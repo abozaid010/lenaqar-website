@@ -6,12 +6,11 @@ import { getBuildingTypes } from "@/data/constants";
 import { useProjectsNames, useDeveloperNames } from "@/hooks/use-admin-shared-data";
 import { getClientIdFromToken } from "@/lib/getRoleFromToken.client";
 import { FileSpreadsheet, Loader2, SlidersHorizontal, Trash2, X } from "lucide-react";
-import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
-import SearchableDistrictSelect from "@/components/ui/inputs/searchable-district-select";
-import SearchableSubDistrictSelect from "@/components/ui/inputs/searchable-sub-district-select";
+import UnitsLocationSearch from "@/components/ui/inputs/units-location-search";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import SearchablePropertyTypeSelect from "@/components/ui/inputs/searchable-property-type-select";
 import SearchableFurnishingTypeSelect from "@/components/ui/inputs/searchable-furnishing-type-select";
+import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import AuthorFilterSelect from "@/components/ui/inputs/author-filter-select";
 import { getFurnishingTypes } from "@/data/constants";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
@@ -114,6 +113,21 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     };
     return getFurnishingTypes({ en: slice, ar: slice });
   }, [t]);
+
+  const BEDROOM_OPTIONS = useMemo(
+    () =>
+      Array.from({ length: 9 }, (_, count) => ({
+        value: String(count),
+        label:
+          count === 0
+            ? translate("unitsFilter.studio", "Studio")
+            : translate("unitsFilter.bedroomsOption", "{count} bedrooms").replace(
+                "{count}",
+                String(count)
+              ),
+      })),
+    [translate]
+  );
 
   // URL = applied filters (API). Draft = form state until Apply / Enter / 5s debounce.
   const {
@@ -438,6 +452,12 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     if (nextFilters.furnished_type) {
       list.push({ key: "furnished_type", value: nextFilters.furnished_type });
     }
+    if (nextFilters.bedrooms !== "" && nextFilters.bedrooms != null) {
+      list.push({
+        key: "bedrooms",
+        value: getSelectedBedrooms(nextFilters.bedrooms),
+      });
+    }
     if (nextFilters.min_price || nextFilters.max_price) {
       const min = nextFilters.min_price ? formatPriceInput(nextFilters.min_price) : "";
       const max = nextFilters.max_price ? formatPriceInput(nextFilters.max_price) : "";
@@ -447,14 +467,11 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       else if (max) value = `${t.unitsFilter.upTo || "Up to"} ${max} EGP`;
       list.push({ key: "price_range", value });
     }
-    if (nextFilters.city) {
-      list.push({ key: "city", value: getSelectedCity() });
-    }
-    if (nextFilters.district) {
-      list.push({ key: "district", value: getSelectedDistrict() });
-    }
-    if (nextFilters.sub_district) {
-      list.push({ key: "sub_district", value: getSelectedSubDistrict() });
+    if (nextFilters.city || nextFilters.district || nextFilters.sub_district) {
+      list.push({
+        key: "location",
+        value: getSelectedLocation(nextFilters),
+      });
     }
     return list;
   }, [
@@ -468,6 +485,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     filters.city,
     filters.district,
     authorOptions,
+    BEDROOM_OPTIONS,
   ]);
 
   // Only show active developer filter if developer exists in loaded list
@@ -486,6 +504,32 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     return buildActiveFilters(safeFilters);
   }, [filters, buildActiveFilters, hasValidDeveloper]);
 
+  const handleLocationChange = (payload) => {
+    updateDraftFilters((prev) => {
+      const nextCity = payload?.city
+        ? String(payload.city).toLowerCase().trim()
+        : "";
+      const nextDistrict = payload?.district
+        ? String(payload.district).toLowerCase().trim()
+        : "";
+      const nextSubDistrict = payload?.sub_district
+        ? String(payload.sub_district).toLowerCase().trim()
+        : "";
+      const cityChanged = nextCity !== (prev.city || "");
+      const districtChanged = nextDistrict !== (prev.district || "");
+
+      return {
+        ...prev,
+        city: nextCity,
+        district: nextDistrict,
+        sub_district: nextSubDistrict,
+        // Match prior cascade: city/district changes reset project scope
+        project_name:
+          cityChanged || districtChanged ? "" : prev.project_name || "",
+      };
+    });
+  };
+
   const handleFilterChange = (key, value) => {
     updateDraftFilters((prev) => {
       const next = { ...prev };
@@ -502,9 +546,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       } else if (value && value !== "" && value !== "all") {
         let normalizedValue = value;
 
-        if (key === "city" || key === "district" || key === "sub_district") {
-          normalizedValue = String(value).toLowerCase().trim();
-        } else if (key === "project_name") {
+        if (key === "project_name") {
           normalizedValue = resolveProjectEnName(compounds, value);
         } else if (key === "property_type") {
           const type =
@@ -520,21 +562,14 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
               (t) => t.ar_label === value || t.en_label === value
             );
           normalizedValue = type?.value || String(value).trim();
+        } else if (key === "bedrooms") {
+          const digits = String(value).replace(/\D/g, "");
+          normalizedValue = digits;
         }
 
         next[key] = normalizedValue;
       } else {
         next[key] = "";
-      }
-
-      if (key === "city") {
-        next.district = "";
-        next.sub_district = "";
-        next.project_name = "";
-      }
-      if (key === "district") {
-        next.sub_district = "";
-        next.project_name = "";
       }
 
       return next;
@@ -655,29 +690,28 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     return getDeveloperLabel(d, locale) || filters.developer_name;
   }
 
-  function getSelectedCity() {
-    if (!filters.city || filters.city === "all" || filters.city === "") {
-      return t.unitsFilter.allCities || "All Cities";
+  function getSelectedLocation(filterValues = filters) {
+    const parts = [];
+    if (filterValues.city && filterValues.city !== "all") {
+      parts.push(cityLabels[filterValues.city] || filterValues.city);
     }
-    return cityLabels[filters.city] || filters.city;
+    if (filterValues.district && filterValues.district !== "all") {
+      parts.push(districtLabels[filterValues.district] || filterValues.district);
+    }
+    if (filterValues.sub_district && filterValues.sub_district !== "all") {
+      parts.push(
+        subDistrictLabels[filterValues.sub_district] || filterValues.sub_district
+      );
+    }
+    return parts.join(" › ");
   }
 
-  function getSelectedDistrict() {
-    if (!filters.district || filters.district === "all" || filters.district === "") {
-      return translate("unitsFilter.allDistricts", "All Districts");
+  function getSelectedBedrooms(raw = filters.bedrooms) {
+    if (raw === "" || raw == null || raw === "all") {
+      return translate("unitsFilter.allBedrooms", "All Bedrooms");
     }
-    return districtLabels[filters.district] || filters.district;
-  }
-
-  function getSelectedSubDistrict() {
-    if (
-      !filters.sub_district ||
-      filters.sub_district === "all" ||
-      filters.sub_district === ""
-    ) {
-      return translate("unitsFilter.allSubDistricts", "All Sub-districts");
-    }
-    return subDistrictLabels[filters.sub_district] || filters.sub_district;
+    const match = BEDROOM_OPTIONS.find((opt) => String(opt.value) === String(raw));
+    return match?.label || String(raw);
   }
 
   function getFilterDisplayText(key, value) {
@@ -708,12 +742,13 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         return getSelectedPropertyType();
       case "furnished_type":
         return getSelectedFurnishingType();
+      case "bedrooms":
+        return value || getSelectedBedrooms();
+      case "location":
       case "city":
-        return getSelectedCity();
       case "district":
-        return getSelectedDistrict();
       case "sub_district":
-        return getSelectedSubDistrict();
+        return value || getSelectedLocation();
       case "price_range":
         return getPriceDisplayText();
       default:
@@ -814,6 +849,10 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         }
       }
 
+      if (filterValues.bedrooms !== "" && filterValues.bedrooms != null) {
+        labels.push(getSelectedBedrooms(filterValues.bedrooms));
+      }
+
       if (filterValues.min_price || filterValues.max_price) {
         const min = filterValues.min_price ? formatPriceInput(filterValues.min_price) : "";
         const max = filterValues.max_price ? formatPriceInput(filterValues.max_price) : "";
@@ -822,16 +861,27 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         else if (max) labels.push(`${t.unitsFilter.upTo || "Up to"} ${max} EGP`);
       }
 
-      if (filterValues.city) {
-        labels.push(cityLabels[filterValues.city] || filterValues.city);
-      }
-      if (filterValues.district) {
-        labels.push(districtLabels[filterValues.district] || filterValues.district);
-      }
-      if (filterValues.sub_district) {
-        labels.push(
-          subDistrictLabels[filterValues.sub_district] || filterValues.sub_district
-        );
+      if (
+        filterValues.city ||
+        filterValues.district ||
+        filterValues.sub_district
+      ) {
+        const parts = [];
+        if (filterValues.city && filterValues.city !== "all") {
+          parts.push(cityLabels[filterValues.city] || filterValues.city);
+        }
+        if (filterValues.district && filterValues.district !== "all") {
+          parts.push(
+            districtLabels[filterValues.district] || filterValues.district
+          );
+        }
+        if (filterValues.sub_district && filterValues.sub_district !== "all") {
+          parts.push(
+            subDistrictLabels[filterValues.sub_district] ||
+              filterValues.sub_district
+          );
+        }
+        if (parts.length > 0) labels.push(parts.join(" › "));
       }
 
       return labels;
@@ -839,6 +889,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     [
       BUILDING_TYPES,
       FURNISHING_TYPES,
+      BEDROOM_OPTIONS,
       authorOptions,
       cityLabels,
       compounds,
@@ -981,59 +1032,17 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
       <form onSubmit={handleApplyFiltersSubmit} className="space-y-3" id="units-filter-form">
         <div className="w-full min-w-0">
-          <SearchableCitySelect
-            value={draftFilters.city === "all" ? "" : draftFilters.city}
-            onChange={(e) => {
-              const cityValue = e.target.value || "all";
-              handleFilterChange("city", cityValue);
-            }}
-            name="city"
-            showAllOption={true}
-            allOptionLabel={translate("unitsFilter.allCities", "All Cities")}
-            placeholder={translate("unitsFilter.allCities", "All Cities")}
-            buttonClassName={filterButtonClassName}
-          />
-        </div>
-
-        <div className="w-full min-w-0">
-          <SearchableDistrictSelect
-            value={draftFilters.district === "all" ? "" : draftFilters.district}
-            onChange={(e) => {
-              const districtValue = e.target.value || "all";
-              handleFilterChange("district", districtValue);
-            }}
-            name="district"
-            city={draftFilters.city && draftFilters.city !== "all" ? draftFilters.city : ""}
-            showAllOption={true}
-            allOptionLabel={translate("unitsFilter.allDistricts", "All Districts")}
-            placeholder={translate("unitsFilter.allDistricts", "All Districts")}
-            buttonClassName={filterButtonClassName}
-          />
-        </div>
-
-        <div className="w-full min-w-0">
-          <SearchableSubDistrictSelect
-            value={draftFilters.sub_district === "all" ? "" : draftFilters.sub_district}
-            onChange={(e) => {
-              const subValue = e.target.value || "all";
-              handleFilterChange("sub_district", subValue);
-            }}
-            name="sub_district"
-            city={draftFilters.city && draftFilters.city !== "all" ? draftFilters.city : ""}
+          <UnitsLocationSearch
+            city={draftFilters.city === "all" ? "" : draftFilters.city}
             district={
-              draftFilters.district && draftFilters.district !== "all"
-                ? draftFilters.district
-                : ""
+              draftFilters.district === "all" ? "" : draftFilters.district
             }
-            disabled={
-              !draftFilters.city ||
-              draftFilters.city === "all" ||
-              !draftFilters.district ||
-              draftFilters.district === "all"
+            subDistrict={
+              draftFilters.sub_district === "all"
+                ? ""
+                : draftFilters.sub_district
             }
-            showAllOption={true}
-            allOptionLabel={translate("unitsFilter.allSubDistricts", "All Sub-districts")}
-            placeholder={translate("unitsFilter.allSubDistricts", "All Sub-districts")}
+            onChange={handleLocationChange}
             buttonClassName={filterButtonClassName}
           />
         </div>
@@ -1073,6 +1082,35 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             showAllOption={true}
             allOptionLabel={translate("unitsFilter.allPropertyTypes", "All Property Types")}
             placeholder={translate("unitsFilter.allPropertyTypes", "All Property Types")}
+            buttonClassName={filterButtonClassName}
+          />
+        </div>
+
+        <div className="w-full min-w-0">
+          <SearchableDropdownSelect
+            name="bedrooms"
+            options={BEDROOM_OPTIONS}
+            value={
+              draftFilters.bedrooms === "all" || draftFilters.bedrooms == null
+                ? ""
+                : String(draftFilters.bedrooms)
+            }
+            onChange={(e) => {
+              handleFilterChange("bedrooms", e.target.value || "all");
+            }}
+            showAllOption
+            allOptionLabel={translate("unitsFilter.allBedrooms", "All Bedrooms")}
+            placeholder={translate("unitsFilter.allBedrooms", "All Bedrooms")}
+            searchPlaceholder={translate(
+              "unitsFilter.bedroomsSearchPlaceholder",
+              "Search bedrooms…"
+            )}
+            noResultsText={translate(
+              "unitsFilter.bedroomsSearchEmpty",
+              "No matching bedrooms"
+            )}
+            getValue={(opt) => opt.value}
+            getLabel={(opt) => opt.label}
             buttonClassName={filterButtonClassName}
           />
         </div>
