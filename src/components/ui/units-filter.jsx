@@ -10,6 +10,7 @@ import UnitsLocationSearch from "@/components/ui/inputs/units-location-search";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import SearchablePropertyTypeSelect from "@/components/ui/inputs/searchable-property-type-select";
 import SearchableFurnishingTypeSelect from "@/components/ui/inputs/searchable-furnishing-type-select";
+import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import AuthorFilterSelect from "@/components/ui/inputs/author-filter-select";
 import { getFurnishingTypes } from "@/data/constants";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
@@ -112,6 +113,21 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     };
     return getFurnishingTypes({ en: slice, ar: slice });
   }, [t]);
+
+  const BEDROOM_OPTIONS = useMemo(
+    () =>
+      Array.from({ length: 9 }, (_, count) => ({
+        value: String(count),
+        label:
+          count === 0
+            ? translate("unitsFilter.studio", "Studio")
+            : translate("unitsFilter.bedroomsOption", "{count} bedrooms").replace(
+                "{count}",
+                String(count)
+              ),
+      })),
+    [translate]
+  );
 
   // URL = applied filters (API). Draft = form state until Apply / Enter / 5s debounce.
   const {
@@ -436,6 +452,12 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     if (nextFilters.furnished_type) {
       list.push({ key: "furnished_type", value: nextFilters.furnished_type });
     }
+    if (nextFilters.bedrooms !== "" && nextFilters.bedrooms != null) {
+      list.push({
+        key: "bedrooms",
+        value: getSelectedBedrooms(nextFilters.bedrooms),
+      });
+    }
     if (nextFilters.min_price || nextFilters.max_price) {
       const min = nextFilters.min_price ? formatPriceInput(nextFilters.min_price) : "";
       const max = nextFilters.max_price ? formatPriceInput(nextFilters.max_price) : "";
@@ -463,6 +485,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     filters.city,
     filters.district,
     authorOptions,
+    BEDROOM_OPTIONS,
   ]);
 
   // Only show active developer filter if developer exists in loaded list
@@ -539,6 +562,9 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
               (t) => t.ar_label === value || t.en_label === value
             );
           normalizedValue = type?.value || String(value).trim();
+        } else if (key === "bedrooms") {
+          const digits = String(value).replace(/\D/g, "");
+          normalizedValue = digits;
         }
 
         next[key] = normalizedValue;
@@ -680,6 +706,14 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     return parts.join(" › ");
   }
 
+  function getSelectedBedrooms(raw = filters.bedrooms) {
+    if (raw === "" || raw == null || raw === "all") {
+      return translate("unitsFilter.allBedrooms", "All Bedrooms");
+    }
+    const match = BEDROOM_OPTIONS.find((opt) => String(opt.value) === String(raw));
+    return match?.label || String(raw);
+  }
+
   function getFilterDisplayText(key, value) {
     switch (key) {
       case "author":
@@ -708,6 +742,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         return getSelectedPropertyType();
       case "furnished_type":
         return getSelectedFurnishingType();
+      case "bedrooms":
+        return value || getSelectedBedrooms();
       case "location":
       case "city":
       case "district":
@@ -813,6 +849,10 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         }
       }
 
+      if (filterValues.bedrooms !== "" && filterValues.bedrooms != null) {
+        labels.push(getSelectedBedrooms(filterValues.bedrooms));
+      }
+
       if (filterValues.min_price || filterValues.max_price) {
         const min = filterValues.min_price ? formatPriceInput(filterValues.min_price) : "";
         const max = filterValues.max_price ? formatPriceInput(filterValues.max_price) : "";
@@ -849,6 +889,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     [
       BUILDING_TYPES,
       FURNISHING_TYPES,
+      BEDROOM_OPTIONS,
       authorOptions,
       cityLabels,
       compounds,
@@ -1041,6 +1082,35 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             showAllOption={true}
             allOptionLabel={translate("unitsFilter.allPropertyTypes", "All Property Types")}
             placeholder={translate("unitsFilter.allPropertyTypes", "All Property Types")}
+            buttonClassName={filterButtonClassName}
+          />
+        </div>
+
+        <div className="w-full min-w-0">
+          <SearchableDropdownSelect
+            name="bedrooms"
+            options={BEDROOM_OPTIONS}
+            value={
+              draftFilters.bedrooms === "all" || draftFilters.bedrooms == null
+                ? ""
+                : String(draftFilters.bedrooms)
+            }
+            onChange={(e) => {
+              handleFilterChange("bedrooms", e.target.value || "all");
+            }}
+            showAllOption
+            allOptionLabel={translate("unitsFilter.allBedrooms", "All Bedrooms")}
+            placeholder={translate("unitsFilter.allBedrooms", "All Bedrooms")}
+            searchPlaceholder={translate(
+              "unitsFilter.bedroomsSearchPlaceholder",
+              "Search bedrooms…"
+            )}
+            noResultsText={translate(
+              "unitsFilter.bedroomsSearchEmpty",
+              "No matching bedrooms"
+            )}
+            getValue={(opt) => opt.value}
+            getLabel={(opt) => opt.label}
             buttonClassName={filterButtonClassName}
           />
         </div>
