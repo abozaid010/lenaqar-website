@@ -50,18 +50,24 @@ export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
       )}
 
       {/* Pricing & Payment Information */}
-      {(unit.totalPrice || unit.downPayment || unit.yearlyInstallment || unit.monthlyInstallmentEstimate || unit.installmentYearsLabel) && (
+      {(unit.totalPrice || unit.monthlyRentPrice || unit.downPayment || unit.yearlyInstallment || unit.monthlyInstallmentEstimate || unit.installmentYearsLabel) && (
         <div className="border-t pt-6">
           <div className="flex items-center gap-2 mb-4">
             <DollarSign className="w-5 h-5 text-gray-600" />
             <h3 className="text-lg font-semibold text-gray-900">{t?.unitPricing?.title || "Pricing & Payment"}</h3>
           </div>
           
-          {/* Total Price - Highlight */}
-          {unit.totalPrice && (
+          {/* Total / Monthly Price - Highlight */}
+          {(unit.monthlyRentPrice || unit.totalPrice) && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-              <div className="text-sm text-blue-600 font-medium mb-1">{t?.unitPricing?.totalPrice || "Total Price"}</div>
-              <div className="text-2xl lg:text-3xl font-bold text-blue-900">{unit.totalPrice}</div>
+              <div className="text-sm text-blue-600 font-medium mb-1">
+                {unit.monthlyRentPrice
+                  ? (t?.rentalDetails?.monthlyRentPrice || t?.unitPricing?.monthlyRent || "Monthly rent")
+                  : (t?.unitPricing?.totalPrice || "Total Price")}
+              </div>
+              <div className="text-2xl lg:text-3xl font-bold text-blue-900">
+                {unit.monthlyRentPrice || unit.totalPrice}
+              </div>
             </div>
           )}
 

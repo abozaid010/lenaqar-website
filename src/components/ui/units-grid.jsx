@@ -95,14 +95,11 @@ export default function UnitsGrid({
   };
 
   const getRentPriceLabel = (unit) => {
-    // Monthly only — never fall back to daily/weekly temporary rates.
-    const monthlyLabel = formatRentPriceWithPeriod(
-      unit.rentDurationType?.monthly?.price,
+    // Flat monthlyRentPrice (fallback mirrored totalPrice during migration).
+    return formatRentPriceWithPeriod(
+      unit.monthlyRentPrice ?? unit.totalPrice,
       "monthly"
     );
-    if (monthlyLabel) return monthlyLabel;
-    // Slim list exposes monthly as rentPrice / price when rentDurationType is absent.
-    return formatRentPriceWithPeriod(unit.rentPrice ?? unit.price, "monthly");
   };
 
   const getUnitHref = (unit) =>
@@ -278,11 +275,9 @@ export default function UnitsGrid({
                         <span className="font-semibold text-base sm:text-lg lg:text-[21px] truncate">
                           {u.totalPrice != null && u.totalPrice !== "" && formatPrice(u.totalPrice)
                             ? `${formatPrice(u.totalPrice)} ${egpLabel}`
-                            : u.price != null && u.price !== "" && formatPrice(u.price)
-                              ? `${formatPrice(u.price)} ${egpLabel}`
-                              : allowMissingFields
-                                ? "—"
-                                : t?.common?.na || "N/A"}
+                            : allowMissingFields
+                              ? "—"
+                              : t?.common?.na || "N/A"}
                         </span>
                       </div>
                     )}

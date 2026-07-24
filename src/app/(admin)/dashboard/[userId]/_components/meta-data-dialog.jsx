@@ -137,8 +137,17 @@ export default function ChatMetaDataModal({ onClose, metaData }) {
                                     <DollarSign className="h-5 w-5 text-blue-600" />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-500">Price</p>
-                                    <p className="text-sm font-medium">{property.metadata.totalPrice} EGP</p>
+                                    <p className="text-xs text-gray-500">
+                                      {String(property.metadata?.purpose || "").toLowerCase() === "rent"
+                                        ? "Monthly rent"
+                                        : "Total Price"}
+                                    </p>
+                                    <p className="text-sm font-medium">
+                                      {(String(property.metadata?.purpose || "").toLowerCase() === "rent"
+                                        ? (property.metadata.monthlyRentPrice ?? property.metadata.totalPrice)
+                                        : property.metadata.totalPrice)}{" "}
+                                      EGP
+                                    </p>
                                 </div>
                             </div>
                         </div>

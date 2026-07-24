@@ -1625,6 +1625,7 @@ export default {
     weekly: "Weekly",
     monthly: "Monthly",
     price: "Price",
+    monthlyRentPrice: "Monthly rent",
     securityDeposit: "Security Deposit",
     cleaningFee: "Cleaning Fee",
     serviceFee: "Service Fee",
@@ -1728,6 +1729,7 @@ export default {
     weekly: "Weekly",
     monthly: "Monthly",
     price: "Price",
+    monthlyRentPrice: "Monthly rent",
     securityDeposit: "Security Deposit",
     cleaningFee: "Cleaning Fee",
     serviceFee: "Service Fee",
@@ -2029,13 +2031,13 @@ export default {
     compoundAdded: "Project added successfully!",
     compoundAddFailed: "Failed to add project. Please try again.",
     enterValidPrice:
-      "Please enter a price greater than 0 for at least one duration type",
+      "Please enter a monthly rent greater than 0",
     uploadImage: "Please upload at least one image.",
     selectPurpose: "Please select a purpose for the unit (sell/rent)",
     errorProcessing:
       "An error occurred while processing your request. Please try again",
     enterValidPrice:
-      "Please enter a price greater than 0 for at least one duration type",
+      "Please enter a monthly rent greater than 0",
     uploadImage: "Please upload at least one image.",
     selectPurpose: "Please select a purpose for the unit (sell/rent)",
     errorProcessing:

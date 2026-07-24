@@ -323,11 +323,17 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
                           {String(u.purpose)}
                         </span>
                       ) : null}
-                      {u?.totalPrice ?? u?.price ? (
-                        <span className="px-2 py-1 rounded bg-gray-100">
-                          {formatPrice(u.totalPrice ?? u.price)} EGP
-                        </span>
-                      ) : null}
+                      {(() => {
+                        const amount =
+                          String(u?.purpose || "").toLowerCase() === "rent"
+                            ? (u?.monthlyRentPrice ?? u?.totalPrice)
+                            : u?.totalPrice;
+                        return amount ? (
+                          <span className="px-2 py-1 rounded bg-gray-100">
+                            {formatPrice(amount)} EGP
+                          </span>
+                        ) : null;
+                      })()}
                     </div>
 
                     <div className="mt-3 flex justify-end">

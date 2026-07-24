@@ -1,7 +1,7 @@
 /**
  * Maps lead requirement objects to /units/v1/slim-list query params
  * (same filters shape as the Units page).
- * Purpose-aware pricing; rent daily vs monthly are mutually exclusive.
+ * Rent and sale both use min_price / max_price (monthly for rent, total for sale).
  */
 
 export const MATCH_UNITS_PAGE_SIZE = 6;
@@ -60,17 +60,9 @@ function applyPriceFilters(filters, requirement, purpose) {
   const minPrice = toPositiveNumber(requirement.min_price);
   const maxPrice = toPositiveNumber(requirement.max_price);
   const totalPrice = toPositiveNumber(requirement.totalPrice);
-  const dailyMin = toPositiveNumber(requirement.daily_min_price);
-  const dailyMax = toPositiveNumber(requirement.daily_max_price);
   const monthlyInstallment = toPositiveNumber(requirement.monthlyInstallment);
 
   if (p === "rent") {
-    const hasDaily = dailyMin != null || dailyMax != null;
-    if (hasDaily) {
-      if (dailyMin != null) filters.daily_min_price = dailyMin;
-      if (dailyMax != null) filters.daily_max_price = dailyMax;
-      return;
-    }
     if (minPrice != null) filters.min_price = minPrice;
     if (maxPrice != null) filters.max_price = maxPrice;
     if (totalPrice != null && maxPrice == null && minPrice == null) {
@@ -168,77 +160,50 @@ export function appendRequirementPriceChips(requirement, push, { translate, form
   const minP = fmt(requirement.min_price);
   const maxP = fmt(requirement.max_price);
   const totalP = fmt(requirement.totalPrice);
-  const dailyMin = fmt(requirement.daily_min_price);
-  const dailyMax = fmt(requirement.daily_max_price);
   const monthly = fmt(requirement.monthlyInstallment);
   const down = fmt(requirement.downPayment);
   const service = fmt(requirement.serviceCharges);
 
-  const hasDaily = dailyMin != null || dailyMax != null;
-
   if (p === "rent") {
-    if (hasDaily) {
-      if (dailyMin != null) {
-        push({
-          key: "daily_min_price",
-          label: translate(
-            "dashboard.requirementsDialog.fields.minDailyRent",
-            "Min daily rent",
-          ),
-          value: dailyMin,
-        });
-      }
-      if (dailyMax != null) {
-        push({
-          key: "daily_max_price",
-          label: translate(
-            "dashboard.requirementsDialog.fields.maxDailyRent",
-            "Max daily rent",
-          ),
-          value: dailyMax,
-        });
-      }
-    } else {
-      if (minP != null) {
-        push({
-          key: "min_price",
-          label: translate(
-            "dashboard.requirementsDialog.fields.minMonthlyRent",
-            "Min monthly rent",
-          ),
-          value: minP,
-        });
-      }
-      if (maxP != null) {
-        push({
-          key: "max_price",
-          label: translate(
-            "dashboard.requirementsDialog.fields.maxMonthlyRent",
-            "Max monthly rent",
-          ),
-          value: maxP,
-        });
-      }
-      if (totalP != null) {
-        push({
-          key: "totalPrice",
-          label: translate(
-            "dashboard.requirementsDialog.fields.singleMonthlyRent",
-            "Monthly rent",
-          ),
-          value: totalP,
-        });
-      }
-      if (monthly != null) {
-        push({
-          key: "monthlyInstallment",
-          label: translate(
-            "dashboard.requirementsDialog.fields.monthly",
-            "Monthly installment",
-          ),
-          value: monthly,
-        });
-      }
+    if (minP != null) {
+      push({
+        key: "min_price",
+        label: translate(
+          "dashboard.requirementsDialog.fields.minMonthlyRent",
+          "Min monthly rent",
+        ),
+        value: minP,
+      });
+    }
+    if (maxP != null) {
+      push({
+        key: "max_price",
+        label: translate(
+          "dashboard.requirementsDialog.fields.maxMonthlyRent",
+          "Max monthly rent",
+        ),
+        value: maxP,
+      });
+    }
+    if (totalP != null) {
+      push({
+        key: "totalPrice",
+        label: translate(
+          "dashboard.requirementsDialog.fields.singleMonthlyRent",
+          "Monthly rent",
+        ),
+        value: totalP,
+      });
+    }
+    if (monthly != null) {
+      push({
+        key: "monthlyInstallment",
+        label: translate(
+          "dashboard.requirementsDialog.fields.monthly",
+          "Monthly installment",
+        ),
+        value: monthly,
+      });
     }
   } else if (p === "buy" || p === "sell") {
     if (minP != null) {
@@ -370,45 +335,24 @@ export function requirementToFilterChips(requirement, translate = (k, fb) => fb 
   const p = String(purpose || "").toLowerCase();
   const minP = formatPriceChip(requirement.min_price);
   const maxP = formatPriceChip(requirement.max_price);
-  const dailyMin = formatPriceChip(requirement.daily_min_price);
-  const dailyMax = formatPriceChip(requirement.daily_max_price);
   const totalP = formatPriceChip(requirement.totalPrice);
 
   if (p === "rent") {
-    if (dailyMin != null || dailyMax != null) {
-      if (dailyMin != null && dailyMax != null) {
-        push(
-          translate("dashboard.requirementsDialog.fields.dailyRent", "Daily rent"),
-          `${dailyMin} – ${dailyMax}`,
-        );
-      } else if (dailyMax != null) {
-        push(
-          translate("dashboard.requirementsDialog.fields.dailyRentUpTo", "Daily rent up to"),
-          dailyMax,
-        );
-      } else if (dailyMin != null) {
-        push(
-          translate("dashboard.requirementsDialog.fields.dailyRentFrom", "Daily rent from"),
-          dailyMin,
-        );
-      }
-    } else {
-      if (minP != null && maxP != null) {
-        push(
-          translate("dashboard.requirementsDialog.fields.monthlyRent", "Monthly rent"),
-          `${minP} – ${maxP}`,
-        );
-      } else if (maxP != null) {
-        push(
-          translate("dashboard.requirementsDialog.fields.monthlyRentUpTo", "Monthly rent up to"),
-          maxP,
-        );
-      } else if (totalP != null) {
-        push(
-          translate("dashboard.requirementsDialog.fields.monthlyRentUpTo", "Monthly rent up to"),
-          totalP,
-        );
-      }
+    if (minP != null && maxP != null) {
+      push(
+        translate("dashboard.requirementsDialog.fields.monthlyRent", "Monthly rent"),
+        `${minP} – ${maxP}`,
+      );
+    } else if (maxP != null) {
+      push(
+        translate("dashboard.requirementsDialog.fields.monthlyRentUpTo", "Monthly rent up to"),
+        maxP,
+      );
+    } else if (totalP != null) {
+      push(
+        translate("dashboard.requirementsDialog.fields.monthlyRentUpTo", "Monthly rent up to"),
+        totalP,
+      );
     }
   } else if (p === "buy" || p === "sell") {
     if (minP != null && maxP != null) {

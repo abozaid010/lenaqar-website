@@ -57,7 +57,7 @@ export default function ImageUploader({
 }) {
   const clinetId = LenaCookiesManager.getClientId() || "";
 
-  const { t } = useI18n();
+  const { t, translate } = useI18n();
   const fileInputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]);
@@ -242,7 +242,7 @@ export default function ImageUploader({
     const imageId = isSelected ? image.id : getImageIdentity(image);
     const isProcessing = isSelected && (uploadStatus[imageId] === "uploading" || uploadStatus[imageId] === "compressing");
     return (
-      <div key={imageId} className="relative group aspect-square">
+      <div key={imageId} className="relative aspect-square">
         <div className="relative w-full h-full">
           <ImageWithLoader
             src={getDisplayImageUrl(image.url) || "/images/defaultImage.jpg"}
@@ -338,7 +338,7 @@ export default function ImageUploader({
             </div>
           )}
           {!isSelected && (
-            <div className="absolute top-1 left-1 z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-500 text-white">
+            <div className="absolute top-1 start-1 z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-500 text-white">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-3.5 w-3.5"
@@ -364,13 +364,15 @@ export default function ImageUploader({
                   removeUploadedImage(imageId);
                 }
               }}
-              className="icon-btn absolute top-1 right-1 z-10 h-6 w-6 rounded-full bg-red-500 text-white opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
+              aria-label={translate("common.delete", "Delete")}
+              className="icon-btn absolute top-1 end-1 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-white shadow-sm hover:bg-red-600"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-3.5 w-3.5"
                 viewBox="0 0 20 20"
                 fill="currentColor"
+                aria-hidden="true"
               >
                 <path
                   fillRule="evenodd"

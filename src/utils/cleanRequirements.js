@@ -14,8 +14,6 @@ const PRICE_FIELDS = [
   "totalPrice",
   "min_price",
   "max_price",
-  "daily_min_price",
-  "daily_max_price",
   "downPayment",
   "monthlyInstallment",
   "serviceCharges",

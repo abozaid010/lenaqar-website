@@ -8,6 +8,11 @@ import { formatCurrency } from "@/utils/formatters";
 import LocalizedLocationText from "@/components/ui/localized-location-text";
 import { Bath, Bed, Heart, MapPin, Square } from "lucide-react";
 import { useState } from "react";
+import {
+  isRentPurpose,
+  resolveMonthlyRentPrice,
+  resolveSaleTotalPrice,
+} from "@/lib/units/unit-price";
 
 const MAX_IMAGES = 4;
 
@@ -47,7 +52,9 @@ export default function MatchUnitCard({
   const district = unit?.district || "";
   const subDistrict = unit?.sub_district || unit?.subDistrict || "";
   const project = unit?.project || unit?.project_name || "";
-  const price = unit?.totalPrice ?? unit?.total_price;
+  const price = isRentPurpose(unit?.purpose)
+    ? resolveMonthlyRentPrice(unit)
+    : resolveSaleTotalPrice(unit);
   const rooms = unit?.roomsCount ?? unit?.bedrooms;
   const baths = unit?.bathroomCount ?? unit?.bathrooms;
   const area = unit?.landArea ?? unit?.land_area;

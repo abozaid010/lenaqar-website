@@ -50,11 +50,9 @@ export function getMissingRequiredFields(unit) {
       missing.push("totalPrice");
     }
   } else if (purpose === "rent") {
-    const rentDurationType = unit.rentDurationType || {};
-    // Monthly only — daily/weekly do not satisfy required rent price.
-    const monthlyPrice = Number(rentDurationType?.monthly?.price);
-    if (!Number.isFinite(monthlyPrice) || monthlyPrice <= 0) {
-      missing.push("rentDurationType");
+    const monthly = Number(unit.monthlyRentPrice ?? unit.totalPrice);
+    if (!Number.isFinite(monthly) || monthly <= 0) {
+      missing.push("monthlyRentPrice");
     }
   }
 

@@ -1,6 +1,11 @@
 import { SITE_URL } from "@/app/metadata";
 import { buildPublicUnitShareUrl } from "@/lib/units/unit-share-links";
 import { isRentVisibilityAvailable } from "@/constants/property-visibility";
+import {
+  isRentPurpose,
+  resolveMonthlyRentPrice,
+  resolveSaleTotalPrice,
+} from "@/lib/units/unit-price";
 
 export default function UnitSchema({ unit, isPublic = false }) {
   if (!unit) return null;
@@ -11,6 +16,10 @@ export default function UnitSchema({ unit, isPublic = false }) {
   const baseUrl = isPublic
     ? buildPublicUnitShareUrl(code)
     : `${SITE_URL}/units/${encodeURIComponent(code.trim())}`;
+
+  const offerPrice = isRentPurpose(unit.purpose)
+    ? resolveMonthlyRentPrice(unit)
+    : resolveSaleTotalPrice(unit);
 
   const schema = {
     "@context": "https://schema.org",
@@ -30,7 +39,7 @@ export default function UnitSchema({ unit, isPublic = false }) {
     }),
     offers: {
       "@type": "Offer",
-      price: String(unit.price ?? unit.totalPrice ?? "0"),
+      price: String(offerPrice ?? "0"),
       priceCurrency: "EGP",
       availability: isRentVisibilityAvailable(unit.visibility ?? unit.status)
         ? "https://schema.org/InStock"

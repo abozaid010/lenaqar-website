@@ -8,8 +8,6 @@ import {
   isRentVisibilityAvailable,
   resolveRentVisibilityForCheckbox,
 } from "@/constants/property-visibility";
-import { useMemo } from "react";
-import { normalizeRentDurationBlock } from "./unit-form-constants";
 
 const availableAmenities = [
   "wifi",
@@ -40,18 +38,8 @@ export default function RentalDetailsStep({
   invalidFields = [],
   setInvalidFields = () => {},
 }) {
-  // TEMP: daily/weekly tabs hidden — monthly rent only.
-  // const [activeDuration, setActiveDuration] = useState("monthly");
-  const activeDuration = "monthly";
   const { t, translate, translateStrict } = useI18n();
 
-  // Defense-in-depth: even if a duration is missing from the incoming data,
-  // always render a complete block so the fields never read `undefined`.
-  // Memoized so we don't allocate a new object on unrelated re-renders.
-  const activeDurationValues = useMemo(
-    () => normalizeRentDurationBlock(formData.rentDurationType?.[activeDuration]),
-    [formData.rentDurationType, activeDuration]
-  );
   const unitVisibility = commonFormData?.visibility ?? commonFormData?.status;
   const isRentAvailable = isRentVisibilityAvailable(unitVisibility);
 
@@ -104,20 +92,11 @@ export default function RentalDetailsStep({
     updateCommonFormData({ [name]: value });
   };
 
-  const handlePriceChange = (durationType, field, value) => {
+  const handleMonthlyRentChange = (value) => {
     const englishValue = convertArabicToEnglishNumbers(value);
     const rawValue = englishValue.replace(/\D/g, "");
-    const currentBlock = normalizeRentDurationBlock(
-      formData.rentDurationType?.[durationType]
-    );
     updateFormData({
-      rentDurationType: {
-        ...formData.rentDurationType,
-        [durationType]: {
-          ...currentBlock,
-          [field]: rawValue === "" ? "" : Number(rawValue),
-        },
-      },
+      monthlyRentPrice: rawValue === "" ? "" : Number(rawValue),
     });
   };
 
@@ -167,99 +146,23 @@ export default function RentalDetailsStep({
       </div>
 
       <h3 className="text-xl font-semibold mb-3 mt-6 text-slate-800">
-        {/* TEMP: was rentDurationOptions (Daily/Weekly/Monthly tabs). Monthly only for now. */}
-        {t.rentalDetails.monthly || t.rentalDetails.rentDurationOptions}
+        {translate("rentalDetails.monthly", t.rentalDetails?.monthly || "Monthly")}
       </h3>
 
-      {/* TEMP: Daily / Weekly / Monthly tabs hidden — monthly only.
-      <div className="mb-3">
-        <div className="flex border-b border-gray-200">
-          <button
-            type="button"
-            onClick={() => setActiveDuration("daily")}
-            className={`py-1 px-4 font-medium text-sm ${
-              activeDuration === "daily"
-                ? "text-blue-950 border-b-2 border-blue-950"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            {t.rentalDetails.daily}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveDuration("weekly")}
-            className={`py-1 px-4 font-medium text-sm ${
-              activeDuration === "weekly"
-                ? "text-blue-950 border-b-2 border-blue-950"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            {t.rentalDetails.weekly}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveDuration("monthly")}
-            className={`py-1 px-4 font-medium text-sm ${
-              activeDuration === "monthly"
-                ? "text-blue-950 border-b-2 border-blue-950"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            {t.rentalDetails.monthly}
-          </button>
-        </div>
-      </div>
-      */}
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4">
-        {/* Price */}
         <LenaTextField
-          label={t.rentalDetails.price}
+          label={translate(
+            "rentalDetails.monthlyRentPrice",
+            t.rentalDetails?.monthlyRentPrice || "Monthly rent"
+          )}
           required
-          value={activeDurationValues.price}
-          onChange={(e) =>
-            handlePriceChange(activeDuration, "price", e.target.value)
-          }
-          placeholder="200"
+          value={formData.monthlyRentPrice}
+          onChange={(e) => handleMonthlyRentChange(e.target.value)}
+          placeholder="16000"
           type="money"
           adornment="EGP"
+          error={invalidFields.includes("monthlyRentPrice")}
         />
-
-        {/* TEMP: fee fields hidden — user only enters rent price.
-            On submit: securityDeposit = serviceFee; cleaningFee = 0.
-        <LenaTextField
-          label={t.rentalDetails.securityDeposit}
-          value={activeDurationValues.securityDeposit}
-          onChange={(e) =>
-            handlePriceChange(activeDuration, "securityDeposit", e.target.value)
-          }
-          placeholder="0"
-          type="money"
-          adornment="EGP"
-        />
-
-        <LenaTextField
-          label={t.rentalDetails.cleaningFee}
-          value={activeDurationValues.cleaningFee}
-          onChange={(e) =>
-            handlePriceChange(activeDuration, "cleaningFee", e.target.value)
-          }
-          placeholder="0"
-          type="money"
-          adornment="EGP"
-        />
-
-        <LenaTextField
-          label={t.rentalDetails.serviceFee}
-          value={activeDurationValues.serviceFee}
-          onChange={(e) =>
-            handlePriceChange(activeDuration, "serviceFee", e.target.value)
-          }
-          placeholder="0"
-          type="money"
-          adornment="EGP"
-        />
-        */}
       </div>
 
       {/* Amenities */}

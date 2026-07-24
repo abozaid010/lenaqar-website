@@ -20,6 +20,11 @@ import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypeLabel } from "@/lib/enums/buildingTypes";
 import { buildAdminUnitDetailPath } from "@/lib/units/unit-share-links";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import {
+  isRentPurpose,
+  resolveMonthlyRentPrice,
+  resolveSaleTotalPrice,
+} from "@/lib/units/unit-price";
 
 const InfoItem = ({ icon, label, value }) => (
   <div className="flex items-center gap-1">
@@ -54,6 +59,8 @@ export default function PropertyCard({ data }) {
     view,
     finishing,
     totalPrice,
+    monthlyRentPrice,
+    purpose,
     project,
     unitTitle,
   } = data;
@@ -65,6 +72,13 @@ export default function PropertyCard({ data }) {
     : unitId
       ? `/units/${unitId}`
       : "#";
+
+  const displayPrice = isRentPurpose(purpose)
+    ? resolveMonthlyRentPrice({ purpose, monthlyRentPrice, totalPrice })
+    : resolveSaleTotalPrice({ totalPrice });
+  const priceLabel = isRentPurpose(purpose)
+    ? translate("rentalDetails.monthlyRentPrice", "Monthly rent")
+    : translate("unitPricing.totalPrice", "Total Price");
 
   return (
     <div className="flex flex-col gap-2 rounded-md overflow-hidden bg-gray-200 shadow-md p-2 m-2 w-72 h-96">
@@ -134,8 +148,8 @@ export default function PropertyCard({ data }) {
           />
           <InfoItem
             icon={<DollarSign size={18} />}
-            label="Price"
-            value={totalPrice ? `${formatCurrency(totalPrice)} EGP` : "N/A"}
+            label={priceLabel}
+            value={displayPrice ? `${formatCurrency(displayPrice)} EGP` : "N/A"}
           />
         </div>
       </div>
