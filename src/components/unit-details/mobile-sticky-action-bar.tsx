@@ -47,10 +47,14 @@ export default function MobileStickyActionBar({ unit }: MobileStickyActionBarPro
       </div>
 
       {/* Price Display (if available) */}
-      {unit.totalPrice && (
+      {(unit.monthlyRentPrice || unit.totalPrice) && (
         <div className="mt-3 text-center">
-          <div className="text-sm text-gray-600">Starting from</div>
-          <div className="text-lg font-bold text-gray-900">{unit.totalPrice}</div>
+          <div className="text-sm text-gray-600">
+            {unit.monthlyRentPrice ? "Monthly rent" : "Starting from"}
+          </div>
+          <div className="text-lg font-bold text-gray-900">
+            {unit.monthlyRentPrice || unit.totalPrice}
+          </div>
         </div>
       )}
     </div>

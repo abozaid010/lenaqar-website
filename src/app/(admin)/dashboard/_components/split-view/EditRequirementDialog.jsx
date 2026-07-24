@@ -59,43 +59,18 @@ function numberToFieldValue(v) {
 
 const PURPOSE_VALUES = ["rent", "buy", "sell"];
 
-function detectRentPriceMode(raw) {
-  const dailyMin = raw?.daily_min_price;
-  const dailyMax = raw?.daily_max_price;
-  if (
-    (dailyMin != null && dailyMin !== "") ||
-    (dailyMax != null && dailyMax !== "")
-  ) {
-    return "daily";
-  }
-  return "monthly";
-}
-
 function buildPriceFieldsForPayload(form) {
   const purpose = String(form.purpose || "").toLowerCase();
   const priceFields = {
     totalPrice: null,
     min_price: null,
     max_price: null,
-    daily_min_price: null,
-    daily_max_price: null,
     monthlyInstallment: null,
     downPayment: toNum(form.downPayment),
     serviceCharges: null,
   };
 
-  if (purpose === "rent") {
-    if (form.rentPriceMode === "daily") {
-      priceFields.daily_min_price = toNum(form.daily_min_price);
-      priceFields.daily_max_price = toNum(form.daily_max_price);
-    } else {
-      priceFields.min_price = toNum(form.min_price);
-      priceFields.max_price = toNum(form.max_price);
-    }
-    return priceFields;
-  }
-
-  if (purpose === "buy" || purpose === "sell") {
+  if (purpose === "rent" || purpose === "buy" || purpose === "sell") {
     priceFields.min_price = toNum(form.min_price);
     priceFields.max_price = toNum(form.max_price);
     return priceFields;
@@ -118,14 +93,11 @@ function createEmptyForm(userId = "") {
     finishingType: "",
     furnishingType: "",
     purpose: "",
-    rentPriceMode: "monthly",
     land_area: "",
     roomsCount: "",
     bathroomCount: "",
     min_price: "",
     max_price: "",
-    daily_min_price: "",
-    daily_max_price: "",
     downPayment: "",
   };
 }
@@ -172,14 +144,11 @@ export default function EditRequirementDialog({
           finishingType: pickSingleValue(raw.finishingType),
           furnishingType: pickSingleValue(raw.furnishingType),
           purpose: pickSingleValue(raw.purpose ?? raw.propertyPurpose),
-          rentPriceMode: detectRentPriceMode(raw),
           land_area: numberToFieldValue(raw.land_area),
           roomsCount: numberToFieldValue(raw.roomsCount),
           bathroomCount: numberToFieldValue(raw.bathroomCount),
           min_price: numberToFieldValue(raw.min_price),
           max_price: numberToFieldValue(raw.max_price),
-          daily_min_price: numberToFieldValue(raw.daily_min_price),
-          daily_max_price: numberToFieldValue(raw.daily_max_price),
           downPayment: numberToFieldValue(raw.downPayment),
         });
       } catch (e) {
@@ -211,11 +180,8 @@ export default function EditRequirementDialog({
       setForm((prev) => ({
         ...prev,
         purpose: value,
-        rentPriceMode: "monthly",
         min_price: "",
         max_price: "",
-        daily_min_price: "",
-        daily_max_price: "",
       }));
       return;
     }
@@ -622,108 +588,33 @@ export default function EditRequirementDialog({
                 )}
 
                 {isRent && (
-                  <div className="space-y-3">
-                    <div
-                      className="flex gap-2"
-                      role="group"
-                      aria-label={tr(
-                        "dashboard.requirementsDialog.pricing.rentMode",
-                        locale === "ar" ? "نوع الإيجار" : "Rent type",
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <LenaTextField
+                      name="min_price"
+                      type="money"
+                      label={tr(
+                        "dashboard.requirementsDialog.fields.minMonthlyRent",
+                        locale === "ar"
+                          ? "أقل إيجار شهري"
+                          : "Min monthly rent",
                       )}
-                    >
-                      {[
-                        {
-                          value: "monthly",
-                          label: tr(
-                            "dashboard.requirementsDialog.pricing.rentMonthly",
-                            locale === "ar" ? "شهري" : "Monthly",
-                          ),
-                        },
-                        {
-                          value: "daily",
-                          label: tr(
-                            "dashboard.requirementsDialog.pricing.rentDaily",
-                            locale === "ar" ? "يومي" : "Daily",
-                          ),
-                        },
-                      ].map((opt) => {
-                        const selected = form.rentPriceMode === opt.value;
-                        return (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            onClick={() => set("rentPriceMode", opt.value)}
-                            className={`flex-1 min-h-11 rounded-md border text-sm font-medium transition-colors ${
-                              selected
-                                ? "bg-primary/10 border-primary/40 text-primary"
-                                : "bg-white border-gray-200 text-gray-700 hover:border-primary/30"
-                            }`}
-                          >
-                            {opt.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {form.rentPriceMode === "monthly" ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <LenaTextField
-                          name="min_price"
-                          type="money"
-                          label={tr(
-                            "dashboard.requirementsDialog.fields.minMonthlyRent",
-                            locale === "ar"
-                              ? "أقل إيجار شهري"
-                              : "Min monthly",
-                          )}
-                          value={form.min_price}
-                          onChange={handlePriceChange}
-                          adornment="EGP"
-                        />
-                        <LenaTextField
-                          name="max_price"
-                          type="money"
-                          label={tr(
-                            "dashboard.requirementsDialog.fields.maxMonthlyRent",
-                            locale === "ar"
-                              ? "أقصى إيجار شهري"
-                              : "Max monthly",
-                          )}
-                          value={form.max_price}
-                          onChange={handlePriceChange}
-                          adornment="EGP"
-                        />
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <LenaTextField
-                          name="daily_min_price"
-                          type="money"
-                          label={tr(
-                            "dashboard.requirementsDialog.fields.minDailyRent",
-                            locale === "ar"
-                              ? "أقل إيجار يومي"
-                              : "Min daily",
-                          )}
-                          value={form.daily_min_price}
-                          onChange={handlePriceChange}
-                          adornment="EGP"
-                        />
-                        <LenaTextField
-                          name="daily_max_price"
-                          type="money"
-                          label={tr(
-                            "dashboard.requirementsDialog.fields.maxDailyRent",
-                            locale === "ar"
-                              ? "أقصى إيجار يومي"
-                              : "Max daily",
-                          )}
-                          value={form.daily_max_price}
-                          onChange={handlePriceChange}
-                          adornment="EGP"
-                        />
-                      </div>
-                    )}
+                      value={form.min_price}
+                      onChange={handlePriceChange}
+                      adornment="EGP"
+                    />
+                    <LenaTextField
+                      name="max_price"
+                      type="money"
+                      label={tr(
+                        "dashboard.requirementsDialog.fields.maxMonthlyRent",
+                        locale === "ar"
+                          ? "أقصى إيجار شهري"
+                          : "Max monthly rent",
+                      )}
+                      value={form.max_price}
+                      onChange={handlePriceChange}
+                      adornment="EGP"
+                    />
                   </div>
                 )}
               </section>

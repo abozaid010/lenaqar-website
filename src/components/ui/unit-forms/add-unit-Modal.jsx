@@ -22,7 +22,7 @@ import { useAddUnit, useUpdateUnit } from "@/hooks/use-unit-mutations";
 import { extractUnitsFromText, getClientid } from "@/utils/api";
 import { UnitTextExtractor } from "@/utils/unit-text-extractor";
 import FillFromTextDialog from "@/components/ui/unit-forms/FillFromTextDialog";
-import { MAX_UNIT_IMAGES, normalizeRentDurationType } from "./unit-form-constants";
+import { MAX_UNIT_IMAGES, resolveMonthlyRentFromUnit } from "./unit-form-constants";
 import { getValidatedClientId } from "@/utils/clientId-validator";
 import { isOwnClientUnit } from "@/lib/units/unit-ownership";
 import { normalizeViewTypeValue } from "@/data/constants";
@@ -104,20 +104,12 @@ function sanitizeAmountsForApi(data) {
       out[field] = toAmount(out[field]);
     }
   });
-  if (out.purpose === "rent" && out.rentDurationType && typeof out.rentDurationType === "object") {
-    out.rentDurationType = { ...out.rentDurationType };
-    Object.keys(out.rentDurationType).forEach((duration) => {
-      const block = out.rentDurationType[duration];
-      if (block && typeof block === "object") {
-        out.rentDurationType[duration] = {
-          ...block,
-          price: toAmount(block.price),
-          securityDeposit: toAmount(block.securityDeposit),
-          cleaningFee: toAmount(block.cleaningFee),
-          serviceFee: toAmount(block.serviceFee),
-        };
-      }
-    });
+  if (out.purpose === "rent") {
+    if ("monthlyRentPrice" in out) {
+      out.monthlyRentPrice = toAmount(out.monthlyRentPrice);
+    }
+    // Nested cadence map is no longer part of the rent API contract.
+    delete out.rentDurationType;
   }
   if ("view" in out) {
     out.view = normalizeViewTypeValue(out.view);
@@ -264,7 +256,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     country: unitData?.country || "Egypt",
     dataSource: unitData?.dataSource || "website",
     buildingType: unitData?.buildingType || "apartment",
-    purpose: unitData?.purpose || "",
+    // TEMP: default new units to rent; edit keeps existing purpose
+    purpose: unitData?.purpose || "rent",
     project: unitData?.project || "",
     project_ar: unitData?.project_ar || "",
     project_id: unitData?.project_id || unitData?.projectId || "",
@@ -316,7 +309,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     availabilityDate:
       toDateInputValue(unitData?.availabilityDate) ||
       new Date().toISOString().split("T")[0],
-    rentDurationType: normalizeRentDurationType(unitData?.rentDurationType),
+    monthlyRentPrice: resolveMonthlyRentFromUnit(unitData),
     amenities: unitData?.amenities || [],
   }));
 
@@ -503,7 +496,23 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       ...(apiUnit.images != null && Array.isArray(apiUnit.images) && { images: apiUnit.images }),
     };
     const sellPartial = {};
-    if ((purpose === "sell" || apiUnit.totalPrice != null) && apiUnit.totalPrice != null) {
+    const rentPartial = {};
+    const isRent = purpose === "rent";
+    if (isRent) {
+      const monthly =
+        apiUnit.monthlyRentPrice != null
+          ? apiUnit.monthlyRentPrice
+          : apiUnit.totalPrice != null
+            ? apiUnit.totalPrice
+            : null;
+      if (monthly != null) rentPartial.monthlyRentPrice = monthly;
+      if (apiUnit.availabilityDate != null) {
+        rentPartial.availabilityDate = toDateInputValue(apiUnit.availabilityDate);
+      }
+      if (Array.isArray(apiUnit.amenities)) {
+        rentPartial.amenities = apiUnit.amenities;
+      }
+    } else if (apiUnit.totalPrice != null) {
       sellPartial.totalPrice = apiUnit.totalPrice;
     }
     if (apiUnit.downPayment != null) sellPartial.downPayment = apiUnit.downPayment;
@@ -511,14 +520,17 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     if (apiUnit.deliveryDate != null) sellPartial.deliveryDate = apiUnit.deliveryDate;
     if (apiUnit.installment_years != null) sellPartial.installment_years = apiUnit.installment_years;
     if (apiUnit.over_price != null) sellPartial.over_price = apiUnit.over_price;
-    return { formDataPartial, sellPartial };
+    return { formDataPartial, sellPartial, rentPartial };
   };
 
   const applyExtractedUnit = (unit, sourceText) => {
-    const { formDataPartial, sellPartial } = mapApiUnitToForm(unit);
+    const { formDataPartial, sellPartial, rentPartial } = mapApiUnitToForm(unit);
     setFormData((prev) => ({ ...prev, ...formDataPartial }));
     if (Object.keys(sellPartial).length) {
       setSellFormData((prev) => ({ ...prev, ...sellPartial }));
+    }
+    if (Object.keys(rentPartial).length) {
+      setRentFormData((prev) => ({ ...prev, ...rentPartial }));
     }
     if (sourceText) setExtractedSourceText(sourceText);
     setCurrentStep(1);
@@ -697,29 +709,20 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           return false;
         }
 
-        // Check if at least one rentDurationType has a price > 0
-        const hasValidPrice = Object.values(rentFormData.rentDurationType).some(
-          (duration) => duration?.price > 0
-        );
+        const hasValidPrice = Number(rentFormData.monthlyRentPrice) > 0;
 
         if (!hasValidPrice) {
           toast.error(t.toasts.enterValidPrice);
+          setInvalidFields(["monthlyRentPrice"]);
           return false;
         }
 
-        // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
-        const sanitizedRentDurationType = { ...rentFormData.rentDurationType };
-        Object.keys(sanitizedRentDurationType).forEach((duration) => {
-          Object.keys(sanitizedRentDurationType[duration] ?? {}).forEach((field) => {
-            if (sanitizedRentDurationType[duration][field] === "") {
-              sanitizedRentDurationType[duration][field] = 0;
-            }
-          });
-        });
-
         setRentFormData((prev) => ({
           ...prev,
-          rentDurationType: sanitizedRentDurationType,
+          monthlyRentPrice:
+            prev.monthlyRentPrice === "" || prev.monthlyRentPrice == null
+              ? 0
+              : Number(prev.monthlyRentPrice),
         }));
       }
     }
@@ -809,6 +812,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         finalFormData = { ...finalFormData, ...SellFormData };
       } else if (formData.purpose === "rent") {
         finalFormData = { ...finalFormData, ...rentFormData };
+        delete finalFormData.rentDurationType;
       }
 
       delete finalFormData.isAvailable;

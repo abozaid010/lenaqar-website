@@ -50,12 +50,9 @@ export function getMissingRequiredFields(unit) {
       missing.push("totalPrice");
     }
   } else if (purpose === "rent") {
-    const rentDurationType = unit.rentDurationType || {};
-    const hasValidPrice = Object.values(rentDurationType).some(
-      (d) => d && Number(d.price) > 0
-    );
-    if (!hasValidPrice) {
-      missing.push("rentDurationType");
+    const monthly = Number(unit.monthlyRentPrice ?? unit.totalPrice);
+    if (!Number.isFinite(monthly) || monthly <= 0) {
+      missing.push("monthlyRentPrice");
     }
   }
 

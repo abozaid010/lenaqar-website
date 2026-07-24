@@ -1,11 +1,8 @@
-import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
-import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { transformUnitToViewModel } from "@/lib/units/unit-selectors";
 import { resolvePublicUnitByCodeParam } from "@/lib/units/unit-legacy-redirect";
-import { isOwnClientUnit } from "@/lib/units/unit-ownership";
 import {
   buildPublicUnitShareUrl,
   encodeUnitCodeForPath,
@@ -13,6 +10,20 @@ import {
 } from "@/lib/units/unit-share-links";
 import UnitDetailsPage from "@/components/unit-details/unit-details-page";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
+
+/** Strip CRM-only fields so they never hydrate into the public page payload. */
+function toPublicUnitViewModel(rawUnit) {
+  const unit = transformUnitToViewModel(rawUnit);
+  return {
+    ...unit,
+    ownerName: null,
+    ownerMobile: null,
+    ownerWhatsapp: null,
+    author: null,
+    phase: null,
+    trustItems: (unit.trustItems || []).filter((item) => item.key !== "employee"),
+  };
+}
 
 async function fetchRawUnit(rawCode) {
   try {
@@ -26,7 +37,7 @@ async function fetchRawUnit(rawCode) {
 
 async function fetchUnitData(rawCode) {
   const rawUnit = await fetchRawUnit(rawCode);
-  return rawUnit ? transformUnitToViewModel(rawUnit) : null;
+  return rawUnit ? toPublicUnitViewModel(rawUnit) : null;
 }
 
 // Same-origin fallback so social crawlers always receive a fetchable image
@@ -111,12 +122,7 @@ export default async function PublicUnitDetailsPage({ params }) {
     notFound();
   }
 
-  const cookieStore = await cookies();
-  const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value || null;
-  // Same authorization rule as Homey `/units/[code]` and `/units/[code]/edit`.
-  const isOwnUnit = isOwnClientUnit(rawUnit, clientId);
-
-  const unit = transformUnitToViewModel(rawUnit);
+  const unit = toPublicUnitViewModel(rawUnit);
   const shareUrl = unit.referenceCode
     ? buildPublicUnitShareUrl(unit.referenceCode)
     : `${SITE_URL}/allProberties`;
@@ -135,7 +141,8 @@ export default async function PublicUnitDetailsPage({ params }) {
           },
         ]}
       />
-      <UnitDetailsPage unit={unit} rawUnit={rawUnit} isOwnUnit={isOwnUnit} />
+      {/* Public share page: property details only — no owner/author/inquiry CRM UI */}
+      <UnitDetailsPage unit={unit} isPublic />
     </>
   );
 }

@@ -4,7 +4,7 @@ import { useI18n } from '@/hooks/useI18n';
 
 export default function UnitPricingCard({ unit }: UnitPricingCardProps) {
   const { t } = useI18n();
-  const hasPricing = unit.totalPrice || unit.downPayment || unit.yearlyInstallment;
+  const hasPricing = unit.monthlyRentPrice || unit.totalPrice || unit.downPayment || unit.yearlyInstallment;
   
   if (!hasPricing) {
     return null;
@@ -17,11 +17,17 @@ export default function UnitPricingCard({ unit }: UnitPricingCardProps) {
         <h2 className="text-lg font-semibold text-gray-900">{t?.unitPricing?.title || "Pricing & Payment"}</h2>
       </div>
 
-      {/* Total Price */}
-      {unit.totalPrice && (
+      {/* Total / Monthly Price */}
+      {(unit.monthlyRentPrice || unit.totalPrice) && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="text-sm text-blue-600 font-medium mb-1">{t?.unitPricing?.totalPrice || "Total Price"}</div>
-          <div className="text-2xl lg:text-3xl font-bold text-blue-900">{unit.totalPrice}</div>
+          <div className="text-sm text-blue-600 font-medium mb-1">
+            {unit.monthlyRentPrice
+              ? (t?.rentalDetails?.monthlyRentPrice || t?.unitPricing?.monthlyRent || "Monthly rent")
+              : (t?.unitPricing?.totalPrice || "Total Price")}
+          </div>
+          <div className="text-2xl lg:text-3xl font-bold text-blue-900">
+            {unit.monthlyRentPrice || unit.totalPrice}
+          </div>
         </div>
       )}
 

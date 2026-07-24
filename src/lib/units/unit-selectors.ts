@@ -146,7 +146,19 @@ export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string
   const heroImages = videoHeroItem ? [videoHeroItem, ...baseHeroImages] : baseHeroImages;
 
   const badges = getUnitBadges(rawUnit, t);
-  const totalPrice = formatCurrency(rawUnit.totalPrice);
+  const isRent =
+    String(rawUnit.purpose || "").toLowerCase() === "rent" ||
+    String(rawUnit.purpose || "").toLowerCase() === "lease";
+  const monthlyRentRaw =
+    isMeaningfulNumber((rawUnit as any).monthlyRentPrice)
+      ? (rawUnit as any).monthlyRentPrice
+      : isRent && isMeaningfulNumber(rawUnit.totalPrice)
+        ? rawUnit.totalPrice
+        : null;
+  const totalPrice = formatCurrency(
+    isRent ? monthlyRentRaw ?? rawUnit.totalPrice : rawUnit.totalPrice
+  );
+  const monthlyRentPrice = formatCurrency(monthlyRentRaw);
   const downPayment = formatCurrency(rawUnit.downPayment);
   const yearlyInstallment = formatCurrency(rawUnit.installment_amount_yearly);
   const monthlyInstallmentEstimate = calculateMonthlyInstallment(rawUnit.installment_amount_yearly);
@@ -201,6 +213,7 @@ export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string
     heroImages,
     badges,
     totalPrice,
+    monthlyRentPrice,
     downPayment,
     yearlyInstallment,
     monthlyInstallmentEstimate,
@@ -375,6 +388,16 @@ export const getTrustItems = (unit: RawUnit, t?: T, locale: string = 'en'): Trus
  */
 export const getPricingItems = (unit: RawUnit) => {
   const items: any[] = [];
+  const purpose = String(unit.purpose || "").toLowerCase();
+  const isRent = purpose === "rent" || purpose === "lease";
+
+  if (isRent) {
+    const monthly =
+      formatCurrency((unit as any).monthlyRentPrice) ||
+      formatCurrency(unit.totalPrice);
+    if (monthly) items.push({ label: 'Monthly Rent', value: monthly, highlight: true });
+    return items;
+  }
 
   const totalPrice = formatCurrency(unit.totalPrice);
   if (totalPrice) items.push({ label: 'Total Price', value: totalPrice, highlight: true });
@@ -395,6 +418,13 @@ export const getPricingItems = (unit: RawUnit) => {
 };
 
 export const hasPricingInfo = (unit: RawUnit): boolean => {
+  const purpose = String(unit.purpose || "").toLowerCase();
+  if (purpose === "rent" || purpose === "lease") {
+    return (
+      isMeaningfulNumber((unit as any).monthlyRentPrice) ||
+      isMeaningfulNumber(unit.totalPrice)
+    );
+  }
   return isMeaningfulNumber(unit.totalPrice) ||
     isMeaningfulNumber(unit.downPayment) ||
     isMeaningfulNumber(unit.installment_amount_yearly);

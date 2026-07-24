@@ -56,10 +56,16 @@ export default function UnitsGrid({
 
   const egpLabel = translate("currency.egp") || "EGP";
 
-  const formatPrice = (price) => {
+  const parsePrice = (price) => {
     if (price === null || price === undefined || price === "") return null;
     const n = typeof price === "number" ? price : Number(String(price).replace(/,/g, ""));
-    if (!Number.isFinite(n)) return null;
+    if (!Number.isFinite(n) || n < 0) return null;
+    return n;
+  };
+
+  const formatPrice = (price) => {
+    const n = parsePrice(price);
+    if (n === null) return null;
     return localeUtils?.formatNumber ? localeUtils.formatNumber(n) : n.toLocaleString();
   };
 
@@ -80,22 +86,20 @@ export default function UnitsGrid({
     );
 
   const formatRentPriceWithPeriod = (price, period) => {
-    const formatted = formatPrice(price);
+    const n = parsePrice(price);
+    // Rent cards: show monthly only when a real amount exists (0 = unset default).
+    if (n === null || n <= 0) return null;
+    const formatted = formatPrice(n);
     if (!formatted) return null;
     return `${formatted} ${egpLabel}/${getRentPeriodLabel(period)}`;
   };
 
   const getRentPriceLabel = (unit) => {
-    const durations = [
-      ["daily", unit.rentDurationType?.daily?.price],
-      ["weekly", unit.rentDurationType?.weekly?.price],
-      ["monthly", unit.rentDurationType?.monthly?.price],
-    ];
-    for (const [period, price] of durations) {
-      const label = formatRentPriceWithPeriod(price, period);
-      if (label) return label;
-    }
-    return formatRentPriceWithPeriod(unit.rentPrice, "monthly");
+    // Flat monthlyRentPrice (fallback mirrored totalPrice during migration).
+    return formatRentPriceWithPeriod(
+      unit.monthlyRentPrice ?? unit.totalPrice,
+      "monthly"
+    );
   };
 
   const getUnitHref = (unit) =>
@@ -271,11 +275,9 @@ export default function UnitsGrid({
                         <span className="font-semibold text-base sm:text-lg lg:text-[21px] truncate">
                           {u.totalPrice != null && u.totalPrice !== "" && formatPrice(u.totalPrice)
                             ? `${formatPrice(u.totalPrice)} ${egpLabel}`
-                            : u.price != null && u.price !== "" && formatPrice(u.price)
-                              ? `${formatPrice(u.price)} ${egpLabel}`
-                              : allowMissingFields
-                                ? "—"
-                                : t?.common?.na || "N/A"}
+                            : allowMissingFields
+                              ? "—"
+                              : t?.common?.na || "N/A"}
                         </span>
                       </div>
                     )}

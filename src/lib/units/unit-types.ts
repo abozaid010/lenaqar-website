@@ -31,6 +31,7 @@ export interface RawUnit {
   project_id: string;
   updatedAt: string;
   totalPrice: number;
+  monthlyRentPrice?: number | null;
   gardenSize: number;
   district: string;
   sub_district?: string;
@@ -110,6 +111,7 @@ export interface UnitViewModel {
   heroImages: HeroImage[];
   badges: string[];
   totalPrice: string | null;
+  monthlyRentPrice: string | null;
   downPayment: string | null;
   yearlyInstallment: string | null;
   monthlyInstallmentEstimate: string | null;

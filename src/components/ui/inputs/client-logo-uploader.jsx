@@ -49,7 +49,7 @@ export default function ClientLogoUploader({
   isUploading,
   setIsUploading,
 }) {
-  const { t } = useI18n();
+  const { t, translate } = useI18n();
   const fileInputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
   const [logoUrl, setLogoUrl] = useState(initialLogoUrl || "");
@@ -256,7 +256,7 @@ export default function ClientLogoUploader({
           onDrop={handleDrop}
         >
           {hasLogo ? (
-            <div className="relative group aspect-square">
+            <div className="relative aspect-square">
               <div className="relative w-full h-full">
                 {/* Native img: client logos often use GCS hosts not in next/image config */}
                 <img
@@ -296,13 +296,15 @@ export default function ClientLogoUploader({
                       e.stopPropagation();
                       removeLogo();
                     }}
-                    className="icon-btn absolute top-1 end-1 z-10 h-6 w-6 rounded-full bg-red-500 text-white opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
+                    aria-label={translate("common.delete", "Delete")}
+                    className="icon-btn absolute top-1 end-1 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-white shadow-sm hover:bg-red-600"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-3.5 w-3.5"
                       viewBox="0 0 20 20"
                       fill="currentColor"
+                      aria-hidden="true"
                     >
                       <path
                         fillRule="evenodd"

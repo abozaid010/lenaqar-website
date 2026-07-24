@@ -2,9 +2,16 @@
  * Maps `/units/v1/slim-list` rows to the list-card shape used by UnitsGrid.
  * Full unit documents are still loaded on detail pages via /units/details or /units/by-code.
  *
- * Slim API shape:
- * { id, code, price, purpose, district, project, property_type, city, area, bedrooms, image, owner_mobile? }
+ * Slim API shape (verified):
+ * { id, code, purpose, totalPrice, monthlyRentPrice, district, project,
+ *   property_type, city, area, bedrooms, image, owner_mobile? }
  */
+
+import {
+  isRentPurpose,
+  resolveMonthlyRentPrice,
+  resolveSaleTotalPrice,
+} from "@/lib/units/unit-price";
 
 export function normalizeSlimPurpose(purpose) {
   if (purpose == null || purpose === "") return purpose;
@@ -21,7 +28,12 @@ export function mapSlimUnitToListItem(slim) {
   if (!slim || typeof slim !== "object") return slim;
 
   const purpose = normalizeSlimPurpose(slim.purpose);
-  const price = slim.price ?? slim.totalPrice ?? slim.rentPrice ?? null;
+  const isRent = isRentPurpose(purpose);
+  const monthlyRentPrice = isRent ? resolveMonthlyRentPrice(slim) : null;
+  const totalPrice = isRent
+    ? monthlyRentPrice
+    : resolveSaleTotalPrice(slim) ?? toNullableNumber(slim.totalPrice);
+
   const imageUrl = slim.image;
   const existingImages = Array.isArray(slim.images) ? slim.images : [];
 
@@ -54,12 +66,18 @@ export function mapSlimUnitToListItem(slim) {
       null,
     city: slim.city ?? null,
     district: slim.district ?? null,
-    totalPrice: slim.totalPrice ?? (purpose === "rent" ? null : price),
-    rentPrice: slim.rentPrice ?? (purpose === "rent" ? price : null),
+    totalPrice,
+    monthlyRentPrice: isRent ? monthlyRentPrice : null,
     landArea: slim.landArea ?? slim.area ?? null,
     roomsCount: slim.roomsCount ?? slim.bedrooms ?? null,
     images,
   };
+}
+
+function toNullableNumber(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const n = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(n) ? n : null;
 }
 
 /**
