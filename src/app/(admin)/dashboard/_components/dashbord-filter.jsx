@@ -79,16 +79,17 @@ import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
 import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
 import { isValidEmail } from "@/utils/email";
 import {
+  buildDashboardDateRangeDaysAgo,
+  getDashboardDateDay,
   getDefaultDashboardEndDate,
   getDefaultDashboardStartDate,
+  isValidDashboardDateRange,
+  normalizeDashboardEndDate,
+  normalizeDashboardStartDate,
+  toDashboardEndDateTime,
+  toDashboardStartDateTime,
 } from "@/utils/dashboardDate";
 import toast from "react-hot-toast";
-
-const formatDate = (date) => {
-  const isoString = date.toISOString();
-  const formattedDate = isoString.slice(0, 19);
-  return formattedDate;
-};
 
 /** w-72 (18rem) at 70% — tighter filter triggers and dropdown panels */
 const FILTER_MENU_WIDTH = "w-[12.6rem]";
@@ -177,9 +178,11 @@ export default function DashbordFilter({
       owner_type: parseOwnerTypeFilter(appliedFilters.owner_type),
       start_date: appliedFilters.start_date || getDefaultDashboardStartDate(),
       end_date: appliedFilters.end_date || getDefaultDashboardEndDate(),
-      campaign_ids: appliedFilters.campaign_ids
-        ? appliedFilters.campaign_ids.split(",")
-        : [],
+      campaign_id:
+        appliedFilters.campaign_id ||
+        (appliedFilters.campaign_ids
+          ? appliedFilters.campaign_ids.split(",")[0]
+          : ""),
       source: parseLeadSourceFilter(appliedFilters.source),
       author: authorFromUrl,
     };
@@ -298,16 +301,10 @@ export default function DashbordFilter({
   );
 
   const ownerTypeFilterLabel = useMemo(() => {
-    if (filters.owner_type.length === 0) {
+    if (!filters.owner_type) {
       return translate("dashboardFilter.ownerType.allTypes", "All Types");
     }
-    if (filters.owner_type.length === 1) {
-      return getOwnerTypeLabel(filters.owner_type[0], translate);
-    }
-    return translate("dashboardFilter.ownerType.selected", "{count} selected").replace(
-      "{count}",
-      filters.owner_type.length,
-    );
+    return getOwnerTypeLabel(filters.owner_type, translate);
   }, [filters.owner_type, translate]);
 
   const sourceOptions = useMemo(
@@ -320,16 +317,10 @@ export default function DashbordFilter({
   );
 
   const sourceFilterLabel = useMemo(() => {
-    if (filters.source.length === 0) {
+    if (!filters.source) {
       return translate("dashboardFilter.source.allSources", "All Sources");
     }
-    if (filters.source.length === 1) {
-      return getLeadSourceLabel(filters.source[0], translate);
-    }
-    return translate("dashboardFilter.source.selected", "{count} selected").replace(
-      "{count}",
-      filters.source.length,
-    );
+    return getLeadSourceLabel(filters.source, translate);
   }, [filters.source, translate]);
 
   const actionFilterLabel = useMemo(() => {
@@ -446,26 +437,62 @@ export default function DashbordFilter({
       return;
     }
 
+    const MARGIN = 8;
+    const GAP = 8;
+    const MIN_PANEL_HEIGHT = 200;
+
     const updatePosition = () => {
       const trigger = datePickerTriggerRef.current;
       if (!trigger) return;
+
       const rect = trigger.getBoundingClientRect();
-      const gap = 4;
-      const openUpward = panel;
-      setDatePickerPosition({
-        top: openUpward ? undefined : rect.bottom + gap,
-        bottom: openUpward
-          ? Math.max(8, window.innerHeight - rect.top + gap)
-          : undefined,
-        left: rect.left,
-        width: rect.width,
-      });
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const panelEl = datePickerPanelRef.current;
+      const measuredHeight = panelEl?.offsetHeight || 0;
+      const estimatedHeight = measuredHeight > 0 ? measuredHeight : 320;
+
+      // Keep usable width on narrow screens; never exceed viewport.
+      const width = Math.min(Math.max(rect.width, 260), vw - MARGIN * 2);
+      const left = Math.min(
+        Math.max(MARGIN, rect.left),
+        Math.max(MARGIN, vw - width - MARGIN),
+      );
+
+      const spaceBelow = vh - rect.bottom - GAP - MARGIN;
+      const spaceAbove = rect.top - GAP - MARGIN;
+      // Prefer below; open above only when below can't fit and above has more room.
+      const openUpward =
+        spaceBelow < Math.min(estimatedHeight, MIN_PANEL_HEIGHT) &&
+        spaceAbove > spaceBelow;
+
+      if (openUpward) {
+        setDatePickerPosition({
+          top: undefined,
+          bottom: Math.max(MARGIN, vh - rect.top + GAP),
+          left,
+          width,
+          maxHeight: Math.max(MIN_PANEL_HEIGHT, spaceAbove),
+        });
+      } else {
+        const top = Math.min(rect.bottom + GAP, vh - MARGIN - MIN_PANEL_HEIGHT);
+        setDatePickerPosition({
+          top: Math.max(MARGIN, top),
+          bottom: undefined,
+          left,
+          width,
+          maxHeight: Math.max(MIN_PANEL_HEIGHT, vh - Math.max(MARGIN, top) - MARGIN),
+        });
+      }
     };
 
     updatePosition();
+    // Remeasure after paint so maxHeight matches real content height.
+    const rafId = window.requestAnimationFrame(updatePosition);
     window.addEventListener("resize", updatePosition);
     window.addEventListener("scroll", updatePosition, true);
     return () => {
+      window.cancelAnimationFrame(rafId);
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("scroll", updatePosition, true);
     };
@@ -538,60 +565,110 @@ export default function DashbordFilter({
 
   const formatDateForDisplay = (date) => formatDayMonthShort(date, locale);
 
-  const onApplyDateFilter = () => {
-    setIsDatePickerOpen(false);
+  const startDay = getDashboardDateDay(filters.start_date) || "";
+  const endDay = getDashboardDateDay(filters.end_date) || "";
+  const isDateRangeInvalid = !isValidDashboardDateRange(
+    filters.start_date,
+    filters.end_date,
+  );
+
+  const dateRangePresets = useMemo(
+    () => [
+      {
+        id: "7",
+        daysAgo: 7,
+        label: translate("dashboardFilter.datePicker.last7Days", "Last 7 days"),
+      },
+      {
+        id: "14",
+        daysAgo: 14,
+        label: translate("dashboardFilter.datePicker.last14Days", "Last 14 days"),
+      },
+      {
+        id: "30",
+        daysAgo: 30,
+        label: translate("dashboardFilter.datePicker.last30Days", "Last 30 days"),
+      },
+      {
+        id: "0",
+        daysAgo: 0,
+        label: translate("dashboardFilter.datePicker.today", "Today"),
+      },
+    ],
+    [translate],
+  );
+
+  const activePresetId = useMemo(() => {
+    const match = dateRangePresets.find((preset) => {
+      const range = buildDashboardDateRangeDaysAgo(preset.daysAgo);
+      return (
+        getDashboardDateDay(range.start_date) === startDay &&
+        getDashboardDateDay(range.end_date) === endDay
+      );
+    });
+    return match?.id ?? null;
+  }, [dateRangePresets, startDay, endDay]);
+
+  const applyDateRangeDraft = (startYmd, endYmd, edited = "start") => {
+    if (!startYmd || !endYmd) return;
+    let nextStart = startYmd;
+    let nextEnd = endYmd;
+    if (nextStart > nextEnd) {
+      // Always keep start day <= end day.
+      if (edited === "end") nextStart = nextEnd;
+      else nextEnd = nextStart;
+    }
     setFilters((prev) => ({
       ...prev,
-      start_date: filters.start_date,
-      end_date: filters.end_date,
+      start_date: toDashboardStartDateTime(nextStart),
+      end_date: toDashboardEndDateTime(nextEnd),
     }));
-    onFilterChange("start_date", filters.start_date);
-    onFilterChange("end_date", filters.end_date);
   };
 
-  const onFilterChange = (key, value) => {
-    let selectdDate = value;
-    if ((key === "start_date" || key === "end_date") && !value.includes("T")) {
-      const dateObj = new Date(value);
-      if (key === "start_date") {
-        dateObj.setHours(0, 0, 0, 0);
-      }
-      if (key === "end_date") {
-        dateObj.setHours(23, 59, 59, 999);
-      }
-      selectdDate = formatDate(dateObj);
+  const onApplyDateFilter = () => {
+    // Full calendar days only: start 00:00:00 → end 23:59:59 (Today = full 24h).
+    const nextStart = normalizeDashboardStartDate(filters.start_date);
+    const nextEnd = normalizeDashboardEndDate(filters.end_date);
+    if (!nextStart || !nextEnd || !isValidDashboardDateRange(nextStart, nextEnd)) {
+      toast.error(
+        translate(
+          "dashboardFilter.datePicker.invalidRange",
+          "Start date must be before or equal to end date",
+        ),
+      );
+      return;
     }
+    setIsDatePickerOpen(false);
+    // Apply both bounds in one navigation so we never drop start or end.
+    pushFilterUpdates({ start_date: nextStart, end_date: nextEnd });
+  };
 
-    setFilters((prev) => ({
-      ...prev,
-      [key]: selectdDate,
-    }));
+  const pushFilterUpdates = (partial) => {
+    const updatedFilters = { ...filters, ...partial };
+    setFilters((prev) => ({ ...prev, ...partial }));
 
     const params = new URLSearchParams();
-    const updatedFilters = { ...filters, [key]: selectdDate };
-
     Object.entries(updatedFilters).forEach(([k, v]) => {
       if (k === "actions" && Array.isArray(v)) {
         const serializedAction = serializeDashboardActionFilter(v);
         if (serializedAction != null) {
           params.append("action", serializedAction);
         }
-      } else if (k === "owner_type" && Array.isArray(v)) {
+      } else if (k === "owner_type") {
         const serializedOwnerType = serializeOwnerTypeFilter(v);
-        if (serializedOwnerType != null) {
+        if (serializedOwnerType) {
           params.append("owner_type", serializedOwnerType);
         }
-      } else if (k === "source" && Array.isArray(v)) {
+      } else if (k === "source") {
         if (canShowLeadSourceFilter(clientId, canViewAllDashboardLeads())) {
           const serializedSource = serializeLeadSourceFilter(v);
-          if (serializedSource != null) {
+          if (serializedSource) {
             params.append("source", serializedSource);
           }
         }
-      } else if (k === "campaign_ids" && Array.isArray(v)) {
-        if (v.length > 0) {
-          params.append(k, v.join(","));
-        }
+      } else if (k === "campaign_id") {
+        const campaignId = typeof v === "string" ? v.trim() : "";
+        if (campaignId) params.append("campaign_id", campaignId);
       } else if (k === "author") {
         // "All" → omit author entirely so the API returns all leads.
         const author = typeof v === "string" ? v.trim() : "";
@@ -623,6 +700,16 @@ export default function DashbordFilter({
     router.push(`${window.location.pathname}?${params.toString()}`, {
       replace: true,
     });
+  };
+
+  const onFilterChange = (key, value) => {
+    let nextValue = value;
+    if (key === "start_date") {
+      nextValue = normalizeDashboardStartDate(value) || value;
+    } else if (key === "end_date") {
+      nextValue = normalizeDashboardEndDate(value) || value;
+    }
+    pushFilterUpdates({ [key]: nextValue });
   };
 
   const toggleActionSelection = (actionValue) => {
@@ -678,64 +765,58 @@ export default function DashbordFilter({
     onFilterChange("author", nextAuthor);
   };
 
-  const toggleOwnerTypeSelection = (ownerTypeValue) => {
-    const newOwnerTypes = filters.owner_type.includes(ownerTypeValue)
-      ? filters.owner_type.filter((value) => value !== ownerTypeValue)
-      : [...filters.owner_type, ownerTypeValue];
-
+  /** owner_type is now a single exact match — selecting again clears it. */
+  const selectOwnerType = (ownerTypeValue) => {
+    const next = filters.owner_type === ownerTypeValue ? "" : ownerTypeValue;
     setFilters((prev) => ({
       ...prev,
-      owner_type: newOwnerTypes,
+      owner_type: next,
     }));
-    onFilterChange("owner_type", newOwnerTypes);
+    onFilterChange("owner_type", next);
   };
 
   const clearOwnerTypeFilters = () => {
     setFilters((prev) => ({
       ...prev,
-      owner_type: [],
+      owner_type: "",
     }));
-    onFilterChange("owner_type", []);
+    onFilterChange("owner_type", "");
   };
 
-  const toggleCampaignSelection = (campaignId) => {
-    const newCampaigns = filters.campaign_ids.includes(campaignId)
-      ? filters.campaign_ids.filter((id) => id !== campaignId)
-      : [...filters.campaign_ids, campaignId];
-
+  /** campaign_id is now a single exact match — selecting again clears it. */
+  const selectCampaign = (campaignId) => {
+    const next = filters.campaign_id === campaignId ? "" : campaignId;
     setFilters((prev) => ({
       ...prev,
-      campaign_ids: newCampaigns,
+      campaign_id: next,
     }));
-    onFilterChange("campaign_ids", newCampaigns);
+    onFilterChange("campaign_id", next);
   };
 
   const clearCampaignFilters = () => {
     setFilters((prev) => ({
       ...prev,
-      campaign_ids: [],
+      campaign_id: "",
     }));
-    onFilterChange("campaign_ids", []);
+    onFilterChange("campaign_id", "");
   };
 
-  const toggleSourceSelection = (sourceValue) => {
-    const newSources = filters.source.includes(sourceValue)
-      ? filters.source.filter((value) => value !== sourceValue)
-      : [...filters.source, sourceValue];
-
+  /** source is now a single exact match — selecting again clears it. */
+  const selectSource = (sourceValue) => {
+    const next = filters.source === sourceValue ? "" : sourceValue;
     setFilters((prev) => ({
       ...prev,
-      source: newSources,
+      source: next,
     }));
-    onFilterChange("source", newSources);
+    onFilterChange("source", next);
   };
 
   const clearSourceFilters = () => {
     setFilters((prev) => ({
       ...prev,
-      source: [],
+      source: "",
     }));
-    onFilterChange("source", []);
+    onFilterChange("source", "");
   };
 
   const handlePrint = () => {
@@ -770,11 +851,11 @@ export default function DashbordFilter({
     setAuthorError("");
     setFilters({
       actions: [NEW_LEAD_ACTION],
-      owner_type: [],
+      owner_type: "",
       start_date: getDefaultDashboardStartDate(),
       end_date: getDefaultDashboardEndDate(),
-      campaign_ids: [],
-      source: [],
+      campaign_id: "",
+      source: "",
       author: defaultAuthor,
     });
     setIsActionDropdownOpen(false);
@@ -893,7 +974,7 @@ export default function DashbordFilter({
 
             {isOwnerTypeDropdownOpen && (
               <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[100] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
-                {filters.owner_type.length > 0 && (
+                {filters.owner_type && (
                   <button
                     type="button"
                     onClick={clearOwnerTypeFilters}
@@ -910,9 +991,10 @@ export default function DashbordFilter({
                     className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer"
                   >
                     <input
-                      type="checkbox"
-                      checked={filters.owner_type.includes(option.value)}
-                      onChange={() => toggleOwnerTypeSelection(option.value)}
+                      type="radio"
+                      name="dashboard_owner_type"
+                      checked={filters.owner_type === option.value}
+                      onChange={() => selectOwnerType(option.value)}
                       className="cursor-pointer"
                     />
                     <span className="text-sm text-gray-700">{option.label}</span>
@@ -941,19 +1023,16 @@ export default function DashbordFilter({
               }`}
             >
               <span className="whitespace-nowrap">
-                {filters.campaign_ids.length === 0
-                  ? translate("dashboardFilter.campaigns.allCampaigns")
-                  : translate("dashboardFilter.campaigns.selected").replace(
-                      "{count}",
-                      filters.campaign_ids.length,
-                    )}
+                {filters.campaign_id
+                  ? filters.campaign_id
+                  : translate("dashboardFilter.campaigns.allCampaigns")}
               </span>
               <ChevronDown className="text-gray-400 w-5 h-5 flex-shrink-0" />
             </div>
 
             {isCampaignDropdownOpen && (
               <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[100] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
-                {filters.campaign_ids.length > 0 && (
+                {filters.campaign_id && (
                   <button
                     onClick={clearCampaignFilters}
                     className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded flex items-center gap-2 mb-1"
@@ -974,9 +1053,10 @@ export default function DashbordFilter({
                       className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer"
                     >
                       <input
-                        type="checkbox"
-                        checked={filters.campaign_ids.includes(campaign)}
-                        onChange={() => toggleCampaignSelection(campaign)}
+                        type="radio"
+                        name="dashboard_campaign_id"
+                        checked={filters.campaign_id === campaign}
+                        onChange={() => selectCampaign(campaign)}
                         className="cursor-pointer"
                       />
                       <span className="text-sm text-gray-700">{campaign}</span>
@@ -1013,7 +1093,7 @@ export default function DashbordFilter({
 
               {isSourceDropdownOpen && (
                 <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[100] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
-                  {filters.source.length > 0 && (
+                  {filters.source && (
                     <button
                       type="button"
                       onClick={clearSourceFilters}
@@ -1030,9 +1110,10 @@ export default function DashbordFilter({
                       className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer"
                     >
                       <input
-                        type="checkbox"
-                        checked={filters.source.includes(option.value)}
-                        onChange={() => toggleSourceSelection(option.value)}
+                        type="radio"
+                        name="dashboard_source"
+                        checked={filters.source === option.value}
+                        onChange={() => selectSource(option.value)}
                         className="cursor-pointer"
                       />
                       <span className="text-sm text-gray-700">{option.label}</span>
@@ -1084,40 +1165,94 @@ export default function DashbordFilter({
                     "dashboardFilter.datePicker.title",
                     "Date range",
                   )}
-                  className="fixed z-[300] rounded-md border border-gray-200 bg-white p-3 shadow-xl"
+                  className="fixed z-[300] rounded-md border border-gray-200 bg-white p-3 shadow-xl overflow-y-auto overscroll-contain"
                   style={{
                     top: datePickerPosition.top,
                     bottom: datePickerPosition.bottom,
                     left: datePickerPosition.left,
                     width: datePickerPosition.width,
+                    maxHeight: datePickerPosition.maxHeight,
                   }}
                 >
-                  <div className="space-y-2">
+                  <div className="space-y-3">
+                    <div
+                      className="flex flex-wrap gap-1.5"
+                      role="group"
+                      aria-label={translate(
+                        "dashboardFilter.datePicker.presets",
+                        "Quick ranges",
+                      )}
+                    >
+                      {dateRangePresets.map((preset) => {
+                        const selected = activePresetId === preset.id;
+                        return (
+                          <button
+                            key={preset.id}
+                            type="button"
+                            onClick={() => {
+                              const range = buildDashboardDateRangeDaysAgo(
+                                preset.daysAgo,
+                              );
+                              setFilters((prev) => ({
+                                ...prev,
+                                start_date: range.start_date,
+                                end_date: range.end_date,
+                              }));
+                            }}
+                            className={`rounded-md border px-2 py-1 text-[11px] font-medium transition-colors ${
+                              selected
+                                ? "border-primary/40 bg-primary/10 text-primary"
+                                : "border-gray-200 bg-white text-gray-700 hover:border-primary/30"
+                            }`}
+                          >
+                            {preset.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+
                     <FormInput
                       type="date"
                       label={translate("dashboardFilter.datePicker.startDate")}
-                      value={filters.start_date.split("T")[0]}
+                      value={startDay}
+                      max={endDay || undefined}
+                      error={isDateRangeInvalid}
                       onChange={(filter) => {
                         const selectedDate = filter.target.value;
-                        setFilters((prev) => ({
-                          ...prev,
-                          start_date: `${selectedDate}T00:00:00`,
-                        }));
+                        if (!selectedDate) return;
+                        applyDateRangeDraft(
+                          selectedDate,
+                          endDay || selectedDate,
+                          "start",
+                        );
                       }}
                     />
 
                     <FormInput
                       type="date"
                       label={translate("dashboardFilter.datePicker.endDate")}
-                      value={filters.end_date.split("T")[0]}
+                      value={endDay}
+                      min={startDay || undefined}
+                      error={isDateRangeInvalid}
                       onChange={(filter) => {
                         const selectedDate = filter.target.value;
-                        setFilters((prev) => ({
-                          ...prev,
-                          end_date: `${selectedDate}T23:59:59`,
-                        }));
+                        if (!selectedDate) return;
+                        applyDateRangeDraft(
+                          startDay || selectedDate,
+                          selectedDate,
+                          "end",
+                        );
                       }}
                     />
+
+                    {isDateRangeInvalid ? (
+                      <p className="text-xs text-red-600" role="alert">
+                        {translate(
+                          "dashboardFilter.datePicker.invalidRange",
+                          "Start date must be before or equal to end date",
+                        )}
+                      </p>
+                    ) : null}
 
                     <div className="flex justify-end gap-2">
                       <button
@@ -1130,7 +1265,8 @@ export default function DashbordFilter({
                       <button
                         type="button"
                         onClick={onApplyDateFilter}
-                        className="bg-blue-600 hover:opacity-95 text-white px-3 py-1 rounded-md text-sm"
+                        disabled={isDateRangeInvalid}
+                        className="bg-blue-600 hover:opacity-95 text-white px-3 py-1 rounded-md text-sm disabled:opacity-50 disabled:pointer-events-none"
                       >
                         {translate("dashboardFilter.datePicker.apply")}
                       </button>

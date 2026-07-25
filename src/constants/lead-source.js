@@ -1,9 +1,9 @@
 /**
  * Lead acquisition `source` — Homey dashboard filter values.
  *
- * Sent as comma-separated `source` query param to `messages/v2/all`.
- * Exact match on stored `source` (after strip). The literal `"null"` filters
- * leads whose stored source is null/missing.
+ * Sent as a single exact `source` query param to `messages/v2/all` (breaking
+ * API change — no comma lists). Exact match on stored `source` (after strip).
+ * The literal `"null"` filters leads whose stored source is null/missing.
  */
 
 export const LEAD_SOURCE_NULL = "null";
@@ -52,33 +52,25 @@ export function getLeadSourceLabel(value, translate) {
 }
 
 /**
- * Parse a comma-separated source filter string into canonical values.
+ * Parse a source filter value into a single canonical value (or "").
+ *
+ * API breaking change: source is now a single exact match, no comma lists.
+ * Only the first value is honored (covers legacy bookmarked links).
  * @param {string | null | undefined} raw
- * @returns {Array<"facebook_activation" | "added_manually" | "null">}
+ * @returns {"" | "facebook_activation" | "added_manually" | "null"}
  */
 export function parseLeadSourceFilter(raw) {
-  if (!raw) return [];
-  return Array.from(
-    new Set(
-      String(raw)
-        .split(",")
-        .map((part) => normalizeLeadSource(part))
-        .filter(Boolean),
-    ),
-  );
+  if (!raw) return "";
+  return normalizeLeadSource(String(raw).split(",")[0]) || "";
 }
 
 /**
- * Serialize selected sources into a comma-separated string (or null).
- * @param {Array<string>} values
+ * Serialize the selected source (or null when empty/invalid).
+ * @param {string} value
  * @returns {string | null}
  */
-export function serializeLeadSourceFilter(values) {
-  if (!Array.isArray(values) || values.length === 0) return null;
-  const unique = Array.from(
-    new Set(values.map((v) => normalizeLeadSource(v)).filter(Boolean)),
-  );
-  return unique.length > 0 ? unique.join(",") : null;
+export function serializeLeadSourceFilter(value) {
+  return normalizeLeadSource(value);
 }
 
 /**

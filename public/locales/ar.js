@@ -702,6 +702,13 @@ export default {
       endDate: "تاريخ النهاية",
       cancel: "إلغاء",
       apply: "تطبيق",
+      presets: "فترات سريعة",
+      last7Days: "آخر 7 أيام",
+      last14Days: "آخر 14 يومًا",
+      last30Days: "آخر 30 يومًا",
+      today: "اليوم",
+      invalidRange: "تاريخ البداية يجب أن يكون قبل أو يساوي تاريخ النهاية",
+      title: "نطاق التاريخ",
     },
     campaigns: {
       label: "الحملات",

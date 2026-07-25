@@ -834,6 +834,13 @@ export default {
       endDate: "End Date",
       cancel: "Cancel",
       apply: "Apply",
+      presets: "Quick ranges",
+      last7Days: "Last 7 days",
+      last14Days: "Last 14 days",
+      last30Days: "Last 30 days",
+      today: "Today",
+      invalidRange: "Start date must be before or equal to end date",
+      title: "Date range",
     },
     campaigns: {
       label: "Campaigns",
