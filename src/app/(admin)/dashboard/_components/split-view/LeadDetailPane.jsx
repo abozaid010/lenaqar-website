@@ -219,7 +219,8 @@ export default function LeadDetailPane({
   // Prefer dashboard list client_id so AI reply can render before chat history loads.
   const clientId = leadSummary?.client_id ?? data?.data?.client_id;
 
-  /** Explicit boolean only — never coerce missing API fields into on/off. */
+  // Conversation payloads do not include this field — dashboard list is source of truth.
+  // Never invent a default when the value is missing.
   const aiReplyEnabled =
     typeof leadSummary?.ai_reply_enabled === "boolean"
       ? leadSummary.ai_reply_enabled
@@ -1064,7 +1065,7 @@ export default function LeadDetailPane({
               {translate("common.edit", common.edit)}
             </span>
           </button>
-          {clientId && userId ? (
+          {clientId && userId && typeof aiReplyEnabled === "boolean" ? (
             <ToggleReplyType
               key={userId}
               userId={userId}

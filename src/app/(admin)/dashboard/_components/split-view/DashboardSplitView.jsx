@@ -5,7 +5,7 @@ import { useUsersInfiniteData } from "@/hooks/use-users-infinite-data";
 import { removeUserFromInfiniteUsersCache, userKeys } from "@/utils/query-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useCallback } from "react";
+import { useEffect, useMemo, useCallback, useState } from "react";
 import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
 import { useSearchParams } from "next/navigation";
 import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
@@ -112,7 +112,7 @@ function DashboardSplitViewComponent() {
     }
   }, [allUsers, isLoading, isFetching, setAverageScore, setLoading]);
 
-  const selectedLead = useMemo(() => {
+  const selectedLeadFromList = useMemo(() => {
     if (!selectedUserId) return null;
     return (
       filteredUsers.find((u) => u.user_id === selectedUserId) ||
@@ -121,8 +121,37 @@ function DashboardSplitViewComponent() {
     );
   }, [filteredUsers, allUsers, selectedUserId]);
 
+  // Keep the clicked lead's dashboard fields (incl. ai_reply_enabled) even if the
+  // row is temporarily missing from loaded/filtered pages.
+  const [selectedLeadSnapshot, setSelectedLeadSnapshot] = useState(null);
+
+  const selectedLead = useMemo(() => {
+    if (!selectedUserId) return null;
+    if (selectedLeadFromList) return selectedLeadFromList;
+    if (selectedLeadSnapshot?.user_id === selectedUserId) {
+      return selectedLeadSnapshot;
+    }
+    return null;
+  }, [selectedUserId, selectedLeadFromList, selectedLeadSnapshot]);
+
+  useEffect(() => {
+    if (!selectedUserId) {
+      setSelectedLeadSnapshot(null);
+      return;
+    }
+    if (
+      selectedLeadFromList &&
+      selectedLeadFromList.user_id === selectedUserId
+    ) {
+      setSelectedLeadSnapshot(selectedLeadFromList);
+    }
+  }, [selectedUserId, selectedLeadFromList]);
+
   const onSelectLead = useCallback(
     (user) => {
+      if (user?.user_id) {
+        setSelectedLeadSnapshot(user);
+      }
       if (!isLg) {
         router.push(buildDashboardLeadHref(user.user_id, searchParams));
         return;

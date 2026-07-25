@@ -181,17 +181,18 @@ export default function ChatClientWrapper({ userId }) {
             name={data.data.name}
             phoneNumber={data.data.phoneNumber || null}
           />
-          <ToggleReplyType
-            userId={userId}
-            clientID={data.data.client_id}
-            initialEnabled={
-              typeof data.data.ai_reply_enabled === "boolean"
-                ? data.data.ai_reply_enabled
-                : typeof data.data.toggle_ai_auto_reply === "boolean"
-                  ? data.data.toggle_ai_auto_reply
-                  : null
-            }
-          />
+          {typeof data.data.ai_reply_enabled === "boolean" ||
+          typeof data.data.toggle_ai_auto_reply === "boolean" ? (
+            <ToggleReplyType
+              userId={userId}
+              clientID={data.data.client_id}
+              initialEnabled={
+                typeof data.data.ai_reply_enabled === "boolean"
+                  ? data.data.ai_reply_enabled
+                  : data.data.toggle_ai_auto_reply
+              }
+            />
+          ) : null}
           <Link
             href={`/dashboard`}
             className="text-sm text-gray-500 hover:text-gray-700"
