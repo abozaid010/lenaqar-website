@@ -38,15 +38,15 @@ export default function LeadRow({
           onSelect(user);
         }
       }}
-      className={`w-full flex flex-row items-center gap-2 text-start px-3 py-2.5 chat-list-row transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25d366]/30 ${
+      className={`w-full flex flex-row items-center gap-2 text-start px-3 py-2.5 lg:py-2 chat-list-row transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25d366]/30 ${
         selected ? "chat-list-row--selected" : ""
       }`}
     >
       {(showBulkCheckbox || index != null) && (
-        <div className="shrink-0 w-8 flex flex-col items-center gap-0.5">
+        <div className="shrink-0 w-8 lg:w-5 flex flex-col items-center gap-0.5">
           {showBulkCheckbox ? (
             <label
-              className="flex items-center justify-center p-2 -m-1 cursor-pointer"
+              className="flex items-center justify-center p-2 -m-1 lg:p-0 lg:m-0 cursor-pointer"
               onClick={(e) => e.stopPropagation()}
             >
               <input

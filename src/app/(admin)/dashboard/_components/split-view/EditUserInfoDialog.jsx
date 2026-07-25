@@ -135,7 +135,7 @@ export default function EditUserInfoDialog({
               {translate("editContact.name", "Name")}
             </label>
             <input
-              className="w-full border border-gray-200 rounded px-2 py-2 min-h-10 text-base"
+              className="w-full border border-gray-200 rounded px-2 py-2 min-h-10 lg:py-1.5 lg:min-h-0 text-base lg:text-sm"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -152,7 +152,7 @@ export default function EditUserInfoDialog({
               {translate("editContact.company", "Company / Agency")}
             </label>
             <input
-              className="w-full border border-gray-200 rounded px-2 py-2 min-h-10 text-base"
+              className="w-full border border-gray-200 rounded px-2 py-2 min-h-10 lg:py-1.5 lg:min-h-0 text-base lg:text-sm"
               value={company}
               onChange={(e) => setCompany(e.target.value)}
             />

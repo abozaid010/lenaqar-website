@@ -103,10 +103,6 @@ function DashboardSplitViewComponent() {
   }, [allUsers, searchQueryTrimmed, leadSort]);
 
   useEffect(() => {
-    setVisibleLeadsFromList(filteredUsers);
-  }, [filteredUsers, setVisibleLeadsFromList]);
-
-  useEffect(() => {
     setLoading(isLoading || isFetching);
     if (allUsers.length > 0) {
       const totalScore = allUsers.reduce((sum, user) => sum + (user.score || 0), 0);
@@ -218,6 +214,7 @@ function DashboardSplitViewComponent() {
             onToggleLeadSelection={toggleLeadSelection}
             onToggleSelectAllVisible={toggleSelectAllVisible}
             hasBulkSelection={hasSelection}
+            onVisibleLeadsChange={setVisibleLeadsFromList}
           />
         )}
         <div

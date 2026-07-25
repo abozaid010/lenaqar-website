@@ -213,7 +213,7 @@ export default function ChatInput({
           }
           disabled={!canType || pending}
           aria-label={translate("chatConversation.messageInput", "Message")}
-          className="w-full resize-none border-0 bg-transparent ps-4 pe-11 py-2.5 disabled:cursor-not-allowed text-base leading-5 overflow-hidden"
+          className="w-full resize-none border-0 bg-transparent ps-4 pe-11 py-2.5 disabled:cursor-not-allowed text-base lg:text-sm leading-5 overflow-hidden"
           style={{ minHeight: compact ? "38px" : "42px" }}
         />
 

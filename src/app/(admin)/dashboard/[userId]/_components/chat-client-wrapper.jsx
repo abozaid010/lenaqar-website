@@ -185,7 +185,11 @@ export default function ChatClientWrapper({ userId }) {
             userId={userId}
             clientID={data.data.client_id}
             initialEnabled={
-              data.data.ai_reply_enabled ?? data.data.toggle_ai_auto_reply
+              typeof data.data.ai_reply_enabled === "boolean"
+                ? data.data.ai_reply_enabled
+                : typeof data.data.toggle_ai_auto_reply === "boolean"
+                  ? data.data.toggle_ai_auto_reply
+                  : null
             }
           />
           <Link

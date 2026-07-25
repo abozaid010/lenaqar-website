@@ -609,7 +609,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
                   onChange={handleSearchChange}
                   onKeyDown={handleKeyDown}
                   placeholder={defaultSearchPlaceholder}
-                  className="w-full ps-9 pe-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-gray-900 placeholder:text-gray-400 bg-white"
+                  className="w-full ps-9 pe-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base lg:text-sm text-gray-900 placeholder:text-gray-400 bg-white"
                 />
               </div>
             </div>

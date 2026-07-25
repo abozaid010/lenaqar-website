@@ -142,7 +142,7 @@ export default function BulkLeadActionDialog({
               type="date"
               value={meetingDate}
               onChange={(e) => setMeetingDate(e.target.value || getDefaultDate())}
-              className="w-full border border-gray-200 rounded-md px-3 py-2 min-h-10 text-base bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full border border-gray-200 rounded-md px-3 py-2 min-h-10 lg:min-h-0 text-base lg:text-sm bg-white focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
           <div>
@@ -153,7 +153,7 @@ export default function BulkLeadActionDialog({
               type="time"
               value={meetingTime}
               onChange={(e) => setMeetingTime(e.target.value || getDefaultTime())}
-              className="w-full border border-gray-200 rounded-md px-3 py-2 min-h-10 text-base bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full border border-gray-200 rounded-md px-3 py-2 min-h-10 lg:min-h-0 text-base lg:text-sm bg-white focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
         </div>
@@ -165,7 +165,7 @@ export default function BulkLeadActionDialog({
           <select
             value={action}
             onChange={(e) => setAction(e.target.value)}
-            className="w-full border border-gray-200 rounded-md px-3 py-2 min-h-10 text-base bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+            className="w-full border border-gray-200 rounded-md px-3 py-2 min-h-10 lg:min-h-0 text-base lg:text-sm bg-white focus:outline-none focus:ring-1 focus:ring-primary"
           >
             {actionOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -184,7 +184,7 @@ export default function BulkLeadActionDialog({
             onChange={(e) => setComment(e.target.value)}
             placeholder={translate("actionForm.commentPlaceholder")}
             rows={3}
-            className="w-full border border-gray-200 rounded-md px-3 py-2 min-h-10 text-base bg-white focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+            className="w-full border border-gray-200 rounded-md px-3 py-2 min-h-10 lg:min-h-0 text-base lg:text-sm bg-white focus:outline-none focus:ring-1 focus:ring-primary resize-none"
           />
         </div>
       </div>

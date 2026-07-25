@@ -37,7 +37,7 @@ const FILTER_BUTTON_CLASS =
   "[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-11 [&>div>button]:min-h-11 [&>div>button]:px-2 [&>div>button]:py-[10px]";
 
 const DATE_INPUT_CLASS =
-  "w-full px-2 py-[10px] h-11 min-h-11 bg-[#F6F7FB] rounded-[5px] border border-[#E6E6E6] text-[#494A4B] text-base focus:outline-none focus:ring-primary focus:border-primary";
+  "w-full px-2 py-[10px] h-11 min-h-11 bg-[#F6F7FB] rounded-[5px] border border-[#E6E6E6] text-[#494A4B] text-base lg:text-sm focus:outline-none focus:ring-primary focus:border-primary";
 
 function WhatsAppIcon({ className = "w-4 h-4 text-green-600 shrink-0" }) {
   return (
@@ -383,7 +383,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
             <p className="truncate text-xs">{item.value}</p>
             <button
               type="button"
-              className="shrink-0 flex items-center justify-center min-h-10 min-w-10 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-200"
+              className="shrink-0 flex items-center justify-center min-h-10 min-w-10 lg:min-h-8 lg:min-w-8 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-200"
               aria-label={translate("unitsFilter.clearall", "Clear")}
               onClick={() => handleRemoveFilter(item.key)}
             >
@@ -394,7 +394,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
       </div>
       <button
         type="button"
-        className="shrink-0 flex items-center gap-1.5 min-h-10 px-2.5 text-xs text-gray-600 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+        className="shrink-0 flex items-center gap-1.5 min-h-10 lg:min-h-9 px-2.5 text-xs text-gray-600 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
         onClick={clearAllFilters}
       >
         <Trash2 size={14} />
@@ -412,7 +412,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
         <input
           type="text"
           inputMode="numeric"
-          className="w-full px-2 py-2.5 min-h-11 text-base border rounded-md bg-white"
+          className="w-full px-2 py-2.5 min-h-11 text-base lg:text-sm border rounded-md bg-white"
           value={formatPriceInput(minValue)}
           onChange={(e) => onMinChange(e.target.value.replace(/\D/g, ""))}
           placeholder="0"
@@ -425,7 +425,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
         <input
           type="text"
           inputMode="numeric"
-          className="w-full px-2 py-2.5 min-h-11 text-base border rounded-md bg-white"
+          className="w-full px-2 py-2.5 min-h-11 text-base lg:text-sm border rounded-md bg-white"
           value={formatPriceInput(maxValue)}
           onChange={(e) => onMaxChange(e.target.value.replace(/\D/g, ""))}
           placeholder="5,000,000,000"

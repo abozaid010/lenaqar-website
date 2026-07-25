@@ -6,41 +6,51 @@ import { Ban, Check, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
+/** Only accept an explicit boolean from the API — never invent on/off. */
 function toReplyMode(enabled) {
-  return enabled === true ? "auto_reply" : "manual_reply";
+  if (enabled === true) return "auto_reply";
+  if (enabled === false) return "manual_reply";
+  return null;
 }
 
 export default function ToggleReplyType({
   userId,
   clientID,
   initialEnabled,
+  onEnabledChange,
 }) {
   const [autoReply, setAutoReply] = useState(() => toReplyMode(initialEnabled));
   const [isLoading, setIsLoading] = useState(false);
   const { translate } = useI18n();
   const isAiOn = autoReply === "auto_reply";
+  const hasKnownStatus = autoReply !== null;
 
   useEffect(() => {
-    setAutoReply(toReplyMode(initialEnabled));
+    const next = toReplyMode(initialEnabled);
+    // Keep prior known status only while a new lead's value is still loading —
+    // never coerce undefined/null into on or off.
+    if (next !== null) {
+      setAutoReply(next);
+    } else if (userId) {
+      setAutoReply(null);
+    }
   }, [userId, initialEnabled]);
 
   const handleToggle = async () => {
-    if (isLoading) return;
+    if (isLoading || !hasKnownStatus) return;
     const nextValue = isAiOn ? "manual_reply" : "auto_reply";
+    const nextEnabled = nextValue === "auto_reply";
     const previous = autoReply;
     setAutoReply(nextValue);
     setIsLoading(true);
 
     try {
-      const result = await toggleAutoReply(
-        userId,
-        clientID,
-        nextValue === "auto_reply",
-      );
+      const result = await toggleAutoReply(userId, clientID, nextEnabled);
 
       if (result.success) {
+        onEnabledChange?.(nextEnabled);
         toast.success(
-          nextValue === "auto_reply"
+          nextEnabled
             ? translate("leadDetail.aiAutoReply.toastOn")
             : translate("leadDetail.aiAutoReply.toastOff"),
         );
@@ -55,6 +65,21 @@ export default function ToggleReplyType({
       setIsLoading(false);
     }
   };
+
+  if (!hasKnownStatus) {
+    return (
+      <button
+        type="button"
+        disabled
+        aria-busy="true"
+        aria-label={translate("leadDetail.aiAutoReply.ariaLabel")}
+        className="inline-flex items-center gap-1.5 shrink-0 px-2.5 py-1 rounded-md text-xs font-medium border border-gray-200 bg-gray-50 text-gray-400 cursor-wait"
+      >
+        <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" aria-hidden />
+        <span>{translate("leadDetail.aiAutoReply.switching")}</span>
+      </button>
+    );
+  }
 
   return (
     <button

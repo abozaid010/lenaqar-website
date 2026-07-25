@@ -45,7 +45,7 @@ export default function AddUnitButton({ isEdit = false, unitData, disabled = fal
         onClick={openModal}
         disabled={disabled}
         title={disabled ? "You can only edit your own units" : undefined}
-        className={`flex-shrink-0 sm:w-auto min-h-11 h-11 min-w-11 px-3 sm:px-4 bg-primary text-white rounded-[5px] flex items-center justify-center transition duration-300 ${
+        className={`flex-shrink-0 sm:w-auto min-h-11 h-11 min-w-11 lg:min-h-[40px] lg:h-[40px] lg:min-w-0 px-3 sm:px-4 bg-primary text-white rounded-[5px] flex items-center justify-center transition duration-300 ${
           t.dir === "rtl" ? "flex-row-reverse" : ""
         } ${disabled ? "opacity-40 cursor-not-allowed" : "hover:opacity-90"}`}
       >
