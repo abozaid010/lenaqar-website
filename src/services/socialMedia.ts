@@ -12,10 +12,13 @@ import type {
   SocialPostDetail,
 } from "@/types/socialMedia";
 
-/** Backend caps at 100; 20 keeps a batch under typical gateway timeouts. */
+/** Backend caps at 100; 20 is a sensible default batch size. */
 export const ACTIVATE_BATCH_LIMIT = 20;
 
-/** Activate is blocking (2–6 min). Client may still abort first — batch keeps running. */
+/**
+ * Activate claims posts and enqueues WhatsApp jobs, then returns.
+ * Keep a generous client timeout as a safety net; progress continues via /status.
+ */
 const ACTIVATE_CLIENT_TIMEOUT_MS = 5 * 60 * 1000;
 
 export class RequestTimeoutError extends Error {
@@ -129,7 +132,10 @@ export function setDiscoveredPostReview(postId: string, isReviewed: boolean) {
   );
 }
 
-/** AI catch-up batch: activates up to `limit` unhandled discovered posts (live WhatsApp send). */
+/**
+ * AI catch-up batch: activates up to `limit` unhandled discovered posts.
+ * WhatsApp send is async (`queued`); poll GET /api/activation/status for progress.
+ */
 export function activateDiscoveredPosts(limit = ACTIVATE_BATCH_LIMIT) {
   return fetchJson<ActivatePostsResponse>(
     `/api/bff/social-media/api/discovered-posts/activate`,

@@ -3061,9 +3061,9 @@ export default {
       chatWith: "Chat",
       aiHandleComments: "Let AI handle",
       aiHandleConfirm:
-        "AI will review unhandled comments and send WhatsApp messages to leads with a phone number. Continue?",
+        "AI will review unhandled comments and queue WhatsApp messages for leads with a phone number. Continue?",
       aiHandleSuccess:
-        "Processed {processed}: {sent} sent, {skipped} skipped, {failed} failed.",
+        "Processed {processed}: {queued} queued for WhatsApp, {sent} sent, {skipped} skipped, {failed} failed.",
       aiHandleNothingToDo: "No new comments for AI to handle.",
       aiHandleDisabled: "AI handling is currently disabled.",
     },
@@ -3073,24 +3073,31 @@ export default {
       pausing: "Stopping…",
       resume: "Resume",
       runningLabel: "AI working…",
+      sendingLabel: "Sending WhatsApp…",
       remaining: "{count} left",
+      queueRemaining: "{count} in queue",
+      queueStats:
+        "{queued} in queue · {sent} sent today · {failed} failed today",
       progressLabel: "Activation progress",
       progressDetail: "~{processed} of {total}",
       batchHint:
-        "This run handles up to {limit} posts and may take a few minutes. You can pause anytime.",
+        "This run claims up to {limit} posts. WhatsApp sends continue in the background — you can pause anytime.",
+      globalControlHint:
+        "Pause and Resume are global — they affect all clients until someone resumes.",
       pauseRequested: "Pause requested. Current post will finish first.",
-      resumeSuccess: "Activation resumed. You can start a new batch.",
+      resumeSuccess:
+        "Activation resumed. Queued WhatsApp jobs will drain; you can start a new batch.",
       stillRunning:
         "AI is still working in the background. Progress will keep updating.",
       stoppedEarly:
-        "Batch stopped early: {processed} processed ({sent} sent, {skipped} skipped, {failed} failed).",
+        "Batch stopped early: {processed} processed ({queued} queued, {sent} sent, {skipped} skipped, {failed} failed).",
       disabledTitle: "Activation disabled by operator",
       disabledBody:
         "AI handling and automatic activation are turned off. Contact an operator to re-enable.",
       pausedTitle: "AI activation paused",
       pausingTitle: "Stopping — finishing current post…",
       pausedBody:
-        "Manual batches and automatic webhook activation are on hold until someone resumes.",
+        "Manual batches and automatic webhook activation are on hold for all clients until someone resumes.",
     },
     empty: {
       title: "No posts found",
