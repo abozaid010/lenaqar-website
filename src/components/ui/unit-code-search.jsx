@@ -11,12 +11,33 @@ import { formatArea, isMeaningfulNumber } from "@/lib/units/unit-formatters";
 import {
   buildAdminUnitDetailPath,
   buildAdminUnitEditPath,
+  normalizeUnitCodeParam,
 } from "@/lib/units/unit-share-links";
 import { appendUnitsSourcePendingQuery } from "@/utils/units-navigation-source";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 
 const INPUT_CLASS =
   "w-full ps-3 pe-9 py-[10px] h-11 min-h-11 bg-[#F6F7FB] rounded-[5px] border border-[#E6E6E6] text-[#494A4B] text-sm focus:outline-none focus:ring-primary focus:border-primary";
+
+const URL_TRAILING_SEGMENTS = new Set(["edit", "whatsapp"]);
+
+/** Accepts either a bare unit code or a pasted unit URL (public/admin, incl. /edit) and returns the code. */
+function extractUnitCodeFromInput(raw) {
+  const trimmed = String(raw ?? "").trim();
+  if (!trimmed || !/^https?:\/\//i.test(trimmed)) {
+    return normalizeUnitCodeParam(trimmed) ?? trimmed;
+  }
+  try {
+    const segments = new URL(trimmed).pathname.split("/").filter(Boolean);
+    while (segments.length && URL_TRAILING_SEGMENTS.has(segments[segments.length - 1].toLowerCase())) {
+      segments.pop();
+    }
+    const last = segments[segments.length - 1];
+    return last ? (normalizeUnitCodeParam(last) ?? last) : trimmed;
+  } catch {
+    return trimmed;
+  }
+}
 
 function Field({ label, value }) {
   return (
@@ -39,12 +60,13 @@ export default function UnitCodeSearch() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const trimmed = inputValue.trim();
-    if (!trimmed) return;
-    if (trimmed === submittedCode) {
+    const code = extractUnitCodeFromInput(inputValue);
+    if (!code) return;
+    setInputValue(code);
+    if (code === submittedCode) {
       refetch();
     } else {
-      setSubmittedCode(trimmed);
+      setSubmittedCode(code);
     }
   };
 
