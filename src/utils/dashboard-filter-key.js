@@ -12,6 +12,14 @@ const DASHBOARD_NON_API_PARAMS = new Set([
 ]);
 
 /**
+ * Exact-match params the API accepts as a single value only (breaking
+ * change — no more comma-separated lists). Only the first value is kept,
+ * so legacy bookmarked/shared links degrade gracefully instead of sending
+ * a list the API no longer understands.
+ */
+const DASHBOARD_SINGLE_VALUE_PARAMS = ["author", "source", "owner_type", "campaign_id"];
+
+/**
  * Build a stable JSON filter key for dashboard leads queries from URL search params.
  * @param {URLSearchParams | { entries?: () => Iterable<[string, string]> } | Record<string, string | string[] | undefined> | null | undefined} searchParams
  * @returns {string}
@@ -39,6 +47,19 @@ export function buildDashboardFilterKey(searchParams) {
 
   for (const key of DASHBOARD_NON_API_PARAMS) {
     delete o[key];
+  }
+
+  // Legacy bookmarks/links may still use `campaign_ids` — migrate to the
+  // current `campaign_id` param name.
+  if (o.campaign_ids && !o.campaign_id) {
+    o.campaign_id = o.campaign_ids;
+  }
+  delete o.campaign_ids;
+
+  for (const key of DASHBOARD_SINGLE_VALUE_PARAMS) {
+    if (typeof o[key] === "string" && o[key].includes(",")) {
+      o[key] = o[key].split(",")[0];
+    }
   }
 
   if (o.query && typeof o.query === "string") {

@@ -53,31 +53,23 @@ export function getOwnerTypeLabel(value, translate) {
 }
 
 /**
- * Parse a comma-separated owner_type filter string into canonical values.
+ * Parse an owner_type filter value into a single canonical value (or "").
+ *
+ * API breaking change: owner_type is now a single exact match, no comma
+ * lists. Only the first value is honored (covers legacy bookmarked links).
  * @param {string | null | undefined} raw
- * @returns {Array<"owner" | "broker" | "developer" | "renter" | "buyer" | "seller" | "rentee">}
+ * @returns {"" | "owner" | "broker" | "developer" | "renter" | "buyer" | "seller" | "rentee"}
  */
 export function parseOwnerTypeFilter(raw) {
-  if (!raw) return [];
-  return Array.from(
-    new Set(
-      String(raw)
-        .split(",")
-        .map((part) => normalizeOwnerType(part))
-        .filter(Boolean),
-    ),
-  );
+  if (!raw) return "";
+  return normalizeOwnerType(String(raw).split(",")[0]) || "";
 }
 
 /**
- * Serialize selected owner types into a comma-separated string (or null).
- * @param {Array<string>} values
+ * Serialize the selected owner type (or null when empty/invalid).
+ * @param {string} value
  * @returns {string | null}
  */
-export function serializeOwnerTypeFilter(values) {
-  if (!Array.isArray(values) || values.length === 0) return null;
-  const unique = Array.from(
-    new Set(values.map((v) => normalizeOwnerType(v)).filter(Boolean)),
-  );
-  return unique.length > 0 ? unique.join(",") : null;
+export function serializeOwnerTypeFilter(value) {
+  return normalizeOwnerType(value);
 }

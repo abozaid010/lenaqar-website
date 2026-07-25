@@ -99,9 +99,9 @@ export function withDashboardFilterDefaults(
     }
   }
 
-  // Rolling date window: start = ~2 months ago, end = tomorrow EOD (covers today).
+  // Rolling date window: start = 7 days ago, end = today EOD (last week).
   // Refresh a stale end_date that ended before today so reloads still include
-  // current leads (matches the date-picker default of "tomorrow").
+  // current leads.
   if (!withAccess.start_date) {
     withAccess.start_date = getDefaultDashboardStartDate();
   }
