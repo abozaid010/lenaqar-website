@@ -41,9 +41,9 @@ const Layout = async ({ children }) => {
             unreadNotificationsCount={unreadNotificationsCount}
           />
 
-          <div className="flex-1 flex flex-col overflow-hidden lg:pl-0">
+          <div className="flex-1 min-w-0 flex flex-col overflow-hidden lg:pl-0">
             <main
-              className={`overflow-y-auto p-3 pt-12 lg:pt-3 relative flex-1 flex flex-col min-h-0 ${SELECTION_COLORS.BG}`}
+              className={`overflow-y-auto overflow-x-hidden p-3 pt-12 lg:pt-3 relative flex-1 flex flex-col min-h-0 min-w-0 ${SELECTION_COLORS.BG}`}
             >
               <Suspense
                 fallback={

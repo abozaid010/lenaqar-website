@@ -6,10 +6,7 @@ import { Ban, Check, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-/**
- * Map an API boolean to reply mode.
- * Caller must pass an explicit boolean — never invent on/off from missing data.
- */
+/** Map API boolean to reply mode. Only `true` is on; missing/false → off. */
 function toReplyMode(enabled) {
   return enabled === true ? "auto_reply" : "manual_reply";
 }

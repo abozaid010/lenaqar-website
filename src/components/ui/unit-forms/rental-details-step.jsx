@@ -93,6 +93,11 @@ export default function RentalDetailsStep({
   };
 
   const handleMonthlyRentChange = (value) => {
+    if (invalidFields.includes("monthlyRentPrice")) {
+      setInvalidFields((prev) =>
+        prev.filter((field) => field !== "monthlyRentPrice")
+      );
+    }
     const englishValue = convertArabicToEnglishNumbers(value);
     const rawValue = englishValue.replace(/\D/g, "");
     updateFormData({
@@ -161,7 +166,14 @@ export default function RentalDetailsStep({
           placeholder="16000"
           type="money"
           adornment="EGP"
-          error={invalidFields.includes("monthlyRentPrice")}
+          error={
+            invalidFields.includes("monthlyRentPrice")
+              ? translate(
+                  "rentalDetails.monthlyRentRequired",
+                  "Enter monthly rent"
+                )
+              : false
+          }
         />
       </div>
 

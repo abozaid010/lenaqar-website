@@ -13,3 +13,146 @@ export function resolveMonthlyRentFromUnit(unit) {
   if (Number.isFinite(mirrored) && mirrored > 0) return mirrored;
   return "";
 }
+
+function asTrimmedString(value) {
+  if (value == null) return "";
+  return String(value).trim();
+}
+
+/**
+ * Ensure unit create/update payloads always include location fields and
+ * fill missing city/district/sub_district from the selected project when possible.
+ */
+export async function ensureUnitLocationPayload(payload, {
+  cityManager,
+  projects = [],
+  fetchProjectById,
+} = {}) {
+  if (!payload || typeof payload !== "object") return payload;
+
+  let city = asTrimmedString(payload.city);
+  let district = asTrimmedString(payload.district);
+  let sub_district = asTrimmedString(payload.sub_district);
+  let project = asTrimmedString(payload.project);
+  let project_ar = asTrimmedString(payload.project_ar);
+  let project_id = asTrimmedString(payload.project_id || payload.projectId);
+  let phase = payload.phase != null ? String(payload.phase) : "";
+  let developer = asTrimmedString(payload.developer);
+  let developer_id = asTrimmedString(payload.developer_id || payload.developerId);
+
+  const locationIncomplete = !city || !district || !sub_district;
+  const projectList = Array.isArray(projects) ? projects : [];
+
+  if ((project_id || project) && locationIncomplete) {
+    let proj =
+      projectList.find((p) => project_id && String(p?.id) === String(project_id)) ||
+      projectList.find(
+        (p) =>
+          project &&
+          (p?.en_name === project || p?.name === project)
+      ) ||
+      null;
+
+    const needsFullProject =
+      project_id &&
+      (!proj?.city || !proj?.district || !proj?.sub_district) &&
+      typeof fetchProjectById === "function";
+
+    if (needsFullProject) {
+      try {
+        const res = await fetchProjectById(project_id, false);
+        if (res?.data) {
+          proj = { ...(proj || {}), ...res.data };
+        }
+      } catch {
+        // Location fill from full project is best-effort.
+      }
+    }
+
+    if (proj) {
+      if (!city && proj.city) city = asTrimmedString(proj.city);
+      if (!district && proj.district) district = asTrimmedString(proj.district);
+      if (!sub_district && proj.sub_district) {
+        sub_district = asTrimmedString(proj.sub_district);
+      }
+      if (!project) {
+        project = asTrimmedString(proj.en_name || proj.name);
+      }
+      if (!project_ar && proj.ar_name) {
+        project_ar = asTrimmedString(proj.ar_name);
+      }
+      if (!project_id && proj.id) project_id = asTrimmedString(proj.id);
+
+      if (!developer_id) {
+        const devId =
+          proj.developer_id ??
+          proj.developerId ??
+          proj?.developer?.id ??
+          proj?.developer?.developer_id ??
+          "";
+        if (devId) developer_id = asTrimmedString(devId);
+      }
+      if (!developer) {
+        developer = asTrimmedString(
+          proj.developer_name ||
+            proj.developer?.en_name ||
+            proj.developer_en_name ||
+            proj.developer?.ar_name ||
+            ""
+        );
+      }
+    }
+  }
+
+  if (cityManager?.resolveLocationHierarchyAsync) {
+    const resolved = await cityManager.resolveLocationHierarchyAsync({
+      city,
+      district,
+      sub_district,
+    });
+    city = resolved.city || city;
+    district = resolved.district || district;
+    sub_district = resolved.sub_district || sub_district;
+  }
+
+  // Always send these keys so the backend receives the full location shape.
+  payload.city = city || "";
+  payload.district = district || "";
+  payload.sub_district = sub_district || "";
+  payload.project = project || "";
+  payload.project_ar = project_ar || "";
+  payload.project_id = project_id || "";
+  payload.phase = phase;
+  payload.developer = developer || "";
+  payload.developer_id = developer_id || "";
+
+  if (cityManager) {
+    if (payload.city && cityManager.normalizeCityValueAsync) {
+      payload.city = await cityManager.normalizeCityValueAsync(payload.city);
+    }
+    if (
+      payload.district &&
+      payload.city &&
+      cityManager.normalizeDistrictValueAsync
+    ) {
+      payload.district = await cityManager.normalizeDistrictValueAsync(
+        payload.district,
+        payload.city
+      );
+    }
+    if (
+      payload.sub_district &&
+      payload.city &&
+      payload.district &&
+      cityManager.normalizeSubDistrictValueAsync
+    ) {
+      payload.sub_district = await cityManager.normalizeSubDistrictValueAsync(
+        payload.sub_district,
+        payload.city,
+        payload.district
+      );
+    }
+  }
+
+  return payload;
+}

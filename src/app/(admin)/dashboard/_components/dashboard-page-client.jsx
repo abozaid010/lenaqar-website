@@ -53,8 +53,8 @@ function DashboardPageContent() {
   }
 
   return (
-    <div className="relative flex-1 min-h-0 flex flex-col gap-1">
-      <div className="no-print flex flex-wrap lg:flex-nowrap items-center gap-2 shrink-0 min-h-10 lg:min-h-9">
+    <div className="relative flex-1 min-h-0 min-w-0 w-full flex flex-col gap-1 overflow-x-hidden">
+      <div className="no-print flex flex-wrap lg:flex-nowrap items-center gap-2 shrink-0 min-w-0 min-h-10 lg:min-h-9">
         <button
           type="button"
           onClick={() => setIsAddLeadOpen(true)}
@@ -91,10 +91,10 @@ function DashboardPageContent() {
       ) : null}
 
       <aside
-        className={`no-print fixed lg:absolute inset-y-0 end-0 z-50 flex w-[min(100%,18rem)] sm:w-72 flex-col border-s border-gray-200 bg-white shadow-xl transition-transform duration-300 ease-out ${
+        className={`no-print fixed lg:absolute inset-y-0 end-0 z-50 flex w-[min(100%,18rem)] sm:w-72 max-w-full flex-col border-s border-gray-200 bg-white shadow-xl transition-transform duration-300 ease-out ${
           isFiltersOpen
             ? "translate-x-0"
-            : "translate-x-full rtl:-translate-x-full pointer-events-none"
+            : "translate-x-full rtl:-translate-x-full pointer-events-none invisible"
         }`}
         aria-hidden={!isFiltersOpen}
       >

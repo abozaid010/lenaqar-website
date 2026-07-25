@@ -219,14 +219,18 @@ export default function LeadDetailPane({
   // Prefer dashboard list client_id so AI reply can render before chat history loads.
   const clientId = leadSummary?.client_id ?? data?.data?.client_id;
 
-  // Conversation payloads do not include this field — dashboard list is source of truth.
-  // Never invent a default when the value is missing.
+  // Prefer list/chat boolean when present; missing → treat as off for UI only
+  // (button must still render — do not gate visibility on this field).
   const aiReplyEnabled =
     typeof leadSummary?.ai_reply_enabled === "boolean"
       ? leadSummary.ai_reply_enabled
-      : typeof data?.data?.ai_reply_enabled === "boolean"
-        ? data.data.ai_reply_enabled
-        : null;
+      : typeof leadSummary?.toggle_ai_auto_reply === "boolean"
+        ? leadSummary.toggle_ai_auto_reply
+        : typeof data?.data?.ai_reply_enabled === "boolean"
+          ? data.data.ai_reply_enabled
+          : typeof data?.data?.toggle_ai_auto_reply === "boolean"
+            ? data.data.toggle_ai_auto_reply
+            : false;
 
   const handleAiReplyEnabledChange = useCallback(
     (enabled) => {
@@ -1008,9 +1012,9 @@ export default function LeadDetailPane({
 
   return (
     <>
-      <div className="flex flex-col min-h-0 flex-1 bg-white lg:border-l border-gray-100">
+      <div className="flex flex-col min-h-0 min-w-0 flex-1 w-full bg-white lg:border-l border-gray-100 overflow-x-hidden">
         <div
-          className={`shrink-0 flex flex-wrap lg:flex-nowrap items-center gap-x-2 gap-y-1 px-3 py-1.5 border-b border-gray-200 bg-white ${
+          className={`shrink-0 flex flex-wrap lg:flex-nowrap items-center gap-x-2 gap-y-1 px-3 py-1.5 border-b border-gray-200 bg-white min-w-0 ${
             !showBackButton ? "lg:pe-28" : ""
           }`}
         >
@@ -1034,7 +1038,7 @@ export default function LeadDetailPane({
             {headerPhoneDisplay ? (
               <span
                 dir="ltr"
-                className="shrink-0 text-sm leading-snug text-gray-700 font-mono tabular-nums truncate max-w-[40%] sm:max-w-none"
+                className="min-w-0 text-sm leading-snug text-gray-700 font-mono tabular-nums truncate max-w-[40%] sm:max-w-[12rem]"
               >
                 {headerPhoneDisplay}
               </span>
@@ -1065,7 +1069,7 @@ export default function LeadDetailPane({
               {translate("common.edit", common.edit)}
             </span>
           </button>
-          {clientId && userId && typeof aiReplyEnabled === "boolean" ? (
+          {clientId && userId ? (
             <ToggleReplyType
               key={userId}
               userId={userId}

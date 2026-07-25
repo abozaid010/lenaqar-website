@@ -1696,7 +1696,8 @@ export default {
     locationSearchPlaceholder: "Search project, area, district, or city…",
     locationSearchEmpty: "No matching locations or projects",
     locationSearchHint:
-      "Type a project or place name. Choosing a project fills city, district, and area.",
+      "Select a project or sub-district. Choosing a project fills city, district, and area.",
+    locationRequired: "Select a project or sub-district",
     selectView: "Select view",
     placeholders: {
       unitTitle: "Enter unit title",
@@ -1750,6 +1751,7 @@ export default {
     maintenance: "Maintenance",
     deleveryError:
       "Delivery date must be between 30 years ago and 10 years from now",
+    totalPriceRequired: "Enter total price",
   },
   rentalDetails: {
     availability: "Availability",
@@ -1761,6 +1763,7 @@ export default {
     monthly: "Monthly",
     price: "Price",
     monthlyRentPrice: "Monthly rent",
+    monthlyRentRequired: "Enter monthly rent",
     securityDeposit: "Security Deposit",
     cleaningFee: "Cleaning Fee",
     serviceFee: "Service Fee",
@@ -2061,14 +2064,7 @@ export default {
     imageUploadFailed: "Failed to upload image. Please try again.",
     compoundAdded: "Project added successfully!",
     compoundAddFailed: "Failed to add project. Please try again.",
-    enterValidPrice:
-      "Please enter a monthly rent greater than 0",
-    uploadImage: "Please upload at least one image.",
-    selectPurpose: "Please select a purpose for the unit (sell/rent)",
-    errorProcessing:
-      "An error occurred while processing your request. Please try again",
-    enterValidPrice:
-      "Please enter a monthly rent greater than 0",
+    enterValidPrice: "Enter monthly rent",
     uploadImage: "Please upload at least one image.",
     selectPurpose: "Please select a purpose for the unit (sell/rent)",
     errorProcessing:
