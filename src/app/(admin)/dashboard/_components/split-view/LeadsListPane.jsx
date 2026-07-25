@@ -10,12 +10,20 @@ import {
   extractPersistableDashboardFilters,
   hasPersistableDashboardFilters,
 } from "@/lib/dashboard-filters-storage";
+import { LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { leadMatchesSearchQuery } from "@/utils/lead-list-search";
 import LeadRow from "./LeadRow";
 
-const SEARCH_DEBOUNCE_MS = 3000;
+const SEARCH_DEBOUNCE_MS = 1000;
+const SORT_LAYOUT_TRANSITION = {
+  type: "spring",
+  stiffness: 480,
+  damping: 38,
+  mass: 0.7,
+};
 
 function useClientMounted() {
   const [isMounted, setIsMounted] = useState(false);
@@ -32,6 +40,8 @@ function readFilterParam(params, key) {
 
 export default function LeadsListPane({
   users,
+  /** Current client-side sort mode — drives reorder animation only. */
+  sortKey,
   totalLoadedLeads = 0,
   /** Total matching leads when fully known (all pages loaded); null while more pages remain. */
   totalMatchingLeads = null,
@@ -51,9 +61,12 @@ export default function LeadsListPane({
   onToggleLeadSelection,
   onToggleSelectAllVisible,
   hasBulkSelection = false,
+  /** Keeps bulk "select all visible" aligned with locally filtered rows. */
+  onVisibleLeadsChange,
 }) {
   const { translate, common, localeUtils } = useI18n();
   const isMounted = useClientMounted();
+  const reduceMotion = useReducedMotion();
   const { canShowBulkButton } = useWhatsappBulkAccess();
   const showBulkCheckbox = isMounted && canShowBulkButton;
 
@@ -65,8 +78,14 @@ export default function LeadsListPane({
     readFilterParam(effectiveFilterParams, "query") ||
     "";
   const [searchInput, setSearchInput] = useState(() => initialQuery);
+  /** Debounced text used only to filter already-loaded rows — never hits the API. */
+  const [localFilterQuery, setLocalFilterQuery] = useState(() =>
+    String(initialQuery || "").trim(),
+  );
+  const [sortFlash, setSortFlash] = useState(false);
   const debounceTimer = useRef(null);
   const lastPushedQueryRef = useRef(initialQuery);
+  const prevSortKeyRef = useRef(sortKey);
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
   const scrollRootRef = useRef(null);
@@ -80,6 +99,16 @@ export default function LeadsListPane({
     hasNextPageRef.current = hasNextPage;
     isFetchingNextPageRef.current = isFetchingNextPage;
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  // Brief opacity cue when sort mode changes so reorder feels intentional.
+  useEffect(() => {
+    if (prevSortKeyRef.current === sortKey) return;
+    prevSortKeyRef.current = sortKey;
+    if (reduceMotion || !sortKey) return;
+    setSortFlash(true);
+    const t = setTimeout(() => setSortFlash(false), 220);
+    return () => clearTimeout(t);
+  }, [sortKey, reduceMotion]);
 
   const applySearch = useCallback(
     (raw) => {
@@ -117,12 +146,15 @@ export default function LeadsListPane({
 
   const handleSearchSubmit = useCallback(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    const next = (searchInput ?? "").trim();
+    setLocalFilterQuery(next);
     applySearch(searchInput);
   }, [applySearch, searchInput]);
 
   const handleClearSearch = useCallback(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     setSearchInput("");
+    setLocalFilterQuery("");
     applySearch("");
   }, [applySearch]);
 
@@ -137,28 +169,48 @@ export default function LeadsListPane({
     if (nextQuery !== lastPushedQueryRef.current) {
       lastPushedQueryRef.current = nextQuery;
       setSearchInput(nextQuery);
+      setLocalFilterQuery(String(nextQuery || "").trim());
     }
   }, [searchParams, effectiveFilterParams]);
 
+  // Debounce → local filter only (no URL / API). Button / Enter → applySearch.
   useEffect(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(() => {
-      applySearch(searchInput);
+      setLocalFilterQuery((searchInput ?? "").trim());
     }, SEARCH_DEBOUNCE_MS);
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
-  }, [searchInput, applySearch]);
+  }, [searchInput]);
 
   const appliedSearchQuery = (
     searchParams.get("query") ||
     readFilterParam(effectiveFilterParams, "query") ||
     ""
   ).trim();
+
+  const displayUsers = useMemo(() => {
+    if (!localFilterQuery) return users;
+    return users.filter((u) => leadMatchesSearchQuery(u, localFilterQuery));
+  }, [users, localFilterQuery]);
+
+  useEffect(() => {
+    onVisibleLeadsChange?.(displayUsers);
+  }, [displayUsers, onVisibleLeadsChange]);
+
   const clientFilteredEmpty =
     Boolean(appliedSearchQuery) && users.length === 0 && totalLoadedLeads > 0;
   /** When false, list area still shows skeleton — no sentinel in DOM yet. */
   const initialListPaint = !(isLoading && !data);
+
+  const showInitialLoading = isLoading && !data;
+  const showNoSearchMatches =
+    !showInitialLoading &&
+    !isError &&
+    displayUsers.length === 0 &&
+    totalLoadedLeads > 0 &&
+    (localFilterQuery || appliedSearchQuery);
 
   useEffect(() => {
     observerRef.current?.disconnect();
@@ -188,7 +240,7 @@ export default function LeadsListPane({
       observerRef.current?.disconnect();
       observerRef.current = null;
     };
-  }, [clientFilteredEmpty, hasNextPage, initialListPaint]);
+  }, [clientFilteredEmpty, hasNextPage, initialListPaint, showNoSearchMatches]);
 
   const loadedCount = totalLoadedLeads;
   const totalFromAPI = totalMatchingLeads;
@@ -221,34 +273,26 @@ export default function LeadsListPane({
     );
   }
 
-  const showInitialLoading = isLoading && !data;
-  const showNoSearchMatches =
-    !showInitialLoading &&
-    !isError &&
-    users.length === 0 &&
-    totalLoadedLeads > 0 &&
-    appliedSearchQuery;
-
   return (
-    <div className="flex flex-col min-h-0 h-full min-h-[320px] lg:border-r border-chat-border chat-list-panel max-w-full lg:max-w-none">
+    <div className="flex flex-col min-h-0 h-full lg:min-h-[320px] lg:border-r border-chat-border chat-list-panel max-w-full lg:max-w-none">
       <div className="px-2 py-1.5 border-b border-chat-border shrink-0 bg-chat-panel-bg">
         <div className="flex items-center gap-1.5 min-w-0">
-          {showBulkCheckbox && users.length > 0 ? (
-            <label className="flex items-center shrink-0 cursor-pointer select-none">
+          {showBulkCheckbox && displayUsers.length > 0 ? (
+            <label className="flex items-center shrink-0 cursor-pointer select-none p-2 -m-2 lg:p-0 lg:m-0">
               <input
                 type="checkbox"
                 checked={
-                  users.length > 0 &&
-                  users.every((u) => isLeadSelected?.(u.user_id))
+                  displayUsers.length > 0 &&
+                  displayUsers.every((u) => isLeadSelected?.(u.user_id))
                 }
                 ref={(el) => {
                   if (!el) return;
-                  const someSelected = users.some((u) =>
+                  const someSelected = displayUsers.some((u) =>
                     isLeadSelected?.(u.user_id)
                   );
                   const allSelected =
-                    users.length > 0 &&
-                    users.every((u) => isLeadSelected?.(u.user_id));
+                    displayUsers.length > 0 &&
+                    displayUsers.every((u) => isLeadSelected?.(u.user_id));
                   el.indeterminate = someSelected && !allSelected;
                 }}
                 onChange={() => onToggleSelectAllVisible?.()}
@@ -284,7 +328,7 @@ export default function LeadsListPane({
               <button
                 type="button"
                 onClick={handleClearSearch}
-                className="absolute start-1 top-1/2 -translate-y-1/2 z-[1] h-7 w-7 text-chat-text-muted rounded hover:bg-gray-100 hover:text-gray-700 transition-colors inline-flex items-center justify-center"
+                className="absolute start-1 top-1/2 -translate-y-1/2 z-[1] h-9 w-9 min-h-9 min-w-9 lg:h-7 lg:w-7 lg:min-h-7 lg:min-w-7 text-chat-text-muted rounded hover:bg-gray-100 hover:text-gray-700 transition-colors inline-flex items-center justify-center"
                 title={translate("common.clear", "Clear")}
                 aria-label={translate("common.clear", "Clear")}
               >
@@ -292,7 +336,7 @@ export default function LeadsListPane({
               </button>
             ) : (
               <Search
-                className="absolute start-2 top-1/2 -translate-y-1/2 w-4 h-4 text-chat-text-faint pointer-events-none z-[1]"
+                className="absolute start-2.5 lg:start-2 top-1/2 -translate-y-1/2 w-4 h-4 text-chat-text-faint pointer-events-none z-[1]"
                 aria-hidden
               />
             )}
@@ -312,13 +356,13 @@ export default function LeadsListPane({
                 "leadsSearchPlaceholder",
                 "Search by name, phone, or company",
               )}
-              className="chat-input-field w-full h-[34px] !rounded-md ps-8 pe-8 text-sm focus:!border-primary focus:!shadow-[0_0_0_1px] focus:!shadow-primary/25"
+              className="chat-input-field w-full h-10 min-h-10 lg:h-[34px] lg:min-h-[34px] !rounded-md ps-9 pe-9 lg:ps-8 lg:pe-8 text-base lg:text-sm focus:!border-primary focus:!shadow-[0_0_0_1px] focus:!shadow-primary/25"
               autoComplete="off"
             />
             <button
               type="button"
               onClick={handleSearchSubmit}
-              className="absolute end-1 top-1/2 -translate-y-1/2 z-[1] h-7 w-7 text-primary rounded hover:bg-primary/10 transition-colors inline-flex items-center justify-center"
+              className="absolute end-1 top-1/2 -translate-y-1/2 z-[1] h-9 w-9 min-h-9 min-w-9 lg:h-7 lg:w-7 lg:min-h-7 lg:min-w-7 text-primary rounded hover:bg-primary/10 transition-colors inline-flex items-center justify-center"
               title={translate("common.search")}
               aria-label={translate("common.search")}
             >
@@ -330,7 +374,9 @@ export default function LeadsListPane({
 
       <div
         ref={scrollRootRef}
-        className="flex-1 min-h-0 overflow-y-auto"
+        className={`flex-1 min-h-0 overflow-y-auto transition-opacity duration-200 ease-out ${
+          sortFlash ? "opacity-70" : "opacity-100"
+        }`}
         role="listbox"
         aria-label={common.leads}
       >
@@ -355,32 +401,40 @@ export default function LeadsListPane({
                 <button
                   type="button"
                   onClick={() => fetchNextPage()}
-                  className="w-full py-1 text-xs text-[#25d366] border border-chat-border rounded hover:bg-chat-hover"
+                  className="w-full py-2.5 min-h-10 lg:py-1 lg:min-h-0 text-sm lg:text-xs text-[#25d366] border border-chat-border rounded hover:bg-chat-hover"
                 >
                   {common.loadMore}
                 </button>
               </div>
             )}
           </>
-        ) : users.length === 0 ? (
+        ) : displayUsers.length === 0 ? (
           <div className="min-h-[200px] flex items-center justify-center p-2">
             <EmptyStateVideo variant="dashboard" autoPlay showControls loop />
           </div>
         ) : (
           <>
-            {users.map((user, index) => (
-              <LeadRow
-                key={user.user_id}
-                user={user}
-                index={index + 1}
-                selected={selectedUserId === user.user_id}
-                onSelect={onSelectLead}
-                onCall={onCallLead}
-                showBulkCheckbox={showBulkCheckbox}
-                bulkSelected={isLeadSelected?.(user.user_id)}
-                onToggleBulkSelection={onToggleLeadSelection}
-              />
-            ))}
+            <LayoutGroup id="dashboard-leads-sort">
+              {displayUsers.map((user, index) => (
+                <motion.div
+                  key={user.user_id}
+                  layout={reduceMotion ? false : "position"}
+                  transition={SORT_LAYOUT_TRANSITION}
+                  className="will-change-transform"
+                >
+                  <LeadRow
+                    user={user}
+                    index={index + 1}
+                    selected={selectedUserId === user.user_id}
+                    onSelect={onSelectLead}
+                    onCall={onCallLead}
+                    showBulkCheckbox={showBulkCheckbox}
+                    bulkSelected={isLeadSelected?.(user.user_id)}
+                    onToggleBulkSelection={onToggleLeadSelection}
+                  />
+                </motion.div>
+              ))}
+            </LayoutGroup>
             <div ref={sentinelRef} className="h-4 w-full shrink-0" aria-hidden />
             {isFetchingNextPage && (
               <div className="py-2 text-center text-xs text-chat-text-faint">
@@ -392,7 +446,7 @@ export default function LeadsListPane({
                 <button
                   type="button"
                   onClick={() => fetchNextPage()}
-                  className="w-full py-1 text-xs text-[#25d366] border border-chat-border rounded hover:bg-chat-hover"
+                  className="w-full py-2.5 min-h-10 lg:py-1 lg:min-h-0 text-sm lg:text-xs text-[#25d366] border border-chat-border rounded hover:bg-chat-hover"
                 >
                   {common.loadMore}
                 </button>

@@ -5,7 +5,7 @@ import { useUsersInfiniteData } from "@/hooks/use-users-infinite-data";
 import { removeUserFromInfiniteUsersCache, userKeys } from "@/utils/query-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useCallback } from "react";
+import { useEffect, useMemo, useCallback, useState } from "react";
 import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
 import { useSearchParams } from "next/navigation";
 import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
@@ -14,16 +14,10 @@ import {
   buildDashboardLeadHref,
   buildDashboardListHref,
 } from "@/utils/dashboard-navigation";
-import {
-  DASHBOARD_SORT_PARAM,
-  LEGACY_SORT_SCORE_PARAM,
-  resolveDashboardSort,
-  sortDashboardLeads,
-} from "@/utils/dashboard-lead-sort";
+import { sortDashboardLeads } from "@/utils/dashboard-lead-sort";
 import { leadMatchesSearchQuery } from "@/utils/lead-list-search";
 import { useLgViewport } from "@/hooks/use-lg-viewport";
 import { useDashboardFilterPersistence } from "@/hooks/useDashboardFilterPersistence";
-import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { ThreeDotsLoader } from "@/components/ui/loading-spinner";
 import { useI18n } from "@/hooks/useI18n";
 import LeadDetailPane from "./LeadDetailPane";
@@ -54,7 +48,7 @@ function DashboardSplitViewComponent() {
   const isLg = useLgViewport();
   const { common } = useI18n();
   const { setAverageScore, setLoading } = useAverageScore();
-  const { effectiveFilterParams } = useDashboardFilterPersistence();
+  const { effectiveFilterParams, leadSort } = useDashboardFilterPersistence();
   const {
     setVisibleLeadsFromList,
     toggleLeadSelection,
@@ -100,25 +94,13 @@ function DashboardSplitViewComponent() {
     !pageCount || hasNextPage ? null : loadedCount;
 
   const searchQueryTrimmed = (readParam(effectiveFilterParams, "query") || "").trim();
-  const leadSort = useMemo(
-    () =>
-      resolveDashboardSort(
-        readParam(effectiveFilterParams, DASHBOARD_SORT_PARAM),
-        LenaCookiesManager.getClientId(),
-        readParam(effectiveFilterParams, LEGACY_SORT_SCORE_PARAM),
-      ),
-    [effectiveFilterParams],
-  );
+  /** Local sort of already-loaded leads — `sort` is excluded from the API filter key. */
   const filteredUsers = useMemo(() => {
     const searchFiltered = searchQueryTrimmed
       ? allUsers.filter((u) => leadMatchesSearchQuery(u, searchQueryTrimmed))
       : allUsers;
     return sortDashboardLeads(searchFiltered, leadSort);
   }, [allUsers, searchQueryTrimmed, leadSort]);
-
-  useEffect(() => {
-    setVisibleLeadsFromList(filteredUsers);
-  }, [filteredUsers, setVisibleLeadsFromList]);
 
   useEffect(() => {
     setLoading(isLoading || isFetching);
@@ -130,7 +112,7 @@ function DashboardSplitViewComponent() {
     }
   }, [allUsers, isLoading, isFetching, setAverageScore, setLoading]);
 
-  const selectedLead = useMemo(() => {
+  const selectedLeadFromList = useMemo(() => {
     if (!selectedUserId) return null;
     return (
       filteredUsers.find((u) => u.user_id === selectedUserId) ||
@@ -139,8 +121,37 @@ function DashboardSplitViewComponent() {
     );
   }, [filteredUsers, allUsers, selectedUserId]);
 
+  // Keep the clicked lead's dashboard fields (incl. ai_reply_enabled) even if the
+  // row is temporarily missing from loaded/filtered pages.
+  const [selectedLeadSnapshot, setSelectedLeadSnapshot] = useState(null);
+
+  const selectedLead = useMemo(() => {
+    if (!selectedUserId) return null;
+    if (selectedLeadFromList) return selectedLeadFromList;
+    if (selectedLeadSnapshot?.user_id === selectedUserId) {
+      return selectedLeadSnapshot;
+    }
+    return null;
+  }, [selectedUserId, selectedLeadFromList, selectedLeadSnapshot]);
+
+  useEffect(() => {
+    if (!selectedUserId) {
+      setSelectedLeadSnapshot(null);
+      return;
+    }
+    if (
+      selectedLeadFromList &&
+      selectedLeadFromList.user_id === selectedUserId
+    ) {
+      setSelectedLeadSnapshot(selectedLeadFromList);
+    }
+  }, [selectedUserId, selectedLeadFromList]);
+
   const onSelectLead = useCallback(
     (user) => {
+      if (user?.user_id) {
+        setSelectedLeadSnapshot(user);
+      }
       if (!isLg) {
         router.push(buildDashboardLeadHref(user.user_id, searchParams));
         return;
@@ -213,6 +224,7 @@ function DashboardSplitViewComponent() {
         {showMobileDetail ? null : (
           <LeadsListPane
             users={filteredUsers}
+            sortKey={leadSort}
             totalLoadedLeads={loadedCount}
             totalMatchingLeads={totalMatchingLeads}
             pageCount={pageCount}
@@ -231,13 +243,14 @@ function DashboardSplitViewComponent() {
             onToggleLeadSelection={toggleLeadSelection}
             onToggleSelectAllVisible={toggleSelectAllVisible}
             hasBulkSelection={hasSelection}
+            onVisibleLeadsChange={setVisibleLeadsFromList}
           />
         )}
         <div
           className={
             showMobileDetail
               ? "flex flex-col min-h-0 flex-1"
-              : "hidden lg:flex flex-col min-h-0 min-h-[320px] flex-1"
+              : "hidden lg:flex flex-col min-h-0 lg:min-h-[320px] flex-1"
           }
         >
           <LeadDetailPane

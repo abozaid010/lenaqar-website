@@ -138,9 +138,9 @@ export default function BulkAssignAuthorDialog({
       }
       submitLoading={isSubmitting}
       headerVariant="unified"
-      dialogClassName="max-w-lg"
+      dialogClassName="max-w-lg w-full sm:w-[90%] rounded-t-2xl sm:rounded-lg"
     >
-      <div className="max-w-md mx-auto w-full" style={{ minHeight: 500 }}>
+      <div className="max-w-md mx-auto w-full min-h-0 max-h-[70dvh] overflow-y-auto">
         <label
           htmlFor="bulk_assign_author"
           className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5"

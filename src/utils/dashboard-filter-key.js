@@ -67,7 +67,11 @@ export function buildDashboardFilterKey(searchParams) {
     if (!trimmed) {
       delete o.query;
     } else {
-      o.query = normalizeSearchQueryForApi(trimmed);
+      // Search is exclusive: while active, send only `query` to the API.
+      // Other filters stay in the URL/UI and resume unchanged when search clears.
+      return JSON.stringify({
+        query: normalizeSearchQueryForApi(trimmed),
+      });
     }
   }
 

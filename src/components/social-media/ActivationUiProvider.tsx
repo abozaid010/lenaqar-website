@@ -50,6 +50,9 @@ type ActivationUiContextValue = {
   isStatusLoading: boolean;
   phase: ActivationPhase;
   pending: number;
+  jobsQueued: number;
+  jobsSentToday: number;
+  jobsFailedToday: number;
   progressBaseline: number | null;
   setBaseline: (value: number | null) => void;
   setStartInFlight: (value: boolean) => void;
@@ -88,10 +91,13 @@ export function ActivationUiProvider({
   }, [phase]);
 
   useEffect(() => {
-    if (status?.running) setStartInFlight(false);
-  }, [status?.running]);
+    // Batch claim finished or send backlog visible — local start latch can drop.
+    if (status?.running || (status?.jobs_queued ?? 0) > 0) {
+      setStartInFlight(false);
+    }
+  }, [status?.running, status?.jobs_queued]);
 
-  // When a batch ends after the start request timed out, still refresh lists.
+  // When a batch / queue settles, refresh lists.
   useEffect(() => {
     const prev = prevPhaseRef.current;
     if (isActivePhase(prev) && !isActivePhase(phase)) {
@@ -109,12 +115,20 @@ export function ActivationUiProvider({
     await queryClient.invalidateQueries({ queryKey: ACTIVATION_STATUS_QUERY_KEY });
   }, [queryClient]);
 
+  const jobsQueued = Math.max(
+    status?.jobs_queued ?? 0,
+    status?.sender_jobs_pending ?? 0,
+  );
+
   const value = useMemo<ActivationUiContextValue>(
     () => ({
       status,
       isStatusLoading,
       phase,
       pending: status?.pending_posts ?? 0,
+      jobsQueued,
+      jobsSentToday: status?.jobs_sent_today ?? 0,
+      jobsFailedToday: status?.jobs_failed_today ?? 0,
       progressBaseline,
       setBaseline,
       setStartInFlight,
@@ -124,6 +138,7 @@ export function ActivationUiProvider({
       status,
       isStatusLoading,
       phase,
+      jobsQueued,
       progressBaseline,
       setBaseline,
       refreshStatus,

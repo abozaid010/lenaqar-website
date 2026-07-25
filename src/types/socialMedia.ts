@@ -103,11 +103,16 @@ export type ActivationStopReason =
 /** Response from the AI catch-up batch activation endpoint. */
 export interface ActivatePostsResponse {
   processed: number;
+  /** Immediate sends (usually 0 — WhatsApp is async via the queue). */
   sent: number;
+  /** Posts claimed and waiting for the WhatsApp sender worker. */
+  queued?: number;
   skipped: number;
   failed: number;
   disabled: boolean;
   client_id: string;
+  skip_reason?: string;
+  post_id?: string;
   /** True when the operator brake ended the run early. */
   stopped?: boolean;
   stop_reason?: ActivationStopReason | string;
@@ -118,7 +123,15 @@ export interface ActivationStatusResponse {
   enabled: boolean;
   stop_requested: boolean;
   pending_posts: number;
+  /** Batch in flight (`active_runs > 0`). */
   running: boolean;
+  /** WhatsApp send jobs waiting (queued + sending). */
+  jobs_queued?: number;
+  jobs_due?: number;
+  jobs_sent_today?: number;
+  jobs_failed_today?: number;
+  /** Same backlog signal as `jobs_queued` for progress. */
+  sender_jobs_pending?: number;
 }
 
 /** Response from POST /api/activation/stop or /resume. */

@@ -38,24 +38,29 @@ export default function LeadRow({
           onSelect(user);
         }
       }}
-      className={`w-full flex flex-row items-center gap-2 text-start px-3 py-2 chat-list-row transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25d366]/30 ${
+      className={`w-full flex flex-row items-center gap-2 text-start px-3 py-2.5 lg:py-2 chat-list-row transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25d366]/30 ${
         selected ? "chat-list-row--selected" : ""
       }`}
     >
       {(showBulkCheckbox || index != null) && (
-        <div className="shrink-0 w-5 flex flex-col items-center gap-0.5">
+        <div className="shrink-0 w-8 lg:w-5 flex flex-col items-center gap-0.5">
           {showBulkCheckbox ? (
-            <input
-              type="checkbox"
-              checked={bulkSelected}
-              onChange={(e) => {
-                e.stopPropagation();
-                onToggleBulkSelection?.(user.user_id);
-              }}
+            <label
+              className="flex items-center justify-center p-2 -m-1 lg:p-0 lg:m-0 cursor-pointer"
               onClick={(e) => e.stopPropagation()}
-              className="h-4 w-4 shrink-0 cursor-pointer accent-primary"
-              aria-label={t.clientsTable?.headers?.name || "Select lead"}
-            />
+            >
+              <input
+                type="checkbox"
+                checked={bulkSelected}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  onToggleBulkSelection?.(user.user_id);
+                }}
+                onClick={(e) => e.stopPropagation()}
+                className="h-4 w-4 shrink-0 cursor-pointer accent-primary"
+                aria-label={t.clientsTable?.headers?.name || "Select lead"}
+              />
+            </label>
           ) : null}
           {index != null ? (
             <span
@@ -75,14 +80,13 @@ export default function LeadRow({
           </span>
           {ownerTypeLabel ? (
             <span
-              className={`shrink-0 inline-flex items-center rounded px-0.5 py-0 font-normal leading-none ${
+              className={`shrink-0 inline-flex items-center rounded px-1 py-0.5 text-[10px] font-normal leading-none ${
                 ownerType === "broker"
                   ? "bg-amber-50 text-amber-700"
                   : ownerType === "developer"
                     ? "bg-purple-50 text-purple-700"
                     : "bg-sky-50 text-sky-700"
               }`}
-              style={{ fontSize: "8px", lineHeight: "10px" }}
             >
               {ownerTypeLabel}
             </span>

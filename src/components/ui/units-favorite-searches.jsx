@@ -202,7 +202,7 @@ export default function UnitsFavoriteSearches({
         <button
           type="button"
           onClick={startSave}
-          className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md border border-primary/20 bg-white px-2 text-[11px] font-medium text-primary hover:bg-primary/5 transition-colors"
+          className="inline-flex h-10 min-h-10 lg:h-8 lg:min-h-8 shrink-0 items-center gap-1 rounded-md border border-primary/20 bg-white px-2.5 lg:px-2 text-xs lg:text-[11px] font-medium text-primary hover:bg-primary/5 transition-colors"
           title={translate(
             "unitsFilter.favoriteSearches.saveCurrent",
             "Save current filters"
@@ -245,14 +245,14 @@ export default function UnitsFavoriteSearches({
                 "unitsFilter.favoriteSearches.namePlaceholder",
                 "Name this search…"
               )}
-              className="h-9 min-w-0 flex-1 rounded-md border border-[#E6E6E6] px-2 text-xs text-[#494A4B] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-11 min-h-11 lg:h-9 lg:min-h-9 min-w-0 flex-1 rounded-md border border-[#E6E6E6] px-2 text-base lg:text-xs text-[#494A4B] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               autoFocus
               maxLength={60}
             />
             <button
               type="button"
               onClick={handleSave}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary text-white hover:bg-primary/90 transition-colors"
+              className="inline-flex h-11 w-11 min-h-11 min-w-11 lg:h-9 lg:w-9 lg:min-h-9 lg:min-w-9 items-center justify-center rounded-md bg-primary text-white hover:bg-primary/90 transition-colors"
               aria-label={translate("unitsFilter.favoriteSearches.save", "Save")}
             >
               <Check size={16} />
@@ -263,7 +263,7 @@ export default function UnitsFavoriteSearches({
                 setIsSaving(false);
                 setSaveName("");
               }}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#E6E6E6] bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+              className="inline-flex h-11 w-11 min-h-11 min-w-11 lg:h-9 lg:w-9 lg:min-h-9 lg:min-w-9 items-center justify-center rounded-md border border-[#E6E6E6] bg-white text-gray-600 hover:bg-gray-50 transition-colors"
               aria-label={translate("buttons.cancel", "Cancel")}
             >
               <X size={16} />
@@ -311,14 +311,14 @@ export default function UnitsFavoriteSearches({
                               setEditingName("");
                             }
                           }}
-                          className="h-8 min-w-0 flex-1 rounded-md border border-[#E6E6E6] px-2 text-xs focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                          className="h-11 min-h-11 lg:h-8 lg:min-h-8 min-w-0 flex-1 rounded-md border border-[#E6E6E6] px-2 text-base lg:text-xs focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                           autoFocus
                           maxLength={60}
                         />
                         <button
                           type="button"
                           onClick={() => handleRename(favorite.id)}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary text-white hover:bg-primary/90"
+                          className="inline-flex h-10 w-10 min-h-10 min-w-10 lg:h-8 lg:w-8 lg:min-h-8 lg:min-w-8 items-center justify-center rounded-md bg-primary text-white hover:bg-primary/90"
                           aria-label={translate(
                             "unitsFilter.favoriteSearches.rename",
                             "Rename"
@@ -332,7 +332,7 @@ export default function UnitsFavoriteSearches({
                             setEditingId(null);
                             setEditingName("");
                           }}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#E6E6E6] text-gray-600 hover:bg-gray-50"
+                          className="inline-flex h-10 w-10 min-h-10 min-w-10 lg:h-8 lg:w-8 lg:min-h-8 lg:min-w-8 items-center justify-center rounded-md border border-[#E6E6E6] text-gray-600 hover:bg-gray-50"
                           aria-label={translate("buttons.cancel", "Cancel")}
                         >
                           <X size={14} />
@@ -350,14 +350,14 @@ export default function UnitsFavoriteSearches({
                           <button
                             type="button"
                             onClick={() => handleDelete(favorite.id)}
-                            className="h-7 rounded-md bg-red-600 px-2 text-[11px] font-medium text-white hover:bg-red-700"
+                            className="h-10 min-h-10 lg:h-7 lg:min-h-7 rounded-md bg-red-600 px-3 lg:px-2 text-xs lg:text-[11px] font-medium text-white hover:bg-red-700"
                           >
                             {translate("buttons.delete", "Delete")}
                           </button>
                           <button
                             type="button"
                             onClick={() => setDeleteConfirmId(null)}
-                            className="h-7 rounded-md border border-[#E6E6E6] px-2 text-[11px] font-medium text-gray-600 hover:bg-gray-50"
+                            className="h-10 min-h-10 lg:h-7 lg:min-h-7 rounded-md border border-[#E6E6E6] px-3 lg:px-2 text-xs lg:text-[11px] font-medium text-gray-600 hover:bg-gray-50"
                           >
                             {translate("buttons.cancel", "Cancel")}
                           </button>
@@ -394,7 +394,7 @@ export default function UnitsFavoriteSearches({
                               setEditingName(favorite.name);
                               setDeleteConfirmId(null);
                             }}
-                            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                            className="inline-flex h-10 w-10 min-h-10 min-w-10 lg:h-7 lg:w-7 lg:min-h-7 lg:min-w-7 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                             aria-label={translate(
                               "unitsFilter.favoriteSearches.rename",
                               "Rename"
@@ -408,7 +408,7 @@ export default function UnitsFavoriteSearches({
                               setDeleteConfirmId(favorite.id);
                               setEditingId(null);
                             }}
-                            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-500 hover:bg-red-50 hover:text-red-600"
+                            className="inline-flex h-10 w-10 min-h-10 min-w-10 lg:h-7 lg:w-7 lg:min-h-7 lg:min-w-7 items-center justify-center rounded-md text-gray-500 hover:bg-red-50 hover:text-red-600"
                             aria-label={translate("buttons.delete", "Delete")}
                           >
                             <Trash2 size={14} />

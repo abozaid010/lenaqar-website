@@ -6,6 +6,10 @@ import { Ban, Check, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
+/**
+ * Map an API boolean to reply mode.
+ * Caller must pass an explicit boolean — never invent on/off from missing data.
+ */
 function toReplyMode(enabled) {
   return enabled === true ? "auto_reply" : "manual_reply";
 }
@@ -14,6 +18,7 @@ export default function ToggleReplyType({
   userId,
   clientID,
   initialEnabled,
+  onEnabledChange,
 }) {
   const [autoReply, setAutoReply] = useState(() => toReplyMode(initialEnabled));
   const [isLoading, setIsLoading] = useState(false);
@@ -21,26 +26,26 @@ export default function ToggleReplyType({
   const isAiOn = autoReply === "auto_reply";
 
   useEffect(() => {
+    // Only sync when parent provides an explicit boolean from the API.
+    if (typeof initialEnabled !== "boolean") return;
     setAutoReply(toReplyMode(initialEnabled));
   }, [userId, initialEnabled]);
 
   const handleToggle = async () => {
     if (isLoading) return;
     const nextValue = isAiOn ? "manual_reply" : "auto_reply";
+    const nextEnabled = nextValue === "auto_reply";
     const previous = autoReply;
     setAutoReply(nextValue);
     setIsLoading(true);
 
     try {
-      const result = await toggleAutoReply(
-        userId,
-        clientID,
-        nextValue === "auto_reply",
-      );
+      const result = await toggleAutoReply(userId, clientID, nextEnabled);
 
       if (result.success) {
+        onEnabledChange?.(nextEnabled);
         toast.success(
-          nextValue === "auto_reply"
+          nextEnabled
             ? translate("leadDetail.aiAutoReply.toastOn")
             : translate("leadDetail.aiAutoReply.toastOff"),
         );

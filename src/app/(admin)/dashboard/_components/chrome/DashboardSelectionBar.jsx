@@ -54,19 +54,19 @@ export default function DashboardSelectionBar() {
   return (
     <>
       <div
-        className="flex items-center gap-1.5 min-w-0 flex-1 rounded-md border border-primary/25 bg-primary/5 px-2 h-9 min-h-9"
+        className="flex flex-wrap lg:flex-nowrap items-center gap-1.5 min-w-0 flex-1 rounded-md border border-primary/25 bg-primary/5 px-2 py-1.5 min-h-10 lg:min-h-9 lg:h-9 lg:py-0"
         role="status"
         aria-live="polite"
       >
         <span className="text-xs font-medium text-primary truncate tabular-nums shrink-0">
           {countLabel}
         </span>
-        <div className="flex items-center gap-1 min-w-0 ms-auto">
+        <div className="flex flex-wrap lg:flex-nowrap items-center gap-1 min-w-0 ms-auto">
           {canAssignAuthor ? (
             <button
               type="button"
               onClick={() => setIsAssignAuthorOpen(true)}
-              className="inline-flex items-center justify-center gap-1 h-7 min-h-7 px-2 rounded-md bg-white border border-gray-300 text-gray-800 text-xs font-medium hover:bg-gray-50 transition-colors shrink-0"
+              className="inline-flex items-center justify-center gap-1 h-9 min-h-9 lg:h-7 lg:min-h-7 px-2.5 lg:px-2 rounded-md bg-white border border-gray-300 text-gray-800 text-xs font-medium hover:bg-gray-50 transition-colors shrink-0"
               title={translate(
                 "dashboardFilter.bulkAssignAuthor.openButton",
                 "Assign author",
@@ -85,7 +85,7 @@ export default function DashboardSelectionBar() {
             <button
               type="button"
               onClick={handleOpenWhatsapp}
-              className="inline-flex items-center justify-center gap-1 h-7 min-h-7 px-2 rounded-md bg-white border border-gray-300 text-gray-800 text-xs font-medium hover:bg-gray-50 transition-colors shrink-0"
+              className="inline-flex items-center justify-center gap-1 h-9 min-h-9 lg:h-7 lg:min-h-7 px-2.5 lg:px-2 rounded-md bg-white border border-gray-300 text-gray-800 text-xs font-medium hover:bg-gray-50 transition-colors shrink-0"
               title={translate("dashboardFilter.bulkWhatsapp.sendButton")}
             >
               <svg
@@ -104,7 +104,7 @@ export default function DashboardSelectionBar() {
           <button
             type="button"
             onClick={clearLeadSelection}
-            className="inline-flex items-center justify-center h-7 w-7 min-h-7 min-w-7 rounded-md text-gray-500 hover:bg-white hover:text-gray-800 transition-colors shrink-0"
+            className="inline-flex items-center justify-center h-9 w-9 min-h-9 min-w-9 lg:h-7 lg:w-7 lg:min-h-7 lg:min-w-7 rounded-md text-gray-500 hover:bg-white hover:text-gray-800 transition-colors shrink-0"
             aria-label={translate(
               "dashboardFilter.bulkWhatsapp.clearSelection",
               "Clear selection",

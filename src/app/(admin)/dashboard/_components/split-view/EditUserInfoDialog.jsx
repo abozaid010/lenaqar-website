@@ -114,8 +114,8 @@ export default function EditUserInfoDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-3">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-3">
+      <div className="bg-white rounded-t-2xl sm:rounded-lg shadow-xl w-full max-w-md max-h-[90dvh] overflow-y-auto">
         <div className="flex items-center justify-between p-3 border-b">
           <h3 className="text-sm font-semibold text-gray-900">
             {translate("editContact.title", "Edit contact")}
@@ -123,7 +123,7 @@ export default function EditUserInfoDialog({
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="inline-flex items-center justify-center min-h-10 min-w-10 text-gray-400 hover:text-gray-600"
             aria-label={common.cancel}
           >
             <X className="w-5 h-5" />
@@ -135,7 +135,7 @@ export default function EditUserInfoDialog({
               {translate("editContact.name", "Name")}
             </label>
             <input
-              className="w-full border border-gray-200 rounded px-2 py-1.5"
+              className="w-full border border-gray-200 rounded px-2 py-2 min-h-10 lg:py-1.5 lg:min-h-0 text-base lg:text-sm"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -152,7 +152,7 @@ export default function EditUserInfoDialog({
               {translate("editContact.company", "Company / Agency")}
             </label>
             <input
-              className="w-full border border-gray-200 rounded px-2 py-1.5"
+              className="w-full border border-gray-200 rounded px-2 py-2 min-h-10 lg:py-1.5 lg:min-h-0 text-base lg:text-sm"
               value={company}
               onChange={(e) => setCompany(e.target.value)}
             />

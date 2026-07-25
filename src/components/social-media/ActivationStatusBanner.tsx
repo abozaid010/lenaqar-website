@@ -62,7 +62,7 @@ export function ActivationStatusBanner() {
         <div className="mt-0.5 text-amber-900/85">
           {translate(
             "socialMedia.activation.pausedBody",
-            "Manual batches and automatic webhook activation are on hold until someone resumes.",
+            "Manual batches and automatic webhook activation are on hold for all clients until someone resumes.",
           )}
         </div>
       </div>

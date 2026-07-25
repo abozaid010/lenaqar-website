@@ -18,8 +18,8 @@ import {
 } from "@/services/socialMedia";
 
 /**
- * Header actions: Start / Pause / Resume based on activation phase.
- * Start is a long-running blocking POST — progress comes from status polling.
+ * Header actions: Run batch / Pause / Resume based on activation phase.
+ * Run batch returns after claiming posts; WhatsApp send progress comes from status polling.
  */
 export function AiHandleCommentsButton() {
   const { translate } = useI18n();
@@ -61,9 +61,10 @@ export function AiHandleCommentsButton() {
         toast(
           translate(
             "socialMedia.activation.stoppedEarly",
-            "Batch stopped early: {processed} processed ({sent} sent, {skipped} skipped, {failed} failed).",
+            "Batch stopped early: {processed} processed ({queued} queued, {sent} sent, {skipped} skipped, {failed} failed).",
           )
             .replace("{processed}", String(result.processed))
+            .replace("{queued}", String(result.queued ?? 0))
             .replace("{sent}", String(result.sent))
             .replace("{skipped}", String(result.skipped))
             .replace("{failed}", String(result.failed)),
@@ -79,9 +80,10 @@ export function AiHandleCommentsButton() {
         toast.success(
           translate(
             "socialMedia.actions.aiHandleSuccess",
-            "Processed {processed}: {sent} sent, {skipped} skipped, {failed} failed.",
+            "Processed {processed}: {queued} queued for WhatsApp, {sent} sent, {skipped} skipped, {failed} failed.",
           )
             .replace("{processed}", String(result.processed))
+            .replace("{queued}", String(result.queued ?? 0))
             .replace("{sent}", String(result.sent))
             .replace("{skipped}", String(result.skipped))
             .replace("{failed}", String(result.failed)),
@@ -90,7 +92,7 @@ export function AiHandleCommentsButton() {
       await refreshLists();
     } catch (error) {
       if (error instanceof RequestTimeoutError) {
-        // Batch still runs server-side — keep observing via status polling.
+        // Rare: batch/claim still running server-side — keep observing via status.
         toast(
           translate(
             "socialMedia.activation.stillRunning",
@@ -98,7 +100,6 @@ export function AiHandleCommentsButton() {
           ),
         );
       } else {
-        setStartInFlight(false);
         toast.error(
           error instanceof Error
             ? error.message
@@ -106,6 +107,7 @@ export function AiHandleCommentsButton() {
         );
       }
     } finally {
+      setStartInFlight(false);
       await refreshStatus();
     }
   };
@@ -141,7 +143,7 @@ export function AiHandleCommentsButton() {
       toast.success(
         translate(
           "socialMedia.activation.resumeSuccess",
-          "Activation resumed. You can start a new batch.",
+          "Activation resumed. Queued WhatsApp jobs will drain; you can start a new batch.",
         ),
       );
       await refreshStatus();
@@ -209,7 +211,7 @@ export function AiHandleCommentsButton() {
           </ActionButton>
         ) : null}
 
-        {/* Start stays visible but locked outside idle — matches §7 state machine. */}
+        {/* Run batch stays visible but locked outside idle. */}
         <ActionButton
           size="md"
           type="primary"
@@ -257,14 +259,20 @@ export function AiHandleCommentsButton() {
         <p className="text-sm text-gray-700">
           {translate(
             "socialMedia.actions.aiHandleConfirm",
-            "AI will review unhandled comments and send WhatsApp messages to leads with a phone number. Continue?",
+            "AI will review unhandled comments and queue WhatsApp messages for leads with a phone number. Continue?",
           )}
         </p>
         <p className="mt-2 text-xs text-gray-500">
           {translate(
             "socialMedia.activation.batchHint",
-            "This run handles up to {limit} posts and may take a few minutes. You can pause anytime.",
+            "This run claims up to {limit} posts. WhatsApp sends continue in the background — you can pause anytime.",
           ).replace("{limit}", String(ACTIVATE_BATCH_LIMIT))}
+        </p>
+        <p className="mt-2 text-xs text-amber-800">
+          {translate(
+            "socialMedia.activation.globalControlHint",
+            "Pause and Resume are global — they affect all clients until someone resumes.",
+          )}
         </p>
         {pending > 0 ? (
           <p className="mt-1.5 text-xs font-medium text-gray-600">
@@ -276,10 +284,17 @@ export function AiHandleCommentsButton() {
   );
 }
 
-/** Compact progress strip — place below the page header while a batch is active. */
+/** Compact progress strip — place below the page header while a batch or send queue is active. */
 export function AiActivationProgress() {
   const { translate } = useI18n();
-  const { phase, pending, progressBaseline } = useActivationUi();
+  const {
+    phase,
+    pending,
+    jobsQueued,
+    jobsSentToday,
+    jobsFailedToday,
+    progressBaseline,
+  } = useActivationUi();
 
   const progress = useMemo(() => {
     if (progressBaseline == null || progressBaseline <= 0) return null;
@@ -289,6 +304,14 @@ export function AiActivationProgress() {
   }, [progressBaseline, pending]);
 
   if (phase !== "running" && phase !== "pausing") return null;
+
+  const queueLine = translate(
+    "socialMedia.activation.queueStats",
+    "{queued} in queue · {sent} sent today · {failed} failed today",
+  )
+    .replace("{queued}", String(jobsQueued))
+    .replace("{sent}", String(jobsSentToday))
+    .replace("{failed}", String(jobsFailedToday));
 
   return (
     <div
@@ -305,17 +328,27 @@ export function AiActivationProgress() {
                   "socialMedia.activation.pausingTitle",
                   "Stopping — finishing current post…",
                 )
-              : translate(
-                  "socialMedia.activation.runningLabel",
-                  "AI working…",
-                )}
+              : jobsQueued > 0
+                ? translate(
+                    "socialMedia.activation.sendingLabel",
+                    "Sending WhatsApp…",
+                  )
+                : translate(
+                    "socialMedia.activation.runningLabel",
+                    "AI working…",
+                  )}
           </span>
         </span>
         <span className="shrink-0 tabular-nums text-gray-500">
-          {translate(
-            "socialMedia.activation.remaining",
-            "{count} left",
-          ).replace("{count}", String(pending))}
+          {jobsQueued > 0
+            ? translate(
+                "socialMedia.activation.queueRemaining",
+                "{count} in queue",
+              ).replace("{count}", String(jobsQueued))
+            : translate(
+                "socialMedia.activation.remaining",
+                "{count} left",
+              ).replace("{count}", String(pending))}
         </span>
       </div>
       <div
@@ -338,16 +371,21 @@ export function AiActivationProgress() {
           }
         />
       </div>
-      {progress != null ? (
-        <div className="mt-1.5 text-[11px] text-gray-400 tabular-nums">
-          {translate(
-            "socialMedia.activation.progressDetail",
-            "~{processed} of {total}",
-          )
-            .replace("{processed}", String(progress.processed))
-            .replace("{total}", String(progress.baseline))}
-        </div>
-      ) : null}
+      <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-[11px] text-gray-400 tabular-nums">
+        {progress != null ? (
+          <span>
+            {translate(
+              "socialMedia.activation.progressDetail",
+              "~{processed} of {total}",
+            )
+              .replace("{processed}", String(progress.processed))
+              .replace("{total}", String(progress.baseline))}
+          </span>
+        ) : (
+          <span />
+        )}
+        <span>{queueLine}</span>
+      </div>
     </div>
   );
 }

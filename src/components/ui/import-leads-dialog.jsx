@@ -125,12 +125,12 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200">
       <div
-        className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+        className="relative w-full max-w-lg max-h-[90dvh] flex flex-col bg-white rounded-t-2xl sm:rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
         dir={isRTL ? "rtl" : "ltr"}
       >
-        <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gray-50/50">
+        <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gray-50/50 shrink-0">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-primary/10 rounded-lg">
               <FileSpreadsheet className="h-5 w-5 text-primary" />
@@ -141,14 +141,14 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
           </div>
           <button
             onClick={resetAndClose}
-            className="icon-btn h-8 w-8 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none"
+            className="icon-btn min-h-10 min-w-10 h-10 w-10 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none inline-flex items-center justify-center"
             aria-label={translate("common.close", "Close")}
           >
             <X size={20} />
           </button>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 overflow-y-auto min-h-0 flex-1">
           <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm text-gray-700 space-y-2">
             <p className="font-medium text-primary">
               {translate("dashboardFilter.importLeads.columnsGuideTitle")}
@@ -358,12 +358,12 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
             </div>
           )}
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-3 pt-2 sticky bottom-0 bg-white pb-[max(0.25rem,env(safe-area-inset-bottom))]">
             <button
               type="button"
               onClick={resetAndClose}
               disabled={isImporting}
-              className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="flex-1 px-4 py-2.5 min-h-11 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               {translate("common.cancel")}
             </button>

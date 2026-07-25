@@ -72,8 +72,8 @@ import {
   DASHBOARD_SORT,
   DASHBOARD_SORT_PARAM,
   LEGACY_SORT_SCORE_PARAM,
-  resolveDashboardSort,
 } from "@/utils/dashboard-lead-sort";
+import { useDashboardFilterPersistence } from "@/hooks/useDashboardFilterPersistence";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
 import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
@@ -120,15 +120,7 @@ export default function DashbordFilter({
   const router = useRouter();
   const searchParams = useSearchParams();
   const clientId = LenaCookiesManager.getClientId();
-  const selectedSort = useMemo(
-    () =>
-      resolveDashboardSort(
-        searchParams.get(DASHBOARD_SORT_PARAM),
-        clientId,
-        searchParams.get(LEGACY_SORT_SCORE_PARAM),
-      ),
-    [searchParams, clientId],
-  );
+  const { leadSort: selectedSort, setLeadSort } = useDashboardFilterPersistence();
 
   const ACTIONS = useMemo(
     () => getDashboardFilterOptions(locale),
@@ -824,25 +816,9 @@ export default function DashbordFilter({
   };
 
   const handleSortChange = (nextSort) => {
-    if (
-      nextSort !== DASHBOARD_SORT.RECENT &&
-      nextSort !== DASHBOARD_SORT.OLDEST &&
-      nextSort !== DASHBOARD_SORT.SCORE
-    ) {
-      return;
-    }
-
-    const params = hasPersistableDashboardFilters(searchParams)
-      ? new URLSearchParams(searchParams.toString())
-      : new URLSearchParams(window.location.search);
-    params.set(DASHBOARD_SORT_PARAM, nextSort);
-    params.delete(LEGACY_SORT_SCORE_PARAM);
     setIsSortDropdownOpen(false);
-    const qs = params.toString();
-    router.push(
-      qs ? `${window.location.pathname}?${qs}` : window.location.pathname,
-      { replace: true },
-    );
+    // Instant local reorder of loaded leads — no API refetch (sort is client-only).
+    setLeadSort(nextSort);
   };
 
   const handleResetFilters = () => {

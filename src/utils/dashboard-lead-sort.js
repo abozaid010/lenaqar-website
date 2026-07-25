@@ -72,15 +72,34 @@ function toTimestampMs(value) {
 }
 
 /**
- * @param {{ updated_at?: unknown, updatedAt?: unknown }} user
+ * @param {{
+ *   updated_at?: unknown,
+ *   updatedAt?: unknown,
+ *   last_user_message_at?: unknown,
+ *   last_followup_at?: unknown,
+ * }} user
  * @returns {number}
  */
-function getUpdatedAtMs(user) {
-  return toTimestampMs(user?.updated_at ?? user?.updatedAt);
+function getSortTimeMs(user) {
+  return Math.max(
+    toTimestampMs(user?.updated_at ?? user?.updatedAt),
+    toTimestampMs(user?.last_user_message_at),
+    toTimestampMs(user?.last_followup_at),
+  );
+}
+
+/**
+ * Stable tie-break so equal timestamps don't flicker between renders.
+ * @param {{ user_id?: unknown }} user
+ * @returns {string}
+ */
+function getUserIdKey(user) {
+  return user?.user_id != null ? String(user.user_id) : "";
 }
 
 /**
  * Sort dashboard leads. Returns a new array; does not mutate input.
+ * Client-only — never sent to the leads API.
  * @param {Array} users
  * @param {"recent" | "oldest" | "score" | null | undefined} sort
  * @returns {Array}
@@ -93,12 +112,19 @@ export function sortDashboardLeads(users, sort) {
     if (sort === DASHBOARD_SORT.SCORE) {
       const aScore = Number(a?.score) || 0;
       const bScore = Number(b?.score) || 0;
-      return bScore - aScore;
+      if (bScore !== aScore) return bScore - aScore;
+      // Same score → freshest activity first.
+      const timeDiff = getSortTimeMs(b) - getSortTimeMs(a);
+      if (timeDiff !== 0) return timeDiff;
+      return getUserIdKey(a).localeCompare(getUserIdKey(b));
     }
 
-    const aTime = getUpdatedAtMs(a);
-    const bTime = getUpdatedAtMs(b);
-    return sort === DASHBOARD_SORT.RECENT ? bTime - aTime : aTime - bTime;
+    const aTime = getSortTimeMs(a);
+    const bTime = getSortTimeMs(b);
+    const timeDiff =
+      sort === DASHBOARD_SORT.RECENT ? bTime - aTime : aTime - bTime;
+    if (timeDiff !== 0) return timeDiff;
+    return getUserIdKey(a).localeCompare(getUserIdKey(b));
   });
 }
 
