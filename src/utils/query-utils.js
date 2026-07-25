@@ -72,6 +72,7 @@ export const unitKeys = {
   pendingApprovalList: (filters) => [...unitKeys.all, "pending-approval", "list", filters],
   details: (id, isPublic) => [...unitKeys.all, "detail", { id, isPublic }],
   detail: (id) => [...unitKeys.details(), id],
+  byCode: (code) => [...unitKeys.all, "byCode", code],
 };
 
 // Query key factory for campaigns

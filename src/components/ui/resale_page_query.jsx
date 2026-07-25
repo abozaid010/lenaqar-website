@@ -3,6 +3,7 @@
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import UnitsGrid from "@/components/ui/units-grid";
 import QueryErrorState from "@/components/ui/query-error-state";
+import UnitCodeSearch from "@/components/ui/unit-code-search";
 import { usePendingApprovalUnitsPageData } from "@/hooks/use-pending-approval-units-page-data";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import AuthorFilterSelect from "@/components/ui/inputs/author-filter-select";
@@ -463,6 +464,8 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
 
   return (
     <div className="flex-1 flex flex-col space-y-3 sm:space-y-4 min-w-0 w-full">
+      <UnitCodeSearch />
+
       {/* Mobile chrome: mount after hydration to keep event handlers reliable */}
       {!isMounted ? (
         <div
