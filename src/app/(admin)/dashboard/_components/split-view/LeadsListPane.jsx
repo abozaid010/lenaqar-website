@@ -274,7 +274,7 @@ export default function LeadsListPane({
   }
 
   return (
-    <div className="flex flex-col min-h-0 h-full lg:min-h-[320px] lg:border-r border-chat-border chat-list-panel max-w-full lg:max-w-none">
+    <div className="flex flex-col min-h-0 min-w-0 h-full w-full lg:min-h-[320px] lg:border-r border-chat-border chat-list-panel max-w-full">
       <div className="px-2 py-1.5 border-b border-chat-border shrink-0 bg-chat-panel-bg">
         <div className="flex items-center gap-1.5 min-w-0">
           {showBulkCheckbox && displayUsers.length > 0 ? (

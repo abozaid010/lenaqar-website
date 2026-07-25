@@ -19,14 +19,19 @@ import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
 
 import { useAddUnit, useUpdateUnit } from "@/hooks/use-unit-mutations";
-import { extractUnitsFromText, getClientid } from "@/utils/api";
+import { extractUnitsFromText, getClientid, fetchProjectById } from "@/utils/api";
 import { UnitTextExtractor } from "@/utils/unit-text-extractor";
 import FillFromTextDialog from "@/components/ui/unit-forms/FillFromTextDialog";
-import { MAX_UNIT_IMAGES, resolveMonthlyRentFromUnit } from "./unit-form-constants";
+import {
+  MAX_UNIT_IMAGES,
+  resolveMonthlyRentFromUnit,
+  ensureUnitLocationPayload,
+} from "./unit-form-constants";
 import { getValidatedClientId } from "@/utils/clientId-validator";
 import { isOwnClientUnit } from "@/lib/units/unit-ownership";
 import { normalizeViewTypeValue } from "@/data/constants";
 import CityManager from "@/utils/city_manager";
+import ProjectsNamesManager from "@/utils/projects_names_manager";
 import {
   PROPERTY_VISIBILITY,
 } from "@/constants/property-visibility";
@@ -615,7 +620,6 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     // Validate required fields for step 1
     if (step === 1) {
       const requiredFields = [
-        "project",
         "buildingType",
         "purpose",
         "landArea", // area
@@ -648,8 +652,34 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         (field) => formData[field] !== 0 && !formData[field]
       );
 
+      // Project or sub-district is required (city/district alone is not enough)
+      const hasLocation = Boolean(
+        String(formData.project || "").trim() ||
+          String(formData.sub_district || "").trim()
+      );
+      if (!hasLocation) {
+        missingFields.push("unit_location");
+      }
+
       if (missingFields.length > 0) {
         setInvalidFields(missingFields);
+        if (missingFields.includes("unit_location")) {
+          toast.error(
+            translate(
+              "basicDetails.locationRequired",
+              "Select a project or sub-district"
+            )
+          );
+        } else {
+          toast.error(
+            translate(
+              "validation.requiredFields",
+              locale === "ar"
+                ? "يرجى إكمال جميع الحقول المطلوبة"
+                : "Please complete all required fields"
+            )
+          );
+        }
         return false;
       }
     }
@@ -657,11 +687,16 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     // Validate required fields for step 2
     if (step === 2) {
       if (formData.purpose === "sell") {
-        const requiredFields = ["deliveryDate", "totalPrice"]; // price
-        // 0 is valid for totalPrice (edge case; downPayment etc. can be 0)
-        const missingFields = requiredFields.filter(
-          (field) => SellFormData[field] !== 0 && !SellFormData[field]
-        );
+        const missingFields = [];
+
+        if (!SellFormData.deliveryDate) {
+          missingFields.push("deliveryDate");
+        }
+
+        // Total price is required for sell units
+        if (!(Number(SellFormData.totalPrice) > 0)) {
+          missingFields.push("totalPrice");
+        }
 
         if (ownerMobileRequired && isOwnerMobileInvalid(formData, ownerMobileRequired)) {
           missingFields.push("owner_mobile");
@@ -688,20 +723,43 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
 
         if (missingFields.length > 0) {
           setInvalidFields(missingFields);
-          if (missingFields.includes("owner_mobile")) {
+          if (missingFields.includes("totalPrice")) {
+            toast.error(
+              translate(
+                "saleDetails.totalPriceRequired",
+                "Enter total price"
+              )
+            );
+          } else if (missingFields.includes("owner_mobile")) {
             toastOwnerMobileValidationError(formData, translate);
+          } else if (
+            !(
+              missingFields.includes("deliveryDate") &&
+              SellFormData.deliveryDate
+            )
+          ) {
+            // Skip generic toast when delivery-date range error was already shown
+            toast.error(
+              translate(
+                "validation.requiredFields",
+                locale === "ar"
+                  ? "يرجى إكمال جميع الحقول المطلوبة"
+                  : "Please complete all required fields"
+              )
+            );
           }
           return false;
         }
 
         // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
-        const zeroFields = ["totalPrice", "downPayment", "paid_amount", "remaining_amount", "installment_years", "over_price"];
+        const zeroFields = ["downPayment", "paid_amount", "remaining_amount", "installment_years", "over_price"];
         const sanitizedData = { ...SellFormData };
         zeroFields.forEach((field) => {
           if (!sanitizedData[field] || sanitizedData[field] === "") {
             sanitizedData[field] = 0;
           }
         });
+        setSellFormData(sanitizedData);
       } else if (formData.purpose === "rent") {
         if (ownerMobileRequired && isOwnerMobileInvalid(formData, ownerMobileRequired)) {
           setInvalidFields(["owner_mobile"]);
@@ -712,7 +770,12 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         const hasValidPrice = Number(rentFormData.monthlyRentPrice) > 0;
 
         if (!hasValidPrice) {
-          toast.error(t.toasts.enterValidPrice);
+          toast.error(
+            translate(
+              "rentalDetails.monthlyRentRequired",
+              "Enter monthly rent"
+            )
+          );
           setInvalidFields(["monthlyRentPrice"]);
           return false;
         }
@@ -764,6 +827,15 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
 
   const handleSubmit = async (e) => {
     e?.preventDefault?.();
+
+    // Re-validate location + price before save (required on add/edit)
+    for (let step = 1; step <= 2; step += 1) {
+      const isValid = await validateStep(step);
+      if (!isValid) {
+        setCurrentStep(step);
+        return;
+      }
+    }
 
     if (ownerMobileRequired && isOwnerMobileInvalid(formData, ownerMobileRequired)) {
       setInvalidFields(["owner_mobile"]);
@@ -847,24 +919,12 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         }
       }
 
-      // Send city/district as lowercase en_name (canonical backend format)
-      const cityManager = CityManager.getInstance();
-      if (payload.city) {
-        payload.city = await cityManager.normalizeCityValueAsync(payload.city);
-      }
-      if (payload.district && payload.city) {
-        payload.district = await cityManager.normalizeDistrictValueAsync(
-          payload.district,
-          payload.city
-        );
-      }
-      if (payload.sub_district && payload.city && payload.district) {
-        payload.sub_district = await cityManager.normalizeSubDistrictValueAsync(
-          payload.sub_district,
-          payload.city,
-          payload.district
-        );
-      }
+      // Always send full location shape; fill missing geo from selected project.
+      payload = await ensureUnitLocationPayload(payload, {
+        cityManager: CityManager.getInstance(),
+        projects: ProjectsNamesManager.getInstance().getProjects(),
+        fetchProjectById,
+      });
 
       if (!isEdit) {
         await addUnitMutation.mutateAsync(payload);

@@ -1522,7 +1522,8 @@ export default {
     locationSearchPlaceholder: "ابحث عن مشروع أو منطقة أو حي أو مدينة…",
     locationSearchEmpty: "لا توجد مواقع أو مشاريع مطابقة",
     locationSearchHint:
-      "اكتب اسم مشروع أو مكان. اختيار مشروع يملأ المدينة والحي والمنطقة.",
+      "اختر مشروعاً أو حياً فرعياً. اختيار مشروع يملأ المدينة والحي والمنطقة.",
+    locationRequired: "اختر مشروعاً أو حياً فرعياً",
     selectView: "اختر الإطلالة",
     placeholders: {
       unitTitle: "أدخل عنوان الوحدة",
@@ -1602,6 +1603,7 @@ export default {
     ownerDetails: "تفاصيل المالك",
     deleveryError:
       "يجب أن يكون تاريخ التسليم بين 30 سنة مضت و 10 سنوات من الآن",
+    totalPriceRequired: "أدخل السعر الإجمالي",
   },
   rentalDetails: {
     availability: "التوفر",
@@ -1613,6 +1615,7 @@ export default {
     monthly: "شهري",
     price: "السعر",
     monthlyRentPrice: "إيجار شهري",
+    monthlyRentRequired: "أدخل الإيجار الشهري",
     securityDeposit: "تأمين",
     cleaningFee: "رسوم التنظيف",
     serviceFee: "رسوم الخدمة",
@@ -1919,13 +1922,9 @@ export default {
     imageUploadFailed: "فشل في تحميل الصورة. يرجى المحاولة مرة أخرى.",
     compoundAdded: "تمت إضافة المشروع بنجاح!",
     compoundAddFailed: "فشل في إضافة المشروع. يرجى المحاولة مرة أخرى.",
-    enterValidPrice: "يرجى إدخال إيجار شهري أكبر من 0",
+    enterValidPrice: "أدخل الإيجار الشهري",
     uploadImage: "يرجى تحميل صورة واحدة على الأقل.",
     selectPurpose: "يرجى اختيار غرض للوحدة (بيع/إيجار)",
-    errorProcessing: "حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى",
-    enterValidPrice: "يرجى إدخال إيجار شهري أكبر من 0",
-    uploadImage: "يرجى تحميل صورة واحدة على الأقل.",
-    selectPurpose: "يرجى تحديد غرض الوحدة (بيع/إيجار)",
     errorProcessing: "حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى",
     unitAdded: "تم إضافة الوحدة بنجاح",
     unitUpdated: "تم تحديث الوحدة بنجاح",

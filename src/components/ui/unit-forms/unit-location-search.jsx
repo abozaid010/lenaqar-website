@@ -43,6 +43,7 @@ export default function UnitLocationSearch({
   onSelectLocation,
   required = false,
   error = false,
+  errorMessage = "",
   disabled = false,
 }) {
   const { locale, translate } = useI18n();
@@ -309,6 +310,7 @@ export default function UnitLocationSearch({
         onChange={handleChange}
         required={required}
         error={error}
+        errorMessage={errorMessage}
         disabled={disabled || fetchingProject}
         isLoading={isLoading}
         placeholder={translate(
@@ -374,7 +376,7 @@ export default function UnitLocationSearch({
       <p className="text-xs text-gray-500">
         {translate(
           "basicDetails.locationSearchHint",
-          "Type a project or place name. Choosing a project fills city, district, and area.",
+          "Select a project or sub-district. Choosing a project fills city, district, and area.",
         )}
       </p>
     </div>

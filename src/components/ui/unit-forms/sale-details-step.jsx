@@ -126,7 +126,14 @@ export default function SaleDetailsStep({
             type="money"
             adornment="EGP"
             required
-            error={invalidFields.includes("totalPrice")}
+            error={
+              invalidFields.includes("totalPrice")
+                ? translate(
+                    "saleDetails.totalPriceRequired",
+                    "Enter total price"
+                  )
+                : false
+            }
           />
           
           <LenaTextField

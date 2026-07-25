@@ -219,8 +219,8 @@ function DashboardSplitViewComponent() {
   }, [router, searchParams]);
 
   return (
-    <div className="flex flex-col min-h-0 flex-1 gap-1">
-      <div className="relative grid grid-cols-1 lg:grid-cols-[minmax(196px,252px)_1fr] min-h-0 flex-1 border border-gray-200 rounded-md overflow-hidden bg-white shadow-sm">
+    <div className="flex flex-col min-h-0 min-w-0 flex-1 gap-1">
+      <div className="relative grid grid-cols-1 lg:grid-cols-[minmax(196px,252px)_minmax(0,1fr)] min-h-0 min-w-0 w-full flex-1 border border-gray-200 rounded-md overflow-hidden bg-white shadow-sm">
         {showMobileDetail ? null : (
           <LeadsListPane
             users={filteredUsers}

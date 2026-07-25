@@ -201,6 +201,12 @@ export default function BasicDetailsStep({
     [locale, updateFormData, applyLocationFromProject]
   );
 
+  const clearLocationInvalid = useCallback(() => {
+    setInvalidFields((prev) =>
+      prev.filter((field) => field !== "unit_location" && field !== "project")
+    );
+  }, [setInvalidFields]);
+
   const handleLocationSearchProject = useCallback(
     async (proj, meta = {}) => {
       if (!proj) return;
@@ -213,21 +219,23 @@ export default function BasicDetailsStep({
           phase: "",
           developer_id: "",
           developer: "",
+          // Seed location immediately so API payload is complete even if
+          // resolve/full-project fetch is slow or incomplete.
+          city: proj.city ?? "",
+          district: proj.district ?? "",
+          sub_district: proj.sub_district ?? "",
         });
         await applyLocationFromProject(proj);
       } else {
         await applyDeveloperFromProject(proj);
       }
-      if (invalidFields.includes("project") && enName) {
-        setInvalidFields((prev) => prev.filter((field) => field !== "project"));
-      }
+      if (enName) clearLocationInvalid();
     },
     [
       updateFormData,
       applyLocationFromProject,
       applyDeveloperFromProject,
-      invalidFields,
-      setInvalidFields,
+      clearLocationInvalid,
     ],
   );
 
@@ -245,8 +253,11 @@ export default function BasicDetailsStep({
         developer_id: "",
         developer: "",
       });
+      if (payload.sub_district || payload.project) {
+        clearLocationInvalid();
+      }
     },
-    [updateFormData],
+    [updateFormData, clearLocationInvalid],
   );
 
   const selectedProjectFromList = useMemo(
@@ -414,7 +425,19 @@ export default function BasicDetailsStep({
             onSelectProject={handleLocationSearchProject}
             onSelectLocation={handleLocationSearchLocation}
             required
-            error={invalidFields.includes("project")}
+            error={
+              invalidFields.includes("unit_location") ||
+              invalidFields.includes("project")
+            }
+            errorMessage={
+              invalidFields.includes("unit_location") ||
+              invalidFields.includes("project")
+                ? translate(
+                    "basicDetails.locationRequired",
+                    "Select a project or sub-district"
+                  )
+                : ""
+            }
           />
 
           <LenaTextField
