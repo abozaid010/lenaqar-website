@@ -65,8 +65,18 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
       typeof searchParams === "string"
         ? safeMergeParams(searchParams, { limit: 100 })
         : { limit: 100, ...(searchParams || {}) };
-    const { action, clientId, tab, userId, cursor, direction, ...restMerged } =
-      merged;
+    // Drop client-only UI params if they ever leak into the filter key.
+    const {
+      action,
+      clientId,
+      tab,
+      userId,
+      cursor,
+      direction,
+      sort: _sort,
+      sort_score: _sortScore,
+      ...restMerged
+    } = merged;
     const params = enforceDashboardAuthorOnParams({
       ...restMerged,
       limit: merged.limit ?? 100,

@@ -110,7 +110,7 @@ export default function ChatWith({ name: initialName, userId, onNameUpdate }) {
           onKeyDown={handleKeyDown}
           onBlur={saveName}
           disabled={isSaving}
-          className="text-sm font-bold text-primary border-b-2 border-primary bg-transparent focus:outline-none w-40 px-1"
+          className="text-base font-bold text-primary border-b-2 border-primary bg-transparent focus:outline-none w-40 min-h-10 px-1"
           placeholder={translate("chatWith.namePlaceholder", "Enter name...")}
         />
         {isSaving ? (
@@ -150,7 +150,7 @@ export default function ChatWith({ name: initialName, userId, onNameUpdate }) {
       <button
         type="button"
         onClick={startEditing}
-        className="shrink-0 opacity-0 group-hover/name:opacity-100 p-0.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-all"
+        className="shrink-0 opacity-100 sm:opacity-0 sm:group-hover/name:opacity-100 min-h-9 min-w-9 inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-all"
         aria-label={translate("common.edit", "Edit")}
       >
         <Pencil className="h-3 w-3" />

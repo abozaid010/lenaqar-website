@@ -925,7 +925,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             </p>
             <button
               type="button"
-              className="shrink-0 flex items-center justify-center min-h-8 min-w-8 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-200"
+              className="shrink-0 flex items-center justify-center min-h-10 min-w-10 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-200"
               aria-label={translate("unitsFilter.clearall", "Clear")}
               onClick={() => {
                 if (filter.removeKeys) {
@@ -942,7 +942,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       </div>
       <button
         type="button"
-        className="shrink-0 flex items-center gap-1.5 min-h-9 px-2.5 text-xs text-gray-600 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+        className="shrink-0 flex items-center gap-1.5 min-h-10 px-2.5 text-xs text-gray-600 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
         onClick={handleRemoveAllFilters}
       >
         <Trash2 size={14} />
@@ -1307,7 +1307,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     <>
       {/* Mobile toolbar: filters trigger + primary actions */}
       <div className={`lg:hidden space-y-2 min-w-0 ${isMobileFiltersOpen ? "invisible pointer-events-none" : ""}`}>
-        <div className="sticky top-0 z-20 -mx-1 px-1 py-1 bg-[#E2DBFF]/95 backdrop-blur-sm supports-[backdrop-filter]:bg-[#E2DBFF]/80">
+        <div className="sticky top-12 z-20 lg:top-0 -mx-1 px-1 py-1 bg-[#E2DBFF]/95 backdrop-blur-sm supports-[backdrop-filter]:bg-[#E2DBFF]/80">
           <div className="flex items-center gap-2 min-w-0">
             <button
               type="button"

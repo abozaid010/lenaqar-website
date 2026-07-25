@@ -41,9 +41,9 @@ export default function AddLeadDialog({ isOpen, onClose, clientId }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200">
       <div 
-        className="relative w-full max-w-md bg-white rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+        className="relative w-full max-w-md max-h-[90dvh] flex flex-col bg-white rounded-t-2xl sm:rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
         dir={isRTL ? "rtl" : "ltr"}
       >
         {/* Header */}
@@ -58,7 +58,7 @@ export default function AddLeadDialog({ isOpen, onClose, clientId }) {
           </div>
           <button
             onClick={onClose}
-            className="icon-btn h-8 w-8 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none"
+            className="icon-btn min-h-10 min-w-10 h-10 w-10 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none inline-flex items-center justify-center"
             aria-label="Close modal"
           >
             <X size={20} />
@@ -66,7 +66,7 @@ export default function AddLeadDialog({ isOpen, onClose, clientId }) {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto min-h-0 flex-1">
           <LenaTextField
             label={translate("clientsTable.headers.name")}
             name="user_name"

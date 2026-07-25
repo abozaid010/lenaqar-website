@@ -28,6 +28,7 @@ import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
 import { ChevronDown, SlidersHorizontal, Trash2, X } from "lucide-react";
 import { useMemo, useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 
 const DEFAULT_VISIBILITY = "pending_approval";
@@ -36,7 +37,7 @@ const FILTER_BUTTON_CLASS =
   "[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-11 [&>div>button]:min-h-11 [&>div>button]:px-2 [&>div>button]:py-[10px]";
 
 const DATE_INPUT_CLASS =
-  "w-full px-2 py-[10px] h-11 min-h-11 bg-[#F6F7FB] rounded-[5px] border border-[#E6E6E6] text-[#494A4B] text-sm focus:outline-none focus:ring-primary focus:border-primary";
+  "w-full px-2 py-[10px] h-11 min-h-11 bg-[#F6F7FB] rounded-[5px] border border-[#E6E6E6] text-[#494A4B] text-base focus:outline-none focus:ring-primary focus:border-primary";
 
 function WhatsAppIcon({ className = "w-4 h-4 text-green-600 shrink-0" }) {
   return (
@@ -382,7 +383,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
             <p className="truncate text-xs">{item.value}</p>
             <button
               type="button"
-              className="shrink-0 flex items-center justify-center min-h-8 min-w-8 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-200"
+              className="shrink-0 flex items-center justify-center min-h-10 min-w-10 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-200"
               aria-label={translate("unitsFilter.clearall", "Clear")}
               onClick={() => handleRemoveFilter(item.key)}
             >
@@ -393,7 +394,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
       </div>
       <button
         type="button"
-        className="shrink-0 flex items-center gap-1.5 min-h-9 px-2.5 text-xs text-gray-600 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+        className="shrink-0 flex items-center gap-1.5 min-h-10 px-2.5 text-xs text-gray-600 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
         onClick={clearAllFilters}
       >
         <Trash2 size={14} />
@@ -411,7 +412,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
         <input
           type="text"
           inputMode="numeric"
-          className="w-full px-2 py-2.5 min-h-11 text-sm border rounded-md bg-white"
+          className="w-full px-2 py-2.5 min-h-11 text-base border rounded-md bg-white"
           value={formatPriceInput(minValue)}
           onChange={(e) => onMinChange(e.target.value.replace(/\D/g, ""))}
           placeholder="0"
@@ -424,7 +425,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
         <input
           type="text"
           inputMode="numeric"
-          className="w-full px-2 py-2.5 min-h-11 text-sm border rounded-md bg-white"
+          className="w-full px-2 py-2.5 min-h-11 text-base border rounded-md bg-white"
           value={formatPriceInput(maxValue)}
           onChange={(e) => onMaxChange(e.target.value.replace(/\D/g, ""))}
           placeholder="5,000,000,000"
@@ -474,7 +475,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
         />
       ) : (
         <div className="lg:hidden space-y-2 min-w-0">
-          <div className="sticky top-0 z-20 -mx-1 px-1 py-1 bg-[#E2DBFF]/95 backdrop-blur-sm supports-[backdrop-filter]:bg-[#E2DBFF]/80">
+          <div className="sticky top-12 z-20 lg:top-0 -mx-1 px-1 py-1 bg-[#E2DBFF]/95 backdrop-blur-sm supports-[backdrop-filter]:bg-[#E2DBFF]/80">
             <div className="flex items-center gap-2 min-w-0">
               <button
                 type="button"
@@ -517,144 +518,146 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
         </div>
       )}
 
-      {/* Mobile sheet backdrop */}
-      {isMounted && isMobileFiltersOpen ? (
-        <button
-          type="button"
-          className="lg:hidden fixed inset-0 z-[55] bg-black/50"
-          aria-label={translate("unitsFilter.closeFilters", "Close filters")}
-          onClick={() => setIsMobileFiltersOpen(false)}
-        />
-      ) : null}
-
-      {isMounted && isMobileFiltersOpen ? (
-      <div
-        className="fixed inset-x-0 bottom-0 z-[60] flex max-h-[92dvh] flex-col rounded-t-2xl bg-white shadow-2xl lg:hidden"
-        role="dialog"
-        aria-modal="true"
-        aria-label={filtersLabel}
-        data-resale-filter-sheet="open"
-      >
-        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-gray-100 px-4 py-3">
-          <div className="min-w-0">
-            <h2 className="text-base font-semibold text-gray-900 truncate">
-              {filtersLabel}
-            </h2>
-            {activeFilterCount > 0 && (
-              <p className="text-xs text-gray-500 truncate">
-                {translate("unitsFilter.filtersCount", "{count} filters").replace(
-                  "{count}",
-                  String(activeFilterCount)
-                )}
-              </p>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={() => setIsMobileFiltersOpen(false)}
-            className="shrink-0 flex items-center justify-center min-h-10 min-w-10 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-            aria-label={translate("unitsFilter.closeFilters", "Close filters")}
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 space-y-3">
-          <div className="w-full min-w-0">
-            <SearchableDropdownSelect
-              name="filter_mobile"
-              options={visibilityOptions}
-              value={draftFilter}
-              onChange={(e) =>
-                setDraftFilter(e?.target?.value || DEFAULT_VISIBILITY)
-              }
-              showAllOption={false}
-              placeholder="Select filter"
-              className={FILTER_BUTTON_CLASS}
-            />
-          </div>
-
-          <div className="w-full min-w-0">
-            <input
-              id="resale-updated-at-mobile"
-              type="date"
-              value={draftUpdatedAtDate}
-              onChange={(e) => setDraftUpdatedAtDate(e.target.value ?? "")}
-              className={DATE_INPUT_CLASS}
-              aria-label={
-                t.resalePage?.filterByUpdatedAt ?? "Filter by updated date"
-              }
-            />
-          </div>
-
-          <div className="w-full min-w-0">
-            <SearchableDropdownSelect
-              options={BUILDING_TYPES}
-              value={draftPropertyType === "all" ? "" : draftPropertyType}
-              onChange={(e) => setDraftPropertyType(e.target.value || "")}
-              name="property_type_mobile"
-              getValue={(type) => type.value}
-              getLabel={(type) =>
-                locale === "ar" ? type.ar_label : type.en_label
-              }
-              searchFields={["en_label", "ar_label", "value"]}
-              showAllOption={true}
-              allOptionLabel={
-                t.unitsFilter?.allPropertyTypes ?? "All Property Types"
-              }
-              placeholder={
-                t.unitsFilter?.allPropertyTypes ?? "All Property Types"
-              }
-              searchPlaceholder={
-                locale === "ar"
-                  ? "ابحث عن نوع العقار..."
-                  : "Search property types..."
-              }
-              className={FILTER_BUTTON_CLASS}
-            />
-          </div>
-
-          <div className="w-full min-w-0">
-            <AuthorFilterSelect
-              name="author_mobile"
-              value={draftAuthor || ""}
-              onChange={(e) => setDraftAuthor(e?.target?.value || "")}
-              className={FILTER_BUTTON_CLASS}
-            />
-          </div>
-
-          <div className="w-full min-w-0 rounded-md border border-[#E6E6E6] bg-[#F6F7FB] p-3">
-            <p className="text-xs font-medium text-gray-700 mb-2">
-              {t.unitsFilter?.price ?? "Price"}
-            </p>
-            {priceFields(
-              draftMinPrice,
-              draftMaxPrice,
-              setDraftMinPrice,
-              setDraftMaxPrice,
-              false
-            )}
-          </div>
-        </div>
-
-          <div className="shrink-0 border-t border-gray-100 bg-white/95 backdrop-blur px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2 z-[1]">
+      {/* Mobile sheet — portaled to body so it is not trapped by sticky/overflow ancestors */}
+      {isMounted &&
+        isMobileFiltersOpen &&
+        createPortal(
+          <div className="lg:hidden">
             <button
               type="button"
-              onClick={handleClearAllAndCloseMobile}
-              className="min-h-11 flex-1 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 truncate px-2"
+              className="fixed inset-0 z-[55] bg-black/50"
+              aria-label={translate("unitsFilter.closeFilters", "Close filters")}
+              onClick={() => setIsMobileFiltersOpen(false)}
+            />
+            <div
+              className="fixed inset-x-0 bottom-0 z-[60] flex max-h-[min(92dvh,100%)] flex-col rounded-t-2xl bg-white shadow-2xl"
+              role="dialog"
+              aria-modal="true"
+              aria-label={filtersLabel}
+              data-resale-filter-sheet="open"
             >
-              {t.unitsFilter?.clearall}
-            </button>
-            <button
-              type="button"
-              onClick={handleApplyMobileFilters}
-              className="min-h-11 flex-[1.4] rounded-md text-sm font-semibold shadow-sm truncate px-2 bg-primary text-white hover:bg-primary/90"
-            >
-              {translate("unitsFilter.applyFilters", "Apply Filters")}
-            </button>
-          </div>
-        </div>
-      ) : null}
+              <div className="flex shrink-0 items-center justify-between gap-3 border-b border-gray-100 px-4 py-3">
+                <div className="min-w-0">
+                  <h2 className="text-base font-semibold text-gray-900 truncate">
+                    {filtersLabel}
+                  </h2>
+                  {activeFilterCount > 0 && (
+                    <p className="text-xs text-gray-500 truncate">
+                      {translate("unitsFilter.filtersCount", "{count} filters").replace(
+                        "{count}",
+                        String(activeFilterCount)
+                      )}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileFiltersOpen(false)}
+                  className="shrink-0 flex items-center justify-center min-h-11 min-w-11 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                  aria-label={translate("unitsFilter.closeFilters", "Close filters")}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 space-y-3">
+                <div className="w-full min-w-0">
+                  <SearchableDropdownSelect
+                    name="filter_mobile"
+                    options={visibilityOptions}
+                    value={draftFilter}
+                    onChange={(e) =>
+                      setDraftFilter(e?.target?.value || DEFAULT_VISIBILITY)
+                    }
+                    showAllOption={false}
+                    placeholder="Select filter"
+                    className={FILTER_BUTTON_CLASS}
+                  />
+                </div>
+
+                <div className="w-full min-w-0">
+                  <input
+                    id="resale-updated-at-mobile"
+                    type="date"
+                    value={draftUpdatedAtDate}
+                    onChange={(e) => setDraftUpdatedAtDate(e.target.value ?? "")}
+                    className={DATE_INPUT_CLASS}
+                    aria-label={
+                      t.resalePage?.filterByUpdatedAt ?? "Filter by updated date"
+                    }
+                  />
+                </div>
+
+                <div className="w-full min-w-0">
+                  <SearchableDropdownSelect
+                    options={BUILDING_TYPES}
+                    value={draftPropertyType === "all" ? "" : draftPropertyType}
+                    onChange={(e) => setDraftPropertyType(e.target.value || "")}
+                    name="property_type_mobile"
+                    getValue={(type) => type.value}
+                    getLabel={(type) =>
+                      locale === "ar" ? type.ar_label : type.en_label
+                    }
+                    searchFields={["en_label", "ar_label", "value"]}
+                    showAllOption={true}
+                    allOptionLabel={
+                      t.unitsFilter?.allPropertyTypes ?? "All Property Types"
+                    }
+                    placeholder={
+                      t.unitsFilter?.allPropertyTypes ?? "All Property Types"
+                    }
+                    searchPlaceholder={
+                      locale === "ar"
+                        ? "ابحث عن نوع العقار..."
+                        : "Search property types..."
+                    }
+                    className={FILTER_BUTTON_CLASS}
+                  />
+                </div>
+
+                <div className="w-full min-w-0">
+                  <AuthorFilterSelect
+                    name="author_mobile"
+                    value={draftAuthor || ""}
+                    onChange={(e) => setDraftAuthor(e?.target?.value || "")}
+                    className={FILTER_BUTTON_CLASS}
+                  />
+                </div>
+
+                <div className="w-full min-w-0 rounded-md border border-[#E6E6E6] bg-[#F6F7FB] p-3">
+                  <p className="text-xs font-medium text-gray-700 mb-2">
+                    {t.unitsFilter?.price ?? "Price"}
+                  </p>
+                  {priceFields(
+                    draftMinPrice,
+                    draftMaxPrice,
+                    setDraftMinPrice,
+                    setDraftMaxPrice,
+                    false
+                  )}
+                </div>
+              </div>
+
+              <div className="shrink-0 border-t border-gray-100 bg-white/95 backdrop-blur px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2 z-[1]">
+                <button
+                  type="button"
+                  onClick={handleClearAllAndCloseMobile}
+                  className="min-h-11 flex-1 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 truncate px-2"
+                >
+                  {t.unitsFilter?.clearall}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleApplyMobileFilters}
+                  className="min-h-11 flex-[1.4] rounded-md text-sm font-semibold shadow-sm truncate px-2 bg-primary text-white hover:bg-primary/90"
+                >
+                  {translate("unitsFilter.applyFilters", "Apply Filters")}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
 
       {/* Desktop filter bar — unchanged layout, lg+ only */}
       <div className="hidden lg:block p-4 space-y-4 bg-white rounded-lg shadow-md min-w-0">

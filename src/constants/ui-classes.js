@@ -8,7 +8,7 @@ export const DASHBOARD_TRIGGER =
   `w-full inline-flex items-center justify-between gap-2 px-3 py-2 ${DASHBOARD_CONTROL_BASE} text-sm cursor-pointer`;
 
 export const DASHBOARD_ICON_BUTTON =
-  `inline-flex items-center justify-center !h-8 !w-8 !min-h-8 !min-w-8 !p-0 leading-none ${DASHBOARD_CONTROL_BASE} border-gray-300 shrink-0`;
+  `inline-flex items-center justify-center !h-10 !w-10 !min-h-10 !min-w-10 !p-0 leading-none ${DASHBOARD_CONTROL_BASE} border-gray-300 shrink-0`;
 
 // ============================================================
 // Action buttons (Edit / Delete / generic) — shared design tokens

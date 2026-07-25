@@ -21,8 +21,17 @@ import {
   withDashboardFilterDefaults,
   writeDashboardFilters,
 } from "@/lib/dashboard-filters-storage";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import {
+  DASHBOARD_SORT,
+  DASHBOARD_SORT_PARAM,
+  LEGACY_SORT_SCORE_PARAM,
+  resolveDashboardSort,
+} from "@/utils/dashboard-lead-sort";
 
 const DashboardFilterPersistenceContext = createContext(null);
+
+const VALID_LEAD_SORTS = new Set(Object.values(DASHBOARD_SORT));
 
 /**
  * @param {Record<string, string>} before
@@ -166,7 +175,11 @@ function useDashboardFilterPersistenceState(serverAppliedFilters) {
     }
   }, [searchParams, isReady, pathname, router]);
 
+  /** Client-only sort: optimistic value so the list reorders before the URL catches up. */
+  const [optimisticLeadSort, setOptimisticLeadSort] = useState(null);
+
   const resetPersistedFilters = useCallback(() => {
+    setOptimisticLeadSort(null);
     const storageKey = getCurrentUserDashboardFiltersStorageKey();
     clearDashboardFilters(storageKey);
 
@@ -204,11 +217,56 @@ function useDashboardFilterPersistenceState(serverAppliedFilters) {
     });
   }, [searchParams, restoredFilters]);
 
+  /**
+   * Sort is client-only (excluded from the leads API key). Apply optimistically
+   * so the loaded list reorders instantly — do not wait on the URL round-trip.
+   */
+  const resolvedLeadSort = useMemo(
+    () =>
+      resolveDashboardSort(
+        effectiveFilterParams[DASHBOARD_SORT_PARAM],
+        LenaCookiesManager.getClientId(),
+        effectiveFilterParams[LEGACY_SORT_SCORE_PARAM],
+      ),
+    [effectiveFilterParams],
+  );
+  const leadSort = optimisticLeadSort ?? resolvedLeadSort;
+
+  useEffect(() => {
+    if (
+      optimisticLeadSort != null &&
+      optimisticLeadSort === resolvedLeadSort
+    ) {
+      setOptimisticLeadSort(null);
+    }
+  }, [optimisticLeadSort, resolvedLeadSort]);
+
+  const setLeadSort = useCallback(
+    (nextSort) => {
+      if (!VALID_LEAD_SORTS.has(nextSort)) return;
+
+      setOptimisticLeadSort(nextSort);
+
+      const params = hasPersistableDashboardFilters(searchParams)
+        ? new URLSearchParams(searchParams.toString())
+        : new URLSearchParams(
+            typeof window !== "undefined" ? window.location.search : "",
+          );
+      params.set(DASHBOARD_SORT_PARAM, nextSort);
+      params.delete(LEGACY_SORT_SCORE_PARAM);
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams],
+  );
+
   return {
     isReady,
     bootAppliedFilters,
     restoredFilters,
     effectiveFilterParams,
+    leadSort,
+    setLeadSort,
     resetPersistedFilters,
   };
 }

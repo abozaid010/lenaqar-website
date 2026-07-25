@@ -14,16 +14,10 @@ import {
   buildDashboardLeadHref,
   buildDashboardListHref,
 } from "@/utils/dashboard-navigation";
-import {
-  DASHBOARD_SORT_PARAM,
-  LEGACY_SORT_SCORE_PARAM,
-  resolveDashboardSort,
-  sortDashboardLeads,
-} from "@/utils/dashboard-lead-sort";
+import { sortDashboardLeads } from "@/utils/dashboard-lead-sort";
 import { leadMatchesSearchQuery } from "@/utils/lead-list-search";
 import { useLgViewport } from "@/hooks/use-lg-viewport";
 import { useDashboardFilterPersistence } from "@/hooks/useDashboardFilterPersistence";
-import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { ThreeDotsLoader } from "@/components/ui/loading-spinner";
 import { useI18n } from "@/hooks/useI18n";
 import LeadDetailPane from "./LeadDetailPane";
@@ -54,7 +48,7 @@ function DashboardSplitViewComponent() {
   const isLg = useLgViewport();
   const { common } = useI18n();
   const { setAverageScore, setLoading } = useAverageScore();
-  const { effectiveFilterParams } = useDashboardFilterPersistence();
+  const { effectiveFilterParams, leadSort } = useDashboardFilterPersistence();
   const {
     setVisibleLeadsFromList,
     toggleLeadSelection,
@@ -100,15 +94,7 @@ function DashboardSplitViewComponent() {
     !pageCount || hasNextPage ? null : loadedCount;
 
   const searchQueryTrimmed = (readParam(effectiveFilterParams, "query") || "").trim();
-  const leadSort = useMemo(
-    () =>
-      resolveDashboardSort(
-        readParam(effectiveFilterParams, DASHBOARD_SORT_PARAM),
-        LenaCookiesManager.getClientId(),
-        readParam(effectiveFilterParams, LEGACY_SORT_SCORE_PARAM),
-      ),
-    [effectiveFilterParams],
-  );
+  /** Local sort of already-loaded leads — `sort` is excluded from the API filter key. */
   const filteredUsers = useMemo(() => {
     const searchFiltered = searchQueryTrimmed
       ? allUsers.filter((u) => leadMatchesSearchQuery(u, searchQueryTrimmed))
@@ -213,6 +199,7 @@ function DashboardSplitViewComponent() {
         {showMobileDetail ? null : (
           <LeadsListPane
             users={filteredUsers}
+            sortKey={leadSort}
             totalLoadedLeads={loadedCount}
             totalMatchingLeads={totalMatchingLeads}
             pageCount={pageCount}
@@ -237,7 +224,7 @@ function DashboardSplitViewComponent() {
           className={
             showMobileDetail
               ? "flex flex-col min-h-0 flex-1"
-              : "hidden lg:flex flex-col min-h-0 min-h-[320px] flex-1"
+              : "hidden lg:flex flex-col min-h-0 lg:min-h-[320px] flex-1"
           }
         >
           <LeadDetailPane

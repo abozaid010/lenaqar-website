@@ -17,7 +17,7 @@ import { appendUnitsSourcePendingQuery } from "@/utils/units-navigation-source";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 
 const INPUT_CLASS =
-  "w-full ps-3 pe-9 py-[10px] h-11 min-h-11 bg-[#F6F7FB] rounded-[5px] border border-[#E6E6E6] text-[#494A4B] text-sm focus:outline-none focus:ring-primary focus:border-primary";
+  "w-full ps-3 pe-9 py-[10px] h-11 min-h-11 bg-[#F6F7FB] rounded-[5px] border border-[#E6E6E6] text-[#494A4B] text-base focus:outline-none focus:ring-primary focus:border-primary";
 
 const URL_TRAILING_SEGMENTS = new Set(["edit", "whatsapp"]);
 

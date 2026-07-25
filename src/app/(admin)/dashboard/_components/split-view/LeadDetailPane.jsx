@@ -977,7 +977,7 @@ export default function LeadDetailPane({
     <>
       <div className="flex flex-col min-h-0 flex-1 bg-white lg:border-l border-gray-100">
         <div
-          className={`shrink-0 flex items-center gap-2 px-3 py-1.5 border-b border-gray-200 bg-white ${
+          className={`shrink-0 flex flex-wrap items-center gap-x-2 gap-y-1 px-3 py-1.5 border-b border-gray-200 bg-white ${
             !showBackButton ? "lg:pe-28" : ""
           }`}
         >
@@ -985,13 +985,13 @@ export default function LeadDetailPane({
             <button
               type="button"
               onClick={onBack}
-              className="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+              className="shrink-0 inline-flex items-center justify-center min-h-10 min-w-10 h-10 w-10 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
               aria-label={translate("common.back", common.back || "Back")}
             >
               <ChevronLeft className="w-5 h-5 rtl:rotate-180" aria-hidden />
             </button>
           ) : null}
-          <div className="flex-1 min-w-0 flex items-center gap-2">
+          <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-2 gap-y-1">
             <ChatWith
               key={userId}
               name={displayName}
@@ -1001,7 +1001,7 @@ export default function LeadDetailPane({
             {headerPhoneDisplay ? (
               <span
                 dir="ltr"
-                className="shrink-0 text-sm leading-snug text-gray-700 font-mono tabular-nums truncate max-w-[40%]"
+                className="shrink-0 text-sm leading-snug text-gray-700 font-mono tabular-nums truncate max-w-[40%] sm:max-w-none"
               >
                 {headerPhoneDisplay}
               </span>
@@ -1023,7 +1023,7 @@ export default function LeadDetailPane({
           <button
             type="button"
             onClick={() => setEditContactOpen(true)}
-            className="shrink-0 inline-flex items-center gap-1 text-xs text-primary hover:bg-primary/5 px-2 py-1 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+            className="shrink-0 inline-flex items-center justify-center gap-1 text-xs text-primary hover:bg-primary/5 min-h-10 min-w-10 px-2.5 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
             title={translate("editContact.title", "Edit contact")}
             aria-label={translate("editContact.title", "Edit contact")}
           >
@@ -1051,7 +1051,7 @@ export default function LeadDetailPane({
               <button
                 type="button"
                 onClick={() => setBulkActionOpen(true)}
-                className="shrink-0 inline-flex items-center gap-1 text-xs text-primary hover:bg-primary/5 px-2 py-1 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                className="shrink-0 inline-flex items-center gap-1 text-xs text-primary hover:bg-primary/5 min-h-10 px-2.5 py-2 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
                 title={translate("dashboardFilter.bulkAction.openButton").replace(
                   "{count}",
                   String(selectedLeads.length)
@@ -1070,7 +1070,7 @@ export default function LeadDetailPane({
             <span
               dir="ltr"
               title={lastActivityLabel}
-              className="shrink-0 text-[11px] text-gray-400 tabular-nums"
+              className="hidden sm:inline shrink-0 text-[11px] text-gray-400 tabular-nums"
             >
               {formatDateTimeAmPmShort(leadSummary.updated_at, locale)}
             </span>
@@ -1160,13 +1160,13 @@ export default function LeadDetailPane({
                       value={newTagInput}
                       onChange={(e) => setNewTagInput(e.target.value)}
                       placeholder={translate("clientsTable.tags.addPlaceholder")}
-                      className="flex-1 min-w-[140px] px-2.5 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="flex-1 min-w-[140px] px-2.5 py-2 min-h-10 text-base border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
                       disabled={isAddingTag}
                     />
                     <button
                       type="submit"
                       disabled={!newTagInput.trim() || isAddingTag}
-                      className="px-3 py-1.5 text-xs bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-3 py-2 min-h-10 text-sm bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isAddingTag
                         ? "..."

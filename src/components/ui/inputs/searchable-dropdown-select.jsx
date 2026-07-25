@@ -212,11 +212,6 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const [documentDir, setDocumentDir] = useState(() => {
-    if (typeof document === "undefined") return "ltr";
-    const htmlDir = document.documentElement.getAttribute("dir");
-    return htmlDir === "ltr" || htmlDir === "rtl" ? htmlDir : "ltr";
-  });
   const dropdownRef = useRef(null);
   const searchInputRef = useRef(null);
   const listRef = useRef(null);
@@ -227,13 +222,6 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
       onOpenChange(nextOpen);
     }
   };
-
-  useEffect(() => {
-    const htmlDir = document.documentElement.getAttribute("dir");
-    if (htmlDir === "ltr" || htmlDir === "rtl") {
-      setDocumentDir(htmlDir);
-    }
-  }, [locale]);
 
   useImperativeHandle(ref, () => ({
     open: () => setOpenState(true),
@@ -462,7 +450,6 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
     searchPlaceholder ||
     (locale === "ar" ? "ابحث..." : "Search...");
 
-  const layoutDir = documentDir;
   const hasError = !!error || !!errorMessage;
   const displayErrorMessage = typeof error === "string" ? error : errorMessage;
   const isAllSentinel =
@@ -510,9 +497,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
         {usesFloatingLabel && (
           <label
             htmlFor={name}
-            className={`absolute transition-all duration-200 pointer-events-none z-[1] ${
-              layoutDir === "rtl" ? "right-3" : "left-3"
-            } ${
+            className={`absolute transition-all duration-200 pointer-events-none z-[1] start-3 ${
               shouldFloatLabel
                 ? `-top-2.5 text-xs ${getLabelColor()} bg-white px-1.5`
                 : "top-1/2 text-sm text-gray-400 transform -translate-y-1/2"
@@ -615,7 +600,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
               <div className="relative">
                 <Search
                   size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400"
                 />
                 <input
                   ref={searchInputRef}
@@ -624,7 +609,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
                   onChange={handleSearchChange}
                   onKeyDown={handleKeyDown}
                   placeholder={defaultSearchPlaceholder}
-                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900 placeholder:text-gray-400 bg-white"
+                  className="w-full ps-9 pe-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base text-gray-900 placeholder:text-gray-400 bg-white"
                 />
               </div>
             </div>
@@ -649,7 +634,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
                     <button
                       type="button"
                       onClick={() => handleSelect(allOptionValue)}
-                      className={`w-full px-4 py-2 text-left hover:bg-gray-100 transition-colors ${
+                      className={`w-full px-4 py-2 text-start hover:bg-gray-100 transition-colors ${
                         !value || value === allOptionValue
                           ? "bg-blue-50 text-blue-600"
                           : "text-gray-900"
@@ -677,7 +662,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
                         <div
                           key={optionKey}
                           onClick={() => handleSelect(optionValue)}
-                          className={`w-full px-4 py-2.5 text-left hover:bg-gray-100 transition-colors cursor-pointer ${
+                          className={`w-full px-4 py-2.5 text-start hover:bg-gray-100 transition-colors cursor-pointer ${
                             isSelected
                               ? "bg-blue-50 text-blue-600 font-medium"
                               : "text-gray-900"
@@ -698,7 +683,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
                         key={optionKey}
                         type="button"
                         onClick={() => handleSelect(optionValue)}
-                        className={`w-full px-4 py-2 text-left hover:bg-gray-100 transition-colors ${
+                        className={`w-full px-4 py-2 text-start hover:bg-gray-100 transition-colors ${
                           isSelected
                             ? "bg-blue-50 text-blue-600 font-medium"
                             : "text-gray-900"
@@ -717,7 +702,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
                     <button
                       type="button"
                       onClick={() => handleSelect(createValue)}
-                      className={`w-full px-4 py-2 text-left hover:bg-gray-100 transition-colors text-primary font-medium ${
+                      className={`w-full px-4 py-2 text-start hover:bg-gray-100 transition-colors text-primary font-medium ${
                         highlightedIndex === sortedOptions.length
                           ? "bg-gray-100"
                           : ""

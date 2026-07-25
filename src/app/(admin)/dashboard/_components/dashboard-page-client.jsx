@@ -31,11 +31,16 @@ function DashboardPageContent() {
 
   useEffect(() => {
     if (!isFiltersOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const onKeyDown = (event) => {
       if (event.key === "Escape") setIsFiltersOpen(false);
     };
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
   }, [isFiltersOpen]);
 
   if (!isReady || bootAppliedFilters == null) {
@@ -49,12 +54,12 @@ function DashboardPageContent() {
 
   return (
     <div className="relative flex-1 min-h-0 flex flex-col gap-1">
-      <div className="no-print flex items-center gap-2 shrink-0 min-h-9">
+      <div className="no-print flex flex-wrap items-center gap-2 shrink-0 min-h-10">
         <button
           type="button"
           onClick={() => setIsAddLeadOpen(true)}
           aria-label={translate("dashboardFilter.ADD")}
-          className="inline-flex items-center justify-center gap-1.5 h-9 min-h-9 px-2.5 sm:px-3 rounded-md bg-primary text-sm font-medium text-white shadow-sm hover:bg-primary/90 active:scale-[0.98] transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          className="inline-flex items-center justify-center gap-1.5 h-10 min-h-10 min-w-10 px-2.5 sm:px-3 rounded-md bg-primary text-sm font-medium text-white shadow-sm hover:bg-primary/90 active:scale-[0.98] transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         >
           <UserPlus className="w-4 h-4 shrink-0" aria-hidden />
           <span className="hidden sm:inline">
@@ -68,7 +73,7 @@ function DashboardPageContent() {
           type="button"
           onClick={() => setIsFiltersOpen(true)}
           aria-expanded={isFiltersOpen}
-          className="ms-auto inline-flex items-center justify-center gap-1.5 h-9 min-h-9 px-2.5 sm:px-3 rounded-md bg-white border border-gray-300 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 active:scale-[0.98] transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          className="ms-auto inline-flex items-center justify-center gap-1.5 h-10 min-h-10 min-w-10 px-2.5 sm:px-3 rounded-md bg-white border border-gray-300 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 active:scale-[0.98] transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           aria-label={filterPanelOpenLabel}
         >
           <SlidersHorizontal className="w-4 h-4 shrink-0" aria-hidden />
@@ -80,7 +85,7 @@ function DashboardPageContent() {
         <button
           type="button"
           aria-label={filterPanelCloseLabel}
-          className="no-print absolute inset-0 z-40 bg-black/20"
+          className="no-print fixed inset-0 z-40 bg-black/20"
           onClick={() => setIsFiltersOpen(false)}
         />
       ) : null}
@@ -100,7 +105,7 @@ function DashboardPageContent() {
           <button
             type="button"
             onClick={() => setIsFiltersOpen(false)}
-            className="inline-flex items-center justify-center rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+            className="inline-flex items-center justify-center min-h-10 min-w-10 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
             aria-label={filterPanelCloseLabel}
           >
             <X className="w-4 h-4" aria-hidden />
