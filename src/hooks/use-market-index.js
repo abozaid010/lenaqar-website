@@ -8,6 +8,12 @@ import {
   fetchLocationLeaves,
   fetchLocationRoots,
   fetchLocationNode,
+  fetchPendingLocations,
+  createLocation,
+  approveLocation,
+  rejectLocation,
+  updateLocationAliases,
+  deleteLocation,
   fetchActiveCard,
   postEstimate,
   saveCard,
@@ -26,6 +32,7 @@ export const marketIndexKeys = {
   activeCard: (id) => ["market-index", "active-card", id],
   locationRoots: () => ["market-index", "locations", "roots"],
   locationLeaves: () => ["market-index", "locations", "leaves"],
+  locationPending: () => ["market-index", "locations", "pending"],
   location: (id) => ["market-index", "location", id],
   children: (id) => ["market-index", "locations", id],
   history: (id) => ["market-index", "history", id],
@@ -57,11 +64,12 @@ export function useMarketCard(locationId, initialData) {
   });
 }
 
-export function useLocationRoots(enabled = true) {
+export function useLocationRoots(enabled = true, initialData) {
   return useQuery({
     queryKey: marketIndexKeys.locationRoots(),
     queryFn: fetchLocationRoots,
     enabled,
+    initialData,
     staleTime: LOCATION_STALE_MS,
     refetchOnWindowFocus: false,
   });
@@ -77,6 +85,17 @@ export function useLocationLeaves(enabled = true) {
   });
 }
 
+export function usePendingLocations(enabled = true, initialData) {
+  return useQuery({
+    queryKey: marketIndexKeys.locationPending(),
+    queryFn: () => fetchPendingLocations({ limit: 500 }),
+    enabled,
+    initialData,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+  });
+}
+
 export function useLocationNode(locationId, enabled = true) {
   return useQuery({
     queryKey: marketIndexKeys.location(locationId),
@@ -87,13 +106,91 @@ export function useLocationNode(locationId, enabled = true) {
   });
 }
 
-export function useLocationChildren(locationId) {
+export function useLocationChildren(locationId, enabled = true) {
   return useQuery({
     queryKey: marketIndexKeys.children(locationId),
     queryFn: () => fetchLocationChildren(locationId),
-    enabled: !!locationId,
+    enabled: !!locationId && enabled,
     staleTime: LOCATION_STALE_MS,
     refetchOnWindowFocus: false,
+  });
+}
+
+function invalidateLocationTree(queryClient, parentId) {
+  queryClient.invalidateQueries({ queryKey: marketIndexKeys.locationRoots() });
+  queryClient.invalidateQueries({ queryKey: marketIndexKeys.locationPending() });
+  queryClient.invalidateQueries({ queryKey: marketIndexKeys.locationLeaves() });
+  if (parentId) {
+    queryClient.invalidateQueries({
+      queryKey: marketIndexKeys.children(parentId),
+    });
+  }
+  queryClient.invalidateQueries({
+    queryKey: ["market-index", "locations"],
+  });
+  // CRM CityManager catalog (session + server memory) must refresh after edits.
+  void import("@/lib/locations/invalidate-locations-catalog.client").then(
+    (m) => m.invalidateLocationsCatalogClient()
+  );
+}
+
+export function useCreateLocation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body) => createLocation(body),
+    onSuccess: (data) => {
+      invalidateLocationTree(queryClient, data?.parent_id);
+    },
+  });
+}
+
+export function useApproveLocation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (locationId) => approveLocation(locationId),
+    onSuccess: (data) => {
+      invalidateLocationTree(queryClient, data?.parent_id);
+    },
+  });
+}
+
+export function useRejectLocation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (locationId) => rejectLocation(locationId),
+    onSuccess: (data) => {
+      invalidateLocationTree(queryClient, data?.parent_id);
+    },
+  });
+}
+
+export function useUpdateLocationAliases() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ locationId, aliases }) =>
+      updateLocationAliases(locationId, aliases),
+    onSuccess: (data) => {
+      if (data?.id) {
+        queryClient.invalidateQueries({
+          queryKey: marketIndexKeys.location(data.id),
+        });
+      }
+      invalidateLocationTree(queryClient, data?.parent_id);
+    },
+  });
+}
+
+export function useDeleteLocation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ locationId, hardDeleteApproved, parentId }) =>
+      deleteLocation(locationId, { hardDeleteApproved }).then((data) => ({
+        ...data,
+        parentId,
+      })),
+    onSuccess: (data) => {
+      invalidateLocationTree(queryClient, data?.parentId);
+    },
   });
 }
 

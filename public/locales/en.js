@@ -552,6 +552,7 @@ export default {
     socialMedia: "Social media",
     copyWhatsappLink: "Copy WhatsApp link",
     marketIndex: "Market Index",
+    locations: "Locations",
   },
   dashboardSummary: {
     title: "Dashboard",
@@ -3405,6 +3406,90 @@ export default {
       invalidInput: "Please check the unit details and try again.",
       unauthorized: "You are not allowed to evaluate units.",
       estimateFailed: "Could not calculate an estimate. Try again.",
+    },
+  },
+  locations: {
+    title: "Locations",
+    subtitle: "Edit and approve city, district, and area names",
+    unavailable: {
+      title: "Locations unavailable",
+      message:
+        "Location catalog data cannot be loaded for your account. Try again or contact support.",
+    },
+    tabs: {
+      tree: "Tree",
+      pending: "Pending",
+    },
+    levels: {
+      country: "Country",
+      governorate: "Governorate",
+      city: "City",
+      district: "District",
+      sub_district: "Sub-district",
+    },
+    actions: {
+      addCity: "Add city",
+      addChild: "Add {level}",
+      editAliases: "Edit aliases",
+      delete: "Delete location",
+      approve: "Approve",
+      reject: "Reject",
+    },
+    tree: {
+      expand: "Expand",
+      collapse: "Collapse",
+      empty: "No approved cities yet. Add a city to get started.",
+      emptyChildren: "No children under this location.",
+      aliasesCount: "{count} aliases",
+    },
+    pending: {
+      empty: "No pending locations to review.",
+      columns: {
+        name: "Name",
+        level: "Level",
+        parent: "Parent",
+        proposedBy: "Proposed by",
+        actions: "Actions",
+      },
+    },
+    form: {
+      addTitle: "Add {level}",
+      submit: "Create",
+      parentLabel: "Parent",
+      enName: "English name",
+      arName: "Arabic name",
+      slugSource: "Slug override",
+      slugSourcePlaceholder: "optional-slug",
+      aliases: "Aliases",
+      aliasesPlaceholder: "One per line, or comma-separated",
+    },
+    aliases: {
+      title: "Edit aliases",
+      save: "Save aliases",
+      hint: "Replaces the full aliases list for this location.",
+    },
+    delete: {
+      title: "Delete location?",
+      message:
+        "Delete “{name}”? Approved locations are permanently removed. Locations with non-rejected children cannot be deleted.",
+    },
+    validation: {
+      enNameRequired: "English name is required",
+    },
+    toasts: {
+      created: "Location created",
+      aliasesUpdated: "Aliases updated",
+      deleted: "Location deleted",
+      approved: "Location approved",
+      rejected: "Location rejected",
+    },
+    errors: {
+      loadFailed: "Could not load locations",
+      createFailed: "Could not create location",
+      aliasesFailed: "Could not update aliases",
+      deleteFailed: "Could not delete location",
+      approveFailed: "Could not approve location",
+      rejectFailed: "Could not reject location",
     },
   },
 };

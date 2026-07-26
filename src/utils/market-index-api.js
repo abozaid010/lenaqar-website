@@ -64,6 +64,70 @@ export async function fetchLocationNode(locationId) {
   return crm(`/locations/${encodeURIComponent(locationId)}`);
 }
 
+/** Pending approval queue — admin/owner only. */
+export async function fetchPendingLocations({ limit } = {}) {
+  const params = new URLSearchParams();
+  if (limit != null) params.set("limit", String(limit));
+  const qs = params.toString();
+  return crm(`/locations/pending${qs ? `?${qs}` : ""}`);
+}
+
+/**
+ * Create city / district / sub_district.
+ * @param {{
+ *   level: "city"|"district"|"sub_district",
+ *   en_name: string,
+ *   ar_name?: string,
+ *   aliases?: string[],
+ *   parent_id?: string|null,
+ *   slug_source?: string|null,
+ *   force_pending?: boolean,
+ * }} body
+ */
+export async function createLocation(body) {
+  return crm("/locations", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+export async function approveLocation(locationId) {
+  return crm(`/locations/${encodeURIComponent(locationId)}/approve`, {
+    method: "POST",
+  });
+}
+
+export async function rejectLocation(locationId) {
+  return crm(`/locations/${encodeURIComponent(locationId)}/reject`, {
+    method: "POST",
+  });
+}
+
+/** Replaces the full aliases array. */
+export async function updateLocationAliases(locationId, aliases) {
+  return crm(`/locations/${encodeURIComponent(locationId)}/aliases`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ aliases }),
+  });
+}
+
+/**
+ * Delete a location. Approved nodes require hard_delete_approved=true.
+ * @param {string} locationId
+ * @param {{ hardDeleteApproved?: boolean }} [opts]
+ */
+export async function deleteLocation(locationId, { hardDeleteApproved = false } = {}) {
+  const params = new URLSearchParams();
+  if (hardDeleteApproved) params.set("hard_delete_approved", "true");
+  const qs = params.toString();
+  return crm(
+    `/locations/${encodeURIComponent(locationId)}${qs ? `?${qs}` : ""}`,
+    { method: "DELETE" }
+  );
+}
+
 /** Published card for a leaf; `null` when no published data (404). */
 export async function fetchActiveCard(locationId) {
   return crm(`/cards/${encodeURIComponent(locationId)}/active`, undefined, {

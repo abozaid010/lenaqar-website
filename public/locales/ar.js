@@ -558,6 +558,7 @@ export default {
     socialMedia: "وسائل التواصل",
     copyWhatsappLink: "نسخ رابط واتساب",
     marketIndex: "مؤشر السوق",
+    locations: "المواقع",
   },
   dashboardSummary: {
     title: "لوحة التحكم",
@@ -3464,6 +3465,90 @@ export default {
       invalidInput: "راجع تفاصيل الوحدة وحاول مجددًا.",
       unauthorized: "غير مسموح لك بتقييم الوحدات.",
       estimateFailed: "تعذر حساب التقدير. حاول مجددًا.",
+    },
+  },
+  locations: {
+    title: "المواقع",
+    subtitle: "تعديل واعتماد أسماء المدن والأحياء والمناطق",
+    unavailable: {
+      title: "المواقع غير متاحة",
+      message:
+        "تعذر تحميل كتالوج المواقع لحسابك. حاول مجددًا أو تواصل مع الدعم.",
+    },
+    tabs: {
+      tree: "الشجرة",
+      pending: "قيد المراجعة",
+    },
+    levels: {
+      country: "دولة",
+      governorate: "محافظة",
+      city: "مدينة",
+      district: "حي",
+      sub_district: "منطقة",
+    },
+    actions: {
+      addCity: "إضافة مدينة",
+      addChild: "إضافة {level}",
+      editAliases: "تعديل الأسماء البديلة",
+      delete: "حذف الموقع",
+      approve: "اعتماد",
+      reject: "رفض",
+    },
+    tree: {
+      expand: "توسيع",
+      collapse: "طي",
+      empty: "لا توجد مدن معتمدة بعد. أضف مدينة للبدء.",
+      emptyChildren: "لا توجد عناصر فرعية تحت هذا الموقع.",
+      aliasesCount: "{count} أسماء بديلة",
+    },
+    pending: {
+      empty: "لا توجد مواقع قيد المراجعة.",
+      columns: {
+        name: "الاسم",
+        level: "المستوى",
+        parent: "الأب",
+        proposedBy: "مقترح بواسطة",
+        actions: "إجراءات",
+      },
+    },
+    form: {
+      addTitle: "إضافة {level}",
+      submit: "إنشاء",
+      parentLabel: "الأب",
+      enName: "الاسم بالإنجليزية",
+      arName: "الاسم بالعربية",
+      slugSource: "تجاوز الـ slug",
+      slugSourcePlaceholder: "optional-slug",
+      aliases: "الأسماء البديلة",
+      aliasesPlaceholder: "سطر لكل اسم، أو مفصولة بفاصلة",
+    },
+    aliases: {
+      title: "تعديل الأسماء البديلة",
+      save: "حفظ الأسماء البديلة",
+      hint: "يستبدل قائمة الأسماء البديلة بالكامل لهذا الموقع.",
+    },
+    delete: {
+      title: "حذف الموقع؟",
+      message:
+        "حذف «{name}»؟ المواقع المعتمدة تُحذف نهائيًا. لا يمكن الحذف إن وُجدت عناصر فرعية غير مرفوضة.",
+    },
+    validation: {
+      enNameRequired: "الاسم بالإنجليزية مطلوب",
+    },
+    toasts: {
+      created: "تم إنشاء الموقع",
+      aliasesUpdated: "تم تحديث الأسماء البديلة",
+      deleted: "تم حذف الموقع",
+      approved: "تم اعتماد الموقع",
+      rejected: "تم رفض الموقع",
+    },
+    errors: {
+      loadFailed: "تعذر تحميل المواقع",
+      createFailed: "تعذر إنشاء الموقع",
+      aliasesFailed: "تعذر تحديث الأسماء البديلة",
+      deleteFailed: "تعذر حذف الموقع",
+      approveFailed: "تعذر اعتماد الموقع",
+      rejectFailed: "تعذر رفض الموقع",
     },
   },
 };

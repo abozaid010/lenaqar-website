@@ -30,6 +30,7 @@ const adminPaths = [
   'dashboard', 'campaigns', 'campaign-chat', 'schedule',
   'analytics', 'units', 'team', 'myProjects', 'developers', 'news', 'map', 'notifications',
   'market-index',
+  'locations',
 ];
 
 export function proxy(request) {
