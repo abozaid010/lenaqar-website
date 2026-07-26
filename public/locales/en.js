@@ -872,7 +872,7 @@ export default {
       invalidEmail: "Enter a valid email address",
       ownEmailOnly: "You can only filter by your own email",
       useEmail: "Use {email}",
-      all: "All",
+      all: "All Employees",
     },
     resetFilters: "Reset Filters",
     panel: {

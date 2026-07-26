@@ -739,7 +739,7 @@ export default {
       invalidEmail: "أدخل بريداً إلكترونياً صالحاً",
       ownEmailOnly: "يمكنك التصفية ببريدك فقط",
       useEmail: "استخدم {email}",
-      all: "الكل",
+      all: "كل الموظفين",
     },
     resetFilters: "إعادة تعيين الفلاتر",
     panel: {

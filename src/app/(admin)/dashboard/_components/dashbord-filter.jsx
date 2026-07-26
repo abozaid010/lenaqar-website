@@ -1271,7 +1271,10 @@ export default function DashbordFilter({
               searchFields={["name", "email"]}
               placeholder={translate("dashboardFilter.author.placeholder", "Author")}
               showAllOption={isAdminUser}
-              allOptionLabel={translate("dashboardFilter.author.all", "All")}
+              allOptionLabel={translate(
+                "dashboardFilter.author.all",
+                "All Employees",
+              )}
               allOptionValue=""
               allowCreate={isAdminUser}
               isValidCreateValue={(query) => isValidEmail(query)}
