@@ -39,16 +39,7 @@ import {
   getPhoneValidationError,
   phoneToE164,
 } from "@/components/phone/phone-utils";
-
-/** Parse value to number for API (strip commas/formatting). */
-function normalizeToEnglishDigits(value) {
-  if (value == null) return value;
-  return String(value)
-    .replace(/[٠-٩]/g, (digit) => String(digit.charCodeAt(0) - 1632))
-    .replace(/[۰-۹]/g, (digit) => String(digit.charCodeAt(0) - 1776))
-    .replace(/٫/g, ".")
-    .replace(/٬/g, ",");
-}
+import { isPositiveAmount, parseAmount } from "@/utils/parse-amount";
 
 /** Safely format a date value to a YYYY-MM-DD input string; empty string when invalid. */
 function toDateInputValue(value) {
@@ -59,12 +50,7 @@ function toDateInputValue(value) {
 }
 
 function toAmount(value) {
-  if (value === "" || value === null || value === undefined) return 0;
-  if (typeof value === "number" && !Number.isNaN(value)) return value;
-  const normalized = normalizeToEnglishDigits(value);
-  const stripped = String(normalized).replace(/[^\d.]/g, "");
-  const n = parseFloat(stripped);
-  return Number.isNaN(n) ? 0 : n;
+  return parseAmount(value);
 }
 
 function toIntAmount(value) {
@@ -693,8 +679,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           missingFields.push("deliveryDate");
         }
 
-        // Total price is required for sell units
-        if (!(Number(SellFormData.totalPrice) > 0)) {
+        // Total price is required for sell units (parseAmount handles comma-formatted strings)
+        if (!isPositiveAmount(SellFormData.totalPrice)) {
           missingFields.push("totalPrice");
         }
 
@@ -767,7 +753,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           return false;
         }
 
-        const hasValidPrice = Number(rentFormData.monthlyRentPrice) > 0;
+        const hasValidPrice = isPositiveAmount(rentFormData.monthlyRentPrice);
 
         if (!hasValidPrice) {
           toast.error(
@@ -785,7 +771,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           monthlyRentPrice:
             prev.monthlyRentPrice === "" || prev.monthlyRentPrice == null
               ? 0
-              : Number(prev.monthlyRentPrice),
+              : parseAmount(prev.monthlyRentPrice),
         }));
       }
     }
