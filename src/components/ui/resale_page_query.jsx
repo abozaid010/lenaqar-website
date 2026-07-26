@@ -6,7 +6,8 @@ import QueryErrorState from "@/components/ui/query-error-state";
 import UnitCodeSearch from "@/components/ui/unit-code-search";
 import { usePendingApprovalUnitsPageData } from "@/hooks/use-pending-approval-units-page-data";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
-import AuthorFilterSelect from "@/components/ui/inputs/author-filter-select";
+// Temporarily hidden — author filter not needed at this stage.
+// import AuthorFilterSelect from "@/components/ui/inputs/author-filter-select";
 import { unitsSourcePendingQueryString } from "@/utils/units-navigation-source";
 import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
@@ -16,6 +17,7 @@ import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-co
 import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
 import { BULK_AVAILABILITY_DEFAULT_MESSAGE_AR } from "@/lib/units/unit-whatsapp-recipient";
 import {
+  getAuthorOptionLabel,
   resolveAuthorDisplayLabel,
   useTeamAuthorOptions,
 } from "@/hooks/useTeamAuthorOptions";
@@ -24,6 +26,7 @@ import {
   enforceDashboardAuthorOnParams,
   getDashboardLoggedInEmail,
 } from "@/lib/dashboard-lead-access";
+import { phoneToE164 } from "@/components/phone/phone-utils";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
 import { ChevronDown, SlidersHorizontal, Trash2, X } from "lucide-react";
@@ -53,6 +56,59 @@ function formatPriceInput(value) {
   return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
+/** Normalize phones for local equality checks (E.164, else digits / last 9). */
+function phonesMatch(a, b) {
+  const rawA = String(a ?? "").trim();
+  const rawB = String(b ?? "").trim();
+  if (!rawA || !rawB) return false;
+
+  const e164A = phoneToE164(rawA, "EG");
+  const e164B = phoneToE164(rawB, "EG");
+  if (e164A && e164B && e164A === e164B) return true;
+
+  const digA = (e164A || rawA).replace(/\D/g, "");
+  const digB = (e164B || rawB).replace(/\D/g, "");
+  if (!digA || !digB) return false;
+  if (digA === digB) return true;
+  if (digA.length >= 9 && digB.length >= 9) {
+    return digA.slice(-9) === digB.slice(-9);
+  }
+  return false;
+}
+
+function getTeamPhoneOptionLabel(option) {
+  return getAuthorOptionLabel(option) || (option?.email ?? "") || (option?.phone ?? "");
+}
+
+/** Selected value is team member email; label prefers name. */
+function resolveTeamPhoneDisplayLabel(email, options) {
+  const selected = typeof email === "string" ? email.trim() : "";
+  if (!selected) return "";
+  const match = (options || []).find(
+    (option) =>
+      typeof option?.email === "string" &&
+      option.email.toLowerCase() === selected.toLowerCase(),
+  );
+  if (match) return getTeamPhoneOptionLabel(match);
+  return selected;
+}
+
+function resolveSelectedTeamMemberPhone(email, options) {
+  const selected = typeof email === "string" ? email.trim() : "";
+  if (!selected) return "";
+  const match = (options || []).find(
+    (option) =>
+      typeof option?.email === "string" &&
+      option.email.toLowerCase() === selected.toLowerCase(),
+  );
+  if (match?.phone) return String(match.phone).trim();
+  // Legacy: value used to be the phone itself.
+  const byPhone = (options || []).find((option) =>
+    phonesMatch(option?.phone, selected),
+  );
+  return byPhone?.phone ? String(byPhone.phone).trim() : "";
+}
+
 export default function ResalePageQuery({ searchParams, initialUnitsData = null }) {
   const { t, locale, translate } = useI18n();
   const { canShowBulkButton } = useWhatsappBulkAccess();
@@ -79,6 +135,8 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [author, setAuthor] = useState("");
+  /** Local-only: selected team member email → filter units by their phone. */
+  const [teamPhone, setTeamPhone] = useState("");
 
   // Mobile sheet draft (committed on Apply)
   const [draftFilter, setDraftFilter] = useState(DEFAULT_VISIBILITY);
@@ -87,6 +145,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const [draftMinPrice, setDraftMinPrice] = useState("");
   const [draftMaxPrice, setDraftMaxPrice] = useState("");
   const [draftAuthor, setDraftAuthor] = useState("");
+  const [draftTeamPhone, setDraftTeamPhone] = useState("");
 
   // Desktop price popover draft
   const [pricePopoverMin, setPricePopoverMin] = useState("");
@@ -94,9 +153,10 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
   const priceDropdownRef = useRef(null);
 
-  const { authorOptions } = useTeamAuthorOptions({
-    selectedAuthor: author || draftAuthor || "",
-  });
+  const { authorOptions, teamPhoneOptions, isAdminUser, isLoading: isTeamLoading } =
+    useTeamAuthorOptions({
+      selectedAuthor: author || draftAuthor || "",
+    });
 
   // Same author ACL as Leads: non-admin/non-owner forced to own email.
   useEffect(() => {
@@ -155,6 +215,20 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const { isFetching, units, pagination, isLoading, isError, error, refetch } =
     usePendingApprovalUnitsPageData(searchParamsKey, initialDataForQuery);
 
+  const displayedUnits = useMemo(() => {
+    const selectedEmail = typeof teamPhone === "string" ? teamPhone.trim() : "";
+    if (!selectedEmail) return units;
+    const selectedPhone = resolveSelectedTeamMemberPhone(
+      selectedEmail,
+      teamPhoneOptions,
+    );
+    if (!selectedPhone) return [];
+    return (units || []).filter((unit) => {
+      const ownerMobile = unit?.owner_mobile ?? unit?.ownerMobile ?? "";
+      return phonesMatch(ownerMobile, selectedPhone);
+    });
+  }, [units, teamPhone, teamPhoneOptions]);
+
   const setVisibleUnitsFromList = bulkSelection?.setVisibleUnitsFromList;
 
   useEffect(() => {
@@ -163,9 +237,9 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
 
   useEffect(() => {
     if (setVisibleUnitsFromList) {
-      setVisibleUnitsFromList(units);
+      setVisibleUnitsFromList(displayedUnits);
     }
-  }, [units, setVisibleUnitsFromList]);
+  }, [displayedUnits, setVisibleUnitsFromList]);
 
   // Lock body scroll while the mobile filter sheet is open
   useEffect(() => {
@@ -246,6 +320,12 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
         value: resolveAuthorDisplayLabel(author, authorOptions),
       });
     }
+    if (teamPhone?.trim()) {
+      list.push({
+        key: "team_phone",
+        value: resolveTeamPhoneDisplayLabel(teamPhone, teamPhoneOptions),
+      });
+    }
     return list;
   }, [
     filter,
@@ -255,6 +335,8 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     maxPrice,
     author,
     authorOptions,
+    teamPhone,
+    teamPhoneOptions,
     visibilityOptions,
     t,
     getPropertyTypeLabel,
@@ -270,6 +352,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setDraftMinPrice(minPrice);
     setDraftMaxPrice(maxPrice);
     setDraftAuthor(author);
+    setDraftTeamPhone(teamPhone);
     setIsMobileFiltersOpen(true);
   };
 
@@ -280,6 +363,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setMinPrice(draftMinPrice);
     setMaxPrice(draftMaxPrice);
     setAuthor(draftAuthor || "");
+    setTeamPhone(draftTeamPhone || "");
     setIsMobileFiltersOpen(false);
   };
 
@@ -290,12 +374,14 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setMinPrice("");
     setMaxPrice("");
     setAuthor("");
+    setTeamPhone("");
     setDraftFilter(DEFAULT_VISIBILITY);
     setDraftUpdatedAtDate("");
     setDraftPropertyType("");
     setDraftMinPrice("");
     setDraftMaxPrice("");
     setDraftAuthor("");
+    setDraftTeamPhone("");
     setPricePopoverMin("");
     setPricePopoverMax("");
   }, []);
@@ -310,6 +396,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     if (key === "updated_at") setUpdatedAtDate("");
     if (key === "property_type") setPropertyType("");
     if (key === "author") setAuthor("");
+    if (key === "team_phone") setTeamPhone("");
     if (key === "price") {
       setMinPrice("");
       setMaxPrice("");
@@ -615,6 +702,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
                   />
                 </div>
 
+                {/* Temporarily hidden — author (email) filter not needed at this stage.
                 <div className="w-full min-w-0">
                   <AuthorFilterSelect
                     name="author_mobile"
@@ -623,6 +711,44 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
                     className={FILTER_BUTTON_CLASS}
                   />
                 </div>
+                */}
+
+                {isAdminUser && (
+                  <div className="w-full min-w-0">
+                    <SearchableDropdownSelect
+                      name="team_phone_mobile"
+                      options={teamPhoneOptions}
+                      value={draftTeamPhone || ""}
+                      onChange={(e) => setDraftTeamPhone(e?.target?.value || "")}
+                      getValue={(option) => option.email}
+                      getLabel={getTeamPhoneOptionLabel}
+                      resolveSelectedLabel={(v) =>
+                        resolveTeamPhoneDisplayLabel(v, teamPhoneOptions)
+                      }
+                      searchFields={["name", "email", "phone"]}
+                      showAllOption
+                      allOptionLabel={translate(
+                        "unitsFilter.teamPhone.all",
+                        "All phone numbers"
+                      )}
+                      allOptionValue=""
+                      placeholder={translate(
+                        "unitsFilter.teamPhone.placeholder",
+                        "Filter by phone number"
+                      )}
+                      searchPlaceholder={translate(
+                        "unitsFilter.teamPhone.search",
+                        "Search by name or phone"
+                      )}
+                      noResultsText={translate(
+                        "unitsFilter.teamPhone.noResults",
+                        "No matching phone numbers"
+                      )}
+                      isLoading={isTeamLoading}
+                      className={FILTER_BUTTON_CLASS}
+                    />
+                  </div>
+                )}
 
                 <div className="w-full min-w-0 rounded-md border border-[#E6E6E6] bg-[#F6F7FB] p-3">
                   <p className="text-xs font-medium text-gray-700 mb-2">
@@ -713,6 +839,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
             />
           </div>
 
+          {/* Temporarily hidden — author (email) filter not needed at this stage.
           <div className="w-auto flex-1 min-w-0">
             <AuthorFilterSelect
               name="author"
@@ -721,6 +848,44 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
               className={FILTER_BUTTON_CLASS}
             />
           </div>
+          */}
+
+          {isAdminUser && (
+            <div className="w-auto flex-1 min-w-0">
+              <SearchableDropdownSelect
+                name="team_phone"
+                options={teamPhoneOptions}
+                value={teamPhone || ""}
+                onChange={(e) => setTeamPhone(e?.target?.value || "")}
+                getValue={(option) => option.email}
+                getLabel={getTeamPhoneOptionLabel}
+                resolveSelectedLabel={(v) =>
+                  resolveTeamPhoneDisplayLabel(v, teamPhoneOptions)
+                }
+                searchFields={["name", "email", "phone"]}
+                showAllOption
+                allOptionLabel={translate(
+                  "unitsFilter.teamPhone.all",
+                  "All phone numbers"
+                )}
+                allOptionValue=""
+                placeholder={translate(
+                  "unitsFilter.teamPhone.placeholder",
+                  "Filter by phone number"
+                )}
+                searchPlaceholder={translate(
+                  "unitsFilter.teamPhone.search",
+                  "Search by name or phone"
+                )}
+                noResultsText={translate(
+                  "unitsFilter.teamPhone.noResults",
+                  "No matching phone numbers"
+                )}
+                isLoading={isTeamLoading}
+                className={FILTER_BUTTON_CLASS}
+              />
+            </div>
+          )}
 
           <div
             className="relative w-auto flex-1 min-w-0"
@@ -841,14 +1006,14 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
         )}
       </div>
 
-      {isFetching ? (
+      {isFetching && displayedUnits.length === 0 ? (
         <LoadingSpinner
           message="Refreshing..."
           containerClassName="flex items-center justify-center min-h-[12rem] mt-6 sm:mt-12"
         />
       ) : (
         <UnitsGrid
-          units={units}
+          units={displayedUnits}
           pagination={pagination}
           readonly={false}
           allowMissingFields

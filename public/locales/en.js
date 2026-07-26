@@ -1377,6 +1377,12 @@ export default {
       defaultMessage:
         "Hello, I would like to check if this unit is available for rent and when we can arrange a property viewing.",
     },
+    teamPhone: {
+      placeholder: "Filter by phone number",
+      all: "All phone numbers",
+      search: "Search by name or phone",
+      noResults: "No matching phone numbers",
+    },
     favoriteSearches: {
       title: "Favorite Searches",
       save: "Save",

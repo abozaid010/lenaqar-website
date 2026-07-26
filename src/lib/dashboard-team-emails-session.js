@@ -1,7 +1,7 @@
 import { getSalesData } from "@/components/services/serviceFetching";
 
 /**
- * @typedef {{ email: string, name: string }} DashboardTeamMember
+ * @typedef {{ email: string, name: string, phone: string }} DashboardTeamMember
  */
 
 /** @type {'unset'|'ok'|'error'} */
@@ -11,7 +11,7 @@ let cachedMembers = null;
 /** @type {Promise<DashboardTeamMember[]|null>|null} */
 let inFlight = null;
 
-const STORAGE_KEY_PREFIX = "dashboard-team-members:v1:";
+const STORAGE_KEY_PREFIX = "dashboard-team-members:v3:";
 
 /**
  * @param {string | null | undefined} clientId
@@ -21,6 +21,27 @@ function getStorageKey(clientId) {
   const id = typeof clientId === "string" ? clientId.trim().toLowerCase() : "";
   if (!id) return null;
   return `${STORAGE_KEY_PREFIX}${id}`;
+}
+
+/**
+ * @param {unknown} row
+ * @returns {string}
+ */
+function readTeamMemberPhone(row) {
+  if (!row || typeof row !== "object") return "";
+  const candidates = [
+    row.phone,
+    row.phone_number,
+    row.mobile,
+    row.mobile_number,
+    row.agent_number,
+  ];
+  for (const raw of candidates) {
+    if (raw == null || raw === "") continue;
+    const value = String(raw).trim();
+    if (value) return value;
+  }
+  return "";
 }
 
 /**
@@ -41,15 +62,18 @@ export function normalizeTeamMembers(rows) {
     const key = email.toLowerCase();
     const name =
       typeof row?.name === "string" ? row.name.trim() : "";
+    const phone = readTeamMemberPhone(row);
     const existing = byEmail.get(key);
     if (!existing) {
-      byEmail.set(key, { email, name });
+      byEmail.set(key, { email, name, phone });
       continue;
     }
-    // Prefer a row that has a display name.
-    if (!existing.name && name) {
-      byEmail.set(key, { email: existing.email, name });
-    }
+    // Prefer a row that has a display name / phone.
+    byEmail.set(key, {
+      email: existing.email,
+      name: existing.name || name,
+      phone: existing.phone || phone,
+    });
   }
 
   return Array.from(byEmail.values()).sort((a, b) => {
@@ -68,12 +92,13 @@ function parseCachedMembers(value) {
   const members = normalizeTeamMembers(
     value.map((item) => {
       if (typeof item === "string") {
-        return { email: item, name: "" };
+        return { email: item, name: "", phone: "" };
       }
       if (item && typeof item === "object") {
         return {
           email: typeof item.email === "string" ? item.email : "",
           name: typeof item.name === "string" ? item.name : "",
+          phone: readTeamMemberPhone(item),
         };
       }
       return null;
@@ -126,7 +151,15 @@ function writeLocalCache(clientId, members) {
  * @returns {Promise<DashboardTeamMember[]|null>}
  */
 export async function loadDashboardTeamMembersOnce(clientId) {
-  if (cacheKind === "ok") return cachedMembers;
+  if (cacheKind === "ok") {
+    // Session cache from before phone support — force one refresh.
+    const staleWithoutPhone = (cachedMembers || []).some(
+      (member) => !Object.prototype.hasOwnProperty.call(member ?? {}, "phone"),
+    );
+    if (!staleWithoutPhone) return cachedMembers;
+    cacheKind = "unset";
+    cachedMembers = null;
+  }
   if (cacheKind === "error") return null;
   if (!inFlight) {
     inFlight = getSalesData()

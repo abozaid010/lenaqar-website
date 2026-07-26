@@ -1205,8 +1205,13 @@ export async function createBooking(bookingData) {
 
 // Sales Team CURD Operations //
 // TODO: Get other operation functions from the serviceFetching file and move them to this file
-export async function deleteEmployee(id) {
-  await axiosInstance.delete(`sales-employees/delete-employee/${id}`);
+/** DELETE /sales-employees/delete-employee/{employee_id} */
+export async function deleteEmployee(employeeId) {
+  if (employeeId == null || String(employeeId).trim() === "") {
+    throw new Error("employee_id is required");
+  }
+  const id = encodeURIComponent(String(employeeId).trim());
+  await axiosInstance.delete(`/sales-employees/delete-employee/${id}`);
 }
 
 export async function toggleAutoReply(user_id, client_id, value) {
