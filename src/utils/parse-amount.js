@@ -59,3 +59,36 @@ export function formatPrice(num) {
   if (isNaN(n)) return "";
   return n.toLocaleString("en-US");
 }
+
+/** Unit form price fields sent to the API only when positive. */
+export const UNIT_PRICE_FIELDS = [
+  "totalPrice",
+  "downPayment",
+  "paid_amount",
+  "remaining_amount",
+  "over_price",
+  "monthlyRentPrice",
+];
+
+/**
+ * Keep price fields only when they parse to a finite positive number.
+ * null / empty / 0 / invalid → omitted from the payload (not sent as 0/null).
+ */
+export function sanitizePriceFields(data, fields = UNIT_PRICE_FIELDS) {
+  const out = { ...data };
+  for (const field of fields) {
+    if (!(field in out)) continue;
+    const raw = out[field];
+    if (raw === "" || raw === null || raw === undefined) {
+      delete out[field];
+      continue;
+    }
+    const amount = parseAmount(raw);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      delete out[field];
+      continue;
+    }
+    out[field] = amount;
+  }
+  return out;
+}

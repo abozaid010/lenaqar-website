@@ -11,6 +11,7 @@ import {
   isPositiveAmount,
   parseAmount,
   parseMoneyInput,
+  sanitizePriceFields,
 } from "../parse-amount.js";
 
 test("parseAmount accepts plain positive numbers and digit strings", () => {
@@ -101,4 +102,39 @@ test("Arabic-Indic digits are parsed correctly", () => {
   assert.equal(parseAmount("٥٬٣٠٠٬٠٠٠"), 5300000);
   assert.equal(parseMoneyInput("٥٣٠٠٠٠٠"), 5300000);
   assert.equal(isPositiveAmount("١٠٠٠"), true);
+});
+
+test("sanitizePriceFields sends only positive prices and omits null/empty/zero", () => {
+  const payload = sanitizePriceFields({
+    purpose: "sell",
+    totalPrice: "5,300,000",
+    downPayment: "",
+    paid_amount: null,
+    remaining_amount: 0,
+    over_price: undefined,
+    monthlyRentPrice: "abc",
+    code: "U-1",
+  });
+
+  assert.equal(payload.totalPrice, 5300000);
+  assert.equal("downPayment" in payload, false);
+  assert.equal("paid_amount" in payload, false);
+  assert.equal("remaining_amount" in payload, false);
+  assert.equal("over_price" in payload, false);
+  assert.equal("monthlyRentPrice" in payload, false);
+  assert.equal(payload.code, "U-1");
+  assert.equal(payload.purpose, "sell");
+});
+
+test("sanitizePriceFields keeps other positive optional prices", () => {
+  const payload = sanitizePriceFields({
+    totalPrice: 2500000,
+    downPayment: "100,000",
+    over_price: 1,
+  });
+  assert.deepEqual(payload, {
+    totalPrice: 2500000,
+    downPayment: 100000,
+    over_price: 1,
+  });
 });
