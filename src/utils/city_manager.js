@@ -1,9 +1,10 @@
 /**
- * Singleton class to manage cities and districts data from local JSON file
- * - Loads data from /cities_list.json (public folder)
- * - Provides formatted cities and districts lists
- * - Uses ar_name and en_name for translations
+ * Singleton class to manage cities and districts data.
+ * Sole source: GET /api/locations/catalog (market-index, server-cached).
+ * Session cache: sessionStorage (one fetch per browser tab session).
  */
+import { LOCATIONS_CATALOG_STORAGE_KEY } from "@/lib/locations/constants";
+
 class CityManager {
   constructor() {
     this.cities = [];
@@ -12,6 +13,7 @@ class CityManager {
     this.isInitialized = false;
     this.isLoading = false;
     this.loadPromise = null;
+    this.source = null;
   }
 
   /**
@@ -24,9 +26,138 @@ class CityManager {
     return CityManager.instance;
   }
 
+  /** Drop in-memory state so the next read reloads from session/API. */
+  reset() {
+    this.cities = [];
+    this.districts = [];
+    this.subDistricts = [];
+    this.isInitialized = false;
+    this.isLoading = false;
+    this.loadPromise = null;
+    this.source = null;
+  }
+
+  readSessionCatalog() {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = window.sessionStorage.getItem(LOCATIONS_CATALOG_STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.cities) || parsed.cities.length === 0) {
+        return null;
+      }
+      return parsed;
+    } catch {
+      return null;
+    }
+  }
+
+  writeSessionCatalog(catalog) {
+    if (typeof window === "undefined" || !catalog) return;
+    try {
+      window.sessionStorage.setItem(
+        LOCATIONS_CATALOG_STORAGE_KEY,
+        JSON.stringify({
+          cities: catalog.cities,
+          fetchedAt: catalog.fetchedAt || new Date().toISOString(),
+          source: catalog.source || "market-index",
+        })
+      );
+    } catch {
+      // private mode / quota — memory cache still works for this page lifetime
+    }
+  }
+
   /**
-   * Initialize data by fetching from public folder.
-   * Concurrent callers share one in-flight promise so nobody reads empty data mid-load.
+   * Hydrate flat cities / districts / subDistricts from the catalog tree.
+   * @param {object[]} citiesListData
+   * @param {string} source
+   */
+  applyCitiesList(citiesListData, source) {
+    this.cities = citiesListData.map((city) => ({
+      id: city.id,
+      en_name: city.en_name,
+      ar_name: city.ar_name,
+      value: city.en_name.toLowerCase(),
+      label_en: city.en_name,
+      label_ar: city.ar_name,
+      aliases: city.alias || city.aliases || [],
+      location_id: city.location_id || null,
+    }));
+
+    this.districts = [];
+    this.subDistricts = [];
+    citiesListData.forEach((city) => {
+      if (city.districts && Array.isArray(city.districts)) {
+        city.districts.forEach((district) => {
+          const districtValue = district.en_name.toLowerCase();
+          this.districts.push({
+            id:
+              city.id +
+              "_" +
+              district.en_name.toLowerCase().replace(/\s+/g, "_"),
+            en_name: district.en_name,
+            ar_name: district.ar_name,
+            city_id: city.id,
+            city_en_name: city.en_name,
+            city_ar_name: city.ar_name,
+            value: districtValue,
+            label_en: district.en_name,
+            label_ar: district.ar_name,
+            aliases: district.aliases || [],
+          });
+
+          if (district.sub_districts && Array.isArray(district.sub_districts)) {
+            district.sub_districts.forEach((sub) => {
+              if (!sub?.en_name) return;
+              this.subDistricts.push({
+                id:
+                  city.id +
+                  "_" +
+                  district.en_name.toLowerCase().replace(/\s+/g, "_") +
+                  "_" +
+                  sub.en_name.toLowerCase().replace(/\s+/g, "_"),
+                en_name: sub.en_name,
+                ar_name: sub.ar_name,
+                city_id: city.id,
+                district_value: districtValue,
+                city_en_name: city.en_name,
+                city_ar_name: city.ar_name,
+                value: sub.en_name.toLowerCase(),
+                label_en: sub.en_name,
+                label_ar: sub.ar_name,
+                aliases: sub.aliases || [],
+              });
+            });
+          }
+        });
+      }
+    });
+
+    this.source = source;
+    this.isInitialized = true;
+  }
+
+  async fetchCatalogFromApi() {
+    const response = await fetch("/api/locations/catalog", {
+      credentials: "include",
+      headers: { Accept: "application/json" },
+    });
+    if (!response.ok) {
+      const err = new Error(`Locations catalog HTTP ${response.status}`);
+      err.status = response.status;
+      throw err;
+    }
+    const catalog = await response.json();
+    if (!catalog || !Array.isArray(catalog.cities)) {
+      throw new Error("Invalid locations catalog payload");
+    }
+    return catalog;
+  }
+
+  /**
+   * Initialize from session cache → API catalog.
+   * Concurrent callers share one in-flight promise.
    */
   async initializeData() {
     if (this.isInitialized) return this;
@@ -35,76 +166,24 @@ class CityManager {
     this.isLoading = true;
     this.loadPromise = (async () => {
       try {
-        const response = await fetch("/cities_list.json");
-        if (!response.ok) {
-          throw new Error(`Failed to fetch cities data: ${response.status}`);
+        const sessionCatalog = this.readSessionCatalog();
+        if (sessionCatalog) {
+          this.applyCitiesList(
+            sessionCatalog.cities,
+            sessionCatalog.source || "session"
+          );
+          return this;
         }
-        const citiesListData = await response.json();
 
-        // Extract cities from the JSON array
-        this.cities = citiesListData.map((city) => ({
-          id: city.id,
-          en_name: city.en_name,
-          ar_name: city.ar_name,
-          value: city.en_name.toLowerCase(), // lowercase en_name sent to backend
-          label_en: city.en_name,
-          label_ar: city.ar_name,
-        }));
-
-        // Extract all districts from all cities
-        this.districts = [];
-        this.subDistricts = [];
-        citiesListData.forEach((city) => {
-          if (city.districts && Array.isArray(city.districts)) {
-            city.districts.forEach((district) => {
-              const districtValue = district.en_name.toLowerCase(); // canonical backend value
-              this.districts.push({
-                id:
-                  city.id +
-                  "_" +
-                  district.en_name.toLowerCase().replace(/\s+/g, "_"),
-                en_name: district.en_name,
-                ar_name: district.ar_name,
-                city_id: city.id,
-                city_en_name: city.en_name,
-                city_ar_name: city.ar_name,
-                value: districtValue, // lowercase for API compatibility
-                label_en: district.en_name,
-                label_ar: district.ar_name,
-                aliases: district.aliases || [],
-              });
-
-              if (district.sub_districts && Array.isArray(district.sub_districts)) {
-                district.sub_districts.forEach((sub) => {
-                  if (!sub?.en_name) return;
-                  this.subDistricts.push({
-                    id:
-                      city.id +
-                      "_" +
-                      district.en_name.toLowerCase().replace(/\s+/g, "_") +
-                      "_" +
-                      sub.en_name.toLowerCase().replace(/\s+/g, "_"),
-                    en_name: sub.en_name,
-                    ar_name: sub.ar_name,
-                    city_id: city.id,
-                    district_value: districtValue,
-                    city_en_name: city.en_name,
-                    city_ar_name: city.ar_name,
-                    value: sub.en_name.toLowerCase(),
-                    label_en: sub.en_name,
-                    label_ar: sub.ar_name,
-                    aliases: sub.aliases || [],
-                  });
-                });
-              }
-            });
-          }
-        });
-
-        this.isInitialized = true;
+        const catalog = await this.fetchCatalogFromApi();
+        this.applyCitiesList(catalog.cities, catalog.source || "market-index");
+        this.writeSessionCatalog(catalog);
         return this;
       } catch (error) {
-        console.error("Failed to initialize CityManager data:", error?.message ?? error);
+        console.error(
+          "Failed to initialize CityManager data:",
+          error?.message ?? error
+        );
         this.cities = [];
         this.districts = [];
         this.subDistricts = [];
@@ -147,7 +226,7 @@ class CityManager {
    */
   async getDistrictsForCity(cityId) {
     await this.initializeData();
-    return this.districts.filter(district => district.city_id === cityId);
+    return this.districts.filter((district) => district.city_id === cityId);
   }
 
   /**
@@ -167,7 +246,7 @@ class CityManager {
    */
   async getCityById(cityId) {
     await this.initializeData();
-    return this.cities.find(city => city.id === cityId);
+    return this.cities.find((city) => city.id === cityId);
   }
 
   /**
@@ -176,15 +255,19 @@ class CityManager {
   async getCityByValue(cityValue) {
     await this.initializeData();
     if (!cityValue) return null;
-    
+
     const normalizedValue = String(cityValue).toLowerCase().trim();
-    return this.cities.find(city => 
-      city.value === normalizedValue || 
-      city.value === cityValue ||
-      city.id === cityValue || 
-      city.id.toLowerCase() === normalizedValue ||
-      city.en_name.toLowerCase() === normalizedValue ||
-      city.ar_name === cityValue
+    return this.cities.find(
+      (city) =>
+        city.value === normalizedValue ||
+        city.value === cityValue ||
+        city.id === cityValue ||
+        city.id.toLowerCase() === normalizedValue ||
+        city.en_name.toLowerCase() === normalizedValue ||
+        city.ar_name === cityValue ||
+        (city.aliases || []).some(
+          (alias) => String(alias).toLowerCase() === normalizedValue
+        )
     );
   }
 
@@ -242,7 +325,10 @@ class CityManager {
         c.value === normalized ||
         c.id.toLowerCase() === normalized ||
         c.en_name.toLowerCase() === normalized ||
-        c.ar_name === cityRaw
+        c.ar_name === cityRaw ||
+        (c.aliases || []).some(
+          (alias) => String(alias).toLowerCase() === normalized
+        )
     );
     if (!city) return String(cityRaw).trim().toLowerCase();
     return city.value;
@@ -431,7 +517,6 @@ class CityManager {
       }
     }
 
-    // Re-normalize district once city is known (e.g. filled from sub-district)
     if (district && resolvedCity && !resolvedDistrict) {
       resolvedDistrict = this.normalizeDistrictValue(district, resolvedCity);
     }
@@ -471,10 +556,10 @@ class CityManager {
    */
   async getCitiesWithLabels(locale = "en") {
     const cities = await this.getCities();
-    return cities.map(city => ({
+    return cities.map((city) => ({
       value: city.value,
       label: locale === "ar" ? city.label_ar : city.label_en,
-      id: city.id
+      id: city.id,
     }));
   }
 
@@ -482,13 +567,16 @@ class CityManager {
    * Get formatted districts list for UI (with translations)
    */
   async getDistrictsWithLabels(cityId = null, locale = "en") {
-    const districts = cityId ? await this.getDistrictsForCity(cityId) : await this.getDistricts();
-    return districts.map(district => ({
+    const districts = cityId
+      ? await this.getDistrictsForCity(cityId)
+      : await this.getDistricts();
+    return districts.map((district) => ({
       value: district.value,
       label: locale === "ar" ? district.label_ar : district.label_en,
       city_id: district.city_id,
-      city_name: locale === "ar" ? district.city_ar_name : district.city_en_name,
-      id: district.id
+      city_name:
+        locale === "ar" ? district.city_ar_name : district.city_en_name,
+      id: district.id,
     }));
   }
 
@@ -497,7 +585,10 @@ class CityManager {
    */
   async getSubDistrictsWithLabels(cityId, districtValue, locale = "en") {
     if (!cityId || !districtValue) return [];
-    const subs = await this.getSubDistrictsForCityDistrict(cityId, districtValue);
+    const subs = await this.getSubDistrictsForCityDistrict(
+      cityId,
+      districtValue
+    );
     return subs.map((sd) => ({
       value: sd.value,
       label: locale === "ar" ? sd.label_ar : sd.label_en,
@@ -606,12 +697,12 @@ class CityManager {
     for (const city of cities) {
       const cityKey = city.value;
       const cityDistricts = await this.getDistrictsForCity(city.id);
-      districts[cityKey] = cityDistricts.map(district => district.value);
+      districts[cityKey] = cityDistricts.map((district) => district.value);
     }
 
     return {
-      cities: cities.map(city => city.value),
-      districts
+      cities: cities.map((city) => city.value),
+      districts,
     };
   }
 
@@ -624,14 +715,18 @@ class CityManager {
 
     const lowercaseQuery = query.toLowerCase();
     return cities
-      .filter(city =>
-        city.label_en.toLowerCase().includes(lowercaseQuery) ||
-        city.label_ar.includes(lowercaseQuery)
+      .filter(
+        (city) =>
+          city.label_en.toLowerCase().includes(lowercaseQuery) ||
+          city.label_ar.includes(lowercaseQuery) ||
+          (city.aliases || []).some((alias) =>
+            String(alias).toLowerCase().includes(lowercaseQuery)
+          )
       )
-      .map(city => ({
+      .map((city) => ({
         value: city.value,
         label: locale === "ar" ? city.label_ar : city.label_en,
-        id: city.id
+        id: city.id,
       }));
   }
 
@@ -639,23 +734,29 @@ class CityManager {
    * Search districts by name (supports both English and Arabic)
    */
   async searchDistricts(query, cityId = null, locale = "en") {
-    const districts = cityId ? await this.getDistrictsForCity(cityId) : await this.getDistricts();
+    const districts = cityId
+      ? await this.getDistrictsForCity(cityId)
+      : await this.getDistricts();
     if (!query) return this.getDistrictsWithLabels(cityId, locale);
 
     const lowercaseQuery = query.toLowerCase();
 
     return districts
-      .filter(district =>
-        district.label_en.toLowerCase().includes(lowercaseQuery) ||
-        district.label_ar.includes(lowercaseQuery) ||
-        district.aliases.some(alias => alias.toLowerCase().includes(lowercaseQuery))
+      .filter(
+        (district) =>
+          district.label_en.toLowerCase().includes(lowercaseQuery) ||
+          district.label_ar.includes(lowercaseQuery) ||
+          district.aliases.some((alias) =>
+            alias.toLowerCase().includes(lowercaseQuery)
+          )
       )
-      .map(district => ({
+      .map((district) => ({
         value: district.value,
         label: locale === "ar" ? district.label_ar : district.label_en,
         city_id: district.city_id,
-        city_name: locale === "ar" ? district.city_ar_name : district.city_en_name,
-        id: district.id
+        city_name:
+          locale === "ar" ? district.city_ar_name : district.city_en_name,
+        id: district.id,
       }));
   }
 }

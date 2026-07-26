@@ -115,6 +115,15 @@ export class TokenRefreshService {
     LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_ID);
     LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_INFO);
 
+    try {
+      const { clearLocationsCatalogSessionStorage } = await import(
+        "@/lib/locations/invalidate-locations-catalog.client"
+      );
+      clearLocationsCatalogSessionStorage();
+    } catch {
+      /* ignore */
+    }
+
     if (typeof window !== "undefined") {
       const suffix =
         reason != null && reason !== ""

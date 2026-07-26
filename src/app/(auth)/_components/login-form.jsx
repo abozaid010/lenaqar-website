@@ -19,6 +19,13 @@ export default function LoginForm() {
     if (state.success) {
       toast.success(t.login.successMessage);
 
+      // New session → drop prior tab's locations catalog so we reload from API.
+      void import("@/lib/locations/invalidate-locations-catalog.client").then(
+        (m) => {
+          m.clearLocationsCatalogSessionStorage();
+        }
+      );
+
       const destination = state.clientId ? `/${state.clientId}/dashboard` : '/dashboard';
       // Single navigation: avoids triple dashboard loads (major perf win).
       setTimeout(() => {

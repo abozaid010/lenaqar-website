@@ -127,8 +127,10 @@ export function useCitiesAndDistricts() {
   return useQuery({
     queryKey: cityKeys.lists(),
     queryFn: fetchCitisAndProjects,
-    staleTime: 1000 * 60 * 15, // 15 minutes
+    staleTime: 1000 * 60 * 60, // 1 hour — catalog is session + server cached
+    gcTime: 1000 * 60 * 60 * 6,
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 }
 

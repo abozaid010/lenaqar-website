@@ -65,6 +65,9 @@ const Header = ({ clientName, clientID, clientEmail }) => {
       if (typeof window !== "undefined") {
         // Also clear TanStack Query cache for data-projection
         queryClient.removeQueries({ queryKey: ["data-projection"] });
+        void import("@/lib/locations/invalidate-locations-catalog.client").then(
+          (m) => m.invalidateLocationsCatalogClient()
+        );
       }
 
       // Wait a brief moment to ensure cookies are cleared

@@ -308,6 +308,9 @@ export default function ClientInfo({ client_email }) {
 
       if (typeof window !== "undefined") {
         queryClient.removeQueries({ queryKey: ["data-projection"] });
+        void import("@/lib/locations/invalidate-locations-catalog.client").then(
+          (m) => m.invalidateLocationsCatalogClient()
+        );
       }
 
       await new Promise((resolve) => setTimeout(resolve, 100));
