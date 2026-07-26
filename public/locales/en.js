@@ -752,6 +752,7 @@ export default {
     noImages: "No images",
     viewImage: "View full image",
     unitFallback: "Property unit",
+    viewDetails: "View details",
     invalidLinkHint: "Ask your agent for a new link.",
     unitsLoadFailed: "Failed to load units",
     createFailed: "Could not open match page",

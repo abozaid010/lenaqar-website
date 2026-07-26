@@ -51,17 +51,16 @@ export async function getLocationDisplayLabels(
  * Format a price for display: commas every 3 digits.
  * Accepts number or string (e.g. "2,3,2,3,1,2,3,123"); normalizes by stripping non-digits so display is correct.
  */
-export const formatPrice = (num) => {
-  if (num === "" || num === null || num === undefined) return "";
-  const str =
-    typeof num === "string"
-      ? num.replace(/\D/g, "")
-      : String(Math.floor(Number(num)));
-  if (!str) return "";
-  const n = parseInt(str, 10);
-  if (isNaN(n)) return "";
-  return n.toLocaleString("en-US");
-};
+export { formatPrice } from "./parse-amount";
+
+export {
+  normalizeToEnglishDigits,
+  parseAmount,
+  isPositiveAmount,
+  parseMoneyInput,
+  sanitizePriceFields,
+  UNIT_PRICE_FIELDS,
+} from "./parse-amount";
 
 export const convertArabicToEnglishNumbers = (input) => {
   if (typeof input !== "string") return input;

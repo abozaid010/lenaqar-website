@@ -3,7 +3,7 @@
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { PhoneField } from "@/components/phone/PhoneField";
 import { useI18n } from "@/hooks/useI18n";
-import { convertArabicToEnglishNumbers } from "@/utils/formatters";
+import { parseMoneyInput } from "@/utils/parse-amount";
 import { Trash2Icon } from "lucide-react";
 
 export default function SaleDetailsStep({
@@ -27,9 +27,7 @@ export default function SaleDetailsStep({
     }
 
     if (type === "money") {
-      const englishValue = String(convertArabicToEnglishNumbers(value));
-      const rawValue = englishValue.replace(/\D/g, "");
-      updateFormData({ [name]: rawValue === "" ? "" : Number(rawValue) });
+      updateFormData({ [name]: parseMoneyInput(value) });
       return;
     }
 
@@ -121,7 +119,7 @@ export default function SaleDetailsStep({
             label={translateStrict("saleDetails.totalPrice")}
             name="totalPrice"
             value={formData.totalPrice}
-            onChange={handleChange}
+            onChange={(e) => handleChange(e, "money")}
             placeholder="0"
             type="money"
             adornment="EGP"
@@ -140,7 +138,7 @@ export default function SaleDetailsStep({
             label={translateStrict("saleDetails.downPayment")}
             name="downPayment"
             value={formData.downPayment}
-            onChange={handleChange}
+            onChange={(e) => handleChange(e, "money")}
             placeholder="0"
             type="money"
             adornment="EGP"
@@ -150,7 +148,7 @@ export default function SaleDetailsStep({
             label={translateStrict("saleDetails.paid_amount")}
             name="paid_amount"
             value={formData.paid_amount}
-            onChange={handleChange}
+            onChange={(e) => handleChange(e, "money")}
             placeholder="0"
             type="money"
             adornment="EGP"
@@ -160,7 +158,7 @@ export default function SaleDetailsStep({
             label={translateStrict("saleDetails.remaining_amount")}
             name="remaining_amount"
             value={formData.remaining_amount}
-            onChange={handleChange}
+            onChange={(e) => handleChange(e, "money")}
             placeholder="0"
             type="money"
             adornment="EGP"
@@ -180,7 +178,7 @@ export default function SaleDetailsStep({
             label={translateStrict("saleDetails.over_price")}
             name="over_price"
             value={formData.over_price}
-            onChange={handleChange}
+            onChange={(e) => handleChange(e, "money")}
             placeholder="0"
             type="money"
             adornment="EGP"

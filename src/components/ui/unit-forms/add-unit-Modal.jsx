@@ -39,16 +39,12 @@ import {
   getPhoneValidationError,
   phoneToE164,
 } from "@/components/phone/phone-utils";
-
-/** Parse value to number for API (strip commas/formatting). */
-function normalizeToEnglishDigits(value) {
-  if (value == null) return value;
-  return String(value)
-    .replace(/[٠-٩]/g, (digit) => String(digit.charCodeAt(0) - 1632))
-    .replace(/[۰-۹]/g, (digit) => String(digit.charCodeAt(0) - 1776))
-    .replace(/٫/g, ".")
-    .replace(/٬/g, ",");
-}
+import {
+  isPositiveAmount,
+  normalizeToEnglishDigits,
+  parseAmount,
+  sanitizePriceFields,
+} from "@/utils/parse-amount";
 
 /** Safely format a date value to a YYYY-MM-DD input string; empty string when invalid. */
 function toDateInputValue(value) {
@@ -59,12 +55,7 @@ function toDateInputValue(value) {
 }
 
 function toAmount(value) {
-  if (value === "" || value === null || value === undefined) return 0;
-  if (typeof value === "number" && !Number.isNaN(value)) return value;
-  const normalized = normalizeToEnglishDigits(value);
-  const stripped = String(normalized).replace(/[^\d.]/g, "");
-  const n = parseFloat(stripped);
-  return Number.isNaN(n) ? 0 : n;
+  return parseAmount(value);
 }
 
 function toIntAmount(value) {
@@ -82,44 +73,44 @@ function cleanExtraInfo(text) {
     .trim();
 }
 
-/** Ensure all price/amount fields in form data are sent as numbers to the API. */
+/**
+ * Normalize counts/areas to numbers, and price fields to positive numbers only.
+ * Missing / empty / non-positive prices are omitted (not sent as null or 0).
+ */
 function sanitizeAmountsForApi(data) {
   const out = { ...data };
   const numericIntFields = ["floor", "roomsCount", "bathroomCount", "installment_years"];
   const numericFloatFields = ["landArea", "gardenSize", "outdoor_area", "roof_area", "garageArea"];
-  const sellAmountFields = [
-    "totalPrice",
-    "downPayment",
-    "paid_amount",
-    "remaining_amount",
-    "over_price",
-  ];
+
   numericIntFields.forEach((field) => {
-    if (field in out) {
-      out[field] = toIntAmount(out[field]);
+    if (!(field in out)) return;
+    const raw = out[field];
+    if (raw === "" || raw === null || raw === undefined) {
+      delete out[field];
+      return;
     }
+    out[field] = toIntAmount(raw);
   });
   numericFloatFields.forEach((field) => {
-    if (field in out) {
-      out[field] = toAmount(out[field]);
+    if (!(field in out)) return;
+    const raw = out[field];
+    if (raw === "" || raw === null || raw === undefined) {
+      delete out[field];
+      return;
     }
+    out[field] = toAmount(raw);
   });
-  sellAmountFields.forEach((field) => {
-    if (field in out) {
-      out[field] = toAmount(out[field]);
-    }
-  });
-  if (out.purpose === "rent") {
-    if ("monthlyRentPrice" in out) {
-      out.monthlyRentPrice = toAmount(out.monthlyRentPrice);
-    }
+
+  const withPrices = sanitizePriceFields(out);
+
+  if (withPrices.purpose === "rent") {
     // Nested cadence map is no longer part of the rent API contract.
-    delete out.rentDurationType;
+    delete withPrices.rentDurationType;
   }
-  if ("view" in out) {
-    out.view = normalizeViewTypeValue(out.view);
+  if ("view" in withPrices) {
+    withPrices.view = normalizeViewTypeValue(withPrices.view);
   }
-  return out;
+  return withPrices;
 }
 
 function normalizeNumbersInPayload(value) {
@@ -693,8 +684,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           missingFields.push("deliveryDate");
         }
 
-        // Total price is required for sell units
-        if (!(Number(SellFormData.totalPrice) > 0)) {
+        // Total price is required for sell units (parseAmount handles comma-formatted strings)
+        if (!isPositiveAmount(SellFormData.totalPrice)) {
           missingFields.push("totalPrice");
         }
 
@@ -751,10 +742,10 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           return false;
         }
 
-        // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
-        const zeroFields = ["downPayment", "paid_amount", "remaining_amount", "installment_years", "over_price"];
+        // Keep optional non-price defaults only; prices are omitted from API when empty.
+        const optionalNonPriceDefaults = ["installment_years"];
         const sanitizedData = { ...SellFormData };
-        zeroFields.forEach((field) => {
+        optionalNonPriceDefaults.forEach((field) => {
           if (!sanitizedData[field] || sanitizedData[field] === "") {
             sanitizedData[field] = 0;
           }
@@ -767,7 +758,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           return false;
         }
 
-        const hasValidPrice = Number(rentFormData.monthlyRentPrice) > 0;
+        const hasValidPrice = isPositiveAmount(rentFormData.monthlyRentPrice);
 
         if (!hasValidPrice) {
           toast.error(
@@ -785,7 +776,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           monthlyRentPrice:
             prev.monthlyRentPrice === "" || prev.monthlyRentPrice == null
               ? 0
-              : Number(prev.monthlyRentPrice),
+              : parseAmount(prev.monthlyRentPrice),
         }));
       }
     }

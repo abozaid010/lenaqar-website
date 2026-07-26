@@ -2288,6 +2288,7 @@ export default {
     noImages: "لا توجد صور",
     viewImage: "عرض الصورة بالحجم الكامل",
     unitFallback: "وحدة عقارية",
+    viewDetails: "عرض التفاصيل",
     invalidLinkHint: "اطلب من الوكيل رابطاً جديداً.",
     unitsLoadFailed: "فشل تحميل الوحدات",
     createFailed: "تعذر فتح صفحة المطابقة",
