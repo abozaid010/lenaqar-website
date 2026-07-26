@@ -4,12 +4,29 @@ interface DeveloperContact {
   id: string;
   sales_phone: string;
   whatsapp: string;
+  name?: string | null;
+  sales_name?: string | null;
+  contact_name?: string | null;
 }
 
 interface ClientContact {
   client_id: string;
   phone_number: string;
   whatsapp: string | null;
+  name?: string | null;
+  client_name?: string | null;
+  full_name?: string | null;
+  contact_name?: string | null;
+}
+
+function pickContactName(
+  ...candidates: Array<string | null | undefined>
+): string | null {
+  for (const value of candidates) {
+    const trimmed = typeof value === "string" ? value.trim() : "";
+    if (trimmed) return trimmed;
+  }
+  return null;
 }
 
 interface ContactInfoResult {
@@ -131,7 +148,7 @@ class ContactInfo {
     }
   }
 
-  // Get developer contact by ID - no default values
+  // Get developer contact by ID — return real name + phone when present.
   get_developer_contact(developerId: string, developerName?: string | null): ContactInfoResult {
     const contact = this.developerContacts.get(developerId);
     
@@ -144,15 +161,24 @@ class ContactInfo {
       };
     }
 
+    const phone = contact.sales_phone?.trim() || null;
+    const whatsapp = contact.whatsapp?.trim() || phone;
+    const name = pickContactName(
+      contact.name,
+      contact.sales_name,
+      contact.contact_name,
+      developerName,
+    );
+
     return {
-      name: contact.sales_phone ? (developerName || 'Developer Sales Team') : null,
-      phone: contact.sales_phone,
-      whatsapp: contact.whatsapp,
+      name,
+      phone,
+      whatsapp,
       type: 'Developer'
     };
   }
 
-  // Get client contact by ID - no default values, proper fallback
+  // Get client contact by ID — return real name + phone when present (no fake labels).
   get_client_contact(clientId: string): ContactInfoResult {
     const contact = this.clientContacts.get(clientId);
     
@@ -165,10 +191,19 @@ class ContactInfo {
       };
     }
 
+    const phone = contact.phone_number?.trim() || null;
+    const whatsapp = contact.whatsapp?.trim() || phone;
+    const name = pickContactName(
+      contact.name,
+      contact.client_name,
+      contact.full_name,
+      contact.contact_name,
+    );
+
     return {
-      name: contact.phone_number ? `Client (${clientId})` : null,
-      phone: contact.phone_number,
-      whatsapp: contact.whatsapp || contact.phone_number, // fallback to phone_number if whatsapp null
+      name,
+      phone,
+      whatsapp,
       type: 'Client'
     };
   }
@@ -192,10 +227,11 @@ class ContactInfo {
       unit.clientId === currentClientId &&
       (unit.ownerName || unit.ownerMobile)
     ) {
+      const phone = unit.ownerMobile?.trim() || null;
       return {
-        name: unit.ownerName,
-        phone: unit.ownerMobile,
-        whatsapp: unit.ownerMobile,
+        name: pickContactName(unit.ownerName),
+        phone,
+        whatsapp: phone,
         type: 'Owner',
       };
     }

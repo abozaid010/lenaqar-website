@@ -349,6 +349,8 @@ export function useUnitsFilterDraft({
         next = { ...next, min_area: "", max_area: "" };
       } else if (key === "location") {
         next = { ...next, city: "", district: "", sub_district: "" };
+      } else if (key === "sort" || key === "sort_by" || key === "sort_order") {
+        next = { ...next, sort_by: "", sort_order: "" };
       } else if (key === "my_inventory" || key === "resale") {
         next = { ...next, [key]: false };
       } else {

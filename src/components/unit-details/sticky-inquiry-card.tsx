@@ -139,14 +139,23 @@ export default function StickyInquiryCard({
       {!loading && receiverPhone ? (
         <>
           <UnitInquiryContactHeader
-            name={contactData?.name?.trim() || unit.ownerName?.trim()}
-            phone={contactData?.phone || receiverPhone}
+            name={contactData?.name?.trim() || null}
+            phone={
+              contactData?.phone?.trim() ||
+              contactData?.whatsapp?.trim() ||
+              receiverPhone ||
+              null
+            }
             actions={{
               onWhatsApp: handleWhatsApp,
               onRefresh: () => {
                 void conversationControls?.refetch();
               },
-              callDisabled: !contactData?.phone || loading,
+              callDisabled: !(
+                contactData?.phone?.trim() ||
+                contactData?.whatsapp?.trim() ||
+                receiverPhone
+              ) || loading,
               whatsappDisabled: !(contactData?.whatsapp || contactData?.phone) || loading,
               refreshDisabled:
                 !conversationControls || conversationControls.isFetching || loading,

@@ -358,7 +358,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
       <span className="text-xs truncate">
         {translate(
           "unitsFilter.bulkAvailability.selectAll",
-          "Select all on page"
+          "Select all"
         )}
       </span>
       {bulkSelection.hasSelection && (
@@ -768,7 +768,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
               <span className="text-xs">
                 {translate(
                   "unitsFilter.bulkAvailability.selectAll",
-                  "Select all on page"
+                  "select all"
                 )}
               </span>
             </label>

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Image as ImageIcon, PlayCircle, Share2 } from 'lucide-react';
+import ImageSwiperModal from '@/components/ui/images-swiper-modal';
 import type { UnitHeroGalleryProps } from '@/lib/units/unit-types';
 import { useI18n } from '@/hooks/useI18n';
 
@@ -14,7 +15,13 @@ export default function UnitHeroGallery({
 }: UnitHeroGalleryProps) {
   const { t, translate } = useI18n();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const shareLabel = translate('unitShare.title', 'Share Property');
+
+  const galleryImages = useMemo(
+    () => images.filter((image) => image.type !== 'video'),
+    [images]
+  );
 
   const shareButton =
     canShare && onShare ? (
@@ -46,13 +53,13 @@ export default function UnitHeroGallery({
   const isCurrentVideo = currentImage?.type === 'video';
 
   const goToPrevious = () => {
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === 0 ? images.length - 1 : prev - 1
     );
   };
 
   const goToNext = () => {
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === images.length - 1 ? 0 : prev + 1
     );
   };
@@ -60,6 +67,16 @@ export default function UnitHeroGallery({
   const goToImage = (index: number) => {
     setCurrentImageIndex(index);
   };
+
+  const openFullscreen = () => {
+    if (isCurrentVideo || galleryImages.length === 0) return;
+    setIsFullscreen(true);
+  };
+
+  const fullscreenInitialSlide = Math.max(
+    0,
+    galleryImages.findIndex((image) => image.url === currentImage?.url)
+  );
 
   return (
     <div className="space-y-4">
@@ -94,30 +111,50 @@ export default function UnitHeroGallery({
             />
           )
         ) : (
-          <Image
-            src={currentImage.url}
-            alt={currentImage.alt}
-            fill
-            className="object-cover"
-            priority
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
-          />
+          <button
+            type="button"
+            onClick={openFullscreen}
+            className="absolute inset-0 cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            aria-label={translate('unitDetails.viewFullscreen', 'Click to view in fullscreen')}
+          >
+            <Image
+              src={currentImage.url}
+              alt={currentImage.alt}
+              fill
+              className="object-cover"
+              priority
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pointer-events-none">
+              <span className="mb-4 px-4 py-2 rounded-full bg-black/40 backdrop-blur-sm text-white text-sm">
+                {translate('unitDetails.viewFullscreen', 'Click to view in fullscreen')}
+              </span>
+            </div>
+          </button>
         )}
 
         {/* Navigation Controls */}
         {hasMultipleImages && (
           <>
             <button
-              onClick={goToPrevious}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white"
-              aria-label="Previous image"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                goToPrevious();
+              }}
+              className="absolute start-4 top-1/2 -translate-y-1/2 z-20 bg-white/80 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white"
+              aria-label={translate('common.previous', 'Previous')}
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <button
-              onClick={goToNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white"
-              aria-label="Next image"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                goToNext();
+              }}
+              className="absolute end-4 top-1/2 -translate-y-1/2 z-20 bg-white/80 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white"
+              aria-label={translate('common.next', 'Next')}
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -130,7 +167,6 @@ export default function UnitHeroGallery({
             {currentImageIndex + 1} / {images.length}
           </div>
         )}
-
       </div>
 
       {/* Thumbnail Strip */}
@@ -139,13 +175,17 @@ export default function UnitHeroGallery({
           {images.map((image, index) => (
             <button
               key={index}
+              type="button"
               onClick={() => goToImage(index)}
               className={`relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
                 index === currentImageIndex
                   ? 'border-blue-500 ring-2 ring-blue-200'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
-              aria-label={`View image ${index + 1}`}
+              aria-label={translate('imageViewer.viewImageN', 'View image {n}').replace(
+                '{n}',
+                String(index + 1)
+              )}
             >
               {image.type === 'video' ? (
                 <div className="w-full h-full bg-gray-900 text-white flex items-center justify-center">
@@ -163,6 +203,16 @@ export default function UnitHeroGallery({
             </button>
           ))}
         </div>
+      )}
+
+      {galleryImages.length > 0 && (
+        <ImageSwiperModal
+          open={isFullscreen}
+          onClose={() => setIsFullscreen(false)}
+          images={galleryImages.map((image) => ({ url: image.url, alt: image.alt }))}
+          showMasterPlanLabel={false}
+          initialSlide={fullscreenInitialSlide}
+        />
       )}
     </div>
   );

@@ -31,15 +31,20 @@ export default function UnitInquiryContactHeader({
   className = "",
 }: UnitInquiryContactHeaderProps) {
   const displayName = name?.trim() || null;
-  const displayPhone = phone?.trim()
-    ? formatPhoneForDisplay(phone, "EG") || phone.trim()
+  const rawPhone = phone?.trim() || null;
+  const displayPhone = rawPhone
+    ? formatPhoneForDisplay(rawPhone, "EG") || rawPhone
     : null;
 
-  if (!displayName && !displayPhone) {
+  // Prefer name when both exist; fall back to phone when name is missing.
+  const label = displayName || displayPhone;
+
+  if (!label) {
     return null;
   }
 
-  const showCall = Boolean(phone) && !actions?.callDisabled;
+  // Copy/call always use the phone number, even when the label shows the name.
+  const showCall = Boolean(rawPhone) && !actions?.callDisabled;
   const showActions = Boolean(
     showCall || actions?.onWhatsApp || actions?.onRefresh
   );
@@ -48,24 +53,24 @@ export default function UnitInquiryContactHeader({
     <div
       className={`shrink-0 flex items-start justify-between gap-2 border-b border-gray-100 pb-3 ${className}`.trim()}
     >
-      <div className="min-w-0 flex-1 space-y-0.5">
-        {displayName ? (
-          <p className="text-sm font-semibold text-gray-900 truncate">
-            {displayName}
-          </p>
-        ) : null}
-        {displayPhone ? (
-          <p className="text-xs text-gray-600" dir="ltr">
-            {displayPhone}
-          </p>
-        ) : null}
+      <div className="min-w-0 flex-1">
+        <p
+          className={
+            displayName
+              ? "text-sm font-semibold text-gray-900 truncate"
+              : "text-xs text-gray-600"
+          }
+          dir={displayName ? undefined : "ltr"}
+        >
+          {label}
+        </p>
       </div>
 
       {showActions ? (
         <div className="flex items-center gap-1.5 shrink-0">
           {showCall ? (
             <CallButton
-              phoneNumber={phone}
+              phoneNumber={rawPhone}
               showCopy
               ariaLabel={actions?.callLabel}
               title={actions?.callLabel}

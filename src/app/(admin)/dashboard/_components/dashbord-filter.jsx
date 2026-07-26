@@ -390,7 +390,7 @@ export default function DashbordFilter({
     setIsWhatsappBulkOpen(true);
   };
 
-  // Campaign list: GET /campaign/names_only once per session; localStorage + poll only as fallback on error
+  // Campaign list: names_only (then /campaign/list); localStorage + poll only as last-resort fallback
   useEffect(() => {
     let cancelled = false;
     let interval;
