@@ -7,6 +7,7 @@ import UnitCodeSearch from "@/components/ui/unit-code-search";
 import { usePendingApprovalUnitsPageData } from "@/hooks/use-pending-approval-units-page-data";
 import { useUnitsByOwnerPhone } from "@/hooks/use-units-by-owner-phone";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
+import SearchableFurnishingTypeSelect from "@/components/ui/inputs/searchable-furnishing-type-select";
 import UnitsLocationSearch from "@/components/ui/inputs/units-location-search";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 // Temporarily hidden — author filter not needed at this stage.
@@ -54,6 +55,16 @@ const DROPDOWN_BUTTON_CLASS =
 
 const DATE_INPUT_CLASS =
   "w-full px-2 py-[10px] h-11 min-h-11 bg-[#F6F7FB] rounded-[5px] border border-[#E6E6E6] text-[#494A4B] text-base lg:text-sm focus:outline-none focus:ring-primary focus:border-primary";
+
+const FURNISHING_TRANSLATION_KEYS = {
+  furnished: "property.furnishing.furnished",
+  unfurnished: "property.furnishing.unfurnished",
+  hotel_furnished: "property.furnishing.hotelFurnished",
+  "partially furnished": "property.furnishing.partiallyFurnished",
+  "semi furnished": "property.furnishing.semiFurnished",
+  flixy: "property.furnishing.flixy",
+  turnkey: "property.furnishing.turnkey",
+};
 
 function normalizeOptionalFilter(value) {
   if (value == null) return "";
@@ -171,6 +182,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const [filter, setFilter] = useState(DEFAULT_VISIBILITY);
   const [updatedAtDate, setUpdatedAtDate] = useState("");
   const [propertyType, setPropertyType] = useState("");
+  const [furnishedType, setFurnishedType] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [author, setAuthor] = useState("");
@@ -189,6 +201,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const [draftFilter, setDraftFilter] = useState(DEFAULT_VISIBILITY);
   const [draftUpdatedAtDate, setDraftUpdatedAtDate] = useState("");
   const [draftPropertyType, setDraftPropertyType] = useState("");
+  const [draftFurnishedType, setDraftFurnishedType] = useState("");
   const [draftMinPrice, setDraftMinPrice] = useState("");
   const [draftMaxPrice, setDraftMaxPrice] = useState("");
   const [draftAuthor, setDraftAuthor] = useState("");
@@ -246,6 +259,8 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
       typeof stored.updated_at === "string" ? stored.updated_at : "";
     const nextPropertyType =
       typeof stored.property_type === "string" ? stored.property_type : "";
+    const nextFurnishedType =
+      typeof stored.furnished_type === "string" ? stored.furnished_type : "";
     const nextMinPrice =
       stored.min_price != null ? String(stored.min_price) : "";
     const nextMaxPrice =
@@ -269,6 +284,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setFilter(nextVisibility);
     setUpdatedAtDate(nextUpdatedAt);
     setPropertyType(nextPropertyType);
+    setFurnishedType(nextFurnishedType);
     setMinPrice(nextMinPrice);
     setMaxPrice(nextMaxPrice);
     setAuthor(nextAuthor);
@@ -284,6 +300,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setDraftFilter(nextVisibility);
     setDraftUpdatedAtDate(nextUpdatedAt);
     setDraftPropertyType(nextPropertyType);
+    setDraftFurnishedType(nextFurnishedType);
     setDraftMinPrice(nextMinPrice);
     setDraftMaxPrice(nextMaxPrice);
     setDraftAuthor(nextAuthor);
@@ -309,6 +326,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
       visibility: filter || DEFAULT_VISIBILITY,
       updated_at: updatedAtDate || "",
       property_type: propertyType || "",
+      furnished_type: furnishedType || "",
       min_price: minPrice || "",
       max_price: maxPrice || "",
       author: author || "",
@@ -325,6 +343,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     filter,
     updatedAtDate,
     propertyType,
+    furnishedType,
     minPrice,
     maxPrice,
     author,
@@ -389,7 +408,11 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
       propertyType && propertyType.trim() !== ""
         ? { ...withDate, property_type: propertyType.trim() }
         : withDate;
-    const withPrice = { ...withPropertyType };
+    const furnishedValue = normalizeOptionalFilter(furnishedType);
+    const withFurnishedType = furnishedValue
+      ? { ...withPropertyType, furnished_type: furnishedValue }
+      : withPropertyType;
+    const withPrice = { ...withFurnishedType };
     if (minPrice != null && minPrice !== "") withPrice.min_price = minPrice;
     if (maxPrice != null && maxPrice !== "") withPrice.max_price = maxPrice;
 
@@ -427,6 +450,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     filter,
     updatedAtDate,
     propertyType,
+    furnishedType,
     minPrice,
     maxPrice,
     author,
@@ -442,6 +466,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const hasActiveClientFilters =
     Boolean(updatedAtDate?.trim()) ||
     Boolean(propertyType?.trim()) ||
+    Boolean(normalizeOptionalFilter(furnishedType)) ||
     Boolean(minPrice) ||
     Boolean(maxPrice) ||
     Boolean(author?.trim()) ||
@@ -554,6 +579,20 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     [BUILDING_TYPES, locale]
   );
 
+  const getFurnishedTypeLabel = useCallback(
+    (value) => {
+      if (!value || value === "all") return "";
+      const key = String(value).toLowerCase().trim();
+      const translationKey = FURNISHING_TRANSLATION_KEYS[key];
+      if (translationKey) {
+        const translated = translate(translationKey);
+        if (translated && translated !== translationKey) return translated;
+      }
+      return value;
+    },
+    [translate]
+  );
+
   const getPriceLabel = useCallback(
     (min, max) => {
       if (!min && !max) return t.unitsFilter?.price ?? "Price";
@@ -620,6 +659,12 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
         value: getPropertyTypeLabel(propertyType),
       });
     }
+    if (normalizeOptionalFilter(furnishedType)) {
+      list.push({
+        key: "furnished_type",
+        value: getFurnishedTypeLabel(furnishedType),
+      });
+    }
     if (minPrice || maxPrice) {
       list.push({
         key: "price",
@@ -667,6 +712,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     filter,
     updatedAtDate,
     propertyType,
+    furnishedType,
     minPrice,
     maxPrice,
     author,
@@ -683,6 +729,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     visibilityOptions,
     t,
     getPropertyTypeLabel,
+    getFurnishedTypeLabel,
     getPriceLabel,
     getBedroomsLabel,
     getPurposeLabel,
@@ -695,6 +742,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setDraftFilter(filter);
     setDraftUpdatedAtDate(updatedAtDate);
     setDraftPropertyType(propertyType);
+    setDraftFurnishedType(furnishedType);
     setDraftMinPrice(minPrice);
     setDraftMaxPrice(maxPrice);
     setDraftAuthor(author);
@@ -717,6 +765,9 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setFilter(draftFilter || DEFAULT_VISIBILITY);
     setUpdatedAtDate(draftUpdatedAtDate);
     setPropertyType(draftPropertyType);
+    setFurnishedType(
+      draftFurnishedType === "all" ? "" : draftFurnishedType || ""
+    );
     setMinPrice(draftMinPrice);
     setMaxPrice(draftMaxPrice);
     setAuthor(draftAuthor || "");
@@ -737,6 +788,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setFilter(DEFAULT_VISIBILITY);
     setUpdatedAtDate("");
     setPropertyType("");
+    setFurnishedType("");
     setMinPrice("");
     setMaxPrice("");
     setAuthor("");
@@ -752,6 +804,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setDraftFilter(DEFAULT_VISIBILITY);
     setDraftUpdatedAtDate("");
     setDraftPropertyType("");
+    setDraftFurnishedType("");
     setDraftMinPrice("");
     setDraftMaxPrice("");
     setDraftAuthor("");
@@ -775,6 +828,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     if (key === "visibility") setFilter(DEFAULT_VISIBILITY);
     if (key === "updated_at") setUpdatedAtDate("");
     if (key === "property_type") setPropertyType("");
+    if (key === "furnished_type") setFurnishedType("");
     if (key === "author") setAuthor("");
     if (key === "team_phone") setTeamPhone("");
     if (key === "price") {
@@ -1263,6 +1317,29 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
                 </div>
 
                 <div className="w-full min-w-0">
+                  <SearchableFurnishingTypeSelect
+                    name="furnished_type_mobile"
+                    value={
+                      draftFurnishedType === "all" ? "" : draftFurnishedType
+                    }
+                    onChange={(e) => {
+                      const next = e?.target?.value || "";
+                      setDraftFurnishedType(next === "all" ? "" : next);
+                    }}
+                    showAllOption
+                    allOptionLabel={translate(
+                      "unitsFilter.allFurnishingTypes",
+                      "All Furnishing Types"
+                    )}
+                    placeholder={translate(
+                      "unitsFilter.allFurnishingTypes",
+                      "All Furnishing Types"
+                    )}
+                    buttonClassName={DROPDOWN_BUTTON_CLASS}
+                  />
+                </div>
+
+                <div className="w-full min-w-0">
                   <UnitsLocationSearch
                     name="resale_location_mobile"
                     city={draftCity}
@@ -1574,6 +1651,27 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
                     : "Search property types..."
                 }
                 className={FILTER_BUTTON_CLASS}
+              />
+            </div>
+
+            <div className="w-full min-w-0">
+              <SearchableFurnishingTypeSelect
+                name="furnished_type"
+                value={furnishedType === "all" ? "" : furnishedType}
+                onChange={(e) => {
+                  const next = e?.target?.value || "";
+                  setFurnishedType(next === "all" ? "" : next);
+                }}
+                showAllOption
+                allOptionLabel={translate(
+                  "unitsFilter.allFurnishingTypes",
+                  "All Furnishing Types"
+                )}
+                placeholder={translate(
+                  "unitsFilter.allFurnishingTypes",
+                  "All Furnishing Types"
+                )}
+                buttonClassName={DROPDOWN_BUTTON_CLASS}
               />
             </div>
 

@@ -33,6 +33,15 @@ export function buildPendingApprovalSlimListParams(raw, clientId) {
   if (base.property_type) {
     params.property_type = base.property_type;
   }
+  const furnishedType =
+    typeof base.furnished_type === "string"
+      ? base.furnished_type.trim()
+      : base.furnished_type != null
+        ? String(base.furnished_type).trim()
+        : "";
+  if (furnishedType && furnishedType !== "all") {
+    params.furnished_type = furnishedType;
+  }
   if (base.min_price != null && base.min_price !== "") {
     params.min_price = base.min_price;
   }

@@ -13,6 +13,7 @@ export function createEmptyPendingApprovalFilters() {
     visibility: DEFAULT_VISIBILITY,
     updated_at: "",
     property_type: "",
+    furnished_type: "",
     min_price: "",
     max_price: "",
     author: "",
@@ -39,6 +40,7 @@ export function hasActivePendingApprovalFilters(filters) {
   const keys = [
     "updated_at",
     "property_type",
+    "furnished_type",
     "min_price",
     "max_price",
     "author",
