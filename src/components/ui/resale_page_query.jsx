@@ -15,7 +15,6 @@ import { unitsSourcePendingQueryString } from "@/utils/units-navigation-source";
 import { detectBrokerUnitIds } from "@/lib/units/detect-broker-units";
 import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
-import { useOnClickOutside } from "@/hooks/use-click-outside";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-context";
 import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
@@ -39,7 +38,7 @@ import {
 import { phoneToE164 } from "@/components/phone/phone-utils";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
-import { ChevronDown, Loader2, SlidersHorizontal, Trash2, X } from "lucide-react";
+import { Loader2, SlidersHorizontal, Trash2, X } from "lucide-react";
 import { useMemo, useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
@@ -203,11 +202,6 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const [draftMaxArea, setDraftMaxArea] = useState("");
   const [draftAreaRangeError, setDraftAreaRangeError] = useState("");
 
-  // Desktop price popover draft
-  const [pricePopoverMin, setPricePopoverMin] = useState("");
-  const [pricePopoverMax, setPricePopoverMax] = useState("");
-  const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
-  const priceDropdownRef = useRef(null);
   const didBootstrapSessionFiltersRef = useRef(false);
   const skipPersistUntilHydratedRef = useRef(false);
 
@@ -365,8 +359,6 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
       })),
     [translate]
   );
-
-  useOnClickOutside(priceDropdownRef, () => setIsPriceDropdownOpen(false));
 
   const validateAreaRange = useCallback(
     (minValue, maxValue, setError) => {
@@ -536,6 +528,17 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [isMobileFiltersOpen]);
+
+  // Close mobile sheet when switching to desktop layout (same as units page)
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+    const onChange = (event) => {
+      if (event.matches) setIsMobileFiltersOpen(false);
+    };
+    mediaQuery.addEventListener("change", onChange);
+    return () => mediaQuery.removeEventListener("change", onChange);
+  }, []);
 
   const showBulkToolbar = isMounted && canShowBulkButton && bulkSelection;
   const defaultAvailabilityMessage = BULK_AVAILABILITY_DEFAULT_MESSAGE_AR;
@@ -761,8 +764,6 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setDraftMinArea("");
     setDraftMaxArea("");
     setDraftAreaRangeError("");
-    setPricePopoverMin("");
-    setPricePopoverMax("");
   }, []);
 
   const handleClearAllAndCloseMobile = () => {
@@ -942,18 +943,6 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setFilter(next || DEFAULT_VISIBILITY);
   };
 
-  const handlePriceApplyDesktop = () => {
-    setMinPrice(pricePopoverMin);
-    setMaxPrice(pricePopoverMax);
-    setIsPriceDropdownOpen(false);
-  };
-
-  const openPriceDropdown = () => {
-    setPricePopoverMin(minPrice);
-    setPricePopoverMax(maxPrice);
-    setIsPriceDropdownOpen(true);
-  };
-
   const bulkSelectLabel = showBulkToolbar && (
     <label className="flex w-full items-center gap-2 min-h-11 px-3 rounded-md border border-gray-300 bg-white text-sm font-medium cursor-pointer select-none hover:bg-gray-50">
       <input
@@ -1072,9 +1061,57 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   }
 
   return (
-    <div className="flex-1 flex flex-col space-y-3 sm:space-y-4 min-w-0 w-full">
+    <div className="flex flex-col min-w-0 w-full gap-3 lg:gap-4">
       <UnitCodeSearch />
 
+      <div className="flex flex-col lg:flex-row gap-3 lg:gap-4 min-w-0 w-full">
+        {/*
+          List column first on desktop (order-1); filters sidebar second (order-2).
+          In RTL that places filters on the visual start — same as units page.
+        */}
+        <div className="min-w-0 flex-1 order-2 lg:order-1 space-y-3 sm:space-y-4">
+          {isOwnerFilterActive && isError ? (
+            <div className="mt-6">
+              <QueryErrorState
+                error={error}
+                refetch={refetch}
+                isFetching={isFetching}
+                title="Error loading units by owner"
+                message="Failed to load units for this owner. Please try again."
+                retryLabel="Retry"
+              />
+            </div>
+          ) : isFetching && displayedUnits.length === 0 ? (
+            <LoadingSpinner
+              message="Refreshing..."
+              containerClassName="flex items-center justify-center min-h-[12rem] mt-6 sm:mt-12"
+            />
+          ) : (
+            <UnitsGrid
+              units={displayedUnits}
+              pagination={pagination}
+              readonly={false}
+              allowMissingFields
+              linkQueryParams={unitsSourcePendingQueryString(true)}
+              brokerUnitIds={brokerUnitIds}
+            />
+          )}
+
+          {showBulkToolbar && (
+            <AddNewWhatsappCampaignDialog
+              isOpen={isWhatsappBulkOpen}
+              onClose={() => setIsWhatsappBulkOpen(false)}
+              recipients={bulkSelection.resolvedRecipients}
+              defaultAutomationMessage={defaultAvailabilityMessage}
+              appendUnitLinkPerRecipient
+              onSendSuccess={() => bulkSelection.clearUnitSelection()}
+            />
+          )}
+        </div>
+
+        {/* Filters: compact bar + sheet on mobile; sticky sidebar on desktop */}
+        <div className="w-full lg:w-[360px] shrink-0 order-1 lg:order-2 min-w-0">
+          <div className="lg:sticky lg:top-3">
       {/* Mobile chrome: mount after hydration to keep event handlers reliable */}
       {!isMounted ? (
         <div
@@ -1082,7 +1119,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
           aria-hidden
         />
       ) : (
-        <div className="lg:hidden space-y-2 min-w-0">
+        <div className={`lg:hidden space-y-2 min-w-0 ${isMobileFiltersOpen ? "invisible pointer-events-none" : ""}`}>
           <div className="sticky top-12 z-20 lg:top-0 -mx-1 px-1 py-1 bg-[#E2DBFF]/95 backdrop-blur-sm supports-[backdrop-filter]:bg-[#E2DBFF]/80">
             <div className="flex items-center gap-2 min-w-0">
               <button
@@ -1435,385 +1472,306 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
           document.body
         )}
 
-      {/* Desktop filter bar — unchanged layout, lg+ only */}
-      <div className="hidden lg:block p-4 space-y-4 bg-white rounded-lg shadow-md min-w-0">
-        <div className="flex items-center flex-wrap gap-2 justify-between min-w-0">
-          <div className="w-auto flex-1 min-w-0">
-            <SearchableDropdownSelect
-              name="filter"
-              options={visibilityOptions}
-              value={filter}
-              onChange={handleVisibilityChange}
-              showAllOption={false}
-              placeholder="Select filter"
-              className={FILTER_BUTTON_CLASS}
-            />
-          </div>
-          <div className="w-auto flex-1 min-w-0">
-            <input
-              id="resale-updated-at"
-              type="date"
-              value={updatedAtDate}
-              onChange={(e) => setUpdatedAtDate(e.target.value ?? "")}
-              className={DATE_INPUT_CLASS}
-              aria-label={
-                t.resalePage?.filterByUpdatedAt ?? "Filter by updated date"
-              }
-            />
-          </div>
+      {/* Desktop sidebar panel — vertical stack like units page */}
+      {!isMobileFiltersOpen && (
+        <div className="hidden lg:block bg-white rounded-lg shadow-md min-w-0">
+          <div className="p-4 space-y-3">
+            {(isMounted && isAdminUser) || showBulkToolbar ? (
+              <div className="w-full pb-3 border-b border-[#E6E6E6] space-y-2">
+                {isMounted && isAdminUser ? (
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    {renderBrokerDetectButton()}
+                    {showBulkToolbar && bulkSelection.hasSelection && (
+                      <button
+                        type="button"
+                        onClick={handleOpenCheckAvailability}
+                        className="flex items-center justify-center gap-1.5 px-2.5 h-10 min-w-10 bg-white border border-gray-300 text-gray-800 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm hover:shadow-md shrink-0"
+                        title={translate(
+                          "unitsFilter.bulkAvailability.checkButton",
+                          "Send Message"
+                        )}
+                        aria-label={translate(
+                          "unitsFilter.bulkAvailability.checkButton",
+                          "Send Message"
+                        )}
+                      >
+                        <WhatsAppIcon />
+                      </button>
+                    )}
+                  </div>
+                ) : null}
+                {showBulkToolbar && (
+                  <label className="flex w-full items-center gap-1.5 h-10 px-2 rounded-md border border-gray-300 bg-white text-sm font-medium cursor-pointer select-none hover:bg-gray-50">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 accent-primary shrink-0"
+                      checked={bulkSelection.allSelectableVisibleSelected}
+                      disabled={bulkSelection.selectableVisibleCount === 0}
+                      onChange={() => bulkSelection.toggleSelectAllVisible()}
+                    />
+                    <span className="text-xs truncate">
+                      {translate(
+                        "unitsFilter.bulkAvailability.selectAll",
+                        "select all"
+                      )}
+                    </span>
+                    {bulkSelection.hasSelection && (
+                      <span className="ms-auto text-[10px] text-gray-500 shrink-0 tabular-nums">
+                        {bulkSelection.selectedUnitIds.size}
+                      </span>
+                    )}
+                  </label>
+                )}
+              </div>
+            ) : null}
 
-          <div className="w-auto flex-1 min-w-0">
-            <SearchableDropdownSelect
-              options={BUILDING_TYPES}
-              value={propertyType === "all" ? "" : propertyType}
-              onChange={(e) => setPropertyType(e.target.value || "")}
-              name="property_type"
-              getValue={(type) => type.value}
-              getLabel={(type) =>
-                locale === "ar" ? type.ar_label : type.en_label
-              }
-              searchFields={["en_label", "ar_label", "value"]}
-              showAllOption={true}
-              allOptionLabel={
-                t.unitsFilter?.allPropertyTypes ?? "All Property Types"
-              }
-              placeholder={
-                t.unitsFilter?.allPropertyTypes ?? "All Property Types"
-              }
-              searchPlaceholder={
-                locale === "ar"
-                  ? "ابحث عن نوع العقار..."
-                  : "Search property types..."
-              }
-              className={FILTER_BUTTON_CLASS}
-            />
-          </div>
-
-          {/* Temporarily hidden — author (email) filter not needed at this stage.
-          <div className="w-auto flex-1 min-w-0">
-            <AuthorFilterSelect
-              name="author"
-              value={author || ""}
-              onChange={(e) => setAuthor(e?.target?.value || "")}
-              className={FILTER_BUTTON_CLASS}
-            />
-          </div>
-          */}
-
-          {isAdminUser && (
-            <div className="w-auto flex-1 min-w-0">
+            <div className="w-full min-w-0">
               <SearchableDropdownSelect
-                name="team_phone"
-                options={teamPhoneOptions}
-                value={teamPhone || ""}
-                onChange={(e) => setTeamPhone(e?.target?.value || "")}
-                getValue={(option) => option.email}
-                getLabel={getTeamPhoneOptionLabel}
-                resolveSelectedLabel={(v) =>
-                  resolveTeamPhoneDisplayLabel(v, teamPhoneOptions)
-                }
-                searchFields={["name", "email", "phone"]}
-                showAllOption
-                allOptionLabel={translate(
-                  "unitsFilter.teamPhone.all",
-                  "All phone numbers"
-                )}
-                allOptionValue=""
-                placeholder={translate(
-                  "unitsFilter.teamPhone.placeholder",
-                  "Filter by phone number"
-                )}
-                searchPlaceholder={translate(
-                  "unitsFilter.teamPhone.search",
-                  "Search by name or phone"
-                )}
-                noResultsText={translate(
-                  "unitsFilter.teamPhone.noResults",
-                  "No matching phone numbers"
-                )}
-                isLoading={isTeamLoading}
+                name="filter"
+                options={visibilityOptions}
+                value={filter}
+                onChange={handleVisibilityChange}
+                showAllOption={false}
+                placeholder="Select filter"
                 className={FILTER_BUTTON_CLASS}
               />
             </div>
-          )}
 
-          <div
-            className="relative w-auto flex-1 min-w-0"
-            ref={priceDropdownRef}
-          >
-            <button
-              type="button"
-              className="w-full px-2 py-[10px] h-11 min-h-11 bg-[#F6F7FB] rounded-[5px] border border-[#E6E6E6] text-[#494A4B] text-sm text-start focus:outline-none focus:ring-primary flex justify-between items-center"
-              onClick={() =>
-                isPriceDropdownOpen
-                  ? setIsPriceDropdownOpen(false)
-                  : openPriceDropdown()
-              }
-            >
-              <span className="truncate">
-                {getPriceLabel(minPrice, maxPrice)}
-              </span>
-              <ChevronDown size={22} className="inline-block mt-0.5 shrink-0" />
-            </button>
-            {isPriceDropdownOpen && (
-              <div className="absolute z-[46] mt-1 w-full min-w-[200px] bg-white rounded-[5px] shadow-2xl p-3">
-                {priceFields(
-                  pricePopoverMin,
-                  pricePopoverMax,
-                  setPricePopoverMin,
-                  setPricePopoverMax,
-                  true,
-                  handlePriceApplyDesktop
+            <div className="w-full min-w-0">
+              <input
+                id="resale-updated-at"
+                type="date"
+                value={updatedAtDate}
+                onChange={(e) => setUpdatedAtDate(e.target.value ?? "")}
+                className={DATE_INPUT_CLASS}
+                aria-label={
+                  t.resalePage?.filterByUpdatedAt ?? "Filter by updated date"
+                }
+              />
+            </div>
+
+            <div className="w-full min-w-0">
+              <SearchableDropdownSelect
+                options={BUILDING_TYPES}
+                value={propertyType === "all" ? "" : propertyType}
+                onChange={(e) => setPropertyType(e.target.value || "")}
+                name="property_type"
+                getValue={(type) => type.value}
+                getLabel={(type) =>
+                  locale === "ar" ? type.ar_label : type.en_label
+                }
+                searchFields={["en_label", "ar_label", "value"]}
+                showAllOption={true}
+                allOptionLabel={
+                  t.unitsFilter?.allPropertyTypes ?? "All Property Types"
+                }
+                placeholder={
+                  t.unitsFilter?.allPropertyTypes ?? "All Property Types"
+                }
+                searchPlaceholder={
+                  locale === "ar"
+                    ? "ابحث عن نوع العقار..."
+                    : "Search property types..."
+                }
+                className={FILTER_BUTTON_CLASS}
+              />
+            </div>
+
+            {isAdminUser && (
+              <div className="w-full min-w-0">
+                <SearchableDropdownSelect
+                  name="team_phone"
+                  options={teamPhoneOptions}
+                  value={teamPhone || ""}
+                  onChange={(e) => setTeamPhone(e?.target?.value || "")}
+                  getValue={(option) => option.email}
+                  getLabel={getTeamPhoneOptionLabel}
+                  resolveSelectedLabel={(v) =>
+                    resolveTeamPhoneDisplayLabel(v, teamPhoneOptions)
+                  }
+                  searchFields={["name", "email", "phone"]}
+                  showAllOption
+                  allOptionLabel={translate(
+                    "unitsFilter.teamPhone.all",
+                    "All phone numbers"
+                  )}
+                  allOptionValue=""
+                  placeholder={translate(
+                    "unitsFilter.teamPhone.placeholder",
+                    "Filter by phone number"
+                  )}
+                  searchPlaceholder={translate(
+                    "unitsFilter.teamPhone.search",
+                    "Search by name or phone"
+                  )}
+                  noResultsText={translate(
+                    "unitsFilter.teamPhone.noResults",
+                    "No matching phone numbers"
+                  )}
+                  isLoading={isTeamLoading}
+                  className={FILTER_BUTTON_CLASS}
+                />
+              </div>
+            )}
+
+            <div className="w-full min-w-0">
+              <UnitsLocationSearch
+                name="resale_location"
+                city={city}
+                district={district}
+                subDistrict={subDistrict}
+                onChange={(payload) => handleLocationChange(payload)}
+                buttonClassName={DROPDOWN_BUTTON_CLASS}
+              />
+            </div>
+
+            <div className="w-full min-w-0">
+              <SearchableDropdownSelect
+                name="bedrooms"
+                options={BEDROOM_OPTIONS}
+                value={bedrooms || ""}
+                onChange={(e) => handleBedroomsChange(e.target.value || "")}
+                showAllOption
+                allOptionLabel={translate(
+                  "unitsFilter.allBedrooms",
+                  "All Bedrooms"
                 )}
+                placeholder={translate(
+                  "unitsFilter.allBedrooms",
+                  "All Bedrooms"
+                )}
+                searchPlaceholder={translate(
+                  "unitsFilter.bedroomsSearchPlaceholder",
+                  "Search bedrooms…"
+                )}
+                noResultsText={translate(
+                  "unitsFilter.bedroomsSearchEmpty",
+                  "No matching bedrooms"
+                )}
+                getValue={(opt) => opt.value}
+                getLabel={(opt) => opt.label}
+                buttonClassName={DROPDOWN_BUTTON_CLASS}
+              />
+            </div>
+
+            <div className="w-full min-w-0">
+              <p className="text-xs font-medium text-[#494A4B] mb-1.5">
+                {translate("unitsFilter.purpose", "Purpose")}
+              </p>
+              <div
+                className="flex flex-wrap items-center gap-2"
+                role="group"
+                aria-label={translate("unitsFilter.purpose", "Purpose")}
+              >
+                {[
+                  {
+                    value: "rent",
+                    label: translate("unitsFilter.purposes.rent", "Rent"),
+                  },
+                  {
+                    value: "sell",
+                    label: translate("unitsFilter.purposes.sell", "Sell"),
+                  },
+                ].map((option) => {
+                  const isSelected = purpose === option.value;
+                  return (
+                    <label
+                      key={option.value}
+                      onClick={(e) => {
+                        if (isSelected) {
+                          e.preventDefault();
+                          handlePurposeChange("all");
+                        }
+                      }}
+                      className={`flex flex-1 min-w-0 items-center gap-2 h-10 px-3 rounded-md border text-xs font-medium cursor-pointer select-none transition-colors ${
+                        isSelected
+                          ? "bg-primary/10 border-primary/40 text-primary"
+                          : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="purpose_desktop"
+                        value={option.value}
+                        checked={isSelected}
+                        onChange={() => handlePurposeChange(option.value)}
+                        className="h-4 w-4 accent-primary shrink-0"
+                      />
+                      <span className="truncate">{option.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="w-full min-w-0 grid grid-cols-2 gap-2">
+              <LenaTextField
+                name="min_area"
+                type="number"
+                label={t.unitsFilter?.minArea ?? "Min Area"}
+                value={minArea}
+                error={areaRangeError}
+                onChange={(e) => handleAreaChange("min_area", e.target.value)}
+                className="w-full min-w-0"
+                adornment="m²"
+              />
+              <LenaTextField
+                name="max_area"
+                type="number"
+                label={translate("unitsFilter.maxArea", "Max Area")}
+                value={maxArea}
+                error={areaRangeError}
+                onChange={(e) => handleAreaChange("max_area", e.target.value)}
+                className="w-full min-w-0"
+                adornment="m²"
+              />
+            </div>
+
+            <div className="w-full min-w-0 rounded-md border border-[#E6E6E6] bg-[#F6F7FB] p-3">
+              <p className="text-xs font-medium text-gray-700 mb-2">
+                {t.unitsFilter?.price ?? "Price"}
+              </p>
+              {priceFields(minPrice, maxPrice, setMinPrice, setMaxPrice, false)}
+            </div>
+
+            {activeFilterCount > 0 && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm text-gray-600">
+                  {t.unitsFilter?.activeFilter}
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {activeFilters.map((item) => (
+                    <div
+                      key={`desktop-${item.key}`}
+                      className="flex items-center gap-3 bg-gray-100 rounded px-1.5 py-1 text-sm text-gray-700"
+                    >
+                      <p className="truncate max-w-[180px] text-xs">{item.value}</p>
+                      <button
+                        type="button"
+                        className="text-gray-500 hover:text-gray-700 min-h-8 min-w-8 inline-flex items-center justify-center"
+                        onClick={() => handleRemoveFilter(item.key)}
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+                  onClick={clearAllFilters}
+                >
+                  <Trash2 size={16} />
+                  {t.unitsFilter?.clearall}
+                </button>
               </div>
             )}
           </div>
         </div>
-
-        <div className="flex items-start flex-wrap gap-2 min-w-0">
-          <div className="w-full min-w-0 sm:flex-1 sm:min-w-[200px]">
-            <UnitsLocationSearch
-              name="resale_location"
-              city={city}
-              district={district}
-              subDistrict={subDistrict}
-              onChange={(payload) => handleLocationChange(payload)}
-              buttonClassName={DROPDOWN_BUTTON_CLASS}
-            />
-          </div>
-
-          <div className="w-full min-w-0 sm:flex-1 sm:min-w-[140px]">
-            <SearchableDropdownSelect
-              name="bedrooms"
-              options={BEDROOM_OPTIONS}
-              value={bedrooms || ""}
-              onChange={(e) => handleBedroomsChange(e.target.value || "")}
-              showAllOption
-              allOptionLabel={translate(
-                "unitsFilter.allBedrooms",
-                "All Bedrooms"
-              )}
-              placeholder={translate(
-                "unitsFilter.allBedrooms",
-                "All Bedrooms"
-              )}
-              searchPlaceholder={translate(
-                "unitsFilter.bedroomsSearchPlaceholder",
-                "Search bedrooms…"
-              )}
-              noResultsText={translate(
-                "unitsFilter.bedroomsSearchEmpty",
-                "No matching bedrooms"
-              )}
-              getValue={(opt) => opt.value}
-              getLabel={(opt) => opt.label}
-              buttonClassName={DROPDOWN_BUTTON_CLASS}
-            />
-          </div>
-
-          <div className="w-full min-w-0 sm:flex-1 sm:min-w-[200px]">
-            <p className="text-xs font-medium text-[#494A4B] mb-1.5">
-              {translate("unitsFilter.purpose", "Purpose")}
-            </p>
-            <div
-              className="flex flex-wrap items-center gap-2"
-              role="group"
-              aria-label={translate("unitsFilter.purpose", "Purpose")}
-            >
-              {[
-                {
-                  value: "rent",
-                  label: translate("unitsFilter.purposes.rent", "Rent"),
-                },
-                {
-                  value: "sell",
-                  label: translate("unitsFilter.purposes.sell", "Sell"),
-                },
-              ].map((option) => {
-                const isSelected = purpose === option.value;
-                return (
-                  <label
-                    key={option.value}
-                    onClick={(e) => {
-                      if (isSelected) {
-                        e.preventDefault();
-                        handlePurposeChange("all");
-                      }
-                    }}
-                    className={`flex flex-1 min-w-0 items-center gap-2 h-10 px-3 rounded-md border text-xs font-medium cursor-pointer select-none transition-colors ${
-                      isSelected
-                        ? "bg-primary/10 border-primary/40 text-primary"
-                        : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="purpose_desktop"
-                      value={option.value}
-                      checked={isSelected}
-                      onChange={() => handlePurposeChange(option.value)}
-                      className="h-4 w-4 accent-primary shrink-0"
-                    />
-                    <span className="truncate">{option.label}</span>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="w-full min-w-0 sm:flex-1 sm:min-w-[220px] grid grid-cols-2 gap-2">
-            <LenaTextField
-              name="min_area"
-              type="number"
-              label={t.unitsFilter?.minArea ?? "Min Area"}
-              value={minArea}
-              error={areaRangeError}
-              onChange={(e) => handleAreaChange("min_area", e.target.value)}
-              className="w-full min-w-0"
-              adornment="m²"
-            />
-            <LenaTextField
-              name="max_area"
-              type="number"
-              label={translate("unitsFilter.maxArea", "Max Area")}
-              value={maxArea}
-              error={areaRangeError}
-              onChange={(e) => handleAreaChange("max_area", e.target.value)}
-              className="w-full min-w-0"
-              adornment="m²"
-            />
+      )}
           </div>
         </div>
-
-        {isMounted && isAdminUser ? (
-          <div className="flex flex-wrap items-center gap-2">
-            {renderBrokerDetectButton()}
-          </div>
-        ) : null}
-
-        {showBulkToolbar && (
-          <div className="flex flex-wrap items-center gap-2">
-            <label className="flex items-center gap-2 h-9 min-h-9 px-3 rounded-md border border-gray-300 bg-white text-sm font-medium cursor-pointer select-none hover:bg-gray-50">
-              <input
-                type="checkbox"
-                className="h-4 w-4 accent-primary"
-                checked={bulkSelection.allSelectableVisibleSelected}
-                disabled={bulkSelection.selectableVisibleCount === 0}
-                onChange={() => bulkSelection.toggleSelectAllVisible()}
-              />
-              <span className="text-xs">
-                {translate(
-                  "unitsFilter.bulkAvailability.selectAll",
-                  "select all"
-                )}
-              </span>
-            </label>
-
-            {bulkSelection.hasSelection && (
-              <span className="text-xs text-gray-600">
-                {translate(
-                  "unitsFilter.bulkAvailability.selectedUnits",
-                  "{count} selected"
-                ).replace(
-                  "{count}",
-                  String(bulkSelection.selectedUnitIds.size)
-                )}
-              </span>
-            )}
-
-            {bulkSelection.hasSelection && (
-              <button
-                type="button"
-                onClick={handleOpenCheckAvailability}
-                className="flex items-center gap-2 px-3 sm:px-4 bg-white border border-gray-300 text-gray-800 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm hover:shadow-md shrink-0 h-9 min-h-9"
-                title={translate(
-                  "unitsFilter.bulkAvailability.checkButton",
-                  "Send Message"
-                )}
-              >
-                <WhatsAppIcon />
-                <span>
-                  {translate(
-                    "unitsFilter.bulkAvailability.checkButton",
-                    "Send Message"
-                  )}
-                </span>
-              </button>
-            )}
-          </div>
-        )}
-
-        {activeFilterCount > 0 && (
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-gray-600">
-              {t.unitsFilter?.activeFilter}
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {activeFilters.map((item) => (
-                <div
-                  key={`desktop-${item.key}`}
-                  className="flex items-center gap-3 bg-gray-100 rounded px-1.5 py-1 text-sm text-gray-700"
-                >
-                  <p className="truncate max-w-[180px] text-xs">{item.value}</p>
-                  <button
-                    type="button"
-                    className="text-gray-500 hover:text-gray-700 min-h-8 min-w-8 inline-flex items-center justify-center"
-                    onClick={() => handleRemoveFilter(item.key)}
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
-            <button
-              type="button"
-              className="flex items-center gap-1.5 px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
-              onClick={clearAllFilters}
-            >
-              <Trash2 size={16} />
-              {t.unitsFilter?.clearall}
-            </button>
-          </div>
-        )}
       </div>
-
-      {isOwnerFilterActive && isError ? (
-        <div className="mt-6">
-          <QueryErrorState
-            error={error}
-            refetch={refetch}
-            isFetching={isFetching}
-            title="Error loading units by owner"
-            message="Failed to load units for this owner. Please try again."
-            retryLabel="Retry"
-          />
-        </div>
-      ) : isFetching && displayedUnits.length === 0 ? (
-        <LoadingSpinner
-          message="Refreshing..."
-          containerClassName="flex items-center justify-center min-h-[12rem] mt-6 sm:mt-12"
-        />
-      ) : (
-        <UnitsGrid
-          units={displayedUnits}
-          pagination={pagination}
-          readonly={false}
-          allowMissingFields
-          linkQueryParams={unitsSourcePendingQueryString(true)}
-          brokerUnitIds={brokerUnitIds}
-        />
-      )}
-
-      {showBulkToolbar && (
-        <AddNewWhatsappCampaignDialog
-          isOpen={isWhatsappBulkOpen}
-          onClose={() => setIsWhatsappBulkOpen(false)}
-          recipients={bulkSelection.resolvedRecipients}
-          defaultAutomationMessage={defaultAvailabilityMessage}
-          appendUnitLinkPerRecipient
-          onSendSuccess={() => bulkSelection.clearUnitSelection()}
-        />
-      )}
     </div>
   );
 }
