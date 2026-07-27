@@ -30,6 +30,7 @@ import {
 import { normalizeLastAction } from "@/utils/actions";
 import { enforceDashboardAuthorOnParams } from "@/lib/dashboard-lead-access";
 import { toApiStartDate, toApiEndDate } from "@/utils/dashboardDate";
+import { resolveQuickSearchFromParams } from "@/utils/lead-list-search";
 
 // Auth API
 // Phone normalization lives in `@/utils/normalize-conversation-phone`
@@ -65,6 +66,30 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
       typeof searchParams === "string"
         ? safeMergeParams(searchParams, { limit: 100 })
         : { limit: 100, ...(searchParams || {}) };
+
+    // Name/phone search → lightweight GET /messages/quick-search.
+    // Action/date/campaign/etc. filters keep using messages/v2/all below.
+    const quickSearch = resolveQuickSearchFromParams(merged);
+    if (quickSearch) {
+      const body = await quickSearchMessages({
+        ...quickSearch,
+        limit: merged.limit ?? 100,
+      });
+      const payload = body?.data ?? body;
+      const users = Array.isArray(payload?.users) ? payload.users : [];
+      return {
+        users: users.map((user) => ({
+          ...user,
+          last_action: normalizeLastAction(user.last_action),
+        })),
+        pagination: {
+          has_more_next: false,
+          next_cursor: null,
+        },
+        count: users.length,
+      };
+    }
+
     // Drop client-only UI params if they ever leak into the filter key.
     const {
       action,
@@ -75,6 +100,9 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
       direction,
       sort: _sort,
       sort_score: _sortScore,
+      phone: _phone,
+      name: _name,
+      query: _query,
       ...restMerged
     } = merged;
     const params = enforceDashboardAuthorOnParams({
