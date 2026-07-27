@@ -200,6 +200,38 @@ export async function fetchPendingApprovalUnits(searchParams = {}) {
   }
 }
 
+/**
+ * Fetch all units listed by a given owner phone for the authenticated client.
+ * GET /units/by-owner-phone?phone=… — client_id comes from the token server-side.
+ *
+ * @param {string} phone
+ */
+export async function fetchUnitsByOwnerPhone(phone) {
+  const trimmed = typeof phone === "string" ? phone.trim() : "";
+  if (!trimmed) {
+    throw new Error("phone is required");
+  }
+
+  try {
+    const response = await axiosInstance.get("/units/by-owner-phone", {
+      params: { phone: trimmed },
+    });
+
+    if (!response.data || !response.data.data) {
+      throw new Error("Invalid response format from server");
+    }
+
+    if (!Array.isArray(response.data.data.units)) {
+      throw new Error("Expected units array but received invalid data format");
+    }
+
+    return mapSlimUnitsListResponse(response.data);
+  } catch (error) {
+    console.error("Failed to fetch units by owner phone:", error.message);
+    throw error;
+  }
+}
+
 // Original fetchDevelopers - keeps full developer data for developers tab with pagination
 const fetchDevelopersBase = async ({ pageParam, pageSize = 20 } = {}) => {
   const params = new URLSearchParams();

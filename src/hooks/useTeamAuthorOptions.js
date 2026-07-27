@@ -125,7 +125,7 @@ export function useTeamAuthorOptions({ selectedAuthor = "" } = {}) {
     });
   }, [isAdminUser, loggedInEmail, teamMembers, selectedAuthor]);
 
-  /** All team members for local phone filter (names shown; phone used to match). */
+  /** All team members for owner-phone filter (names shown; phone used for API query). */
   const teamPhoneOptions = useMemo(() => {
     if (!isAdminUser) return [];
 

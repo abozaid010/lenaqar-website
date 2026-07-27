@@ -5,6 +5,7 @@ import UnitsGrid from "@/components/ui/units-grid";
 import QueryErrorState from "@/components/ui/query-error-state";
 import UnitCodeSearch from "@/components/ui/unit-code-search";
 import { usePendingApprovalUnitsPageData } from "@/hooks/use-pending-approval-units-page-data";
+import { useUnitsByOwnerPhone } from "@/hooks/use-units-by-owner-phone";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 // Temporarily hidden — author filter not needed at this stage.
 // import AuthorFilterSelect from "@/components/ui/inputs/author-filter-select";
@@ -56,7 +57,7 @@ function formatPriceInput(value) {
   return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-/** Normalize phones for local equality checks (E.164, else digits / last 9). */
+/** Normalize phones for option matching (E.164, else digits / last 9). */
 function phonesMatch(a, b) {
   const rawA = String(a ?? "").trim();
   const rawB = String(b ?? "").trim();
@@ -135,7 +136,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [author, setAuthor] = useState("");
-  /** Local-only: selected team member email → filter units by their phone. */
+  /** Selected team member email → query units by their phone via /units/by-owner-phone. */
   const [teamPhone, setTeamPhone] = useState("");
 
   // Mobile sheet draft (committed on Apply)
@@ -212,22 +213,46 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const initialDataForQuery =
     !hasActiveClientFilters && initialUnitsData != null ? initialUnitsData : null;
 
-  const { isFetching, units, pagination, isLoading, isError, error, refetch } =
-    usePendingApprovalUnitsPageData(searchParamsKey, initialDataForQuery);
-
-  const displayedUnits = useMemo(() => {
+  const selectedOwnerPhone = useMemo(() => {
     const selectedEmail = typeof teamPhone === "string" ? teamPhone.trim() : "";
-    if (!selectedEmail) return units;
-    const selectedPhone = resolveSelectedTeamMemberPhone(
-      selectedEmail,
-      teamPhoneOptions,
-    );
-    if (!selectedPhone) return [];
-    return (units || []).filter((unit) => {
-      const ownerMobile = unit?.owner_mobile ?? unit?.ownerMobile ?? "";
-      return phonesMatch(ownerMobile, selectedPhone);
-    });
-  }, [units, teamPhone, teamPhoneOptions]);
+    if (!selectedEmail) return "";
+    return resolveSelectedTeamMemberPhone(selectedEmail, teamPhoneOptions);
+  }, [teamPhone, teamPhoneOptions]);
+
+  const isOwnerFilterActive = Boolean(
+    typeof teamPhone === "string" && teamPhone.trim()
+  );
+
+  const pendingQuery = usePendingApprovalUnitsPageData(
+    searchParamsKey,
+    initialDataForQuery,
+    { enabled: !isOwnerFilterActive }
+  );
+
+  const ownerQuery = useUnitsByOwnerPhone(
+    isOwnerFilterActive ? selectedOwnerPhone : ""
+  );
+
+  const units = isOwnerFilterActive
+    ? selectedOwnerPhone
+      ? ownerQuery.units
+      : []
+    : pendingQuery.units;
+  // Owner filter returns the full result set — no cursor pagination.
+  const pagination = isOwnerFilterActive ? null : pendingQuery.pagination;
+  const isLoading = isOwnerFilterActive
+    ? Boolean(selectedOwnerPhone) && ownerQuery.isLoading
+    : pendingQuery.isLoading;
+  const isFetching = isOwnerFilterActive
+    ? Boolean(selectedOwnerPhone) && ownerQuery.isFetching
+    : pendingQuery.isFetching;
+  const isError = isOwnerFilterActive
+    ? Boolean(selectedOwnerPhone) && ownerQuery.isError
+    : pendingQuery.isError;
+  const error = isOwnerFilterActive ? ownerQuery.error : pendingQuery.error;
+  const refetch = isOwnerFilterActive ? ownerQuery.refetch : pendingQuery.refetch;
+
+  const displayedUnits = units;
 
   const setVisibleUnitsFromList = bulkSelection?.setVisibleUnitsFromList;
 
@@ -530,12 +555,12 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     </div>
   );
 
-  // Initial load only — keep filters mounted during refetch
-  if (isLoading && !units?.length && !isError) {
+  // Initial load only — keep filters mounted during refetch / owner-phone queries
+  if (!isOwnerFilterActive && isLoading && !units?.length && !isError) {
     return <LoadingSpinner message="Loading resale units..." />;
   }
 
-  if (isError && !units?.length) {
+  if (!isOwnerFilterActive && isError && !units?.length) {
     return (
       <div className="container">
         <QueryErrorState
@@ -1006,7 +1031,18 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
         )}
       </div>
 
-      {isFetching && displayedUnits.length === 0 ? (
+      {isOwnerFilterActive && isError ? (
+        <div className="mt-6">
+          <QueryErrorState
+            error={error}
+            refetch={refetch}
+            isFetching={isFetching}
+            title="Error loading units by owner"
+            message="Failed to load units for this owner. Please try again."
+            retryLabel="Retry"
+          />
+        </div>
+      ) : isFetching && displayedUnits.length === 0 ? (
         <LoadingSpinner
           message="Refreshing..."
           containerClassName="flex items-center justify-center min-h-[12rem] mt-6 sm:mt-12"

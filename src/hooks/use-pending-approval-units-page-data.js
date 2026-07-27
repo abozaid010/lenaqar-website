@@ -16,8 +16,13 @@ import {
 /**
  * @param {string|object} searchParams - Serialized filter payload
  * @param {object|null} [initialData] - Server-prefetched first page (from RSC)
+ * @param {{ enabled?: boolean }} [options]
  */
-export function usePendingApprovalUnitsPageData(searchParams, initialData = null) {
+export function usePendingApprovalUnitsPageData(
+  searchParams,
+  initialData = null,
+  { enabled = true } = {},
+) {
   const queryClient = useQueryClient();
   const safeSearchParams =
     typeof searchParams === "string" && searchParams ? searchParams : "{}";
@@ -28,6 +33,7 @@ export function usePendingApprovalUnitsPageData(searchParams, initialData = null
   const unitsQuery = useQuery({
     queryKey,
     queryFn: () => fetchPendingApprovalUnits(safeSearchParams),
+    enabled,
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 30,
     refetchOnWindowFocus: false,
@@ -36,12 +42,14 @@ export function usePendingApprovalUnitsPageData(searchParams, initialData = null
     ...(initialData != null ? { initialData } : {}),
   });
 
-  const page1Settled = !unitsQuery.isFetching && Boolean(unitsQuery.data?.data);
+  const page1Settled =
+    enabled && !unitsQuery.isFetching && Boolean(unitsQuery.data?.data);
 
   // Restricted roles: return page 1 immediately; merge pages 2–3 in background.
   // Deps intentionally omit unitsQuery.data identity so setQueryData merges do not
   // re-enter and cancel the in-flight progressive loop.
   useEffect(() => {
+    if (!enabled) return;
     if (!shouldProgressivePendingUnitsFetch()) return;
 
     const { parsed, hasCursor, pageSize: paramPageSize } =
@@ -147,16 +155,16 @@ export function usePendingApprovalUnitsPageData(searchParams, initialData = null
     return () => {
       cancelled = true;
     };
-  }, [safeSearchParams, queryKey, queryClient, page1Settled]);
+  }, [enabled, safeSearchParams, queryKey, queryClient, page1Settled]);
 
   return {
-    units: unitsQuery.data?.data?.units ?? [],
-    pagination: unitsQuery.data?.data?.pagination ?? null,
-    isLoading: unitsQuery.isLoading,
-    error: unitsQuery.error,
-    isError: unitsQuery.isError,
+    units: enabled ? (unitsQuery.data?.data?.units ?? []) : [],
+    pagination: enabled ? (unitsQuery.data?.data?.pagination ?? null) : null,
+    isLoading: enabled && unitsQuery.isLoading,
+    error: enabled ? unitsQuery.error : null,
+    isError: enabled && unitsQuery.isError,
     refetch: unitsQuery.refetch,
-    isFetching: unitsQuery.isFetching,
-    isPending: unitsQuery.isPending,
+    isFetching: enabled && unitsQuery.isFetching,
+    isPending: enabled && unitsQuery.isPending,
   };
 }
