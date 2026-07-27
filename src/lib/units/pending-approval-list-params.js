@@ -39,6 +39,46 @@ export function buildPendingApprovalSlimListParams(raw, clientId) {
   if (base.max_price != null && base.max_price !== "") {
     params.max_price = base.max_price;
   }
+  if (base.min_area != null && base.min_area !== "") {
+    params.min_area = base.min_area;
+  }
+  if (base.max_area != null && base.max_area !== "") {
+    params.max_area = base.max_area;
+  }
+
+  const bedrooms =
+    base.bedrooms != null && base.bedrooms !== "" && base.bedrooms !== "all"
+      ? String(base.bedrooms).trim()
+      : "";
+  if (bedrooms !== "") {
+    params.bedrooms = bedrooms;
+  }
+
+  const purpose =
+    typeof base.purpose === "string" ? base.purpose.trim().toLowerCase() : "";
+  if (purpose && purpose !== "all") {
+    params.purpose = purpose;
+  }
+
+  const city =
+    typeof base.city === "string" ? base.city.trim().toLowerCase() : "";
+  if (city && city !== "all") {
+    params.city = city;
+  }
+  const district =
+    typeof base.district === "string"
+      ? base.district.trim().toLowerCase()
+      : "";
+  if (district && district !== "all") {
+    params.district = district;
+  }
+  const subDistrict =
+    typeof base.sub_district === "string"
+      ? base.sub_district.trim().toLowerCase()
+      : "";
+  if (subDistrict && subDistrict !== "all") {
+    params.sub_district = subDistrict;
+  }
 
   const author =
     typeof base.author === "string" ? base.author.trim() : base.author;

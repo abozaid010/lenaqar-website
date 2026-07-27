@@ -38,6 +38,12 @@ export default function UnitsGrid({
   allowMissingFields = false,
   /** When set (e.g. "?pending=1"), appended to unit detail links so details page can highlight missing fields */
   linkQueryParams = "",
+  /**
+   * TEMP: unit selection ids whose owner is a broker (from manual quick-search).
+   * When provided, cards show a "Broker" badge. Units page does not pass this.
+   * @type {Set<string> | null | undefined}
+   */
+  brokerUnitIds = null,
 }) {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareUnitCode, setShareUnitCode] = useState(null);
@@ -149,6 +155,10 @@ export default function UnitsGrid({
               showBulkCheckbox &&
               unitSelectionId &&
               bulkSelection.isUnitSelected(unitSelectionId);
+            const showBrokerBadge =
+              Boolean(brokerUnitIds) &&
+              Boolean(unitSelectionId) &&
+              brokerUnitIds.has(String(unitSelectionId));
 
             const cardBody = (
               <>
@@ -226,6 +236,15 @@ export default function UnitsGrid({
                               ? "—"
                               : t.sell}
                       </p>
+                      {showBrokerBadge ? (
+                        <p
+                          style={{ fontWeight: "600" }}
+                          className="absolute text-[12px] top-3 rounded-sm end-14 z-10 bg-amber-500 text-white px-2 py-0.5 uppercase tracking-wide shadow-sm"
+                          aria-label={translate("ownerType.broker", "Broker")}
+                        >
+                          {translate("ownerType.broker", "Broker")}
+                        </p>
+                      ) : null}
                     </div>
                   ) : null}
                 </div>
