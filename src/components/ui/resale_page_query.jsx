@@ -7,9 +7,12 @@ import UnitCodeSearch from "@/components/ui/unit-code-search";
 import { usePendingApprovalUnitsPageData } from "@/hooks/use-pending-approval-units-page-data";
 import { useUnitsByOwnerPhone } from "@/hooks/use-units-by-owner-phone";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
+import UnitsLocationSearch from "@/components/ui/inputs/units-location-search";
+import LenaTextField from "@/components/ui/inputs/lena-text-field";
 // Temporarily hidden — author filter not needed at this stage.
 // import AuthorFilterSelect from "@/components/ui/inputs/author-filter-select";
 import { unitsSourcePendingQueryString } from "@/utils/units-navigation-source";
+import { detectBrokerUnitIds } from "@/lib/units/detect-broker-units";
 import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
@@ -30,7 +33,7 @@ import {
 import { phoneToE164 } from "@/components/phone/phone-utils";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
-import { ChevronDown, SlidersHorizontal, Trash2, X } from "lucide-react";
+import { ChevronDown, Loader2, SlidersHorizontal, Trash2, X } from "lucide-react";
 import { useMemo, useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
@@ -40,8 +43,31 @@ const DEFAULT_VISIBILITY = "pending_approval";
 const FILTER_BUTTON_CLASS =
   "[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-11 [&>div>button]:min-h-11 [&>div>button]:px-2 [&>div>button]:py-[10px]";
 
+/** Matches units filter dropdown button styling (for UnitsLocationSearch / bedrooms). */
+const DROPDOWN_BUTTON_CLASS =
+  "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors w-full";
+
 const DATE_INPUT_CLASS =
   "w-full px-2 py-[10px] h-11 min-h-11 bg-[#F6F7FB] rounded-[5px] border border-[#E6E6E6] text-[#494A4B] text-base lg:text-sm focus:outline-none focus:ring-primary focus:border-primary";
+
+function normalizeOptionalFilter(value) {
+  if (value == null) return "";
+  const trimmed = String(value).trim();
+  if (!trimmed || trimmed === "all") return "";
+  return trimmed;
+}
+
+function formatLocationChip(city, district, subDistrict) {
+  return [city, district, subDistrict].filter(Boolean).join(" › ");
+}
+
+function parseNumericFilter(value) {
+  if (value === undefined || value === null || value === "") return null;
+  const cleaned = String(value).replace(/[^0-9.]/g, "");
+  if (!cleaned) return null;
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? n : null;
+}
 
 function WhatsAppIcon({ className = "w-4 h-4 text-green-600 shrink-0" }) {
   return (
@@ -117,6 +143,13 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const [isMounted, setIsMounted] = useState(false);
   const [isWhatsappBulkOpen, setIsWhatsappBulkOpen] = useState(false);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  /** TEMP: unit ids flagged as broker after manual quick-search (admin/owner only). */
+  const [brokerUnitIds, setBrokerUnitIds] = useState(() => new Set());
+  const [isDetectingBrokers, setIsDetectingBrokers] = useState(false);
+  const [brokerDetectProgress, setBrokerDetectProgress] = useState({
+    done: 0,
+    total: 0,
+  });
 
   const visibilityOptions = useMemo(
     () => [
@@ -138,6 +171,14 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const [author, setAuthor] = useState("");
   /** Selected team member email → query units by their phone via /units/by-owner-phone. */
   const [teamPhone, setTeamPhone] = useState("");
+  const [city, setCity] = useState("");
+  const [district, setDistrict] = useState("");
+  const [subDistrict, setSubDistrict] = useState("");
+  const [bedrooms, setBedrooms] = useState("");
+  const [purpose, setPurpose] = useState("");
+  const [minArea, setMinArea] = useState("");
+  const [maxArea, setMaxArea] = useState("");
+  const [areaRangeError, setAreaRangeError] = useState("");
 
   // Mobile sheet draft (committed on Apply)
   const [draftFilter, setDraftFilter] = useState(DEFAULT_VISIBILITY);
@@ -147,6 +188,14 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const [draftMaxPrice, setDraftMaxPrice] = useState("");
   const [draftAuthor, setDraftAuthor] = useState("");
   const [draftTeamPhone, setDraftTeamPhone] = useState("");
+  const [draftCity, setDraftCity] = useState("");
+  const [draftDistrict, setDraftDistrict] = useState("");
+  const [draftSubDistrict, setDraftSubDistrict] = useState("");
+  const [draftBedrooms, setDraftBedrooms] = useState("");
+  const [draftPurpose, setDraftPurpose] = useState("");
+  const [draftMinArea, setDraftMinArea] = useState("");
+  const [draftMaxArea, setDraftMaxArea] = useState("");
+  const [draftAreaRangeError, setDraftAreaRangeError] = useState("");
 
   // Desktop price popover draft
   const [pricePopoverMin, setPricePopoverMin] = useState("");
@@ -180,7 +229,40 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     });
   }, []);
 
+  const BEDROOM_OPTIONS = useMemo(
+    () =>
+      Array.from({ length: 9 }, (_, count) => ({
+        value: String(count),
+        label:
+          count === 0
+            ? translate("unitsFilter.studio", "Studio")
+            : translate("unitsFilter.bedroomsOption", "{count} bedrooms").replace(
+                "{count}",
+                String(count)
+              ),
+      })),
+    [translate]
+  );
+
   useOnClickOutside(priceDropdownRef, () => setIsPriceDropdownOpen(false));
+
+  const validateAreaRange = useCallback(
+    (minValue, maxValue, setError) => {
+      const minN = parseNumericFilter(minValue);
+      const maxN = parseNumericFilter(maxValue);
+      if (minN != null && maxN != null && maxN < minN) {
+        setError(
+          locale === "ar"
+            ? "يجب أن يكون الحد الأقصى للمساحة أكبر من أو يساوي الحد الأدنى"
+            : "Max area must be greater than or equal to min area"
+        );
+        return false;
+      }
+      setError("");
+      return true;
+    },
+    [locale]
+  );
 
   const searchParamsKey = useMemo(() => {
     const base = searchParams || {};
@@ -196,11 +278,52 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     const withPrice = { ...withPropertyType };
     if (minPrice != null && minPrice !== "") withPrice.min_price = minPrice;
     if (maxPrice != null && maxPrice !== "") withPrice.max_price = maxPrice;
+
+    const cityValue = normalizeOptionalFilter(city);
+    const districtValue = normalizeOptionalFilter(district);
+    const subDistrictValue = normalizeOptionalFilter(subDistrict);
+    if (cityValue) withPrice.city = cityValue;
+    if (districtValue) withPrice.district = districtValue;
+    if (subDistrictValue) withPrice.sub_district = subDistrictValue;
+
+    const bedroomsValue = normalizeOptionalFilter(bedrooms);
+    if (bedroomsValue !== "") withPrice.bedrooms = bedroomsValue;
+
+    const purposeValue = normalizeOptionalFilter(purpose);
+    if (purposeValue) withPrice.purpose = purposeValue;
+
+    const minAreaN = parseNumericFilter(minArea);
+    const maxAreaN = parseNumericFilter(maxArea);
+    const areaRangeValid = !(
+      minAreaN != null &&
+      maxAreaN != null &&
+      maxAreaN < minAreaN
+    );
+    if (areaRangeValid) {
+      if (minArea != null && minArea !== "") withPrice.min_area = minArea;
+      if (maxArea != null && maxArea !== "") withPrice.max_area = maxArea;
+    }
+
     const authorValue = typeof author === "string" ? author.trim() : "";
     if (authorValue) withPrice.author = authorValue;
     // Defense in depth: query key + fetch always include own author for non-admins.
     return JSON.stringify(enforceDashboardAuthorOnParams(withPrice));
-  }, [searchParams, filter, updatedAtDate, propertyType, minPrice, maxPrice, author]);
+  }, [
+    searchParams,
+    filter,
+    updatedAtDate,
+    propertyType,
+    minPrice,
+    maxPrice,
+    author,
+    city,
+    district,
+    subDistrict,
+    bedrooms,
+    purpose,
+    minArea,
+    maxArea,
+  ]);
 
   const hasActiveClientFilters =
     Boolean(updatedAtDate?.trim()) ||
@@ -208,6 +331,13 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     Boolean(minPrice) ||
     Boolean(maxPrice) ||
     Boolean(author?.trim()) ||
+    Boolean(normalizeOptionalFilter(city)) ||
+    Boolean(normalizeOptionalFilter(district)) ||
+    Boolean(normalizeOptionalFilter(subDistrict)) ||
+    Boolean(normalizeOptionalFilter(bedrooms)) ||
+    Boolean(normalizeOptionalFilter(purpose)) ||
+    Boolean(minArea) ||
+    Boolean(maxArea) ||
     filter !== DEFAULT_VISIBILITY;
 
   const initialDataForQuery =
@@ -312,6 +442,38 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     [t]
   );
 
+  const getAreaLabel = useCallback(
+    (min, max) => {
+      if (!min && !max) return "";
+      if (min && max) return `${min} - ${max} m²`;
+      if (min) return `${t.unitsFilter?.minArea ?? "Min Area"}: ${min} m²`;
+      return `${translate("unitsFilter.maxArea", "Max Area")}: ${max} m²`;
+    },
+    [t, translate]
+  );
+
+  const getBedroomsLabel = useCallback(
+    (raw) => {
+      const value = normalizeOptionalFilter(raw);
+      if (!value) return translate("unitsFilter.allBedrooms", "All Bedrooms");
+      const match = BEDROOM_OPTIONS.find((opt) => String(opt.value) === value);
+      return match?.label || value;
+    },
+    [BEDROOM_OPTIONS, translate]
+  );
+
+  const getPurposeLabel = useCallback(
+    (raw) => {
+      const value = normalizeOptionalFilter(raw);
+      if (!value) return "";
+      return (
+        t.unitsFilter?.purposes?.[value] ||
+        translate(`unitsFilter.purposes.${value}`, value)
+      );
+    },
+    [t, translate]
+  );
+
   const activeFilters = useMemo(() => {
     const list = [];
     if (filter !== DEFAULT_VISIBILITY) {
@@ -351,6 +513,30 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
         value: resolveTeamPhoneDisplayLabel(teamPhone, teamPhoneOptions),
       });
     }
+    if (city || district || subDistrict) {
+      list.push({
+        key: "location",
+        value: formatLocationChip(city, district, subDistrict),
+      });
+    }
+    if (normalizeOptionalFilter(bedrooms)) {
+      list.push({
+        key: "bedrooms",
+        value: getBedroomsLabel(bedrooms),
+      });
+    }
+    if (normalizeOptionalFilter(purpose)) {
+      list.push({
+        key: "purpose",
+        value: getPurposeLabel(purpose),
+      });
+    }
+    if (minArea || maxArea) {
+      list.push({
+        key: "area",
+        value: getAreaLabel(minArea, maxArea),
+      });
+    }
     return list;
   }, [
     filter,
@@ -362,10 +548,20 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     authorOptions,
     teamPhone,
     teamPhoneOptions,
+    city,
+    district,
+    subDistrict,
+    bedrooms,
+    purpose,
+    minArea,
+    maxArea,
     visibilityOptions,
     t,
     getPropertyTypeLabel,
     getPriceLabel,
+    getBedroomsLabel,
+    getPurposeLabel,
+    getAreaLabel,
   ]);
 
   const activeFilterCount = activeFilters.length;
@@ -378,10 +574,21 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setDraftMaxPrice(maxPrice);
     setDraftAuthor(author);
     setDraftTeamPhone(teamPhone);
+    setDraftCity(city);
+    setDraftDistrict(district);
+    setDraftSubDistrict(subDistrict);
+    setDraftBedrooms(bedrooms);
+    setDraftPurpose(purpose);
+    setDraftMinArea(minArea);
+    setDraftMaxArea(maxArea);
+    setDraftAreaRangeError("");
     setIsMobileFiltersOpen(true);
   };
 
   const handleApplyMobileFilters = () => {
+    if (!validateAreaRange(draftMinArea, draftMaxArea, setDraftAreaRangeError)) {
+      return;
+    }
     setFilter(draftFilter || DEFAULT_VISIBILITY);
     setUpdatedAtDate(draftUpdatedAtDate);
     setPropertyType(draftPropertyType);
@@ -389,6 +596,14 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setMaxPrice(draftMaxPrice);
     setAuthor(draftAuthor || "");
     setTeamPhone(draftTeamPhone || "");
+    setCity(draftCity || "");
+    setDistrict(draftDistrict || "");
+    setSubDistrict(draftSubDistrict || "");
+    setBedrooms(normalizeOptionalFilter(draftBedrooms));
+    setPurpose(normalizeOptionalFilter(draftPurpose));
+    setMinArea(draftMinArea);
+    setMaxArea(draftMaxArea);
+    setAreaRangeError("");
     setIsMobileFiltersOpen(false);
   };
 
@@ -400,6 +615,14 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setMaxPrice("");
     setAuthor("");
     setTeamPhone("");
+    setCity("");
+    setDistrict("");
+    setSubDistrict("");
+    setBedrooms("");
+    setPurpose("");
+    setMinArea("");
+    setMaxArea("");
+    setAreaRangeError("");
     setDraftFilter(DEFAULT_VISIBILITY);
     setDraftUpdatedAtDate("");
     setDraftPropertyType("");
@@ -407,6 +630,14 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setDraftMaxPrice("");
     setDraftAuthor("");
     setDraftTeamPhone("");
+    setDraftCity("");
+    setDraftDistrict("");
+    setDraftSubDistrict("");
+    setDraftBedrooms("");
+    setDraftPurpose("");
+    setDraftMinArea("");
+    setDraftMaxArea("");
+    setDraftAreaRangeError("");
     setPricePopoverMin("");
     setPricePopoverMax("");
   }, []);
@@ -426,6 +657,74 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
       setMinPrice("");
       setMaxPrice("");
     }
+    if (key === "location") {
+      setCity("");
+      setDistrict("");
+      setSubDistrict("");
+    }
+    if (key === "bedrooms") setBedrooms("");
+    if (key === "purpose") setPurpose("");
+    if (key === "area") {
+      setMinArea("");
+      setMaxArea("");
+      setAreaRangeError("");
+    }
+  };
+
+  const handleLocationChange = (payload, { draft = false } = {}) => {
+    const nextCity = payload?.city
+      ? String(payload.city).toLowerCase().trim()
+      : "";
+    const nextDistrict = payload?.district
+      ? String(payload.district).toLowerCase().trim()
+      : "";
+    const nextSubDistrict = payload?.sub_district
+      ? String(payload.sub_district).toLowerCase().trim()
+      : "";
+    if (draft) {
+      setDraftCity(nextCity);
+      setDraftDistrict(nextDistrict);
+      setDraftSubDistrict(nextSubDistrict);
+      return;
+    }
+    setCity(nextCity);
+    setDistrict(nextDistrict);
+    setSubDistrict(nextSubDistrict);
+  };
+
+  const handleBedroomsChange = (value, { draft = false } = {}) => {
+    const next = normalizeOptionalFilter(value);
+    if (draft) {
+      setDraftBedrooms(next);
+      return;
+    }
+    setBedrooms(next);
+  };
+
+  const handlePurposeChange = (value, { draft = false } = {}) => {
+    const next = normalizeOptionalFilter(value);
+    if (draft) {
+      setDraftPurpose(next);
+      return;
+    }
+    setPurpose(next);
+  };
+
+  const handleAreaChange = (key, value, { draft = false } = {}) => {
+    const cleaned = String(value ?? "").replace(/[^0-9]/g, "");
+    if (draft) {
+      const nextMin = key === "min_area" ? cleaned : draftMinArea;
+      const nextMax = key === "max_area" ? cleaned : draftMaxArea;
+      if (key === "min_area") setDraftMinArea(cleaned);
+      else setDraftMaxArea(cleaned);
+      validateAreaRange(nextMin, nextMax, setDraftAreaRangeError);
+      return;
+    }
+    const nextMin = key === "min_area" ? cleaned : minArea;
+    const nextMax = key === "max_area" ? cleaned : maxArea;
+    if (key === "min_area") setMinArea(cleaned);
+    else setMaxArea(cleaned);
+    validateAreaRange(nextMin, nextMax, setAreaRangeError);
   };
 
   const handleOpenCheckAvailability = () => {
@@ -439,6 +738,80 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
       return;
     }
     setIsWhatsappBulkOpen(true);
+  };
+
+  /** TEMP: admin/owner-only — never auto-runs; only on explicit button click. */
+  const handleDetectBrokerUnits = useCallback(async () => {
+    if (!isAdminUser || isDetectingBrokers) return;
+    if (!displayedUnits?.length) {
+      toast.error(
+        translate(
+          "resalePage.brokerDetect.noUnits",
+          "No units to check on this page."
+        )
+      );
+      return;
+    }
+
+    setIsDetectingBrokers(true);
+    setBrokerDetectProgress({ done: 0, total: 0 });
+    try {
+      const ids = await detectBrokerUnitIds(displayedUnits, {
+        onProgress: (done, total) => setBrokerDetectProgress({ done, total }),
+      });
+      setBrokerUnitIds(ids);
+      toast.success(
+        translate(
+          "resalePage.brokerDetect.done",
+          "Found {count} broker unit(s)"
+        ).replace("{count}", String(ids.size))
+      );
+    } catch (error) {
+      console.error("Broker detect failed:", error?.message ?? error);
+      toast.error(
+        translate(
+          "resalePage.brokerDetect.failed",
+          "Failed to check broker owners. Please try again."
+        )
+      );
+    } finally {
+      setIsDetectingBrokers(false);
+    }
+  }, [displayedUnits, isAdminUser, isDetectingBrokers, translate]);
+
+  const renderBrokerDetectButton = () => {
+    if (!isMounted || !isAdminUser) return null;
+    return (
+      <button
+        type="button"
+        onClick={handleDetectBrokerUnits}
+        disabled={isDetectingBrokers || !displayedUnits?.length}
+        className="shrink-0 inline-flex items-center justify-center gap-1.5 min-h-11 lg:min-h-9 px-3 rounded-md border border-amber-300 bg-amber-50 text-amber-900 text-xs font-medium hover:bg-amber-100 disabled:opacity-60 disabled:cursor-not-allowed"
+        title={translate(
+          "resalePage.brokerDetect.hint",
+          "Temp: look up owner_type via quick-search and badge broker units"
+        )}
+        aria-label={translate(
+          "resalePage.brokerDetect.button",
+          "Mark broker units"
+        )}
+      >
+        {isDetectingBrokers ? (
+          <>
+            <Loader2 size={14} className="animate-spin shrink-0" />
+            <span className="truncate">
+              {brokerDetectProgress.total > 0
+                ? `${brokerDetectProgress.done}/${brokerDetectProgress.total}`
+                : translate("resalePage.brokerDetect.checking", "Checking…")}
+            </span>
+          </>
+        ) : (
+          <span className="truncate">
+            {translate("resalePage.brokerDetect.button", "Mark broker units")}
+          </span>
+        )}
+      </button>
+    );
   };
 
   const handleVisibilityChange = (e) => {
@@ -604,6 +977,8 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
                 )}
               </button>
 
+              {renderBrokerDetectButton()}
+
               {showBulkToolbar && bulkSelection.hasSelection && (
                 <button
                   type="button"
@@ -724,6 +1099,133 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
                         : "Search property types..."
                     }
                     className={FILTER_BUTTON_CLASS}
+                  />
+                </div>
+
+                <div className="w-full min-w-0">
+                  <UnitsLocationSearch
+                    name="resale_location_mobile"
+                    city={draftCity}
+                    district={draftDistrict}
+                    subDistrict={draftSubDistrict}
+                    onChange={(payload) =>
+                      handleLocationChange(payload, { draft: true })
+                    }
+                    buttonClassName={DROPDOWN_BUTTON_CLASS}
+                  />
+                </div>
+
+                <div className="w-full min-w-0">
+                  <SearchableDropdownSelect
+                    name="bedrooms_mobile"
+                    options={BEDROOM_OPTIONS}
+                    value={draftBedrooms || ""}
+                    onChange={(e) =>
+                      handleBedroomsChange(e.target.value || "", { draft: true })
+                    }
+                    showAllOption
+                    allOptionLabel={translate(
+                      "unitsFilter.allBedrooms",
+                      "All Bedrooms"
+                    )}
+                    placeholder={translate(
+                      "unitsFilter.allBedrooms",
+                      "All Bedrooms"
+                    )}
+                    searchPlaceholder={translate(
+                      "unitsFilter.bedroomsSearchPlaceholder",
+                      "Search bedrooms…"
+                    )}
+                    noResultsText={translate(
+                      "unitsFilter.bedroomsSearchEmpty",
+                      "No matching bedrooms"
+                    )}
+                    getValue={(opt) => opt.value}
+                    getLabel={(opt) => opt.label}
+                    buttonClassName={DROPDOWN_BUTTON_CLASS}
+                  />
+                </div>
+
+                <div className="w-full min-w-0">
+                  <p className="text-xs font-medium text-[#494A4B] mb-1.5">
+                    {translate("unitsFilter.purpose", "Purpose")}
+                  </p>
+                  <div
+                    className="flex flex-wrap items-center gap-2"
+                    role="group"
+                    aria-label={translate("unitsFilter.purpose", "Purpose")}
+                  >
+                    {[
+                      {
+                        value: "rent",
+                        label: translate("unitsFilter.purposes.rent", "Rent"),
+                      },
+                      {
+                        value: "sell",
+                        label: translate("unitsFilter.purposes.sell", "Sell"),
+                      },
+                    ].map((option) => {
+                      const isSelected = draftPurpose === option.value;
+                      return (
+                        <label
+                          key={option.value}
+                          onClick={(e) => {
+                            if (isSelected) {
+                              e.preventDefault();
+                              handlePurposeChange("all", { draft: true });
+                            }
+                          }}
+                          className={`flex flex-1 min-w-0 items-center gap-2 h-10 px-3 rounded-md border text-xs font-medium cursor-pointer select-none transition-colors ${
+                            isSelected
+                              ? "bg-primary/10 border-primary/40 text-primary"
+                              : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="purpose_mobile"
+                            value={option.value}
+                            checked={isSelected}
+                            onChange={() =>
+                              handlePurposeChange(option.value, { draft: true })
+                            }
+                            className="h-4 w-4 accent-primary shrink-0"
+                          />
+                          <span className="truncate">{option.label}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="w-full min-w-0 grid grid-cols-2 gap-2">
+                  <LenaTextField
+                    name="min_area_mobile"
+                    type="number"
+                    label={t.unitsFilter?.minArea ?? "Min Area"}
+                    value={draftMinArea}
+                    error={draftAreaRangeError}
+                    onChange={(e) =>
+                      handleAreaChange("min_area", e.target.value, {
+                        draft: true,
+                      })
+                    }
+                    className="w-full min-w-0"
+                    adornment="m²"
+                  />
+                  <LenaTextField
+                    name="max_area_mobile"
+                    type="number"
+                    label={translate("unitsFilter.maxArea", "Max Area")}
+                    value={draftMaxArea}
+                    error={draftAreaRangeError}
+                    onChange={(e) =>
+                      handleAreaChange("max_area", e.target.value, {
+                        draft: true,
+                      })
+                    }
+                    className="w-full min-w-0"
+                    adornment="m²"
                   />
                 </div>
 
@@ -945,6 +1447,127 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
           </div>
         </div>
 
+        <div className="flex items-start flex-wrap gap-2 min-w-0">
+          <div className="w-full min-w-0 sm:flex-1 sm:min-w-[200px]">
+            <UnitsLocationSearch
+              name="resale_location"
+              city={city}
+              district={district}
+              subDistrict={subDistrict}
+              onChange={(payload) => handleLocationChange(payload)}
+              buttonClassName={DROPDOWN_BUTTON_CLASS}
+            />
+          </div>
+
+          <div className="w-full min-w-0 sm:flex-1 sm:min-w-[140px]">
+            <SearchableDropdownSelect
+              name="bedrooms"
+              options={BEDROOM_OPTIONS}
+              value={bedrooms || ""}
+              onChange={(e) => handleBedroomsChange(e.target.value || "")}
+              showAllOption
+              allOptionLabel={translate(
+                "unitsFilter.allBedrooms",
+                "All Bedrooms"
+              )}
+              placeholder={translate(
+                "unitsFilter.allBedrooms",
+                "All Bedrooms"
+              )}
+              searchPlaceholder={translate(
+                "unitsFilter.bedroomsSearchPlaceholder",
+                "Search bedrooms…"
+              )}
+              noResultsText={translate(
+                "unitsFilter.bedroomsSearchEmpty",
+                "No matching bedrooms"
+              )}
+              getValue={(opt) => opt.value}
+              getLabel={(opt) => opt.label}
+              buttonClassName={DROPDOWN_BUTTON_CLASS}
+            />
+          </div>
+
+          <div className="w-full min-w-0 sm:flex-1 sm:min-w-[200px]">
+            <p className="text-xs font-medium text-[#494A4B] mb-1.5">
+              {translate("unitsFilter.purpose", "Purpose")}
+            </p>
+            <div
+              className="flex flex-wrap items-center gap-2"
+              role="group"
+              aria-label={translate("unitsFilter.purpose", "Purpose")}
+            >
+              {[
+                {
+                  value: "rent",
+                  label: translate("unitsFilter.purposes.rent", "Rent"),
+                },
+                {
+                  value: "sell",
+                  label: translate("unitsFilter.purposes.sell", "Sell"),
+                },
+              ].map((option) => {
+                const isSelected = purpose === option.value;
+                return (
+                  <label
+                    key={option.value}
+                    onClick={(e) => {
+                      if (isSelected) {
+                        e.preventDefault();
+                        handlePurposeChange("all");
+                      }
+                    }}
+                    className={`flex flex-1 min-w-0 items-center gap-2 h-10 px-3 rounded-md border text-xs font-medium cursor-pointer select-none transition-colors ${
+                      isSelected
+                        ? "bg-primary/10 border-primary/40 text-primary"
+                        : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="purpose_desktop"
+                      value={option.value}
+                      checked={isSelected}
+                      onChange={() => handlePurposeChange(option.value)}
+                      className="h-4 w-4 accent-primary shrink-0"
+                    />
+                    <span className="truncate">{option.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="w-full min-w-0 sm:flex-1 sm:min-w-[220px] grid grid-cols-2 gap-2">
+            <LenaTextField
+              name="min_area"
+              type="number"
+              label={t.unitsFilter?.minArea ?? "Min Area"}
+              value={minArea}
+              error={areaRangeError}
+              onChange={(e) => handleAreaChange("min_area", e.target.value)}
+              className="w-full min-w-0"
+              adornment="m²"
+            />
+            <LenaTextField
+              name="max_area"
+              type="number"
+              label={translate("unitsFilter.maxArea", "Max Area")}
+              value={maxArea}
+              error={areaRangeError}
+              onChange={(e) => handleAreaChange("max_area", e.target.value)}
+              className="w-full min-w-0"
+              adornment="m²"
+            />
+          </div>
+        </div>
+
+        {isMounted && isAdminUser ? (
+          <div className="flex flex-wrap items-center gap-2">
+            {renderBrokerDetectButton()}
+          </div>
+        ) : null}
+
         {showBulkToolbar && (
           <div className="flex flex-wrap items-center gap-2">
             <label className="flex items-center gap-2 h-9 min-h-9 px-3 rounded-md border border-gray-300 bg-white text-sm font-medium cursor-pointer select-none hover:bg-gray-50">
@@ -1054,6 +1677,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
           readonly={false}
           allowMissingFields
           linkQueryParams={unitsSourcePendingQueryString(true)}
+          brokerUnitIds={brokerUnitIds}
         />
       )}
 
