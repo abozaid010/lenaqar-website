@@ -30,6 +30,12 @@ import {
   enforceDashboardAuthorOnParams,
   getDashboardLoggedInEmail,
 } from "@/lib/dashboard-lead-access";
+import {
+  clearPendingApprovalSessionFilters,
+  hasActivePendingApprovalFilters,
+  readPendingApprovalSessionFilters,
+  writePendingApprovalSessionFilters,
+} from "@/lib/units/pending-approval-session-filters";
 import { phoneToE164 } from "@/components/phone/phone-utils";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
@@ -202,6 +208,8 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const [pricePopoverMax, setPricePopoverMax] = useState("");
   const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
   const priceDropdownRef = useRef(null);
+  const didBootstrapSessionFiltersRef = useRef(false);
+  const skipPersistUntilHydratedRef = useRef(false);
 
   const { authorOptions, teamPhoneOptions, isAdminUser, isLoading: isTeamLoading } =
     useTeamAuthorOptions({
@@ -221,6 +229,120 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
       return current.toLowerCase() === email.toLowerCase() ? prev : email;
     });
   }, []);
+
+  // Bootstrap once: restore session filters when returning to this page (same UX as units).
+  useEffect(() => {
+    if (didBootstrapSessionFiltersRef.current) return;
+    didBootstrapSessionFiltersRef.current = true;
+
+    const stored = readPendingApprovalSessionFilters();
+    if (!hasActivePendingApprovalFilters(stored)) return;
+
+    skipPersistUntilHydratedRef.current = true;
+
+    let nextAuthor =
+      typeof stored.author === "string" ? stored.author.trim() : "";
+    const email = getDashboardLoggedInEmail();
+    if (!canViewAllDashboardLeads() && email) {
+      nextAuthor = email;
+    }
+
+    const nextVisibility = stored.visibility || DEFAULT_VISIBILITY;
+    const nextUpdatedAt =
+      typeof stored.updated_at === "string" ? stored.updated_at : "";
+    const nextPropertyType =
+      typeof stored.property_type === "string" ? stored.property_type : "";
+    const nextMinPrice =
+      stored.min_price != null ? String(stored.min_price) : "";
+    const nextMaxPrice =
+      stored.max_price != null ? String(stored.max_price) : "";
+    const nextTeamPhone =
+      typeof stored.team_phone === "string" ? stored.team_phone : "";
+    const nextCity = typeof stored.city === "string" ? stored.city : "";
+    const nextDistrict =
+      typeof stored.district === "string" ? stored.district : "";
+    const nextSubDistrict =
+      typeof stored.sub_district === "string" ? stored.sub_district : "";
+    const nextBedrooms =
+      typeof stored.bedrooms === "string" ? stored.bedrooms : "";
+    const nextPurpose =
+      typeof stored.purpose === "string" ? stored.purpose : "";
+    const nextMinArea =
+      stored.min_area != null ? String(stored.min_area) : "";
+    const nextMaxArea =
+      stored.max_area != null ? String(stored.max_area) : "";
+
+    setFilter(nextVisibility);
+    setUpdatedAtDate(nextUpdatedAt);
+    setPropertyType(nextPropertyType);
+    setMinPrice(nextMinPrice);
+    setMaxPrice(nextMaxPrice);
+    setAuthor(nextAuthor);
+    setTeamPhone(nextTeamPhone);
+    setCity(nextCity);
+    setDistrict(nextDistrict);
+    setSubDistrict(nextSubDistrict);
+    setBedrooms(nextBedrooms);
+    setPurpose(nextPurpose);
+    setMinArea(nextMinArea);
+    setMaxArea(nextMaxArea);
+
+    setDraftFilter(nextVisibility);
+    setDraftUpdatedAtDate(nextUpdatedAt);
+    setDraftPropertyType(nextPropertyType);
+    setDraftMinPrice(nextMinPrice);
+    setDraftMaxPrice(nextMaxPrice);
+    setDraftAuthor(nextAuthor);
+    setDraftTeamPhone(nextTeamPhone);
+    setDraftCity(nextCity);
+    setDraftDistrict(nextDistrict);
+    setDraftSubDistrict(nextSubDistrict);
+    setDraftBedrooms(nextBedrooms);
+    setDraftPurpose(nextPurpose);
+    setDraftMinArea(nextMinArea);
+    setDraftMaxArea(nextMaxArea);
+  }, []);
+
+  // Persist applied filters locally until the user changes/clears them.
+  useEffect(() => {
+    if (!didBootstrapSessionFiltersRef.current) return;
+    if (skipPersistUntilHydratedRef.current) {
+      skipPersistUntilHydratedRef.current = false;
+      return;
+    }
+
+    writePendingApprovalSessionFilters({
+      visibility: filter || DEFAULT_VISIBILITY,
+      updated_at: updatedAtDate || "",
+      property_type: propertyType || "",
+      min_price: minPrice || "",
+      max_price: maxPrice || "",
+      author: author || "",
+      team_phone: teamPhone || "",
+      city: city || "",
+      district: district || "",
+      sub_district: subDistrict || "",
+      bedrooms: bedrooms || "",
+      purpose: purpose || "",
+      min_area: minArea || "",
+      max_area: maxArea || "",
+    });
+  }, [
+    filter,
+    updatedAtDate,
+    propertyType,
+    minPrice,
+    maxPrice,
+    author,
+    teamPhone,
+    city,
+    district,
+    subDistrict,
+    bedrooms,
+    purpose,
+    minArea,
+    maxArea,
+  ]);
 
   const BUILDING_TYPES = useMemo(() => {
     return getBuildingTypes({
@@ -608,6 +730,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   };
 
   const clearAllFilters = useCallback(() => {
+    clearPendingApprovalSessionFilters();
     setFilter(DEFAULT_VISIBILITY);
     setUpdatedAtDate("");
     setPropertyType("");
