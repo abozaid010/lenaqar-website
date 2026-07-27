@@ -676,6 +676,21 @@ export async function updateCampaign(id, payload) {
   }
 }
 
+export async function deleteCampaign(campaign_id) {
+  try {
+    const response = await axiosInstance.delete(`/campaign/${campaign_id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to delete campaign:", error.message);
+    return {
+      error:
+        error.response?.data?.error_message ||
+        error.response?.data?.message ||
+        error.message,
+    };
+  }
+}
+
 export async function getClientActions(phoneNumber) {
   try {
     const response = await axiosInstance.get(`action/${phoneNumber}`);

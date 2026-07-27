@@ -1,19 +1,23 @@
 "use client";
 
+import { DeleteButton } from "@/components/ui/action-button";
+import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import QueryErrorState from "@/components/ui/query-error-state";
 import { useI18n } from "@/hooks/useI18n";
-import { fetchCampaigns } from "@/utils/api";
+import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
+import { deleteCampaign, fetchCampaigns } from "@/utils/api";
+import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { useLocaleConstants } from "@/utils/localeConstants";
 import { campaignKeys } from "@/utils/query-utils";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import CampaignDialog from "./CampaignDialog";
-import { getDisplayImageUrl } from "@/utils/imageUtils";
 
-function CampaignCard({ campaign, onEdit }) {
+function CampaignCard({ campaign, onEdit, onDelete, canDelete }) {
   const { t, translate, locale } = useI18n();
   const { formatDateTimeAmPmShort } = useLocaleConstants();
   const isUnitMode = !!campaign?.unit;
@@ -123,6 +127,17 @@ function CampaignCard({ campaign, onEdit }) {
             <Pencil size={16} />
             {translate("campaigns.edit", locale === "ar" ? "تعديل" : "Edit")}
           </button>
+
+          {canDelete ? (
+            <DeleteButton
+              size="lg"
+              onClick={() => onDelete?.(campaign)}
+              title={translate("campaigns.delete")}
+              ariaLabel={translate("campaigns.delete")}
+            >
+              {translate("campaigns.delete")}
+            </DeleteButton>
+          ) : null}
         </div>
       </div>
 
@@ -261,12 +276,20 @@ function CampaignCard({ campaign, onEdit }) {
 
 export default function CampaignsPageClient() {
   const { t, translate } = useI18n();
+  const queryClient = useQueryClient();
   const [limit] = useState(50);
   const [offset, setOffset] = useState(0);
 
   // Dialog wiring (implemented next)
   const [isCampaignDialogOpen, setIsCampaignDialogOpen] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState(null);
+  const [campaignToDelete, setCampaignToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const canDeleteCampaign = useMemo(() => {
+    const role = getRoleFromToken();
+    return ["admin", "owner"].includes(String(role || "").toLowerCase());
+  }, []);
 
   const queryParams = useMemo(() => ({ limit, offset }), [limit, offset]);
 
@@ -299,6 +322,34 @@ export default function CampaignsPageClient() {
   const totalCount = data?.total_count ?? 0;
   const canPrev = offset > 0;
   const canNext = offset + limit < totalCount;
+
+  const handleConfirmDelete = async () => {
+    const campaignId = campaignToDelete?.id;
+    if (!campaignId || isDeleting) return;
+
+    setIsDeleting(true);
+    try {
+      const res = await deleteCampaign(campaignId);
+      if (res?.error || res?.status === false) {
+        toast.error(
+          res?.error || translate("campaigns.errors.deleteFailed")
+        );
+        return;
+      }
+
+      toast.success(
+        translate("campaigns.toasts.deleted") ||
+          translate("common.campaignDeleted")
+      );
+      setCampaignToDelete(null);
+      await queryClient.invalidateQueries({ queryKey: campaignKeys.all });
+    } catch (err) {
+      console.error("Error deleting campaign:", err?.message);
+      toast.error(translate("campaigns.errors.deleteFailed"));
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   if (isLoading) {
     return <LoadingSpinner message={translate("common.loadingData")} />;
@@ -394,10 +445,12 @@ export default function CampaignsPageClient() {
             <CampaignCard
               key={c?.id || JSON.stringify(c)}
               campaign={c}
+              canDelete={canDeleteCampaign}
               onEdit={(campaign) => {
                 setEditingCampaign(campaign);
                 setIsCampaignDialogOpen(true);
               }}
+              onDelete={(campaign) => setCampaignToDelete(campaign)}
             />
           ))
         )}
@@ -412,7 +465,25 @@ export default function CampaignsPageClient() {
           setIsCampaignDialogOpen(false);
         }}
       />
+
+      {campaignToDelete ? (
+        <DeleteConfirmDialog
+          isOpen={!!campaignToDelete}
+          onClose={() => {
+            if (isDeleting) return;
+            setCampaignToDelete(null);
+          }}
+          onConfirm={handleConfirmDelete}
+          title={translate("campaigns.deleteTitle")}
+          message={translate("campaigns.deleteMessage")}
+          confirmLabel={
+            isDeleting
+              ? translate("common.deleting")
+              : translate("campaigns.delete")
+          }
+          cancelLabel={translate("cancelButton") || translate("common.cancel")}
+        />
+      ) : null}
     </div>
   );
 }
-

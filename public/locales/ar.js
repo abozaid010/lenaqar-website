@@ -595,6 +595,10 @@ export default {
     creating: "جاري الإنشاء...",
     updating: "جاري التحديث...",
     edit: "تعديل",
+    delete: "حذف",
+    deleteTitle: "حذف الحملة",
+    deleteMessage:
+      "هل أنت متأكد أنك تريد حذف هذه الحملة؟ لا يمكن التراجع عن هذا الإجراء.",
     typeText: "النص",
     typeUnit: "الوحدة",
     campaignType: "نوع الحملة",
@@ -647,6 +651,7 @@ export default {
     toasts: {
       created: "تم إنشاء الحملة بنجاح",
       updated: "تم تحديث الحملة بنجاح",
+      deleted: "تم حذف الحملة بنجاح",
     },
     errors: {
       campaignIdRequired: "معرف الحملة مطلوب.",
@@ -660,6 +665,7 @@ export default {
       waitForImages: "برجاء الانتظار حتى ينتهي رفع الصور.",
       requestFailed: "فشل الطلب. برجاء المحاولة مرة أخرى.",
       somethingWentWrong: "حدث خطأ ما.",
+      deleteFailed: "فشل حذف الحملة. برجاء المحاولة مرة أخرى.",
     },
   },
   dashboardFilter: {

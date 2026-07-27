@@ -589,6 +589,10 @@ export default {
     creating: "Creating...",
     updating: "Updating...",
     edit: "Edit",
+    delete: "Delete",
+    deleteTitle: "Delete Campaign",
+    deleteMessage:
+      "Are you sure you want to delete this campaign? This action cannot be undone.",
     typeText: "Text",
     typeUnit: "Unit",
     campaignType: "Campaign type",
@@ -641,6 +645,7 @@ export default {
     toasts: {
       created: "Campaign created successfully",
       updated: "Campaign updated successfully",
+      deleted: "Campaign deleted successfully",
     },
     errors: {
       campaignIdRequired: "Campaign ID is required.",
@@ -654,6 +659,7 @@ export default {
       waitForImages: "Please wait for images to finish uploading.",
       requestFailed: "Request failed. Please try again.",
       somethingWentWrong: "Something went wrong.",
+      deleteFailed: "Failed to delete campaign. Please try again.",
     },
   },
   leadsSearchPlaceholder: "Search by name, phone, or company",
