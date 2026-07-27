@@ -1,4 +1,4 @@
-import { normalizeSearchQueryForApi } from "@/utils/lead-list-search";
+import { buildQuickSearchArgs } from "@/utils/lead-list-search";
 
 /** URL params that must not be sent to GET messages/v2/all */
 const DASHBOARD_NON_API_PARAMS = new Set([
@@ -67,11 +67,11 @@ export function buildDashboardFilterKey(searchParams) {
     if (!trimmed) {
       delete o.query;
     } else {
-      // Search is exclusive: while active, send only `query` to the API.
-      // Other filters stay in the URL/UI and resume unchanged when search clears.
-      return JSON.stringify({
-        query: normalizeSearchQueryForApi(trimmed),
-      });
+      // Name/phone search is exclusive and uses GET /messages/quick-search
+      // (`phone` or `name`). Other filters stay in the URL/UI and resume
+      // on messages/v2/all when search clears.
+      const quick = buildQuickSearchArgs(trimmed);
+      return JSON.stringify(quick || {});
     }
   }
 

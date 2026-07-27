@@ -552,6 +552,7 @@ export default {
     socialMedia: "Social media",
     copyWhatsappLink: "Copy WhatsApp link",
     marketIndex: "Market Index",
+    locations: "Locations",
   },
   dashboardSummary: {
     title: "Dashboard",
@@ -588,6 +589,10 @@ export default {
     creating: "Creating...",
     updating: "Updating...",
     edit: "Edit",
+    delete: "Delete",
+    deleteTitle: "Delete Campaign",
+    deleteMessage:
+      "Are you sure you want to delete this campaign? This action cannot be undone.",
     typeText: "Text",
     typeUnit: "Unit",
     campaignType: "Campaign type",
@@ -640,6 +645,7 @@ export default {
     toasts: {
       created: "Campaign created successfully",
       updated: "Campaign updated successfully",
+      deleted: "Campaign deleted successfully",
     },
     errors: {
       campaignIdRequired: "Campaign ID is required.",
@@ -653,6 +659,7 @@ export default {
       waitForImages: "Please wait for images to finish uploading.",
       requestFailed: "Request failed. Please try again.",
       somethingWentWrong: "Something went wrong.",
+      deleteFailed: "Failed to delete campaign. Please try again.",
     },
   },
   leadsSearchPlaceholder: "Search by name, phone, or company",
@@ -871,7 +878,7 @@ export default {
       invalidEmail: "Enter a valid email address",
       ownEmailOnly: "You can only filter by your own email",
       useEmail: "Use {email}",
-      all: "All",
+      all: "All Employees",
     },
     resetFilters: "Reset Filters",
     panel: {
@@ -1342,6 +1349,22 @@ export default {
     openFilters: "Open filters",
     closeFilters: "Close filters",
     filtersCount: "{count} filters",
+    sort: {
+      label: "Sort by",
+      default: "Default",
+      searchPlaceholder: "Search sort options…",
+      searchEmpty: "No matching sort options",
+      updatedNewest: "Updated: Newest first",
+      updatedOldest: "Updated: Oldest first",
+      priceLowHigh: "Price: Low to High",
+      priceHighLow: "Price: High to Low",
+      monthlyRentLowHigh: "Monthly rent: Low to High",
+      monthlyRentHighLow: "Monthly rent: High to Low",
+      areaSmallLarge: "Area: Small to Large",
+      areaLargeSmall: "Area: Large to Small",
+      deliverySoonest: "Delivery: Soonest first",
+      deliveryLatest: "Delivery: Latest first",
+    },
     purposes: {
       buy: "Buy",
       rent: "Rent",
@@ -1350,7 +1373,7 @@ export default {
     },
     bulkAvailability: {
       checkButton: "Send Message",
-      selectAll: "Select all on page",
+      selectAll: "Select all",
       selectUnit: "Select unit",
       selectedUnits: "{count} selected",
       noOwnerPhone: "No owner phone",
@@ -1359,6 +1382,12 @@ export default {
         "Each owner will receive your message with their unit link appended automatically.",
       defaultMessage:
         "Hello, I would like to check if this unit is available for rent and when we can arrange a property viewing.",
+    },
+    teamPhone: {
+      placeholder: "Filter by phone number",
+      all: "All phone numbers",
+      search: "Search by name or phone",
+      noResults: "No matching phone numbers",
     },
     favoriteSearches: {
       title: "Favorite Searches",
@@ -1533,6 +1562,15 @@ export default {
   phase: "Phase",
   viewOnGoogleMaps: "View on Google Maps",
   clickToViewFullscreen: "Click to view fullscreen",
+  imageViewer: {
+    title: "Image viewer",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out",
+    resetZoom: "Reset zoom",
+    masterPlan: "Master Plan",
+    imageAlt: "Gallery image {n}",
+    viewImageN: "View image {n}",
+  },
   watchVideo: "Watch Video",
   addPhase: "Add Phase",
   images: "Images",
@@ -2767,6 +2805,8 @@ export default {
     projectPhases: "Project Phases",
     phasesPlanned: "{count} phases planned",
     facilityManagement: "Facility Management",
+    featuredProject: "Featured Project",
+    noImagesDescription: "This project has no photos yet",
   },
 
   unitLocation: {
@@ -3405,6 +3445,90 @@ export default {
       invalidInput: "Please check the unit details and try again.",
       unauthorized: "You are not allowed to evaluate units.",
       estimateFailed: "Could not calculate an estimate. Try again.",
+    },
+  },
+  locations: {
+    title: "Locations",
+    subtitle: "Edit and approve city, district, and area names",
+    unavailable: {
+      title: "Locations unavailable",
+      message:
+        "Location catalog data cannot be loaded for your account. Try again or contact support.",
+    },
+    tabs: {
+      tree: "Tree",
+      pending: "Pending",
+    },
+    levels: {
+      country: "Country",
+      governorate: "Governorate",
+      city: "City",
+      district: "District",
+      sub_district: "Sub-district",
+    },
+    actions: {
+      addCity: "Add city",
+      addChild: "Add {level}",
+      editAliases: "Edit aliases",
+      delete: "Delete location",
+      approve: "Approve",
+      reject: "Reject",
+    },
+    tree: {
+      expand: "Expand",
+      collapse: "Collapse",
+      empty: "No approved cities yet. Add a city to get started.",
+      emptyChildren: "No children under this location.",
+      aliasesCount: "{count} aliases",
+    },
+    pending: {
+      empty: "No pending locations to review.",
+      columns: {
+        name: "Name",
+        level: "Level",
+        parent: "Parent",
+        proposedBy: "Proposed by",
+        actions: "Actions",
+      },
+    },
+    form: {
+      addTitle: "Add {level}",
+      submit: "Create",
+      parentLabel: "Parent",
+      enName: "English name",
+      arName: "Arabic name",
+      slugSource: "Slug override",
+      slugSourcePlaceholder: "optional-slug",
+      aliases: "Aliases",
+      aliasesPlaceholder: "One per line, or comma-separated",
+    },
+    aliases: {
+      title: "Edit aliases",
+      save: "Save aliases",
+      hint: "Replaces the full aliases list for this location.",
+    },
+    delete: {
+      title: "Delete location?",
+      message:
+        "Delete “{name}”? Approved locations are permanently removed. Locations with non-rejected children cannot be deleted.",
+    },
+    validation: {
+      enNameRequired: "English name is required",
+    },
+    toasts: {
+      created: "Location created",
+      aliasesUpdated: "Aliases updated",
+      deleted: "Location deleted",
+      approved: "Location approved",
+      rejected: "Location rejected",
+    },
+    errors: {
+      loadFailed: "Could not load locations",
+      createFailed: "Could not create location",
+      aliasesFailed: "Could not update aliases",
+      deleteFailed: "Could not delete location",
+      approveFailed: "Could not approve location",
+      rejectFailed: "Could not reject location",
     },
   },
 };

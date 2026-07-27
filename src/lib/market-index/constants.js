@@ -123,3 +123,10 @@ export const DEFAULT_ADJUSTMENTS = {
 
 export const MARKET_INDEX_CLIENT_ID = "homey";
 export const MARKET_INDEX_EDIT_ROLES = ["admin", "owner"];
+
+/** Locations catalog admin UI — Homey + public (king-admin) only. */
+export const LOCATIONS_ADMIN_CLIENT_IDS = ["homey", "public"];
+export const LOCATIONS_ADMIN_ROLES = ["admin", "owner"];
+
+/** Levels the create API accepts (country/governorate are seed-only). */
+export const LOCATIONS_CREATABLE_LEVELS = ["city", "district", "sub_district"];

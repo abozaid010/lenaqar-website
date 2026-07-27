@@ -1,6 +1,6 @@
-import { fetchCampaignNamesOnly } from "@/utils/api";
+import { fetchCampaignNamesOnly, fetchCampaigns } from "@/utils/api";
 
-/** @type {'unset'|'ok'|'error'} */
+/** @type {'unset'|'ok'} */
 let cacheKind = "unset";
 /** @type {string[]|null} */
 let cachedIds = null;
@@ -8,32 +8,48 @@ let cachedIds = null;
 let inFlight = null;
 
 /**
- * Loads campaign ids from GET /campaign/names_only once per browser session (SPA lifetime).
+ * @param {unknown} campaigns
+ * @returns {string[]}
+ */
+function campaignIdsFromListPayload(campaigns) {
+  if (!Array.isArray(campaigns)) return [];
+  return campaigns
+    .map((c) => (typeof c === "string" ? c : c?.id || c?.campaign_id))
+    .filter((id) => typeof id === "string" && id.trim() !== "");
+}
+
+/**
+ * Loads campaign ids once per successful browser session (SPA lifetime).
  * Concurrent callers share the same in-flight request.
- * @returns {Promise<string[]|null>} ids on success (may be empty), or null if the request failed (use localStorage fallback)
+ * Transient failures are not cached, so a later mount can retry.
+ * @returns {Promise<string[]|null>} ids on success (may be empty), or null if all sources failed (use localStorage fallback)
  */
 export async function loadDashboardCampaignIdsOnce() {
   if (cacheKind === "ok") return cachedIds;
-  if (cacheKind === "error") return null;
   if (!inFlight) {
-    inFlight = fetchCampaignNamesOnly({ limit: 50, offset: 0 })
-      .then((ids) => {
+    inFlight = (async () => {
+      try {
+        const ids = await fetchCampaignNamesOnly({ limit: 50, offset: 0 });
         cachedIds = Array.isArray(ids) ? ids : [];
         cacheKind = "ok";
         return cachedIds;
-      })
-      .catch((err) => {
-        console.error(
-          "[dashboard] campaign names_only failed; filter will use localStorage fallback",
-          err?.message ?? err
-        );
-        cacheKind = "error";
-        cachedIds = null;
-        return null;
-      })
-      .finally(() => {
+      } catch (namesErr) {
+        try {
+          const list = await fetchCampaigns({ limit: 50, offset: 0 });
+          cachedIds = campaignIdsFromListPayload(list?.campaigns);
+          cacheKind = "ok";
+          return cachedIds;
+        } catch {
+          console.warn(
+            "[dashboard] campaign names_only/list failed; filter will use localStorage fallback",
+            namesErr?.message ?? namesErr
+          );
+          return null;
+        }
+      } finally {
         inFlight = null;
-      });
+      }
+    })();
   }
   return inFlight;
 }

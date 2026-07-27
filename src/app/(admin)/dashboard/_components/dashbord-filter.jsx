@@ -390,7 +390,7 @@ export default function DashbordFilter({
     setIsWhatsappBulkOpen(true);
   };
 
-  // Campaign list: GET /campaign/names_only once per session; localStorage + poll only as fallback on error
+  // Campaign list: names_only (then /campaign/list); localStorage + poll only as last-resort fallback
   useEffect(() => {
     let cancelled = false;
     let interval;
@@ -1271,7 +1271,10 @@ export default function DashbordFilter({
               searchFields={["name", "email"]}
               placeholder={translate("dashboardFilter.author.placeholder", "Author")}
               showAllOption={isAdminUser}
-              allOptionLabel={translate("dashboardFilter.author.all", "All")}
+              allOptionLabel={translate(
+                "dashboardFilter.author.all",
+                "All Employees",
+              )}
               allOptionValue=""
               allowCreate={isAdminUser}
               isValidCreateValue={(query) => isValidEmail(query)}

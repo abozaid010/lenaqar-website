@@ -3,6 +3,43 @@
 import axiosInstance from "@/utils/axiosInstance";
 
 /**
+ * @returns {Promise<{ locations: object[], count: number } | { unavailable: true } | null>}
+ */
+export async function fetchLocationRootsServer() {
+  try {
+    const res = await axiosInstance.get("/market-index/locations/roots");
+    if (res.data?.status === true) {
+      return res.data.data ?? { locations: [], count: 0 };
+    }
+    return null;
+  } catch (error) {
+    if (error?.response?.status === 403) return { unavailable: true };
+    return null;
+  }
+}
+
+/**
+ * @returns {Promise<{ locations: object[], count: number } | { unavailable: true } | null>}
+ */
+export async function fetchPendingLocationsServer({ limit = 500 } = {}) {
+  try {
+    const params = new URLSearchParams();
+    if (limit != null) params.set("limit", String(limit));
+    const qs = params.toString();
+    const res = await axiosInstance.get(
+      `/market-index/locations/pending${qs ? `?${qs}` : ""}`
+    );
+    if (res.data?.status === true) {
+      return res.data.data ?? { locations: [], count: 0 };
+    }
+    return null;
+  } catch (error) {
+    if (error?.response?.status === 403) return { unavailable: true };
+    return null;
+  }
+}
+
+/**
  * @returns {Promise<{ cards: object[], count: number } | { unavailable: true } | null>}
  */
 export async function fetchMarketCards({ status, limit } = {}) {

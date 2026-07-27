@@ -125,8 +125,43 @@ export function useTeamAuthorOptions({ selectedAuthor = "" } = {}) {
     });
   }, [isAdminUser, loggedInEmail, teamMembers, selectedAuthor]);
 
+  /** All team members for owner-phone filter (names shown; phone used for API query). */
+  const teamPhoneOptions = useMemo(() => {
+    if (!isAdminUser) return [];
+
+    /** @type {Map<string, { phone: string, name: string, email: string }>} */
+    const byEmail = new Map();
+    for (const member of teamMembers) {
+      const email =
+        typeof member?.email === "string" ? member.email.trim() : "";
+      if (!email) continue;
+      const key = email.toLowerCase();
+      const phone =
+        typeof member?.phone === "string" ? member.phone.trim() : "";
+      const name =
+        typeof member?.name === "string" ? member.name.trim() : "";
+      const existing = byEmail.get(key);
+      if (!existing) {
+        byEmail.set(key, { email, name, phone });
+        continue;
+      }
+      byEmail.set(key, {
+        email: existing.email,
+        name: existing.name || name,
+        phone: existing.phone || phone,
+      });
+    }
+
+    return Array.from(byEmail.values()).sort((a, b) => {
+      const labelA = (a.name || a.email).toLowerCase();
+      const labelB = (b.name || b.email).toLowerCase();
+      return labelA.localeCompare(labelB);
+    });
+  }, [isAdminUser, teamMembers]);
+
   return {
     authorOptions,
+    teamPhoneOptions,
     isLoading: isAdminUser && isLoading,
     isAdminUser,
     loggedInEmail,

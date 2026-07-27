@@ -558,6 +558,7 @@ export default {
     socialMedia: "وسائل التواصل",
     copyWhatsappLink: "نسخ رابط واتساب",
     marketIndex: "مؤشر السوق",
+    locations: "المواقع",
   },
   dashboardSummary: {
     title: "لوحة التحكم",
@@ -594,6 +595,10 @@ export default {
     creating: "جاري الإنشاء...",
     updating: "جاري التحديث...",
     edit: "تعديل",
+    delete: "حذف",
+    deleteTitle: "حذف الحملة",
+    deleteMessage:
+      "هل أنت متأكد أنك تريد حذف هذه الحملة؟ لا يمكن التراجع عن هذا الإجراء.",
     typeText: "النص",
     typeUnit: "الوحدة",
     campaignType: "نوع الحملة",
@@ -646,6 +651,7 @@ export default {
     toasts: {
       created: "تم إنشاء الحملة بنجاح",
       updated: "تم تحديث الحملة بنجاح",
+      deleted: "تم حذف الحملة بنجاح",
     },
     errors: {
       campaignIdRequired: "معرف الحملة مطلوب.",
@@ -659,6 +665,7 @@ export default {
       waitForImages: "برجاء الانتظار حتى ينتهي رفع الصور.",
       requestFailed: "فشل الطلب. برجاء المحاولة مرة أخرى.",
       somethingWentWrong: "حدث خطأ ما.",
+      deleteFailed: "فشل حذف الحملة. برجاء المحاولة مرة أخرى.",
     },
   },
   dashboardFilter: {
@@ -738,7 +745,7 @@ export default {
       invalidEmail: "أدخل بريداً إلكترونياً صالحاً",
       ownEmailOnly: "يمكنك التصفية ببريدك فقط",
       useEmail: "استخدم {email}",
-      all: "الكل",
+      all: "كل الموظفين",
     },
     resetFilters: "إعادة تعيين الفلاتر",
     panel: {
@@ -1213,6 +1220,22 @@ export default {
     openFilters: "فتح الفلاتر",
     closeFilters: "إغلاق الفلاتر",
     filtersCount: "{count} فلاتر",
+    sort: {
+      label: "ترتيب حسب",
+      default: "الافتراضي",
+      searchPlaceholder: "ابحث في خيارات الترتيب…",
+      searchEmpty: "لا توجد خيارات مطابقة",
+      updatedNewest: "التحديث: الأحدث أولاً",
+      updatedOldest: "التحديث: الأقدم أولاً",
+      priceLowHigh: "السعر: من الأقل للأعلى",
+      priceHighLow: "السعر: من الأعلى للأقل",
+      monthlyRentLowHigh: "الإيجار الشهري: من الأقل للأعلى",
+      monthlyRentHighLow: "الإيجار الشهري: من الأعلى للأقل",
+      areaSmallLarge: "المساحة: من الأصغر للأكبر",
+      areaLargeSmall: "المساحة: من الأكبر للأصغر",
+      deliverySoonest: "التسليم: الأقرب أولاً",
+      deliveryLatest: "التسليم: الأبعد أولاً",
+    },
     purposes: {
       buy: "شراء",
       rent: "إيجار",
@@ -1230,6 +1253,12 @@ export default {
         "سيتلقى كل مالك رسالتك مع رابط وحدته مُضافاً تلقائياً.",
       defaultMessage:
         "السلام عليكم . حضرتك عندنا عميل عايز الشقه بتاعتك.. هل متاح مواعيد للمعاينة؟",
+    },
+    teamPhone: {
+      placeholder: "تصفية برقم الهاتف",
+      all: "كل أرقام الهاتف",
+      search: "ابحث بالاسم أو الهاتف",
+      noResults: "لا توجد أرقام مطابقة",
     },
     favoriteSearches: {
       title: "عمليات البحث المفضلة",
@@ -1934,6 +1963,15 @@ export default {
   phase: "المرحلة",
   viewOnGoogleMaps: "عرض على خرائط جوجل",
   clickToViewFullscreen: "انقر لعرض الصورة بحجم كامل",
+  imageViewer: {
+    title: "عارض الصور",
+    zoomIn: "تكبير",
+    zoomOut: "تصغير",
+    resetZoom: "إعادة ضبط التكبير",
+    masterPlan: "المخطط العام",
+    imageAlt: "صورة المعرض {n}",
+    viewImageN: "عرض الصورة {n}",
+  },
   watchVideo: "مشاهدة الفيديو",
   shareUnitContent: "مشاركة محتوى الوحدة",
   postContent: "مشاركة محتوى المنشور",
@@ -2828,6 +2866,8 @@ export default {
     projectPhases: "مراحل المشروع",
     phasesPlanned: "{count} مراحل مخطط لها",
     facilityManagement: "إدارة المرافق",
+    featuredProject: "مشروع مميز",
+    noImagesDescription: "لا توجد صور لهذا المشروع",
   },
 
   unitLocation: {
@@ -3464,6 +3504,90 @@ export default {
       invalidInput: "راجع تفاصيل الوحدة وحاول مجددًا.",
       unauthorized: "غير مسموح لك بتقييم الوحدات.",
       estimateFailed: "تعذر حساب التقدير. حاول مجددًا.",
+    },
+  },
+  locations: {
+    title: "المواقع",
+    subtitle: "تعديل واعتماد أسماء المدن والأحياء والمناطق",
+    unavailable: {
+      title: "المواقع غير متاحة",
+      message:
+        "تعذر تحميل كتالوج المواقع لحسابك. حاول مجددًا أو تواصل مع الدعم.",
+    },
+    tabs: {
+      tree: "الشجرة",
+      pending: "قيد المراجعة",
+    },
+    levels: {
+      country: "دولة",
+      governorate: "محافظة",
+      city: "مدينة",
+      district: "حي",
+      sub_district: "منطقة",
+    },
+    actions: {
+      addCity: "إضافة مدينة",
+      addChild: "إضافة {level}",
+      editAliases: "تعديل الأسماء البديلة",
+      delete: "حذف الموقع",
+      approve: "اعتماد",
+      reject: "رفض",
+    },
+    tree: {
+      expand: "توسيع",
+      collapse: "طي",
+      empty: "لا توجد مدن معتمدة بعد. أضف مدينة للبدء.",
+      emptyChildren: "لا توجد عناصر فرعية تحت هذا الموقع.",
+      aliasesCount: "{count} أسماء بديلة",
+    },
+    pending: {
+      empty: "لا توجد مواقع قيد المراجعة.",
+      columns: {
+        name: "الاسم",
+        level: "المستوى",
+        parent: "الأب",
+        proposedBy: "مقترح بواسطة",
+        actions: "إجراءات",
+      },
+    },
+    form: {
+      addTitle: "إضافة {level}",
+      submit: "إنشاء",
+      parentLabel: "الأب",
+      enName: "الاسم بالإنجليزية",
+      arName: "الاسم بالعربية",
+      slugSource: "تجاوز الـ slug",
+      slugSourcePlaceholder: "optional-slug",
+      aliases: "الأسماء البديلة",
+      aliasesPlaceholder: "سطر لكل اسم، أو مفصولة بفاصلة",
+    },
+    aliases: {
+      title: "تعديل الأسماء البديلة",
+      save: "حفظ الأسماء البديلة",
+      hint: "يستبدل قائمة الأسماء البديلة بالكامل لهذا الموقع.",
+    },
+    delete: {
+      title: "حذف الموقع؟",
+      message:
+        "حذف «{name}»؟ المواقع المعتمدة تُحذف نهائيًا. لا يمكن الحذف إن وُجدت عناصر فرعية غير مرفوضة.",
+    },
+    validation: {
+      enNameRequired: "الاسم بالإنجليزية مطلوب",
+    },
+    toasts: {
+      created: "تم إنشاء الموقع",
+      aliasesUpdated: "تم تحديث الأسماء البديلة",
+      deleted: "تم حذف الموقع",
+      approved: "تم اعتماد الموقع",
+      rejected: "تم رفض الموقع",
+    },
+    errors: {
+      loadFailed: "تعذر تحميل المواقع",
+      createFailed: "تعذر إنشاء الموقع",
+      aliasesFailed: "تعذر تحديث الأسماء البديلة",
+      deleteFailed: "تعذر حذف الموقع",
+      approveFailed: "تعذر اعتماد الموقع",
+      rejectFailed: "تعذر رفض الموقع",
     },
   },
 };

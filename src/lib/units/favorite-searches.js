@@ -15,6 +15,8 @@ export const UNITS_FILTER_PARAM_KEYS = [
   "my_inventory",
   "resale",
   "author",
+  "sort_by",
+  "sort_order",
 ];
 
 const STORAGE_KEY_PREFIX = "lena_units_favorite_searches";
@@ -41,6 +43,8 @@ export function createEmptyFilters() {
     my_inventory: false,
     resale: false,
     author: "",
+    sort_by: "",
+    sort_order: "",
   };
 }
 
@@ -62,6 +66,8 @@ export function filtersFromSearchParams(searchParams) {
     my_inventory: searchParams.get("my_inventory") === "true",
     resale: searchParams.get("resale") === "true",
     author: searchParams.get("author") || "",
+    sort_by: searchParams.get("sort_by") || "",
+    sort_order: searchParams.get("sort_order") || "",
   };
 }
 

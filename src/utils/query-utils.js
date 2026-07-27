@@ -70,6 +70,7 @@ export const unitKeys = {
   lists: () => [...unitKeys.all, "list"],
   list: (filters) => [...unitKeys.lists(), filters],
   pendingApprovalList: (filters) => [...unitKeys.all, "pending-approval", "list", filters],
+  byOwnerPhone: (phone) => [...unitKeys.all, "by-owner-phone", phone],
   details: (id, isPublic) => [...unitKeys.all, "detail", { id, isPublic }],
   detail: (id) => [...unitKeys.details(), id],
   byCode: (code) => [...unitKeys.all, "byCode", code],

@@ -3,7 +3,7 @@
 import { useLocalizedLocationLabels } from "@/hooks/use-localized-location-labels";
 
 /**
- * Renders localized city / district / sub-district labels from cities_list.json.
+ * Renders localized city / district / sub-district labels from the locations catalog API.
  * Backend values stay canonical English; display follows active locale.
  */
 export default function LocalizedLocationText({

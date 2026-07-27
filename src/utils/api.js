@@ -30,6 +30,7 @@ import {
 import { normalizeLastAction } from "@/utils/actions";
 import { enforceDashboardAuthorOnParams } from "@/lib/dashboard-lead-access";
 import { toApiStartDate, toApiEndDate } from "@/utils/dashboardDate";
+import { resolveQuickSearchFromParams } from "@/utils/lead-list-search";
 
 // Auth API
 // Phone normalization lives in `@/utils/normalize-conversation-phone`
@@ -65,6 +66,30 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
       typeof searchParams === "string"
         ? safeMergeParams(searchParams, { limit: 100 })
         : { limit: 100, ...(searchParams || {}) };
+
+    // Name/phone search → lightweight GET /messages/quick-search.
+    // Action/date/campaign/etc. filters keep using messages/v2/all below.
+    const quickSearch = resolveQuickSearchFromParams(merged);
+    if (quickSearch) {
+      const body = await quickSearchMessages({
+        ...quickSearch,
+        limit: merged.limit ?? 100,
+      });
+      const payload = body?.data ?? body;
+      const users = Array.isArray(payload?.users) ? payload.users : [];
+      return {
+        users: users.map((user) => ({
+          ...user,
+          last_action: normalizeLastAction(user.last_action),
+        })),
+        pagination: {
+          has_more_next: false,
+          next_cursor: null,
+        },
+        count: users.length,
+      };
+    }
+
     // Drop client-only UI params if they ever leak into the filter key.
     const {
       action,
@@ -75,6 +100,9 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
       direction,
       sort: _sort,
       sort_score: _sortScore,
+      phone: _phone,
+      name: _name,
+      query: _query,
       ...restMerged
     } = merged;
     const params = enforceDashboardAuthorOnParams({
@@ -196,6 +224,38 @@ export async function fetchPendingApprovalUnits(searchParams = {}) {
     return mapSlimUnitsListResponse(response.data);
   } catch (error) {
     console.error("Failed to fetch pending approval units:", error.message);
+    throw error;
+  }
+}
+
+/**
+ * Fetch all units listed by a given owner phone for the authenticated client.
+ * GET /units/by-owner-phone?phone=… — client_id comes from the token server-side.
+ *
+ * @param {string} phone
+ */
+export async function fetchUnitsByOwnerPhone(phone) {
+  const trimmed = typeof phone === "string" ? phone.trim() : "";
+  if (!trimmed) {
+    throw new Error("phone is required");
+  }
+
+  try {
+    const response = await axiosInstance.get("/units/by-owner-phone", {
+      params: { phone: trimmed },
+    });
+
+    if (!response.data || !response.data.data) {
+      throw new Error("Invalid response format from server");
+    }
+
+    if (!Array.isArray(response.data.data.units)) {
+      throw new Error("Expected units array but received invalid data format");
+    }
+
+    return mapSlimUnitsListResponse(response.data);
+  } catch (error) {
+    console.error("Failed to fetch units by owner phone:", error.message);
     throw error;
   }
 }
@@ -673,6 +733,21 @@ export async function updateCampaign(id, payload) {
   } catch (error) {
     console.error("Failed to update campaign:", error.message);
     return { error: error.response?.data?.error_message || error.message };
+  }
+}
+
+export async function deleteCampaign(campaign_id) {
+  try {
+    const response = await axiosInstance.delete(`/campaign/${campaign_id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to delete campaign:", error.message);
+    return {
+      error:
+        error.response?.data?.error_message ||
+        error.response?.data?.message ||
+        error.message,
+    };
   }
 }
 
@@ -1205,8 +1280,13 @@ export async function createBooking(bookingData) {
 
 // Sales Team CURD Operations //
 // TODO: Get other operation functions from the serviceFetching file and move them to this file
-export async function deleteEmployee(id) {
-  await axiosInstance.delete(`sales-employees/delete-employee/${id}`);
+/** DELETE /sales-employees/delete-employee/{employee_id} */
+export async function deleteEmployee(employeeId) {
+  if (employeeId == null || String(employeeId).trim() === "") {
+    throw new Error("employee_id is required");
+  }
+  const id = encodeURIComponent(String(employeeId).trim());
+  await axiosInstance.delete(`/sales-employees/delete-employee/${id}`);
 }
 
 export async function toggleAutoReply(user_id, client_id, value) {
@@ -1350,6 +1430,35 @@ export async function getChatHistory(userId, { limit = 50, offset = 0 } = {}) {
     params: { limit, offset },
   });
   return response.data;
+}
+
+/**
+ * Quick-search dashboard contacts by phone and/or name.
+ * GET /messages/quick-search — at least one of phone/name is required.
+ *
+ * @param {{ phone?: string, name?: string, limit?: number }} params
+ */
+export async function quickSearchMessages({ phone, name, limit } = {}) {
+  const trimmedPhone = typeof phone === "string" ? phone.trim() : "";
+  const trimmedName = typeof name === "string" ? name.trim() : "";
+  if (!trimmedPhone && !trimmedName) {
+    throw new Error("Provide at least one of 'phone' or 'name'");
+  }
+
+  const params = {};
+  if (trimmedPhone) params.phone = trimmedPhone;
+  if (trimmedName) params.name = trimmedName;
+  if (limit != null) params.limit = limit;
+
+  try {
+    const response = await axiosInstance.get("/messages/quick-search", {
+      params,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to quick-search messages:", error.message);
+    throw error;
+  }
 }
 
 /**

@@ -7,6 +7,7 @@ import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { getCachedClientProfile } from "@/lib/getCachedClientProfile.server";
 import { extractModuleActionsFromProfile } from "@/lib/whatsapp-bulk-access";
 import { getUnreadNotificationsCount } from "@/lib/notifications.server";
+import { getLocationsCatalog } from "@/lib/locations/locations-catalog.server";
 
 import { cookies } from "next/headers";
 import { safeCookieParse } from "@/utils/safeJsonParser";
@@ -26,6 +27,15 @@ const Layout = async ({ children }) => {
     getCachedClientProfile(),
     getUnreadNotificationsCount(),
   ]);
+
+  // Warm locations catalog once per server TTL — do not block the admin shell.
+  void getLocationsCatalog().catch((err) => {
+    console.warn(
+      "[admin/layout] locations catalog warm failed:",
+      err?.response?.status || err?.message || err
+    );
+  });
+
   const initialModuleActions = extractModuleActionsFromProfile(profileResponse);
 
   // I18nProvider lives in the root layout only (avoids nested providers + dual locale loads).

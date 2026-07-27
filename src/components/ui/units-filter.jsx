@@ -36,12 +36,17 @@ import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-co
 import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
 import { BULK_AVAILABILITY_DEFAULT_MESSAGE_AR } from "@/lib/units/unit-whatsapp-recipient";
 import { createEmptyFilters } from "@/lib/units/favorite-searches";
+import {
+  buildUnitsSortOptions,
+  decodeUnitsSortValue,
+  encodeUnitsSortValue,
+} from "@/lib/units/units-sort";
 import { useUnitsFilterDraft } from "@/hooks/use-units-filter-draft";
 import {
   resolveAuthorDisplayLabel,
   useTeamAuthorOptions,
 } from "@/hooks/useTeamAuthorOptions";
-import UnitsFavoriteSearches from "@/components/ui/units-favorite-searches";
+// import UnitsFavoriteSearches from "@/components/ui/units-favorite-searches";
 
 // Helper functions defined outside component to avoid hoisting/initialization issues
 const getDeveloperValue = (dev) => {
@@ -148,6 +153,16 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     isPublic,
     locale,
   });
+
+  const SORT_OPTIONS = useMemo(
+    () => buildUnitsSortOptions(translate),
+    [translate]
+  );
+
+  const selectedSortValue = encodeUnitsSortValue(
+    draftFilters.sort_by,
+    draftFilters.sort_order
+  );
 
   const { authorOptions } = useTeamAuthorOptions({
     selectedAuthor: draftFilters.author || filters.author || "",
@@ -416,6 +431,19 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
   const buildActiveFilters = useCallback((nextFilters) => {
     const list = [];
+    if (nextFilters.sort_by && nextFilters.sort_order) {
+      const sortValue = encodeUnitsSortValue(
+        nextFilters.sort_by,
+        nextFilters.sort_order
+      );
+      const sortLabel =
+        buildUnitsSortOptions(translate).find((opt) => opt.value === sortValue)
+          ?.label || sortValue;
+      list.push({
+        key: "sort",
+        value: sortLabel,
+      });
+    }
     if (nextFilters.author) {
       list.push({
         key: "author",
@@ -477,6 +505,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   }, [
     locale,
     t,
+    translate,
     compounds,
     developers,
     cityLabels,
@@ -573,6 +602,16 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       }
 
       return next;
+    });
+  };
+
+  /** Sort applies immediately — no debounce wait. */
+  const handleSortChange = (combinedValue) => {
+    const { sort_by, sort_order } = decodeUnitsSortValue(combinedValue);
+    applyExternalFilters({
+      ...draftFilters,
+      sort_by,
+      sort_order,
     });
   };
 
@@ -716,6 +755,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
   function getFilterDisplayText(key, value) {
     switch (key) {
+      case "sort":
+        return value;
       case "author":
         return resolveAuthorDisplayLabel(value, authorOptions) || value;
       case "my_inventory":
@@ -762,6 +803,15 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const buildSummaryLabelsFromFilters = useCallback(
     (filterValues) => {
       const labels = [];
+
+      if (filterValues.sort_by && filterValues.sort_order) {
+        const sortValue = encodeUnitsSortValue(
+          filterValues.sort_by,
+          filterValues.sort_order
+        );
+        const sortLabel = SORT_OPTIONS.find((opt) => opt.value === sortValue)?.label;
+        if (sortLabel) labels.push(sortLabel);
+      }
 
       if (filterValues.author) {
         labels.push(
@@ -890,6 +940,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       BUILDING_TYPES,
       FURNISHING_TYPES,
       BEDROOM_OPTIONS,
+      SORT_OPTIONS,
       authorOptions,
       cityLabels,
       compounds,
@@ -954,24 +1005,46 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   );
 
   const actionsBlock = !isPublic && (
-    <div className="w-full space-y-2 pb-3 border-b border-[#E6E6E6]">
-      <div className="flex items-center gap-2">
+    <div className="w-full pb-3 border-b border-[#E6E6E6]">
+      <div className="flex items-center gap-2 min-w-0">
+        <AddUnitButton />
         <button
           type="button"
           onClick={() => setIsUploadDialogOpen(true)}
-          className="min-w-0 flex-1 px-3 py-2 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+          className="shrink-0 px-3 py-2 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center gap-1.5 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
         >
           <FileSpreadsheet size={16} className="shrink-0" />
-          <span className="whitespace-nowrap text-xs truncate">
+          <span className="whitespace-nowrap text-xs">
             {t.uploadExcel?.button || "Upload"}
           </span>
         </button>
-        <AddUnitButton />
+        {showBulkToolbar && (
+          <label className="flex min-w-0 flex-1 items-center gap-1.5 h-10 px-2 rounded-md border border-gray-300 bg-white text-sm font-medium cursor-pointer select-none hover:bg-gray-50">
+            <input
+              type="checkbox"
+              className="h-4 w-4 accent-primary shrink-0"
+              checked={bulkSelection.allSelectableVisibleSelected}
+              disabled={bulkSelection.selectableVisibleCount === 0}
+              onChange={() => bulkSelection.toggleSelectAllVisible()}
+            />
+            <span className="text-xs truncate">
+              {translate(
+                "unitsFilter.bulkAvailability.selectAll",
+                "select all"
+              )}
+            </span>
+            {bulkSelection.hasSelection && (
+              <span className="ms-auto text-[10px] text-gray-500 shrink-0 tabular-nums">
+                {bulkSelection.selectedUnitIds.size}
+              </span>
+            )}
+          </label>
+        )}
         {showBulkToolbar && bulkSelection.hasSelection && (
           <button
             type="button"
             onClick={handleOpenCheckAvailability}
-            className="flex items-center justify-center gap-1.5 px-3 h-10 min-w-10 bg-white border border-gray-300 text-gray-800 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm hover:shadow-md shrink-0"
+            className="flex items-center justify-center gap-1.5 px-2.5 h-10 min-w-10 bg-white border border-gray-300 text-gray-800 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm hover:shadow-md shrink-0"
             title={translate(
               "unitsFilter.bulkAvailability.checkButton",
               "Send Message"
@@ -988,37 +1061,12 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           </button>
         )}
       </div>
-
-      {showBulkToolbar && (
-        <label className="flex w-full items-center gap-2 h-10 px-3 rounded-md border border-gray-300 bg-white text-sm font-medium cursor-pointer select-none hover:bg-gray-50">
-          <input
-            type="checkbox"
-            className="h-4 w-4 accent-primary shrink-0"
-            checked={bulkSelection.allSelectableVisibleSelected}
-            disabled={bulkSelection.selectableVisibleCount === 0}
-            onChange={() => bulkSelection.toggleSelectAllVisible()}
-          />
-          <span className="text-xs truncate">
-            {translate(
-              "unitsFilter.bulkAvailability.selectAll",
-              "Select all on page"
-            )}
-          </span>
-          {bulkSelection.hasSelection && (
-            <span className="ms-auto text-xs text-gray-500 shrink-0">
-              {translate(
-                "unitsFilter.bulkAvailability.selectedUnits",
-                "{count} selected"
-              ).replace("{count}", String(bulkSelection.selectedUnitIds.size))}
-            </span>
-          )}
-        </label>
-      )}
     </div>
   );
 
   const filterFields = (
     <>
+      {/* Favorite Searches — hidden for now
       <UnitsFavoriteSearches
         filters={draftFilters}
         activeFilterLabels={draftFilterLabels}
@@ -1029,6 +1077,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         }}
         isPublic={isPublic}
       />
+      */}
 
       <form onSubmit={handleApplyFiltersSubmit} className="space-y-3" id="units-filter-form">
         <div className="w-full min-w-0">
@@ -1212,6 +1261,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           </label>
         </div>
 
+        {/* Resale filter — hidden for now
         <div className="w-full min-w-0">
           <label
             className={`flex w-full items-center gap-2 h-10 px-3 rounded-md border text-sm font-medium cursor-pointer select-none ${
@@ -1229,6 +1279,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             <span className="truncate text-xs">{t.unitsFilter.resale}</span>
           </label>
         </div>
+        */}
 
         <div className="w-full min-w-0 grid grid-cols-2 gap-2">
           <LenaTextField
@@ -1285,6 +1336,32 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             }}
             className="w-full min-w-0"
             adornment="m²"
+          />
+        </div>
+
+        <div className="w-full min-w-0">
+          <p className="text-xs font-medium text-[#494A4B] mb-1.5">
+            {translate("unitsFilter.sort.label", "Sort by")}
+          </p>
+          <SearchableDropdownSelect
+            name="units_sort"
+            options={SORT_OPTIONS.filter((opt) => opt.value !== "")}
+            value={selectedSortValue}
+            onChange={(e) => handleSortChange(e.target.value || "")}
+            showAllOption
+            allOptionLabel={translate("unitsFilter.sort.default", "Default")}
+            placeholder={translate("unitsFilter.sort.label", "Sort by")}
+            searchPlaceholder={translate(
+              "unitsFilter.sort.searchPlaceholder",
+              "Search sort options…"
+            )}
+            noResultsText={translate(
+              "unitsFilter.sort.searchEmpty",
+              "No matching sort options"
+            )}
+            getValue={(opt) => opt.value}
+            getLabel={(opt) => opt.label}
+            buttonClassName={filterButtonClassName}
           />
         </div>
 
@@ -1379,7 +1456,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
               <span className="text-xs truncate">
                 {translate(
                   "unitsFilter.bulkAvailability.selectAll",
-                  "Select all on page"
+                  "select all"
                 )}
               </span>
               {bulkSelection.hasSelection && (

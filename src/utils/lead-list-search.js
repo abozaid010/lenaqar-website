@@ -23,6 +23,48 @@ export function normalizeSearchQueryForApi(trimmed) {
 }
 
 /**
+ * Map a free-text leads search into GET /messages/quick-search args.
+ * Phone-like input → `{ phone }` (E.164 when possible); otherwise `{ name }`.
+ * @param {unknown} rawQuery
+ * @returns {{ phone: string } | { name: string } | null}
+ */
+export function buildQuickSearchArgs(rawQuery) {
+  const trimmed = String(rawQuery ?? "").trim();
+  if (!trimmed) return null;
+
+  const normalized = normalizeSearchQueryForApi(trimmed);
+  if (isMostlyPhoneQuery(trimmed)) {
+    return { phone: phoneToE164(normalized, "EG") || normalized };
+  }
+  return { name: normalized };
+}
+
+/**
+ * Detect quick-search params from a dashboard filter key / fetch payload.
+ * Prefers explicit `phone`/`name`; falls back to legacy `{ query }`.
+ * @param {Record<string, unknown> | null | undefined} params
+ * @returns {{ phone?: string, name?: string } | null}
+ */
+export function resolveQuickSearchFromParams(params) {
+  if (!params || typeof params !== "object") return null;
+
+  const phone = typeof params.phone === "string" ? params.phone.trim() : "";
+  const name = typeof params.name === "string" ? params.name.trim() : "";
+  if (phone || name) {
+    return {
+      ...(phone ? { phone } : {}),
+      ...(name ? { name } : {}),
+    };
+  }
+
+  if (typeof params.query === "string" && params.query.trim()) {
+    return buildQuickSearchArgs(params.query);
+  }
+
+  return null;
+}
+
+/**
  * Client filter: name or company contains query (case-insensitive), or phone
  * contains query. For digit-heavy input, compares after removing spaces and
  * non-digits so "55727254" matches "+20 557 272 654" style values.
