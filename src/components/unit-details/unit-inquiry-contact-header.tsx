@@ -64,6 +64,11 @@ export default function UnitInquiryContactHeader({
         >
           {label}
         </p>
+        {displayName && displayPhone ? (
+          <p className="text-xs text-gray-600 mt-0.5 truncate" dir="ltr">
+            {displayPhone}
+          </p>
+        ) : null}
       </div>
 
       {showActions ? (

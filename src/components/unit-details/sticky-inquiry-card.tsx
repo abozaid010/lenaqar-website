@@ -12,6 +12,7 @@ import { formatPhoneForDisplay } from '@/components/phone/phone-utils';
 import { normalizeConversationPhone } from '@/utils/normalize-conversation-phone';
 import { handleOpenWhatsApp } from '@/utils/phone-utils';
 import { useUnitOwnership } from '@/hooks/useUnitOwnership';
+import { resolveOwnerFromDashboardPhone } from '@/lib/units/resolve-owner-from-dashboard';
 
 export default function StickyInquiryCard({
   unit,
@@ -79,10 +80,22 @@ export default function StickyInquiryCard({
         setLoading(true);
 
         if (showOwnerContact) {
+          const ownerName = unit.ownerName?.trim() || null;
+          const ownerMobile = unit.ownerMobile?.trim() || null;
+          let resolvedName = ownerName;
+
+          // Name missing but phone present → lazy dashboard lookup.
+          if (!resolvedName && ownerMobile) {
+            const resolved = await resolveOwnerFromDashboardPhone(ownerMobile);
+            if (resolved?.name) {
+              resolvedName = resolved.name;
+            }
+          }
+
           setContactData({
-            name: unit.ownerName?.trim() || null,
-            phone: unit.ownerMobile?.trim() || null,
-            whatsapp: unit.ownerMobile?.trim() || null,
+            name: resolvedName,
+            phone: ownerMobile,
+            whatsapp: ownerMobile,
             type: 'Owner',
           });
           return;

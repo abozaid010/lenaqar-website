@@ -29,6 +29,7 @@ import {
 } from "./unit-form-constants";
 import { getValidatedClientId } from "@/utils/clientId-validator";
 import { isOwnClientUnit } from "@/lib/units/unit-ownership";
+import { resolveOwnerFromDashboardPhone } from "@/lib/units/resolve-owner-from-dashboard";
 import { normalizeViewTypeValue } from "@/data/constants";
 import CityManager from "@/utils/city_manager";
 import ProjectsNamesManager from "@/utils/projects_names_manager";
@@ -151,6 +152,7 @@ function toastOwnerMobileValidationError(formData, translate) {
 
 export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtracted, isPageMode = false }) {
   const modalRef = useRef(null);
+  const ownerNameLookupPhoneRef = useRef(null);
   const { t, locale, translate } = useI18n();
 
   // Secure clientId state management with loading and error handling
@@ -321,6 +323,35 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       };
     });
   }, [clientIdState.clientId, clientName]);
+
+  // Edit only: if owner_name is empty but owner_mobile exists, lazy-fill from dashboard.
+  useEffect(() => {
+    if (!isEdit || !clientIdState.clientId) return;
+    if (!isOwnClientUnit(unitData, clientIdState.clientId)) return;
+
+    const ownerName = String(formData.owner_name ?? "").trim();
+    const ownerMobile = String(formData.owner_mobile ?? "").trim();
+    // Only when name is missing and we have a phone to search by.
+    if (ownerName || !ownerMobile) return;
+    if (ownerNameLookupPhoneRef.current === ownerMobile) return;
+    ownerNameLookupPhoneRef.current = ownerMobile;
+
+    let cancelled = false;
+    (async () => {
+      const resolved = await resolveOwnerFromDashboardPhone(ownerMobile);
+      if (cancelled || !resolved?.name) return;
+      setFormData((prev) => {
+        if (String(prev.owner_name ?? "").trim()) return prev;
+        return { ...prev, owner_name: resolved.name };
+      });
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // One-shot suggest when opening edit / when phone identity changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid re-running on owner_name keystrokes
+  }, [isEdit, clientIdState.clientId, unitData, formData.owner_mobile]);
 
   // Show loading/error UI AFTER all hooks run (to keep hook order stable)
   if (clientIdState.isLoading) {

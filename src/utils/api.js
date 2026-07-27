@@ -1373,6 +1373,35 @@ export async function getChatHistory(userId, { limit = 50, offset = 0 } = {}) {
 }
 
 /**
+ * Quick-search dashboard contacts by phone and/or name.
+ * GET /messages/quick-search — at least one of phone/name is required.
+ *
+ * @param {{ phone?: string, name?: string, limit?: number }} params
+ */
+export async function quickSearchMessages({ phone, name, limit } = {}) {
+  const trimmedPhone = typeof phone === "string" ? phone.trim() : "";
+  const trimmedName = typeof name === "string" ? name.trim() : "";
+  if (!trimmedPhone && !trimmedName) {
+    throw new Error("Provide at least one of 'phone' or 'name'");
+  }
+
+  const params = {};
+  if (trimmedPhone) params.phone = trimmedPhone;
+  if (trimmedName) params.name = trimmedName;
+  if (limit != null) params.limit = limit;
+
+  try {
+    const response = await axiosInstance.get("/messages/quick-search", {
+      params,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to quick-search messages:", error.message);
+    throw error;
+  }
+}
+
+/**
  * Load conversation history by phone number.
  * Uses GET /messages/conversation?phone_number={e164}
  */
