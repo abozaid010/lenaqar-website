@@ -116,7 +116,7 @@ The "Add Unit" flow is a **multi-step form modal** (3 steps) that allows users t
 ## Data Loading Strategy
 
 ### 1. Projects (Compounds)
-**Endpoint**: `GET /projectsv2/all_projects_names`
+**Endpoint**: `GET /projects/v3/projects_names`
 
 **Hook**: `useProjectsNames(isPublic = false)` (`src/hooks/use-admin-shared-data.js`)
 
@@ -331,8 +331,8 @@ await cityManager.initializeData(); // Fetches /cities_list.json
 ### Fetch Projects
 | Endpoint | Method | Purpose | Auth |
 |----------|--------|---------|------|
-| `/projectsv2/all_projects_names` | GET | Lightweight project list (names only) | ✓ |
-| `/projectsv2/all_projects_names?public=true` | GET | Public projects (no auth) | ✗ |
+| `/projects/v3/projects_names` | GET | Lightweight project list (names only) | ✓ |
+| `/projects/v3/projects_names?public=true` | GET | Public projects (no auth) | ✗ |
 
 **Response**:
 ```javascript
@@ -463,7 +463,7 @@ Body:
 
 #### 2. **Fetch Available Projects**
 ```bash
-GET /projectsv2/all_projects_names
+GET /projects/v3/projects_names
 
 Headers: Authorization: Bearer {token}
 

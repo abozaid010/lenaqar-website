@@ -601,7 +601,7 @@ export async function fetchProjects(isPublic = false) {
  * use fetchProjectById when the full hierarchy is needed).
  */
 const fetchProjectsNamesBase = async (isPublic = false) => {
-  const url = isPublic ? "/projectsv2/all_projects_names?public=true" : "/projectsv2/all_projects_names";
+  const url = isPublic ? "/projects/v3/projects_names?public=true" : "/projects/v3/projects_names";
 
   const response = await axiosInstance.get(url);
 

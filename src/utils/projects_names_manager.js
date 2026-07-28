@@ -1,6 +1,6 @@
 /**
  * Singleton class to manage lightweight project names data
- * - Fetches data from /projectsv2/all_projects_names endpoint
+ * - Fetches data from /projects/v3/projects_names endpoint
  * - Provides formatted projects lists for dropdowns
  * - Uses ar_name and en_name for translations
  * - Core fields: id, en_name, ar_name, city, district

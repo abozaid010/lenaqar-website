@@ -38,7 +38,7 @@ export async function getProjectByEnName(enName: string): Promise<ProjectApiResp
       console.warn('Primary projects endpoint failed, trying fallback:', apiError instanceof Error ? apiError.message : String(apiError));
       
       try {
-        response = await axiosInstance.get('/projectsv2/all_projects_names');
+        response = await axiosInstance.get('/projects/v3/projects_names');
       } catch (fallbackError) {
         console.error('All project endpoints failed:', fallbackError instanceof Error ? fallbackError.message : String(fallbackError));
         throw new Error('Unable to fetch projects data');
