@@ -18,11 +18,11 @@ export default function WhatsAppButton({
   className = "",
   title = "Open WhatsApp",
   ariaLabel = "WhatsApp",
-  onClick,
-  options,
-  disabled,
+  onClick = undefined,
+  options = undefined,
+  disabled = undefined,
   size = "md",
-  onMessageCopied,
+  onMessageCopied = undefined,
 }) {
   const isDisabled = disabled ?? !phoneNumber;
   const baseClass = SIZE_CLASSES[size] ?? SIZE_CLASSES.md;
