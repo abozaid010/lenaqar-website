@@ -11,4 +11,6 @@ export {
   getLocalizedActionLabel,
   buildActionOptions,
   actionKeyToLocalePath,
+  ACTION_VALUE_TO_KEY,
+  lookupActionValueInLocaleMessages,
 } from "./action-label-utils";

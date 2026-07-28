@@ -47,7 +47,7 @@ export function useActionOptions({
   includeFilterOnly = false,
   enabled = true,
 } = {}) {
-  const { translate } = useI18n();
+  const { translate, t } = useI18n();
   const query = useActionCatalog({ enabled });
 
   const options = useMemo(() => {
@@ -60,8 +60,9 @@ export function useActionOptions({
       ownerTypes,
       includeFilterOnly,
       translate,
+      messages: t,
     });
-  }, [query.data, ownerType, ownerTypes, includeFilterOnly, translate]);
+  }, [query.data, ownerType, ownerTypes, includeFilterOnly, translate, t]);
 
   return {
     ...query,
@@ -74,12 +75,12 @@ export function useActionOptions({
  * Localized label for any action value (catalog + translate fallback).
  */
 export function useActionLabel(value) {
-  const { translate } = useI18n();
+  const { translate, t } = useI18n();
   const { data: catalog } = useActionCatalog();
 
   return useMemo(
-    () => getLocalizedActionLabel(value, translate, catalog),
-    [value, translate, catalog]
+    () => getLocalizedActionLabel(value, translate, catalog, t),
+    [value, translate, catalog, t]
   );
 }
 
