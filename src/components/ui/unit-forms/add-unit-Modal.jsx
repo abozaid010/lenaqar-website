@@ -26,7 +26,9 @@ import {
   MAX_UNIT_IMAGES,
   resolveMonthlyRentFromUnit,
   ensureUnitLocationPayload,
+  isValidUnitLocationLeaf,
 } from "./unit-form-constants";
+import { validateSalePricing } from "@/utils/sale-pricing-validation";
 import { getValidatedClientId } from "@/utils/clientId-validator";
 import { isOwnClientUnit } from "@/lib/units/unit-ownership";
 import { resolveOwnerFromDashboardPhone } from "@/lib/units/resolve-owner-from-dashboard";
@@ -90,7 +92,13 @@ function sanitizeAmountsForApi(data) {
       delete out[field];
       return;
     }
-    out[field] = toIntAmount(raw);
+    const n = toIntAmount(raw);
+    // Optional installment years: omit blank / zero / non-positive (cash sale).
+    if (field === "installment_years" && (!Number.isFinite(n) || n <= 0)) {
+      delete out[field];
+      return;
+    }
+    out[field] = n;
   });
   numericFloatFields.forEach((field) => {
     if (!(field in out)) return;
@@ -241,6 +249,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   // Track over all upload statecl
   const [isUploading, setIsUploading] = useState(false);
   const [invalidFields, setInvalidFields] = useState([]); // New state for invalid fields
+  const [fieldErrors, setFieldErrors] = useState({});
   const [showFillFromTextDialog, setShowFillFromTextDialog] = useState(false);
   const [extractingFromText, setExtractingFromText] = useState(false);
   const [useLocalExtractor, setUseLocalExtractor] = useState(true);
@@ -674,12 +683,12 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         (field) => formData[field] !== 0 && !formData[field]
       );
 
-      // Project or sub-district is required (city/district alone is not enough)
-      const hasLocation = Boolean(
-        String(formData.project || "").trim() ||
-          String(formData.sub_district || "").trim()
+      // Location must be a valid leaf (project, sub-district, or district with no subs)
+      const locationIsLeaf = await isValidUnitLocationLeaf(
+        formData,
+        CityManager.getInstance()
       );
-      if (!hasLocation) {
+      if (!locationIsLeaf) {
         missingFields.push("unit_location");
       }
 
@@ -689,7 +698,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           toast.error(
             translate(
               "basicDetails.locationRequired",
-              "Select a project or sub-district"
+              "Select a complete location down to the leaf (district, sub-district, or project)"
             )
           );
         } else {
@@ -715,11 +724,6 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           missingFields.push("deliveryDate");
         }
 
-        // Total price is required for sell units (parseAmount handles comma-formatted strings)
-        if (!isPositiveAmount(SellFormData.totalPrice)) {
-          missingFields.push("totalPrice");
-        }
-
         if (ownerMobileRequired && isOwnerMobileInvalid(formData, ownerMobileRequired)) {
           missingFields.push("owner_mobile");
         }
@@ -738,25 +742,30 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           );
         }
 
-        // Validate payment plan fields
-        if (SellFormData.installment_years && SellFormData.installment_years <= 0) {
-          missingFields.push("installment_years");
+        const pricing = validateSalePricing(SellFormData);
+        if (!pricing.ok) {
+          missingFields.push(...pricing.invalidFields);
         }
 
         if (missingFields.length > 0) {
-          setInvalidFields(missingFields);
-          if (missingFields.includes("totalPrice")) {
-            toast.error(
-              translate(
-                "saleDetails.totalPriceRequired",
-                "Enter total price"
-              )
-            );
-          } else if (missingFields.includes("owner_mobile")) {
+          const uniqueMissing = [...new Set(missingFields)];
+          setInvalidFields(uniqueMissing);
+
+          const translatedPricingErrors = {};
+          for (const [field, err] of Object.entries(pricing.fieldErrors)) {
+            translatedPricingErrors[field] = translate(err.key, err.fallback);
+          }
+          setFieldErrors(translatedPricingErrors);
+
+          if (pricing.invalidFields.length > 0) {
+            const first = pricing.invalidFields[0];
+            const firstErr = pricing.fieldErrors[first];
+            toast.error(translate(firstErr.key, firstErr.fallback));
+          } else if (uniqueMissing.includes("owner_mobile")) {
             toastOwnerMobileValidationError(formData, translate);
           } else if (
             !(
-              missingFields.includes("deliveryDate") &&
+              uniqueMissing.includes("deliveryDate") &&
               SellFormData.deliveryDate
             )
           ) {
@@ -773,15 +782,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           return false;
         }
 
-        // Keep optional non-price defaults only; prices are omitted from API when empty.
-        const optionalNonPriceDefaults = ["installment_years"];
-        const sanitizedData = { ...SellFormData };
-        optionalNonPriceDefaults.forEach((field) => {
-          if (!sanitizedData[field] || sanitizedData[field] === "") {
-            sanitizedData[field] = 0;
-          }
-        });
-        setSellFormData(sanitizedData);
+        setFieldErrors({});
       } else if (formData.purpose === "rent") {
         if (ownerMobileRequired && isOwnerMobileInvalid(formData, ownerMobileRequired)) {
           setInvalidFields(["owner_mobile"]);
@@ -813,6 +814,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     }
 
     setInvalidFields([]);
+    setFieldErrors({});
     return true;
   };
 
@@ -897,6 +899,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       }
     }
 
+    let keepInvalidFields = false;
     try {
       setLoading(true);
       let finalFormData = { ...formData };
@@ -942,11 +945,27 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       }
 
       // Always send full location shape; fill missing geo from selected project.
+      const cityManager = CityManager.getInstance();
       payload = await ensureUnitLocationPayload(payload, {
-        cityManager: CityManager.getInstance(),
+        cityManager,
         projects: ProjectsNamesManager.getInstance().getProjects(),
         fetchProjectById,
       });
+
+      // Final leaf check after location fill (add + edit).
+      const locationIsLeaf = await isValidUnitLocationLeaf(payload, cityManager);
+      if (!locationIsLeaf) {
+        keepInvalidFields = true;
+        setInvalidFields(["unit_location"]);
+        setCurrentStep(1);
+        toast.error(
+          translate(
+            "basicDetails.locationRequired",
+            "Select a complete location down to the leaf (district, sub-district, or project)"
+          )
+        );
+        return;
+      }
 
       if (!isEdit) {
         await addUnitMutation.mutateAsync(payload);
@@ -961,7 +980,10 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     } catch (error) {
       toast.error(`${t.toasts.errorProcessing}: ${error.message}`);
     } finally {
-      setInvalidFields([]);
+      if (!keepInvalidFields) {
+        setInvalidFields([]);
+        setFieldErrors({});
+      }
       setLoading(false);
     }
   };
@@ -1196,6 +1218,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           updateCommonFormData={updateFormData}
           invalidFields={invalidFields}
           setInvalidFields={setInvalidFields}
+          fieldErrors={fieldErrors}
+          setFieldErrors={setFieldErrors}
         />
       )}
 

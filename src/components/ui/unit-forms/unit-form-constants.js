@@ -20,6 +20,61 @@ function asTrimmedString(value) {
 }
 
 /**
+ * A unit location is valid only when it points at a leaf in the hierarchy:
+ * - City → District → Subdistrict → Project
+ * - City → District → Subdistrict
+ * - City → District → Project (district has no subdistricts)
+ * - City → District (district has no subdistricts)
+ *
+ * Rejects city-only, empty selection, and district when that district has subdistricts.
+ */
+export async function isValidUnitLocationLeaf(location = {}, cityManager) {
+  const project = asTrimmedString(
+    location.project || location.project_id || location.projectId
+  );
+  const city = asTrimmedString(location.city);
+  const district = asTrimmedString(location.district);
+  const sub_district = asTrimmedString(location.sub_district);
+
+  // Project selected but parents not resolved yet (filled before save).
+  if (!city || !district) {
+    return Boolean(project);
+  }
+
+  if (!cityManager) {
+    return Boolean(sub_district || project);
+  }
+
+  await cityManager.initializeData();
+  const resolved = cityManager.resolveLocationHierarchy
+    ? cityManager.resolveLocationHierarchy({ city, district, sub_district })
+    : { city, district, sub_district };
+
+  if (!resolved.city || !resolved.district) {
+    return Boolean(project);
+  }
+
+  const cityObj = await cityManager.getCityByValue(resolved.city);
+  if (!cityObj) {
+    // Unknown city in catalog — require a deeper node.
+    return Boolean(resolved.sub_district || project);
+  }
+
+  const subs = await cityManager.getSubDistrictsForCityDistrict(
+    cityObj.id,
+    resolved.district
+  );
+
+  if (subs.length > 0) {
+    // District has subdistricts — must select one (project optional).
+    return Boolean(resolved.sub_district);
+  }
+
+  // District has no subdistricts — district itself is a valid leaf (project optional).
+  return true;
+}
+
+/**
  * Ensure unit create/update payloads always include location fields and
  * fill missing city/district/sub_district from the selected project when possible.
  */

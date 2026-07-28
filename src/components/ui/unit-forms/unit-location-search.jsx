@@ -376,7 +376,7 @@ export default function UnitLocationSearch({
       <p className="text-xs text-gray-500">
         {translate(
           "basicDetails.locationSearchHint",
-          "Select a project or sub-district. Choosing a project fills city, district, and area.",
+          "Select a leaf location: project, sub-district, or a district with no sub-districts. Choosing a project fills city, district, and area.",
         )}
       </p>
     </div>

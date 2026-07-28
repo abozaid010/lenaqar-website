@@ -253,9 +253,8 @@ export default function BasicDetailsStep({
         developer_id: "",
         developer: "",
       });
-      if (payload.sub_district || payload.project) {
-        clearLocationInvalid();
-      }
+      // Clear sticky error; Next/Save re-validates leaf rules from hierarchy.
+      clearLocationInvalid();
     },
     [updateFormData, clearLocationInvalid],
   );
@@ -434,7 +433,7 @@ export default function BasicDetailsStep({
               invalidFields.includes("project")
                 ? translate(
                     "basicDetails.locationRequired",
-                    "Select a project or sub-district"
+                    "Select a complete location down to the leaf (district, sub-district, or project)"
                   )
                 : ""
             }

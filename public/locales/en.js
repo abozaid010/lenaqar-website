@@ -1736,8 +1736,9 @@ export default {
     locationSearchPlaceholder: "Search project, area, district, or city…",
     locationSearchEmpty: "No matching locations or projects",
     locationSearchHint:
-      "Select a project or sub-district. Choosing a project fills city, district, and area.",
-    locationRequired: "Select a project or sub-district",
+      "Select a leaf location: project, sub-district, or a district with no sub-districts. Choosing a project fills city, district, and area.",
+    locationRequired:
+      "Select a complete location down to the leaf (district, sub-district, or project)",
     selectView: "Select view",
     placeholders: {
       unitTitle: "Enter unit title",
@@ -1791,7 +1792,14 @@ export default {
     maintenance: "Maintenance",
     deleveryError:
       "Delivery date must be between 30 years ago and 10 years from now",
-    totalPriceRequired: "Enter total price",
+    totalPriceRequired: "Total price is required.",
+    downPaymentRequiredInstallments:
+      "Down payment is required when using installments.",
+    remainingAmountRequiredInstallments:
+      "Remaining amount is required when using installments.",
+    installmentYearsRequiredInstallments:
+      "Installment years is required when using installments.",
+    invalidNumber: "Please enter a valid number.",
   },
   rentalDetails: {
     availability: "Availability",

@@ -1552,8 +1552,9 @@ export default {
     locationSearchPlaceholder: "ابحث عن مشروع أو منطقة أو حي أو مدينة…",
     locationSearchEmpty: "لا توجد مواقع أو مشاريع مطابقة",
     locationSearchHint:
-      "اختر مشروعاً أو حياً فرعياً. اختيار مشروع يملأ المدينة والحي والمنطقة.",
-    locationRequired: "اختر مشروعاً أو حياً فرعياً",
+      "اختر موقعاً نهائياً: مشروعاً أو حياً فرعياً، أو منطقة بلا أحياء فرعية. اختيار مشروع يملأ المدينة والحي والمنطقة.",
+    locationRequired:
+      "اختر موقعاً كاملاً حتى المستوى النهائي (منطقة أو حي فرعي أو مشروع)",
     selectView: "اختر الإطلالة",
     placeholders: {
       unitTitle: "أدخل عنوان الوحدة",
@@ -1633,7 +1634,11 @@ export default {
     ownerDetails: "تفاصيل المالك",
     deleveryError:
       "يجب أن يكون تاريخ التسليم بين 30 سنة مضت و 10 سنوات من الآن",
-    totalPriceRequired: "أدخل السعر الإجمالي",
+    totalPriceRequired: "السعر الإجمالي مطلوب.",
+    downPaymentRequiredInstallments: "المقدم مطلوب عند استخدام التقسيط.",
+    remainingAmountRequiredInstallments: "المبلغ المتبقي مطلوب عند استخدام التقسيط.",
+    installmentYearsRequiredInstallments: "سنوات التقسيط مطلوبة عند استخدام التقسيط.",
+    invalidNumber: "يرجى إدخال رقم صالح.",
   },
   rentalDetails: {
     availability: "التوفر",
