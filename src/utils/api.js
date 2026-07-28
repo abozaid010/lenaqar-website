@@ -27,7 +27,7 @@ import {
   resolveWhatsappMessageSource,
   WHATSAPP_RATE_LIMIT_EXCEEDED_CODE,
 } from "@/constants/whatsapp-messaging";
-import { normalizeLastAction } from "@/utils/actions";
+import { normalizeLastAction } from "@/utils/action-normalize";
 import { enforceDashboardAuthorOnParams } from "@/lib/dashboard-lead-access";
 import { toApiStartDate, toApiEndDate } from "@/utils/dashboardDate";
 import { resolveQuickSearchFromParams } from "@/utils/lead-list-search";

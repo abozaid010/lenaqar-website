@@ -2,6 +2,7 @@ import Sidebar from "@/components/dashbord/common/Sidebar";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { TokenRefreshProvider } from "@/components/auth/TokenRefreshProvider";
 import ModuleActionsProvider from "@/components/auth/ModuleActionsProvider";
+import ActionCatalogWarmup from "@/components/actions/ActionCatalogWarmup";
 import { Suspense } from "react";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { getCachedClientProfile } from "@/lib/getCachedClientProfile.server";
@@ -43,6 +44,7 @@ const Layout = async ({ children }) => {
   return (
     <TokenRefreshProvider>
       <ModuleActionsProvider initialModuleActions={initialModuleActions}>
+        <ActionCatalogWarmup />
         <div className="flex flex-col lg:flex-row h-screen bg-gray-50">
           <Sidebar
             serverProfileInitial={profileResponse}

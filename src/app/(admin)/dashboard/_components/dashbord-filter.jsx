@@ -2,17 +2,17 @@
 
 import FormInput from "@/components/ui/inputs/form-input";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
+import ActionSelect from "@/components/actions/ActionSelect";
 import {
   DASHBOARD_TRIGGER,
 } from "@/constants/ui-classes";
 import { useI18n } from "@/hooks/useI18n";
 import {
-  getActionLabel,
-  getDashboardFilterOptions,
-  NEW_LEAD_ACTION,
   parseDashboardActionFilter,
   serializeDashboardActionFilter,
-} from "@/utils/actions";
+} from "@/utils/action-constants";
+import { NEW_LEAD_ACTION } from "@/utils/action-normalize";
+import { useActionOptions } from "@/hooks/use-action-catalog";
 import {
   canViewAllDashboardLeads,
   getDashboardLoggedInEmail,
@@ -124,11 +124,6 @@ export default function DashbordFilter({
   const clientId = LenaCookiesManager.getClientId();
   const { leadSort: selectedSort, setLeadSort } = useDashboardFilterPersistence();
 
-  const ACTIONS = useMemo(
-    () => getDashboardFilterOptions(locale),
-    [locale],
-  );
-
   const sortOptions = useMemo(
     () => [
       {
@@ -180,6 +175,13 @@ export default function DashbordFilter({
       source: parseLeadSourceFilter(appliedFilters.source),
       author: authorFromUrl,
     };
+  });
+
+  const {
+    isError: actionCatalogError,
+  } = useActionOptions({
+    ownerType: filters.owner_type || null,
+    includeFilterOnly: true,
   });
 
   useEffect(() => {
@@ -317,21 +319,7 @@ export default function DashbordFilter({
     return getLeadSourceLabel(filters.source, translate);
   }, [filters.source, translate]);
 
-  const actionFilterLabel = useMemo(() => {
-    if (filters.actions.length === 0) {
-      return translate("dashboardFilter.actions.allActions");
-    }
-    if (filters.actions.length === 1) {
-      return getActionLabel(filters.actions[0], locale);
-    }
-    return translate("dashboardFilter.actions.selected").replace(
-      "{count}",
-      filters.actions.length,
-    );
-  }, [filters.actions, locale, translate]);
-
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  const [isActionDropdownOpen, setIsActionDropdownOpen] = useState(false);
   const [isOwnerTypeDropdownOpen, setIsOwnerTypeDropdownOpen] = useState(false);
   const [isCampaignDropdownOpen, setIsCampaignDropdownOpen] = useState(false);
   const [isSourceDropdownOpen, setIsSourceDropdownOpen] = useState(false);
@@ -344,14 +332,12 @@ export default function DashbordFilter({
   const [isMounted, setIsMounted] = useState(false);
   /** Dropdowns inside the Filters panel section (excludes sort — separate section in panel mode). */
   const isFiltersDropdownOpen =
-    isActionDropdownOpen ||
     isOwnerTypeDropdownOpen ||
     isCampaignDropdownOpen ||
     isSourceDropdownOpen ||
     isAuthorDropdownOpen ||
     isDatePickerOpen;
   const isFilterMenuOpen = isFiltersDropdownOpen || isSortDropdownOpen;
-  const actionDropdownRef = useRef(null);
   const ownerTypeDropdownRef = useRef(null);
   const campaignDropdownRef = useRef(null);
   const sourceDropdownRef = useRef(null);
@@ -498,12 +484,6 @@ export default function DashbordFilter({
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
-        actionDropdownRef.current &&
-        !actionDropdownRef.current.contains(event.target)
-      ) {
-        setIsActionDropdownOpen(false);
-      }
-      if (
         ownerTypeDropdownRef.current &&
         !ownerTypeDropdownRef.current.contains(event.target)
       ) {
@@ -539,7 +519,6 @@ export default function DashbordFilter({
     };
 
     if (
-      isActionDropdownOpen ||
       isOwnerTypeDropdownOpen ||
       isCampaignDropdownOpen ||
       isSourceDropdownOpen ||
@@ -552,7 +531,6 @@ export default function DashbordFilter({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [
-    isActionDropdownOpen,
     isOwnerTypeDropdownOpen,
     isCampaignDropdownOpen,
     isSourceDropdownOpen,
@@ -709,26 +687,6 @@ export default function DashbordFilter({
     pushFilterUpdates({ [key]: nextValue });
   };
 
-  const toggleActionSelection = (actionValue) => {
-    const newActions = filters.actions.includes(actionValue)
-      ? filters.actions.filter((value) => value !== actionValue)
-      : [...filters.actions, actionValue];
-
-    setFilters((prev) => ({
-      ...prev,
-      actions: newActions,
-    }));
-    onFilterChange("actions", newActions);
-  };
-
-  const clearActionFilters = () => {
-    setFilters((prev) => ({
-      ...prev,
-      actions: [],
-    }));
-    onFilterChange("actions", []);
-  };
-
   const handleAuthorChange = (event) => {
     const raw = typeof event?.target?.value === "string" ? event.target.value : "";
     // Empty = "All" → do not send author to the API (admins/owners only).
@@ -873,61 +831,31 @@ export default function DashbordFilter({
 
   const filterControls = (
     <>
-          <div
-            className={`relative ${isActionDropdownOpen ? "z-[90]" : "z-[60]"} ${fieldShellClass}`}
-            ref={actionDropdownRef}
-          >
-            <div
+          <div className={`relative z-[60] ${fieldShellClass}`}>
+            <ActionSelect
               id="action_type"
-              role="button"
-              tabIndex={0}
-              aria-haspopup="listbox"
-              aria-expanded={isActionDropdownOpen}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ")
-                  setIsActionDropdownOpen((open) => !open);
+              selectionMode="multiple"
+              ownerType={filters.owner_type || null}
+              includeFilterOnly
+              values={filters.actions}
+              onValuesChange={(next) => {
+                setFilters((prev) => ({ ...prev, actions: next }));
+                onFilterChange("actions", next);
               }}
-              onClick={() => setIsActionDropdownOpen(!isActionDropdownOpen)}
-              className={`${DASHBOARD_TRIGGER} ${triggerWidthClass} ${
-                compact ? "h-9 min-h-[36px]" : "h-10"
-              }`}
-            >
-              <span className="whitespace-nowrap">{actionFilterLabel}</span>
-              <ChevronDown className="text-gray-400 w-5 h-5 flex-shrink-0" />
-            </div>
-
-            {isActionDropdownOpen && (
-              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[100] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
-                {filters.actions.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={clearActionFilters}
-                    className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded flex items-center gap-2 mb-1"
-                  >
-                    <X size={16} />
-                    {translate(
-                      "dashboardFilter.actions.clearAll",
-                      "Clear All",
-                    )}
-                  </button>
+              emptyLabel={translate(
+                "dashboardFilter.actions.allActions",
+                "All Actions"
+              )}
+              className={fieldShellClass}
+            />
+            {actionCatalogError ? (
+              <p className="mt-1 text-[11px] text-red-600">
+                {translate(
+                  "actionCatalog.errors.catalogUnavailable",
+                  "Action catalog unavailable. Try refreshing the page."
                 )}
-
-                {ACTIONS.map((action) => (
-                  <label
-                    key={action.value}
-                    className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={filters.actions.includes(action.value)}
-                      onChange={() => toggleActionSelection(action.value)}
-                      className="cursor-pointer"
-                    />
-                    <span className="text-sm text-gray-700">{action.label}</span>
-                  </label>
-                ))}
-              </div>
-            )}
+              </p>
+            ) : null}
           </div>
 
           <div

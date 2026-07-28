@@ -796,8 +796,8 @@ export default function LeadDetailPane({
   };
 
   const lastActionLabel = useMemo(
-    () => getActionLabel(normalizeLastAction(leadSummary?.last_action), locale),
-    [leadSummary?.last_action, locale]
+    () => getActionLabel(normalizeLastAction(leadSummary?.last_action), translate),
+    [leadSummary?.last_action, translate]
   );
 
   // Dashboard list summary: same fields as GET /messages/v2/all → users[]:
@@ -1254,6 +1254,7 @@ export default function LeadDetailPane({
           name={displayName || ""}
           onClose={() => setOpenActionsModal(false)}
           onActionUpdate={handleActionUpdate}
+          ownerType={ownerType}
         />
       )}
 

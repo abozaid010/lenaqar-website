@@ -1,147 +1,89 @@
-export const USER_ACTIONS = [
-  {
-    value: "",
-    en_label: "All Actions",
-    ar_label: "كل الإجراءات",
-  },
-  {
-    value: "new",
-    en_label: "New",
-    ar_label: "جديد",
-  },
-  {
-    value: "Make a call",
-    en_label: "Make a Call",
-    ar_label: "إجراء مكالمة",
-  },
-  {
-    value: "Office visit",
-    en_label: "Office Visit",
-    ar_label: "زيارة مكتب",
-  },
-  {
-    value: "Property view",
-    en_label: "Property View",
-    ar_label: "معاينه",
-  },
-  {
-    value: "Qualified lead",
-    en_label: "Qualified Lead",
-    ar_label: "موجه للشراء",
-  },
-  {
-    value: "Not interested",
-    en_label: "Not Interested",
-    ar_label: "غير مهتم",
-  },
-  {
-    value: "Interested",
-    en_label: "Interested",
-    ar_label: "مهتم",
-  },
-  {
-    value: "Not qualified",
-    en_label: "Not Qualified",
-    ar_label: "غير مؤهل",
-  },
-  {
-    value: "Did not reply",
-    en_label: "Did not reply",
-    ar_label: "لم يرد",
-  },
-  {
-    value: "Follow up later",
-    en_label: "Follow Up Later",
-    ar_label: "متابعة لاحقاً",
-  },
-  {
-    value: "Missing requirement",
-    en_label: "Open Request",
-    ar_label: "طلب مفتوح",
-  },
-  {
-    value: "Blocked",
-    en_label: "Blocked",
-    ar_label: "محظور",
-  },
-];
+"use client";
 
-export const SCHEDULE_VISIBLE_ACTIONS = [
-  "Make a call",
-  "Office visit",
-  "Property view",
-  "Follow up later",
-];
+import { actionCatalogService } from "@/services/actionCatalogService";
+import { getLocalizedActionLabel } from "@/components/actions/action-label-utils";
+import {
+  NEW_LEAD_ACTION,
+  normalizeLastAction,
+} from "@/utils/action-normalize";
+import {
+  ACTIONS_COLORS,
+  SCHEDULE_VISIBLE_ACTIONS,
+  getActionColorClass,
+  parseDashboardActionFilter,
+  serializeDashboardActionFilter,
+} from "@/utils/action-constants";
 
-/** Canonical last_action for leads without history (null, empty, or legacy "New"). */
-export const NEW_LEAD_ACTION = "new";
+export {
+  NEW_LEAD_ACTION,
+  normalizeLastAction,
+  ACTIONS_COLORS,
+  SCHEDULE_VISIBLE_ACTIONS,
+  getActionColorClass,
+  parseDashboardActionFilter,
+  serializeDashboardActionFilter,
+};
 
 /**
- * Normalize API `last_action` to the canonical value used in filters and display.
- * - null / empty / "New" → "new"
- * - existing actions → unchanged (latest value from backend)
+ * Localized action label.
+ * Prefer passing `translate` as the second arg. Locale string ("en"|"ar") is
+ * accepted for backward compatibility and falls back to the catalog API label.
+ *
+ * @param {string} value
+ * @param {((key: string, fallback?: string) => string)|string} [languageOrTranslate="en"]
  */
-export const normalizeLastAction = (value) => {
-  if (value == null) return NEW_LEAD_ACTION;
-  const trimmed = String(value).trim();
-  if (!trimmed) return NEW_LEAD_ACTION;
-  if (trimmed.toLowerCase() === NEW_LEAD_ACTION) return NEW_LEAD_ACTION;
-  return trimmed;
+export const getActionLabel = (value, languageOrTranslate = "en") => {
+  if (typeof languageOrTranslate === "function") {
+    return getLocalizedActionLabel(value, languageOrTranslate);
+  }
+
+  const catalog = actionCatalogService.getCatalogSync();
+  const normalized = normalizeLastAction(value);
+  if (catalog) {
+    const spec =
+      catalog.actions.find((a) => a.value === normalized) ||
+      (catalog.filter_only || []).find((a) => a.value === normalized);
+    if (spec) {
+      return spec.label || spec.value;
+    }
+  }
+  return normalized;
 };
 
-// Helper function to get action label by value and language
-export const getActionLabel = (value, language = "en") => {
-  const lookupValue = normalizeLastAction(value);
-  const action = USER_ACTIONS.find((action) => action.value === lookupValue);
-  if (!action) return value;
-
-  return language === "ar" ? action.ar_label : action.en_label;
-};
-
-// Helper function to get actions for dashboard multi-select (excludes "All Actions" only)
+/**
+ * Filter options including filter_only (e.g. "new"). Sync — requires catalog cache.
+ * Prefer useActionOptions({ includeFilterOnly: true }) in React components.
+ */
 export const getFilterActions = () => {
-  return USER_ACTIONS.filter((action) => action.value !== "");
+  const catalog = actionCatalogService.getCatalogSync();
+  if (!catalog) return [];
+  const filterOnly = (catalog.filter_only || []).map((item) => ({
+    value: item.value,
+    label: item.label || item.value,
+  }));
+  const actions = catalog.actions.map((a) => ({
+    value: a.value,
+    label: a.label || a.value,
+  }));
+  return [...filterOnly, ...actions];
 };
 
-/** Checkbox options for DashbordFilter (same values sent to messages/v2/all). */
-export const getDashboardFilterOptions = (language = "en") => {
+/** @deprecated Prefer useActionOptions — sync helper for non-React call sites. */
+export const getDashboardFilterOptions = (languageOrTranslate = "en") => {
   return getFilterActions().map((action) => ({
     value: action.value,
-    label: getActionLabel(action.value, language),
+    label: getActionLabel(action.value, languageOrTranslate),
   }));
 };
 
-export const parseDashboardActionFilter = (actionParam) => {
-  if (!actionParam || actionParam === "all") return [];
-  return actionParam
-    .split(",")
-    .map((value) => value.trim())
-    .filter(Boolean);
+/**
+ * Schedule-visible actions = catalog entries with requires_meeting_time.
+ * Sync from cache; prefer server catalog when available.
+ */
+export const getScheduleVisibleActions = () => {
+  const fromService = actionCatalogService.getScheduledActionValuesSync();
+  if (fromService.length) return fromService;
+  return [];
 };
 
-export const serializeDashboardActionFilter = (actions) => {
-  if (!Array.isArray(actions) || actions.length === 0) return null;
-  return actions.join(",");
-};
-
-// Helper function to get all actions including ongoing conversation
-export const getAllActions = () => {
-  return USER_ACTIONS;
-};
-
-// Action colors mapping
-export const ACTIONS_COLORS = {
-  "Make a call": "text-green-800",
-  "Office visit": "text-yellow-800",
-  "Property view": "text-teal-800",
-  "Not interested": "text-gray-800",
-  "Not qualified": "text-red-800",
-  "Did not reply": "text-slate-600",
-  "Follow up later": "text-orange-800",
-  "Missing requirement": "text-purple-800",
-  Blocked: "text-red-600",
-  "Qualified lead": "text-emerald-800",
-  Interested: "text-indigo-900",
-  new: "text-sky-700",
-  null: "text-sky-700",
-};
+export const getAllActions = () => getFilterActions();

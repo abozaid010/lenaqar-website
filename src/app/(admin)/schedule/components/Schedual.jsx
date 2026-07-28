@@ -8,6 +8,7 @@ import {
 } from "@/components/phone/phone-utils";
 import { handleCopyFullPhoneNumber } from "@/utils/phone-utils";
 import { getActionLabel, SCHEDULE_VISIBLE_ACTIONS } from "@/utils/actions";
+import { useActionCatalog, getScheduledActionsFromCatalog } from "@/hooks/use-action-catalog";
 import { fetchScheduledActionsByDate } from "@/utils/api";
 import { formatScheduleRowDateTime, formatScheduleWeekDayDate } from "@/utils/formateDate";
 import {
@@ -25,7 +26,7 @@ import {
   Eye,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import PhoneTelLink from "@/components/phone/PhoneTelLink";
@@ -79,13 +80,6 @@ const getWeekStartSaturday = (date) => {
   return d;
 };
 
-const normalizedScheduleActions = new Set(
-  SCHEDULE_VISIBLE_ACTIONS.map((action) => action.toLowerCase())
-);
-
-const isVisibleScheduleAction = (action) =>
-  normalizedScheduleActions.has(String(action || "").trim().toLowerCase());
-
 const formatToISODate = (date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -98,7 +92,7 @@ const MAX_PAST_WEEKS = 17;
 // Allow browsing schedule up to 8 weeks ahead.
 const MAX_NEXT_WEEKS = 8;
 
-const Schedule = ({ data, dataSales }) => {
+const Schedule = ({ data, dataSales, scheduledActionValues }) => {
   const router = useRouter();
   const [currentDate, setCurrentDate] = useState(() =>
     getWeekStartSaturday(new Date())
@@ -111,6 +105,23 @@ const Schedule = ({ data, dataSales }) => {
   const [detailsAppointment, setDetailsAppointment] = useState(null);
   const { t, translate, locale } = useI18n();
   const isRTL = locale === "ar";
+  const { data: catalog } = useActionCatalog();
+
+  const visibleScheduleActions = useMemo(() => {
+    const fromCatalog = getScheduledActionsFromCatalog(catalog);
+    if (fromCatalog.length) return fromCatalog;
+    if (Array.isArray(scheduledActionValues) && scheduledActionValues.length) {
+      return scheduledActionValues;
+    }
+    return SCHEDULE_VISIBLE_ACTIONS;
+  }, [catalog, scheduledActionValues]);
+
+  const isVisibleScheduleAction = (action) => {
+    const normalized = String(action || "").trim().toLowerCase();
+    return visibleScheduleActions.some(
+      (item) => String(item).trim().toLowerCase() === normalized
+    );
+  };
 
   const getAppointmentDateTime = (appointment) =>
     appointment?.meeting_time || appointment?.created_at;
@@ -153,7 +164,7 @@ const Schedule = ({ data, dataSales }) => {
       const nextWeekData = await fetchScheduledActionsByDate(
         formatToISODate(weekStart),
         formatToISODate(weekEnd),
-        SCHEDULE_VISIBLE_ACTIONS
+        visibleScheduleActions
       );
       setAppointments(nextWeekData);
     } catch (error) {
@@ -329,9 +340,9 @@ const Schedule = ({ data, dataSales }) => {
               ) : (
                 filteredData?.map((appointment, index) => {
                   const actionLabel =
-                    getActionLabel(appointment.action, locale) ||
+                    getActionLabel(appointment.action, translate) ||
                     appointment.action ||
-                    t.dashboardFilter?.actions?.noAction;
+                    translate("dashboardFilter.actions.noAction", "No Action");
                   const dateTimeRaw = getAppointmentDateTime(appointment);
                   const formattedDateTime = formatScheduleRowDateTime(
                     dateTimeRaw,
@@ -646,6 +657,7 @@ const Schedule = ({ data, dataSales }) => {
                 ""
               }
               name={editAppointment.name || ""}
+              ownerType={editAppointment.owner_type || null}
               defaultAction={editAppointment.action || null}
               defaultComment={editAppointment.comment ?? ""}
               defaultMeetingDate={

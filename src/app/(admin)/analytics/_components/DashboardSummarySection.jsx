@@ -27,7 +27,8 @@ import {
 } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { fetchDashboardSummary, getClientid } from "@/utils/api";
-import { ACTIONS_COLORS, getActionLabel, getFilterActions } from "@/utils/actions";
+import { getActionColorClass } from "@/utils/action-constants";
+import { useActionOptions } from "@/hooks/use-action-catalog";
 import { cairoDateDaysAgo, cairoDateToday } from "@/utils/cairoDate";
 import { debounce } from "@/utils/debounce";
 import { isValidDashboardDateRange } from "@/utils/dashboardDate";
@@ -117,6 +118,9 @@ export default function DashboardSummarySection() {
   const { translate, locale, localeUtils } = useI18n();
   const clientId = getClientid();
   const queryClient = useQueryClient();
+  const { options: filterActionOptions } = useActionOptions({
+    includeFilterOnly: true,
+  });
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [startDate, setStartDate] = useState(() => cairoDateDaysAgo(7));
   const [endDate, setEndDate] = useState(() => cairoDateToday());
@@ -174,14 +178,14 @@ export default function DashboardSummarySection() {
 
   const actionItems = useMemo(() => {
     const actionsByType = data?.actions_by_type || {};
-    return getFilterActions().map((action) => ({
+    return filterActionOptions.map((action) => ({
       value: action.value,
-      label: getActionLabel(action.value, locale),
+      label: action.label,
       count: readSummaryCount(actionsByType, action.value),
-      colorClass: ACTIONS_COLORS[action.value] || "text-gray-800",
+      colorClass: getActionColorClass(action.value),
       Icon: ACTION_ICONS[action.value] || Users,
     }));
-  }, [data?.actions_by_type, locale]);
+  }, [data?.actions_by_type, filterActionOptions]);
 
   const formattedRange = useMemo(() => {
     const rangeStart = data?.start_date || debouncedRange.startDate;

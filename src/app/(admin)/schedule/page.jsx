@@ -7,7 +7,11 @@ import ErrorBoundary from "@/components/ui/error-boundary";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
-import { SCHEDULE_VISIBLE_ACTIONS } from "@/utils/actions";
+import { SCHEDULE_VISIBLE_ACTIONS } from "@/utils/action-constants";
+import {
+  fetchActionCatalogServer,
+  getScheduledActionValuesFromCatalog,
+} from "@/lib/action-catalog.server";
 import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
@@ -70,9 +74,14 @@ const formattedAfter = rangeEnd.toISOString().split("T")[0];
 
 const page = async () => {
   try {
+    const catalog = await fetchActionCatalogServer();
+    const fromCatalog = getScheduledActionValuesFromCatalog(catalog);
+    const scheduledActions =
+      fromCatalog.length > 0 ? fromCatalog : SCHEDULE_VISIBLE_ACTIONS;
+
     // Run both API calls in parallel for better performance
     const [data, dataSales] = await Promise.allSettled([
-      getschedual(formattedBefore, formattedAfter, SCHEDULE_VISIBLE_ACTIONS),
+      getschedual(formattedBefore, formattedAfter, scheduledActions),
       getSalesData()
     ]);
 
@@ -91,7 +100,11 @@ const page = async () => {
           ]}
         />
         <ErrorBoundary>
-          <Schedual data={scheduleData} dataSales={salesData} />
+          <Schedual
+            data={scheduleData}
+            dataSales={salesData}
+            scheduledActionValues={scheduledActions}
+          />
         </ErrorBoundary>
       </>
     );

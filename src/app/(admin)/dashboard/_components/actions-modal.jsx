@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/hooks/useI18n";
-import { USER_ACTIONS, getActionLabel } from "@/utils/actions";
+import { getActionLabel } from "@/utils/actions";
 import { formatDateForDisplay } from "@/utils/formateDate";
 import { getClientActions, updateUserAction } from "@/utils/api";
 import { userKeys } from "@/utils/query-utils";
@@ -10,15 +10,13 @@ import { ChevronDown, ChevronUp, Pencil, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import NewActionForm from "./new-action-form";
-
-const NOPREFRERED_TIME = [
-  "Qualified lead",
-  "Not interested",
-  "Not qualified",
-  "Did not reply",
-  "Follow up later",
-  "Missing requirement",
-];
+import ActionSelect from "@/components/actions/ActionSelect";
+import TerminalActionDialog from "@/components/actions/TerminalActionDialog";
+import {
+  validateActionSubmission,
+  actionRequiresMeetingTime,
+} from "@/components/actions/validateActionSubmission";
+import { useActionOptions } from "@/hooks/use-action-catalog";
 
 const INITIAL_VISIBLE_ACTIONS = 5;
 const NOTES_COLLAPSE_LENGTH = 120;
@@ -29,13 +27,14 @@ function ActivityTimelineItem({
   isEditing,
   editForm,
   setEditForm,
-  actionOptions,
+  ownerType,
   onStartEdit,
   onCancelEdit,
   onSaveEdit,
   isSavingEdit,
   translate,
   locale,
+  catalog,
 }) {
   const [notesExpanded, setNotesExpanded] = useState(false);
   const isAI = !item?.author?.trim();
@@ -50,8 +49,13 @@ function ActivityTimelineItem({
       : `${comment.slice(0, NOTES_COLLAPSE_LENGTH).trimEnd()}…`;
 
   const actionLabel = item?.action
-    ? getActionLabel(item.action, locale) || item.action
+    ? getActionLabel(item.action, translate) || item.action
     : "";
+
+  const showMeetingTime =
+    item?.meeting_time &&
+    (actionRequiresMeetingTime(item.action, catalog) ||
+      !catalog);
 
   const expandNotesLabel = translate(
     "actionForm.expandNotes",
@@ -156,32 +160,28 @@ function ActivityTimelineItem({
           </div>
         )}
 
-        {!NOPREFRERED_TIME.includes(item?.action) && item?.meeting_time && (
+        {showMeetingTime ? (
           <div className="mt-1.5">
             <span className="inline-block rounded bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-700">
               {formatDateForDisplay(item.meeting_time)}
             </span>
           </div>
-        )}
+        ) : null}
 
         {isEditing && (
           <div className="mt-3 space-y-2 border-t border-gray-100 pt-3">
-            <select
+            <ActionSelect
+              selectionMode="single"
+              ownerType={ownerType}
               value={editForm.action}
-              onChange={(e) =>
+              onChange={(next) =>
                 setEditForm((prev) => ({
                   ...prev,
-                  action: e.target.value,
+                  action: next,
                 }))
               }
               className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs"
-            >
-              {actionOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            />
 
             <input
               type="datetime-local"
@@ -239,7 +239,8 @@ function ActivityHistory({
   editingIndex,
   editForm,
   setEditForm,
-  actionOptions,
+  ownerType,
+  catalog,
   startEdit,
   cancelEdit,
   saveEdit,
@@ -313,7 +314,8 @@ function ActivityHistory({
                   isEditing={editingIndex === originalIndex}
                   editForm={editForm}
                   setEditForm={setEditForm}
-                  actionOptions={actionOptions}
+                  ownerType={ownerType}
+                  catalog={catalog}
                   onStartEdit={() => startEdit(item, originalIndex)}
                   onCancelEdit={cancelEdit}
                   onSaveEdit={saveEdit}
@@ -347,6 +349,7 @@ export default function ActionsModal({
   userId,
   phoneNumber,
   name,
+  ownerType = null,
   onActionUpdate,
   /** Raise when opened above another modal (e.g. schedule user details). */
   overlayClassName = "z-50",
@@ -356,11 +359,14 @@ export default function ActionsModal({
   const [actionItems, setActionItems] = useState(actions || []);
   const [editingIndex, setEditingIndex] = useState(null);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [terminalOpen, setTerminalOpen] = useState(false);
   const [editForm, setEditForm] = useState({
     action: "",
     comment: "",
     meeting_time: "",
   });
+
+  const { options: actionOptions, catalog } = useActionOptions({ ownerType });
 
   useEffect(() => {
     setActionItems(actions || []);
@@ -373,17 +379,6 @@ export default function ActionsModal({
   const closeLabel = translate(
     "buttons.close",
     locale === "ar" ? "إغلاق" : "Close"
-  );
-
-  const actionOptions = useMemo(
-    () =>
-      USER_ACTIONS.filter((item) => item.value && item.value !== "new").map(
-        (item) => ({
-          value: item.value,
-          label: getActionLabel(item.value, locale),
-        })
-      ),
-    [locale]
   );
 
   const latestEditableIndex = useMemo(() => {
@@ -435,7 +430,7 @@ export default function ActionsModal({
     setEditForm({ action: "", comment: "", meeting_time: "" });
   };
 
-  const saveEdit = async () => {
+  const performSaveEdit = async () => {
     if (!userId) return;
     try {
       setIsSavingEdit(true);
@@ -448,8 +443,6 @@ export default function ActionsModal({
       });
       await refreshActions();
       onActionUpdate?.(userId, editForm.action);
-      // Editing the latest action can change last_action; stale-mark cached
-      // lead lists (no refetch now) so filtered views refresh on next visit.
       queryClient.invalidateQueries({ queryKey: userKeys.all, refetchType: "none" });
       toast.success(
         translate(
@@ -470,6 +463,24 @@ export default function ActionsModal({
     } finally {
       setIsSavingEdit(false);
     }
+  };
+
+  const saveEdit = async () => {
+    if (!userId) return;
+    const validation = validateActionSubmission({
+      action: editForm.action,
+      meetingTime: editForm.meeting_time || "",
+      catalog,
+    });
+    if (!validation.ok) {
+      toast.error(translate(validation.errorKey, validation.errorFallback));
+      return;
+    }
+    if (validation.actionSpec.terminal) {
+      setTerminalOpen(true);
+      return;
+    }
+    await performSaveEdit();
   };
 
   // Optimistic append: the newly created action is added straight to the
@@ -521,6 +532,7 @@ export default function ActionsModal({
               userId={userId}
               phoneNumber={phoneNumber}
               name={name}
+              ownerType={ownerType}
               onSuccess={handleActionSaved}
               onActionUpdate={onActionUpdate}
               showHeading
@@ -538,7 +550,8 @@ export default function ActionsModal({
               editingIndex={editingIndex}
               editForm={editForm}
               setEditForm={setEditForm}
-              actionOptions={actionOptions}
+              ownerType={ownerType}
+              catalog={catalog}
               startEdit={startEdit}
               cancelEdit={cancelEdit}
               saveEdit={saveEdit}
@@ -549,6 +562,19 @@ export default function ActionsModal({
           </div>
         </div>
       </div>
+
+      <TerminalActionDialog
+        isOpen={terminalOpen}
+        onClose={() => setTerminalOpen(false)}
+        onConfirm={async () => {
+          setTerminalOpen(false);
+          await performSaveEdit();
+        }}
+        actionLabel={
+          actionOptions.find((o) => o.value === editForm.action)?.label ||
+          editForm.action
+        }
+      />
     </div>
   );
 }

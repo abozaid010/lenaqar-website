@@ -175,9 +175,9 @@ export default function ScheduleUserDetailsDialog({
         normalizeLastAction(
           leadSummary?.last_action ?? appointment?.action,
         ),
-        locale,
+        translate,
       ),
-    [leadSummary?.last_action, appointment?.action, locale]
+    [leadSummary?.last_action, appointment?.action, translate]
   );
 
   const handleOpenActions = async () => {
@@ -461,6 +461,11 @@ export default function ScheduleUserDetailsDialog({
                   userId={String(userId)}
                   phoneNumber={phoneE164ForLinks || phoneNumber || ""}
                   name={displayName}
+                  ownerType={
+                    leadSummary?.owner_type ||
+                    appointment?.owner_type ||
+                    null
+                  }
                   defaultAction={appointment?.action || null}
                   defaultComment={appointment?.comment ?? ""}
                   onSuccess={afterMutation}
@@ -496,6 +501,11 @@ export default function ScheduleUserDetailsDialog({
           name={displayName || ""}
           onClose={() => setOpenActionsModal(false)}
           onActionUpdate={() => afterMutation()}
+          ownerType={
+            leadSummary?.owner_type ||
+            appointment?.owner_type ||
+            null
+          }
           overlayClassName="z-[70]"
         />
       ) : null}
