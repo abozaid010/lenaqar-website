@@ -33,6 +33,9 @@ import {
   canViewAllDashboardLeads,
   getDashboardLoggedInEmail,
 } from "@/lib/dashboard-lead-access";
+import { isHomeyClientId } from "@/lib/dashboard-filters-storage";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 import {
   RESALE_AUTHOR_DATA_ONLY_ACTION,
   RESALE_MODULE,
@@ -165,6 +168,8 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const { canShowBulkButton } = useWhatsappBulkAccess();
   const bulkSelection = useUnitsBulkSelectionOptional();
   const [isMounted, setIsMounted] = useState(false);
+  const [isHomeyClient, setIsHomeyClient] = useState(false);
+  const [isEditorRole, setIsEditorRole] = useState(false);
   const [isWhatsappBulkOpen, setIsWhatsappBulkOpen] = useState(false);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   /** TEMP: unit ids flagged as broker after manual quick-search (admin/owner only). */
@@ -556,7 +561,22 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
 
   useEffect(() => {
     setIsMounted(true);
+    setIsHomeyClient(isHomeyClientId(LenaCookiesManager.getClientId()));
+    const role = String(getRoleFromToken() || "")
+      .trim()
+      .toLowerCase();
+    setIsEditorRole(role === "editor");
   }, []);
+
+  /**
+   * Mark broker units (Homey only):
+   * - admin / owner → always
+   * - editor → only when author_data_only is absent/false (never assume)
+   */
+  const canMarkBrokerUnits =
+    isHomeyClient &&
+    (isAdminUser ||
+      (isEditorRole && isResaleActionsReady && !authorDataOnly));
 
   useEffect(() => {
     if (setVisibleUnitsFromList) {
@@ -955,9 +975,9 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setIsWhatsappBulkOpen(true);
   };
 
-  /** TEMP: admin/owner-only — never auto-runs; only on explicit button click. */
+  /** TEMP: Homey — admin/owner, or editor without author_data_only. */
   const handleDetectBrokerUnits = useCallback(async () => {
-    if (!isAdminUser || isDetectingBrokers) return;
+    if (!canMarkBrokerUnits || isDetectingBrokers) return;
     if (!displayedUnits?.length) {
       toast.error(
         translate(
@@ -993,10 +1013,10 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     } finally {
       setIsDetectingBrokers(false);
     }
-  }, [displayedUnits, isAdminUser, isDetectingBrokers, translate]);
+  }, [displayedUnits, canMarkBrokerUnits, isDetectingBrokers, translate]);
 
   const renderBrokerDetectButton = () => {
-    if (!isMounted || !isAdminUser) return null;
+    if (!isMounted || !canMarkBrokerUnits) return null;
     return (
       <button
         type="button"
@@ -1035,7 +1055,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setFilter(next || DEFAULT_VISIBILITY);
   };
 
-  const bulkSelectLabel = showBulkToolbar && (
+  const bulkSelectLabel = showBulkToolbar && isAdminUser && (
     <label className="flex w-full items-center gap-2 min-h-11 px-3 rounded-md border border-gray-300 bg-white text-sm font-medium cursor-pointer select-none hover:bg-gray-50">
       <input
         type="checkbox"
@@ -1599,9 +1619,12 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
       {!isMobileFiltersOpen && (
         <div className="hidden lg:block bg-white rounded-lg shadow-md min-w-0">
           <div className="p-4 space-y-3">
-            {(isMounted && isAdminUser) || showBulkToolbar ? (
+            {(isMounted && (isAdminUser || canMarkBrokerUnits)) ||
+            showBulkToolbar ? (
               <div className="w-full pb-3 border-b border-[#E6E6E6] space-y-2">
-                {isMounted && isAdminUser ? (
+                {isMounted &&
+                (canMarkBrokerUnits ||
+                  (showBulkToolbar && bulkSelection.hasSelection)) ? (
                   <div className="flex flex-wrap items-center gap-2 min-w-0">
                     {renderBrokerDetectButton()}
                     {showBulkToolbar && bulkSelection.hasSelection && (
@@ -1623,7 +1646,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
                     )}
                   </div>
                 ) : null}
-                {showBulkToolbar && (
+                {showBulkToolbar && isAdminUser && (
                   <label className="flex w-full items-center gap-1.5 h-10 px-2 rounded-md border border-gray-300 bg-white text-sm font-medium cursor-pointer select-none hover:bg-gray-50">
                     <input
                       type="checkbox"
