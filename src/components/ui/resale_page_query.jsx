@@ -172,7 +172,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const [isEditorRole, setIsEditorRole] = useState(false);
   const [isWhatsappBulkOpen, setIsWhatsappBulkOpen] = useState(false);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
-  /** TEMP: unit ids flagged as broker after manual quick-search (admin/owner only). */
+  /** TEMP: unit ids flagged as broker after manual quick-search. */
   const [brokerUnitIds, setBrokerUnitIds] = useState(() => new Set());
   const [isDetectingBrokers, setIsDetectingBrokers] = useState(false);
   const [brokerDetectProgress, setBrokerDetectProgress] = useState({
@@ -180,9 +180,9 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     total: 0,
   });
 
-  // Hydrate from sessionStorage after mount (avoids SSR mismatch).
+  // Hydrate broker badges from localStorage after mount (survives reload on web/mobile).
   useEffect(() => {
-    setBrokerUnitIds(readBrokerUnitIds());
+    setBrokerUnitIds(readBrokerUnitIds(LenaCookiesManager.getClientId()));
   }, []);
 
   const visibilityOptions = useMemo(
@@ -994,8 +994,10 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
       const ids = await detectBrokerUnitIds(displayedUnits, {
         onProgress: (done, total) => setBrokerDetectProgress({ done, total }),
       });
-      // Merge into sessionStorage so badges survive nav / refresh / filter / sort.
-      setBrokerUnitIds(mergeBrokerUnitIds(ids));
+      // Merge into localStorage so badges survive reload / nav / filter / sort.
+      setBrokerUnitIds(
+        mergeBrokerUnitIds(ids, LenaCookiesManager.getClientId())
+      );
       toast.success(
         translate(
           "resalePage.brokerDetect.done",
