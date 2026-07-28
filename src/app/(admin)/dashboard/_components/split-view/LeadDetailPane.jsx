@@ -1,6 +1,7 @@
 "use client";
 
-import ActionsModal from "@/app/(admin)/dashboard/_components/actions-modal";
+import ActionsHistoryPanel from "@/app/(admin)/dashboard/_components/actions-history-panel";
+import AddActionOverlay from "@/app/(admin)/dashboard/_components/add-action-overlay";
 import ChatWith from "@/components/chat/chat-with";
 import ChatConversation from "@/components/chat/chat-conversation";
 import ToggleReplyType from "@/app/(admin)/dashboard/[userId]/_components/reply-type";
@@ -18,7 +19,7 @@ import {
   removeLeadTags,
 } from "@/utils/api";
 import { formatPhoneForDisplay, phoneToE164 } from "@/components/phone/phone-utils";
-import { getActionLabel, normalizeLastAction } from "@/utils/actions";
+import { normalizeLastAction } from "@/utils/actions";
 import { formatDateTimeAmPmShort, formatDateForDisplay } from "@/utils/formateDate";
 import { formatCurrency } from "@/utils/formatters";
 import { appendRequirementPriceChips } from "@/lib/match/requirement-to-units-filter";
@@ -37,7 +38,6 @@ import {
   Home,
   Landmark,
   ListChecks,
-  ListPlus,
   MapPin,
   MessageCircle,
   Pencil,
@@ -129,8 +129,8 @@ export default function LeadDetailPane({
   const canShowDeleteLead =
     canDeleteLead && isDashboardAdminRole(getRoleFromToken());
   const [bulkActionOpen, setBulkActionOpen] = useState(false);
-  const [openActionsModal, setOpenActionsModal] = useState(false);
-  const [rowActions, setRowActions] = useState(null);
+  const [openAddAction, setOpenAddAction] = useState(false);
+  const [rowActions, setRowActions] = useState([]);
   const [loadingActions, setLoadingActions] = useState(false);
   const [editReqOpen, setEditReqOpen] = useState(false);
   const [editContactOpen, setEditContactOpen] = useState(false);
@@ -288,20 +288,46 @@ export default function LeadDetailPane({
     }
   };
 
-  const handleOpenActions = async () => {
-    if (!userId) return;
+  // Prefetch action history as soon as the Actions tab is opened.
+  useEffect(() => {
+    setRowActions([]);
+    setOpenAddAction(false);
+  }, [userId]);
+
+  useEffect(() => {
+    if (activeTab !== "actions" || !userId) return;
+
+    let cancelled = false;
     setLoadingActions(true);
-    try {
-      const actions = await getClientActions(userId);
-      setRowActions(actions);
-      setOpenActionsModal(true);
-    } catch (e) {
-      console.error(e?.message ?? e);
-      toast.error(common.operationFailed);
-    } finally {
-      setLoadingActions(false);
-    }
-  };
+
+    (async () => {
+      try {
+        const actions = await getClientActions(userId);
+        if (cancelled) return;
+        setRowActions(Array.isArray(actions) ? actions : []);
+      } catch (e) {
+        if (cancelled) return;
+        console.error(e?.message ?? e);
+        toast.error(common.operationFailed);
+        setRowActions([]);
+      } finally {
+        if (!cancelled) setLoadingActions(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab, userId, common.operationFailed]);
+
+  const handleActionSaved = useCallback(
+    (createdAction) => {
+      if (createdAction?.action) {
+        setRowActions((prev) => [...(Array.isArray(prev) ? prev : []), createdAction]);
+      }
+    },
+    [],
+  );
 
   // Optimistic last-action update — no refetch. Client caches stay the single
   // source of truth until the next normal refresh, so every place that reads
@@ -795,11 +821,6 @@ export default function LeadDetailPane({
     }
   };
 
-  const lastActionLabel = useMemo(
-    () => getActionLabel(normalizeLastAction(leadSummary?.last_action), translate),
-    [leadSummary?.last_action, translate]
-  );
-
   // Dashboard list summary: same fields as GET /messages/v2/all → users[]:
   // `company_name`, `requirement_name` (building type slug or free text).
   // Falls back to legacy summary* fields on conversation payload if present.
@@ -1143,20 +1164,37 @@ export default function LeadDetailPane({
 
           {activeTab === "actions" && (
             <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-3 bg-gray-50/40">
-              {/* Actions log — top priority for rapid entry */}
-              <section className="rounded-lg border border-gray-200 bg-white p-3">
-                <h5 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                  {translate("leadDetail.actionsTab.sections.actionsLog")}
-                </h5>
-                <button
-                  type="button"
-                  onClick={handleOpenActions}
-                  disabled={loadingActions}
-                  className={`${DASHBOARD_BUTTON} h-9 min-h-[36px] text-xs w-full sm:w-auto`}
-                >
-                  <ListPlus className="w-3.5 h-3.5" />
-                  {common.actions} · {lastActionLabel}
-                </button>
+              {/* Actions history — always visible; Add Action opens form overlay only */}
+              <section className="rounded-lg border border-gray-200 bg-white overflow-hidden">
+                <ActionsHistoryPanel
+                  actions={rowActions}
+                  userId={userId}
+                  phoneNumber={phoneE164ForLinks || phoneNumber || ""}
+                  name={displayName || ""}
+                  ownerType={ownerType}
+                  onActionUpdate={handleActionUpdate}
+                  onActionsChange={setRowActions}
+                  fillHeight={false}
+                  className="border-0 bg-transparent"
+                  isLoading={loadingActions}
+                  headerAction={
+                    canCreateAction ? (
+                      <button
+                        type="button"
+                        onClick={() => setOpenAddAction(true)}
+                        className={`${DASHBOARD_BUTTON} h-8 min-h-[32px] text-xs shrink-0`}
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        {translate(
+                          "actionForm.addNewAction",
+                          locale === "ar"
+                            ? "إضافة إجراء جديد"
+                            : "Add New Action"
+                        )}
+                      </button>
+                    ) : null
+                  }
+                />
               </section>
 
               {/* Lead summary — read-only AI/lead summary text for context */}
@@ -1246,13 +1284,13 @@ export default function LeadDetailPane({
         }}
       />
 
-      {openActionsModal && (
-        <ActionsModal
-          actions={rowActions}
+      {openAddAction && (
+        <AddActionOverlay
           userId={userId}
           phoneNumber={phoneE164ForLinks || phoneNumber || ""}
           name={displayName || ""}
-          onClose={() => setOpenActionsModal(false)}
+          onClose={() => setOpenAddAction(false)}
+          onSuccess={handleActionSaved}
           onActionUpdate={handleActionUpdate}
           ownerType={ownerType}
         />
