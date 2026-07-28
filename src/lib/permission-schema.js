@@ -34,6 +34,7 @@ const FALLBACK_ALL_ACTIONS = [
   "whatsapp_api",
   "whatsapp_automation",
   "leads_source_filter",
+  "author_data_only",
 ];
 
 function filterClientActions(actions) {
@@ -64,6 +65,10 @@ function getFallbackAvailableActionsForModule(moduleKey) {
       "leads_source_filter"
     );
   }
+  if (key === "resale") {
+    // Optional: scopes Hidden Units list to the member's own author.
+    actions.push("author_data_only");
+  }
 
   return actions;
 }
@@ -79,6 +84,7 @@ const ACTION_LABEL_FALLBACKS = {
   whatsapp_api: "WhatsApp API Template",
   whatsapp_automation: "WhatsApp Automation",
   leads_source_filter: "Leads Source Filter",
+  author_data_only: "Author Data Only",
 };
 
 const ACTION_LABEL_KEYS = {
@@ -92,6 +98,7 @@ const ACTION_LABEL_KEYS = {
   whatsapp_api: "modulePermissions.actions.whatsappApi",
   whatsapp_automation: "modulePermissions.actions.whatsappAutomation",
   leads_source_filter: "modulePermissions.actions.leadsSourceFilter",
+  author_data_only: "modulePermissions.actions.authorDataOnly",
 };
 
 export function getFallbackPermissionSchema() {

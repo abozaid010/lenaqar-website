@@ -31,9 +31,12 @@ import {
 } from "@/hooks/useTeamAuthorOptions";
 import {
   canViewAllDashboardLeads,
-  enforceDashboardAuthorOnParams,
   getDashboardLoggedInEmail,
 } from "@/lib/dashboard-lead-access";
+import {
+  RESALE_AUTHOR_DATA_ONLY_ACTION,
+  RESALE_MODULE,
+} from "@/lib/resale-author-access";
 import {
   clearPendingApprovalSessionFilters,
   hasActivePendingApprovalFilters,
@@ -41,6 +44,7 @@ import {
   writePendingApprovalSessionFilters,
 } from "@/lib/units/pending-approval-session-filters";
 import { phoneToE164 } from "@/components/phone/phone-utils";
+import { useModuleActions } from "@/hooks/useModuleActions";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
 import { Loader2, SlidersHorizontal, Trash2, X } from "lucide-react";
@@ -227,15 +231,23 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const didBootstrapSessionFiltersRef = useRef(false);
   const skipPersistUntilHydratedRef = useRef(false);
 
+  const { has: hasResaleAction, isReady: isResaleActionsReady } =
+    useModuleActions(RESALE_MODULE);
+  /** Only force own author when resale.author_data_only is explicitly granted. */
+  const authorDataOnly =
+    isResaleActionsReady && hasResaleAction(RESALE_AUTHOR_DATA_ONLY_ACTION);
+
   const { authorOptions, teamPhoneOptions, isAdminUser, isLoading: isTeamLoading } =
     useTeamAuthorOptions({
       selectedAuthor: author || draftAuthor || "",
     });
 
-  // Same author ACL as Leads: non-admin/non-owner forced to own email.
+  // Resale ACL: force own email only when author_data_only (not for all editor/viewer).
   useEffect(() => {
+    if (!isResaleActionsReady) return;
+    if (canViewAllDashboardLeads() || !authorDataOnly) return;
     const email = getDashboardLoggedInEmail();
-    if (canViewAllDashboardLeads() || !email) return;
+    if (!email) return;
     setAuthor((prev) => {
       const current = typeof prev === "string" ? prev.trim() : "";
       return current.toLowerCase() === email.toLowerCase() ? prev : email;
@@ -244,10 +256,11 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
       const current = typeof prev === "string" ? prev.trim() : "";
       return current.toLowerCase() === email.toLowerCase() ? prev : email;
     });
-  }, []);
+  }, [isResaleActionsReady, authorDataOnly]);
 
   // Bootstrap once: restore session filters when returning to this page (same UX as units).
   useEffect(() => {
+    if (!isResaleActionsReady) return;
     if (didBootstrapSessionFiltersRef.current) return;
     didBootstrapSessionFiltersRef.current = true;
 
@@ -259,8 +272,10 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     let nextAuthor =
       typeof stored.author === "string" ? stored.author.trim() : "";
     const email = getDashboardLoggedInEmail();
-    if (!canViewAllDashboardLeads() && email) {
-      nextAuthor = email;
+    if (!canViewAllDashboardLeads()) {
+      // Author UI is hidden here; only keep a forced self-author when
+      // resale.author_data_only is present (never assume from role alone).
+      nextAuthor = authorDataOnly && email ? email : "";
     }
 
     const nextVisibility = stored.visibility || DEFAULT_VISIBILITY;
@@ -321,7 +336,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setDraftPurpose(nextPurpose);
     setDraftMinArea(nextMinArea);
     setDraftMaxArea(nextMaxArea);
-  }, []);
+  }, [isResaleActionsReady, authorDataOnly]);
 
   // Persist applied filters locally until the user changes/clears them.
   useEffect(() => {
@@ -452,8 +467,12 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
 
     const authorValue = typeof author === "string" ? author.trim() : "";
     if (authorValue) withPrice.author = authorValue;
-    // Defense in depth: query key + fetch always include own author for non-admins.
-    return JSON.stringify(enforceDashboardAuthorOnParams(withPrice));
+    // Defense in depth: only force own author when resale.author_data_only.
+    if (authorDataOnly) {
+      const email = getDashboardLoggedInEmail();
+      if (email) withPrice.author = email;
+    }
+    return JSON.stringify(withPrice);
   }, [
     searchParams,
     filter,
@@ -463,6 +482,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     minPrice,
     maxPrice,
     author,
+    authorDataOnly,
     city,
     district,
     subDistrict,
@@ -794,13 +814,17 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
 
   const clearAllFilters = useCallback(() => {
     clearPendingApprovalSessionFilters();
+    const lockedAuthor =
+      authorDataOnly && !canViewAllDashboardLeads()
+        ? getDashboardLoggedInEmail()
+        : "";
     setFilter(DEFAULT_VISIBILITY);
     setUpdatedAtDate("");
     setPropertyType("");
     setFurnishedType("");
     setMinPrice("");
     setMaxPrice("");
-    setAuthor("");
+    setAuthor(lockedAuthor);
     setTeamPhone("");
     setCity("");
     setDistrict("");
@@ -816,7 +840,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setDraftFurnishedType("");
     setDraftMinPrice("");
     setDraftMaxPrice("");
-    setDraftAuthor("");
+    setDraftAuthor(lockedAuthor);
     setDraftTeamPhone("");
     setDraftCity("");
     setDraftDistrict("");
@@ -826,7 +850,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setDraftMinArea("");
     setDraftMaxArea("");
     setDraftAreaRangeError("");
-  }, []);
+  }, [authorDataOnly]);
 
   const handleClearAllAndCloseMobile = () => {
     clearAllFilters();
@@ -838,7 +862,11 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     if (key === "updated_at") setUpdatedAtDate("");
     if (key === "property_type") setPropertyType("");
     if (key === "furnished_type") setFurnishedType("");
-    if (key === "author") setAuthor("");
+    if (key === "author") {
+      // Locked when resale.author_data_only — cannot clear own-author scope.
+      if (authorDataOnly && !canViewAllDashboardLeads()) return;
+      setAuthor("");
+    }
     if (key === "team_phone") setTeamPhone("");
     if (key === "price") {
       setMinPrice("");
@@ -1033,15 +1061,21 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     </label>
   );
 
+  const isAuthorFilterLocked =
+    authorDataOnly && !canViewAllDashboardLeads();
+
   const activeFiltersChips = activeFilterCount > 0 && (
     <div className="flex items-center gap-2 min-w-0">
       <div className="flex items-center gap-2 min-w-0 overflow-x-auto overscroll-x-contain pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {activeFilters.map((item) => (
+        {activeFilters.map((item) => {
+          const locked = item.key === "author" && isAuthorFilterLocked;
+          return (
           <div
             key={item.key}
             className="flex items-center gap-1.5 bg-gray-100 rounded-full ps-2.5 pe-1 py-1 text-sm text-gray-700 shrink-0 max-w-[200px]"
           >
             <p className="truncate text-xs">{item.value}</p>
+            {!locked && (
             <button
               type="button"
               className="shrink-0 flex items-center justify-center min-h-10 min-w-10 lg:min-h-8 lg:min-w-8 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-200"
@@ -1050,8 +1084,10 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
             >
               <X size={14} />
             </button>
+            )}
           </div>
-        ))}
+          );
+        })}
       </div>
       <button
         type="button"
@@ -1848,12 +1884,15 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
                   {t.unitsFilter?.activeFilter}
                 </span>
                 <div className="flex flex-wrap gap-2">
-                  {activeFilters.map((item) => (
+                  {activeFilters.map((item) => {
+                    const locked = item.key === "author" && isAuthorFilterLocked;
+                    return (
                     <div
                       key={`desktop-${item.key}`}
                       className="flex items-center gap-3 bg-gray-100 rounded px-1.5 py-1 text-sm text-gray-700"
                     >
                       <p className="truncate max-w-[180px] text-xs">{item.value}</p>
+                      {!locked && (
                       <button
                         type="button"
                         className="text-gray-500 hover:text-gray-700 min-h-8 min-w-8 inline-flex items-center justify-center"
@@ -1861,8 +1900,10 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
                       >
                         <X size={16} />
                       </button>
+                      )}
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <button
                   type="button"

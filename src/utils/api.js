@@ -202,9 +202,9 @@ export async function fetchPendingApprovalUnits(searchParams = {}) {
     const parsed = safeMergeParams(searchParams, {});
 
     const clientId = createSafeClientId(LenaCookiesManager.getClientId());
-    const params = enforceDashboardAuthorOnParams(
-      buildPendingApprovalSlimListParams(parsed, clientId),
-    );
+    // Author scoping is applied by ResalePageQuery only when
+    // `resale.author_data_only` is present — do not assume from role.
+    const params = buildPendingApprovalSlimListParams(parsed, clientId);
     const url = buildPendingApprovalSlimListUrl(params);
 
     const response = await axiosInstance.get(url);
