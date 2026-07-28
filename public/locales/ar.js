@@ -910,6 +910,7 @@ export default {
       whatsappApi: "قالب واتساب API",
       whatsappAutomation: "أتمتة واتساب",
       leadsSourceFilter: "فلتر مصدر العملاء",
+      authorDataOnly: "بيانات المؤلف فقط",
     },
   },
   adminClients: {

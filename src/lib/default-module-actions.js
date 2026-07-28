@@ -7,6 +7,7 @@
  *   units        → import
  *   conversation → import, whatsapp, whatsapp_automation
  *     (optional assignable: leads_source_filter — not granted by default)
+ *   resale → (optional assignable: author_data_only — not granted by default)
  *
  * Note: API accepts `whatsapp` (not `whatsapp_api`) on conversation.
  */

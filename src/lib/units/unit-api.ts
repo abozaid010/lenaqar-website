@@ -5,7 +5,12 @@ import {
   buildPendingApprovalSlimListParams,
   buildPendingApprovalSlimListUrl,
 } from '@/lib/units/pending-approval-list-params';
-import { getRestrictedDashboardAuthorEmailFromToken } from '@/lib/getRoleFromToken';
+import { getRestrictedDashboardAuthorEmailFromToken, getRoleFromToken } from '@/lib/getRoleFromToken';
+import { getCachedClientProfile } from '@/lib/getCachedClientProfile.server';
+import { extractModuleActionsFromProfile } from '@/lib/whatsapp-bulk-access';
+import { getRestrictedResaleAuthorEmailForRole } from '@/lib/resale-author-access';
+import { COOKIE_KEYS } from '@/constants/cookieKeys';
+import { cookies } from 'next/headers';
 import { safeMergeParams } from '@/utils/safeJsonParser';
 import type { UnitApiResponse } from './unit-types';
 
@@ -172,10 +177,34 @@ export async function fetchPendingApprovalUnitsServer(
   try {
     const base: Record<string, unknown> = { ...(searchParams ?? {}) };
     const params = buildPendingApprovalSlimListParams(base, clientId);
-    const restrictedAuthor = await getRestrictedDashboardAuthorEmailFromToken();
+
+    // Scope to own author only when resale.author_data_only is present.
+    // Do not assume editor/viewer are restricted by role alone.
+    const [role, profileEnvelope, cookieStore] = await Promise.all([
+      getRoleFromToken(),
+      getCachedClientProfile(),
+      cookies(),
+    ]);
+    let email = '';
+    try {
+      const raw = cookieStore.get(COOKIE_KEYS.CLIENT_INFO)?.value;
+      if (raw) {
+        const info = JSON.parse(raw);
+        email = typeof info?.email === 'string' ? info.email.trim() : '';
+      }
+    } catch {
+      email = '';
+    }
+    const moduleActions = extractModuleActionsFromProfile(profileEnvelope);
+    const restrictedAuthor = getRestrictedResaleAuthorEmailForRole(
+      role,
+      email,
+      moduleActions
+    );
     if (restrictedAuthor) {
       params.author = restrictedAuthor;
     }
+
     const url = buildPendingApprovalSlimListUrl(params);
     const response = await axiosInstance.get(url);
 
