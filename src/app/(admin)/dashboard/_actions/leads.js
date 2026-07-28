@@ -4,7 +4,7 @@ import axiosInstance from "@/utils/axiosInstance";
 import { getClientid } from "@/components/services/clientCookies";
 import { normalizeApiDetail } from "@/constants/permissionsAuth";
 import { revalidatePath } from "next/cache";
-import { NEW_LEAD_ACTION } from "@/utils/actions";
+import { NEW_LEAD_ACTION } from "@/utils/action-normalize";
 
 const parseBulkImportValidationErrors = (error) => {
   const responseData = error?.response?.data;

@@ -156,6 +156,7 @@ const LenaTextField = forwardRef(({
   return (
     <div 
       ref={containerRef}
+      data-field-invalid={hasError ? "true" : undefined}
       className="relative transition-all duration-200"
       onMouseEnter={() => !disabled && setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -216,11 +217,15 @@ const LenaTextField = forwardRef(({
 
       {/* Helper Text or Error Message */}
       {(helperText || hasError) && (
-        <div className={`text-xs mt-1 px-1 transition-all duration-200 ${
-          hasError ? "text-red-500 animate-fade-in" : "text-gray-400"
-        }`}>
+        <p
+          role={hasError && displayErrorMessage ? "alert" : undefined}
+          data-field-invalid={hasError ? "true" : undefined}
+          className={`text-xs sm:text-sm mt-1.5 px-0.5 leading-snug break-words max-w-full transition-all duration-200 ${
+            hasError ? "text-red-600 animate-fade-in" : "text-gray-400"
+          }`}
+        >
           {hasError && displayErrorMessage ? displayErrorMessage : helperText}
-        </div>
+        </p>
       )}
     </div>
   );

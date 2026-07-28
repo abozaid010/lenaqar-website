@@ -27,7 +27,7 @@ import {
   resolveWhatsappMessageSource,
   WHATSAPP_RATE_LIMIT_EXCEEDED_CODE,
 } from "@/constants/whatsapp-messaging";
-import { normalizeLastAction } from "@/utils/actions";
+import { normalizeLastAction } from "@/utils/action-normalize";
 import { enforceDashboardAuthorOnParams } from "@/lib/dashboard-lead-access";
 import { toApiStartDate, toApiEndDate } from "@/utils/dashboardDate";
 import { resolveQuickSearchFromParams } from "@/utils/lead-list-search";
@@ -596,10 +596,12 @@ export async function fetchProjects(isPublic = false) {
 
 /**
  * Fetches lightweight project names for dropdowns/filters.
- * Response items: { id, en_name, ar_name, city, district } (district required for city+district filtering).
+ * Response items: { id, en_name, ar_name, city, district, sub_district? }
+ * (district required for city+district filtering; sub_district may be omitted —
+ * use fetchProjectById when the full hierarchy is needed).
  */
 const fetchProjectsNamesBase = async (isPublic = false) => {
-  const url = isPublic ? "/projectsv2/all_projects_names?public=true" : "/projectsv2/all_projects_names";
+  const url = isPublic ? "/projects/v3/projects_names?public=true" : "/projects/v3/projects_names";
 
   const response = await axiosInstance.get(url);
 

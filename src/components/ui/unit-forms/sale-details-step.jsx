@@ -4,7 +4,6 @@ import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { PhoneField } from "@/components/phone/PhoneField";
 import { useI18n } from "@/hooks/useI18n";
 import { parseMoneyInput } from "@/utils/parse-amount";
-import { Trash2Icon } from "lucide-react";
 
 export default function SaleDetailsStep({
   formData,
@@ -16,15 +15,32 @@ export default function SaleDetailsStep({
   updateCommonFormData,
   invalidFields = [],
   setInvalidFields = () => {},
+  fieldErrors = {},
+  setFieldErrors = () => {},
 }) {
   const { t, translate, translateStrict } = useI18n();
 
-  const handleChange = (e, type = "") => {
-    const { name, value } = e.target;
-
+  const clearFieldError = (name) => {
     if (invalidFields.includes(name)) {
       setInvalidFields((prev) => prev.filter((field) => field !== name));
     }
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
+  };
+
+  const fieldErrorMessage = (name, fallbackKey) => {
+    if (!invalidFields.includes(name)) return false;
+    return fieldErrors[name] || (fallbackKey ? translate(fallbackKey) : false);
+  };
+
+  const handleChange = (e, type = "") => {
+    const { name, value } = e.target;
+    clearFieldError(name);
 
     if (type === "money") {
       updateFormData({ [name]: parseMoneyInput(value) });
@@ -43,11 +59,7 @@ export default function SaleDetailsStep({
 
   const handleOwnerChange = (e) => {
     const { name, value } = e.target;
-
-    if (invalidFields.includes(name)) {
-      setInvalidFields((prev) => prev.filter((field) => field !== name));
-    }
-
+    clearFieldError(name);
     updateCommonFormData({ [name]: value });
   };
 
@@ -62,7 +74,10 @@ export default function SaleDetailsStep({
           value={formData.deliveryDate}
           onChange={handleChange}
           type="date"
-          error={invalidFields.includes("deliveryDate")}
+          error={fieldErrorMessage(
+            "deliveryDate",
+            "unitFormValidation.deliveryDateRequired"
+          )}
         />
       </div>
 
@@ -91,16 +106,15 @@ export default function SaleDetailsStep({
               defaultCountry="EG"
               value={commonFormData.owner_mobile ?? ""}
               onChange={(next) => {
-                if (invalidFields.includes("owner_mobile")) {
-                  setInvalidFields((prev) => prev.filter((f) => f !== "owner_mobile"));
-                }
+                clearFieldError("owner_mobile");
                 updateCommonFormData({ owner_mobile: next ?? "" });
               }}
               error={
                 invalidFields.includes("owner_mobile")
-                  ? !String(commonFormData.owner_mobile ?? "").trim()
-                    ? translate("phoneField.required", "Phone number is required")
-                    : translate("phoneField.invalid", "Invalid phone number")
+                  ? fieldErrors.owner_mobile ||
+                    (!String(commonFormData.owner_mobile ?? "").trim()
+                      ? translate("unitFormValidation.ownerMobileRequired")
+                      : translate("unitFormValidation.ownerMobileInvalid"))
                   : undefined
               }
             />
@@ -124,14 +138,10 @@ export default function SaleDetailsStep({
             type="money"
             adornment="EGP"
             required
-            error={
-              invalidFields.includes("totalPrice")
-                ? translate(
-                    "saleDetails.totalPriceRequired",
-                    "Enter total price"
-                  )
-                : false
-            }
+            error={fieldErrorMessage(
+              "totalPrice",
+              "unitFormValidation.totalPriceRequired"
+            )}
           />
           
           <LenaTextField
@@ -142,6 +152,10 @@ export default function SaleDetailsStep({
             placeholder="0"
             type="money"
             adornment="EGP"
+            error={fieldErrorMessage(
+              "downPayment",
+              "unitFormValidation.downPaymentRequiredInstallments"
+            )}
           />
           
           <LenaTextField
@@ -162,6 +176,10 @@ export default function SaleDetailsStep({
             placeholder="0"
             type="money"
             adornment="EGP"
+            error={fieldErrorMessage(
+              "remaining_amount",
+              "unitFormValidation.remainingAmountRequiredInstallments"
+            )}
           />
           
           <LenaTextField
@@ -171,7 +189,10 @@ export default function SaleDetailsStep({
             onChange={handleChange}
             placeholder="0"
             type="number"
-            error={invalidFields.includes("installment_years")}
+            error={fieldErrorMessage(
+              "installment_years",
+              "unitFormValidation.installmentYearsRequiredInstallments"
+            )}
           />
           
           <LenaTextField

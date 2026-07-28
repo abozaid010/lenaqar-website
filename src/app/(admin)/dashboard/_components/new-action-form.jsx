@@ -1,7 +1,6 @@
 "use client";
 
 import { useI18n } from "@/hooks/useI18n";
-import { USER_ACTIONS, getActionLabel } from "@/utils/actions";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { formatDateTimeAmPmShort } from "@/utils/formateDate";
 import { Calendar, ChevronDown, ChevronUp, Clock, Loader2 } from "lucide-react";
@@ -11,6 +10,13 @@ import toast from "react-hot-toast";
 import { addNewAction } from "../_actions/actions";
 import { updateUserAction } from "@/utils/api";
 import { userKeys } from "@/utils/query-utils";
+import ActionSelect from "@/components/actions/ActionSelect";
+import TerminalActionDialog from "@/components/actions/TerminalActionDialog";
+import {
+  validateActionSubmission,
+  actionRequiresMeetingTime,
+} from "@/components/actions/validateActionSubmission";
+import { useActionOptions } from "@/hooks/use-action-catalog";
 
 /** Default follow-up time when the user picks a date but does not change time. */
 const DEFAULT_MEETING_TIME = "09:00";
@@ -24,6 +30,7 @@ export default function NewActionForm({
   userId,
   phoneNumber = "",
   name = "",
+  ownerType = null,
   onSuccess,
   onActionUpdate,
   /** Pre-fill when opening from schedule (or similar); creates a new action on submit. */
@@ -66,15 +73,14 @@ export default function NewActionForm({
   const [scheduleTouched, setScheduleTouched] = useState(
     Boolean(defaultMeetingDate || defaultMeetingTime)
   );
+  const [terminalOpen, setTerminalOpen] = useState(false);
   const notesRef = useRef(null);
+  const formRef = useRef(null);
+  const skipValidateRef = useRef(false);
   const lastHandledSuccessRef = useRef(null);
 
-  const ACTIONS = USER_ACTIONS.filter(
-    (actionItem) => actionItem.value && actionItem.value !== "new"
-  ).map((actionItem) => ({
-    label: getActionLabel(actionItem.value, locale),
-    value: actionItem.value,
-  }));
+  const { options: actionOptions, catalog, isError: catalogError } =
+    useActionOptions({ ownerType });
 
   const getDefaultDate = () => {
     const now = new Date();
@@ -87,11 +93,10 @@ export default function NewActionForm({
   const initialMeetingTime = defaultMeetingTime || getDefaultTime();
 
   const pickInitialAction = () => {
-    const first = ACTIONS[0]?.value || "Make a call";
-    if (defaultAction && ACTIONS.some((a) => a.value === defaultAction)) {
+    if (defaultAction && actionOptions.some((a) => a.value === defaultAction)) {
       return defaultAction;
     }
-    return first;
+    return actionOptions[0]?.value || "";
   };
 
   const to12HourFormat = (time24) => {
@@ -119,7 +124,7 @@ export default function NewActionForm({
   };
 
   const [formData, setFormData] = useState(() => ({
-    action: pickInitialAction(),
+    action: defaultAction || "",
     comment: defaultComment ?? "",
     meeting_date: initialMeetingDate,
     meeting_time: initialMeetingTime,
@@ -135,10 +140,29 @@ export default function NewActionForm({
     };
   });
 
+  // Seed / repair selected action once catalog options are available.
+  useEffect(() => {
+    if (!actionOptions.length) return;
+    setFormData((prev) => {
+      if (prev.action && actionOptions.some((a) => a.value === prev.action)) {
+        return prev;
+      }
+      const next = pickInitialAction();
+      if (prev.action === next) return prev;
+      return { ...prev, action: next };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only when options/defaultAction change
+  }, [actionOptions, defaultAction]);
+
+  const requiresMeetingTime = actionRequiresMeetingTime(
+    formData.action,
+    catalog
+  );
+
   const resetForm = () => {
     const defaultTime = getDefaultTime();
     setFormData({
-      action: ACTIONS[0]?.value || "Make a call",
+      action: actionOptions[0]?.value || "",
       comment: "",
       meeting_date: getDefaultDate(),
       meeting_time: defaultTime,
@@ -156,6 +180,40 @@ export default function NewActionForm({
     if (notesRef.current) {
       notesRef.current.style.height = "auto";
     }
+  };
+
+  const showValidationError = (result) => {
+    toast.error(
+      translate(result.errorKey, result.errorFallback),
+      { position: "top-right" }
+    );
+  };
+
+  const getMeetingTimeForValidation = () => {
+    if (!requiresMeetingTime) {
+      return scheduleTouched ? getFullMeetingDateTime() : "n/a";
+    }
+    return scheduleTouched ? getFullMeetingDateTime() : "";
+  };
+
+  const runPreSubmitValidation = () => {
+    if (catalogError || !catalog) {
+      showValidationError({
+        errorKey: "actionCatalog.errors.catalogUnavailable",
+        errorFallback: "Action catalog unavailable. Try refreshing the page.",
+      });
+      return null;
+    }
+    const result = validateActionSubmission({
+      action: formData.action,
+      meetingTime: getMeetingTimeForValidation(),
+      catalog,
+    });
+    if (!result.ok) {
+      showValidationError(result);
+      return null;
+    }
+    return result;
   };
 
   useEffect(() => {
@@ -365,6 +423,19 @@ export default function NewActionForm({
     e.preventDefault();
     if (!userId) return;
 
+    const validation = runPreSubmitValidation();
+    if (!validation) return;
+
+    if (validation.actionSpec.terminal) {
+      setTerminalOpen(true);
+      return;
+    }
+
+    await performUpdate();
+  };
+
+  const performUpdate = async () => {
+    if (!userId) return;
     try {
       setUpdating(true);
       await updateUserAction(userId, {
@@ -406,6 +477,35 @@ export default function NewActionForm({
     }
   };
 
+  const handleCreateSubmit = (e) => {
+    if (skipValidateRef.current) {
+      skipValidateRef.current = false;
+      return;
+    }
+    e.preventDefault();
+
+    const validation = runPreSubmitValidation();
+    if (!validation) return;
+
+    if (validation.actionSpec.terminal) {
+      setTerminalOpen(true);
+      return;
+    }
+
+    skipValidateRef.current = true;
+    formRef.current?.requestSubmit();
+  };
+
+  const handleTerminalConfirm = async () => {
+    setTerminalOpen(false);
+    if (useUpdateApi) {
+      await performUpdate();
+      return;
+    }
+    skipValidateRef.current = true;
+    formRef.current?.requestSubmit();
+  };
+
   const labelClass =
     "mb-1.5 ms-1 block text-xs font-bold uppercase tracking-wider text-gray-500";
   const inputClass =
@@ -439,6 +539,13 @@ export default function NewActionForm({
     "actionForm.scheduleOptional",
     locale === "ar" ? "التاريخ والوقت (اختياري)" : "Date & Time (optional)"
   );
+  const scheduleRequiredLabel = translate(
+    "actionForm.scheduleRequired",
+    locale === "ar" ? "التاريخ والوقت (مطلوب)" : "Date & Time (required)"
+  );
+  const scheduleLabel = requiresMeetingTime
+    ? scheduleRequiredLabel
+    : scheduleOptionalLabel;
   const submittingLabel = translate(
     "actionForm.submittingButton",
     t?.actionForm?.submittingButton || "Saving..."
@@ -558,7 +665,7 @@ export default function NewActionForm({
           */}
           <label className="relative flex min-w-0 flex-1 cursor-pointer items-center justify-between gap-2 rounded-lg px-1 py-1.5 text-start text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-primary focus-within:text-primary focus-within:ring-2 focus-within:ring-primary/30">
             <span className="pointer-events-none min-w-0 shrink">
-              {scheduleOptionalLabel}
+              {scheduleLabel}
             </span>
             {scheduleSummary ? (
               <span className="pointer-events-none truncate font-semibold normal-case tracking-normal text-gray-700">
@@ -577,8 +684,9 @@ export default function NewActionForm({
               onChange={handleDateChange}
               onFocus={markScheduleTouched}
               onClick={openPickerFromEvent}
+              required={requiresMeetingTime}
               className="absolute inset-0 z-10 cursor-pointer opacity-0"
-              aria-label={scheduleOptionalLabel}
+              aria-label={scheduleLabel}
             />
           </label>
           {scheduleTouched ? (
@@ -602,7 +710,7 @@ export default function NewActionForm({
     ) : (
       <div className="mb-4">
         {fieldPriority === "action" ? (
-          <p className={`${labelClass} mb-2`}>{scheduleOptionalLabel}</p>
+          <p className={`${labelClass} mb-2`}>{scheduleLabel}</p>
         ) : null}
         {scheduleFieldsInner}
       </div>
@@ -614,22 +722,16 @@ export default function NewActionForm({
         {actionLabel}
       </label>
       <div className="relative">
-        <select
+        <ActionSelect
           id="new-action-type"
           name="action"
-          className={`${inputClass} appearance-none pe-10 font-medium text-gray-700`}
+          selectionMode="single"
+          ownerType={ownerType}
           value={formData.action}
-          onChange={(e) =>
-            setFormData({ ...formData, action: e.target.value })
-          }
+          onChange={(next) => setFormData({ ...formData, action: next })}
           required
-        >
-          {ACTIONS.map((actionItem) => (
-            <option key={actionItem.value} value={actionItem.value}>
-              {actionItem.label}
-            </option>
-          ))}
-        </select>
+          className={`${inputClass} appearance-none pe-10 font-medium text-gray-700`}
+        />
         <div className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-gray-400">
           <ChevronDown size={16} />
         </div>
@@ -674,14 +776,16 @@ export default function NewActionForm({
   );
 
   return (
+    <>
     <form
+      ref={formRef}
       className={
         composerLayout
           ? "flex min-h-0 flex-1 flex-col bg-white"
           : "rounded-b-lg border-t border-gray-100 bg-gray-50/30 p-4"
       }
       action={useUpdateApi ? undefined : action}
-      onSubmit={useUpdateApi ? handleUpdateSubmit : undefined}
+      onSubmit={useUpdateApi ? handleUpdateSubmit : handleCreateSubmit}
     >
       <input type="hidden" name="user_id" value={userId || ""} />
       <input type="hidden" name="author" value={author} />
@@ -740,5 +844,15 @@ export default function NewActionForm({
         {submitButton}
       </div>
     </form>
+    <TerminalActionDialog
+      isOpen={terminalOpen}
+      onClose={() => setTerminalOpen(false)}
+      onConfirm={handleTerminalConfirm}
+      actionLabel={
+        actionOptions.find((o) => o.value === formData.action)?.label ||
+        formData.action
+      }
+    />
+    </>
   );
 }

@@ -14,6 +14,10 @@ import LenaTextField from "@/components/ui/inputs/lena-text-field";
 // import AuthorFilterSelect from "@/components/ui/inputs/author-filter-select";
 import { unitsSourcePendingQueryString } from "@/utils/units-navigation-source";
 import { detectBrokerUnitIds } from "@/lib/units/detect-broker-units";
+import {
+  mergeBrokerUnitIds,
+  readBrokerUnitIds,
+} from "@/lib/units/broker-units-session";
 import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
@@ -166,6 +170,11 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     done: 0,
     total: 0,
   });
+
+  // Hydrate from sessionStorage after mount (avoids SSR mismatch).
+  useEffect(() => {
+    setBrokerUnitIds(readBrokerUnitIds());
+  }, []);
 
   const visibilityOptions = useMemo(
     () => [
@@ -937,7 +946,8 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
       const ids = await detectBrokerUnitIds(displayedUnits, {
         onProgress: (done, total) => setBrokerDetectProgress({ done, total }),
       });
-      setBrokerUnitIds(ids);
+      // Merge into sessionStorage so badges survive nav / refresh / filter / sort.
+      setBrokerUnitIds(mergeBrokerUnitIds(ids));
       toast.success(
         translate(
           "resalePage.brokerDetect.done",

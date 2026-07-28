@@ -10,6 +10,7 @@ import { normalizeViewTypeValue } from "@/data/constants";
 import { useProjectsNames } from "@/hooks/use-admin-shared-data";
 import ProjectsNamesManager from "@/utils/projects_names_manager";
 import CityManager from "@/utils/city_manager";
+import { fetchProjectById } from "@/utils/api";
 import {
   convertArabicToEnglishNumbers,
 } from "@/utils/formatters";
@@ -27,6 +28,8 @@ export default function BasicDetailsStep({
   citiesAndDistricts: _citiesAndDistricts, // Keep for backward compatibility but don't use
   invalidFields = [],
   setInvalidFields = () => { },
+  fieldErrors = {},
+  setFieldErrors = () => {},
   developers = [],
   developersLoading = false,
   isEdit = false,
@@ -38,6 +41,30 @@ export default function BasicDetailsStep({
   const [locationFromProject, setLocationFromProject] = useState(false);
   const didNormalizeLocation = useRef(false);
   const didFillFromProject = useRef(false);
+
+  const clearFieldError = useCallback(
+    (name) => {
+      if (invalidFields.includes(name)) {
+        setInvalidFields((prev) => prev.filter((field) => field !== name));
+      }
+      if (fieldErrors[name]) {
+        setFieldErrors((prev) => {
+          const next = { ...prev };
+          delete next[name];
+          return next;
+        });
+      }
+    },
+    [invalidFields, fieldErrors, setInvalidFields, setFieldErrors]
+  );
+
+  const fieldErrorMessage = useCallback(
+    (name) => {
+      if (!invalidFields.includes(name)) return false;
+      return fieldErrors[name] || false;
+    },
+    [invalidFields, fieldErrors]
+  );
 
   const { data: projectsData } = useProjectsNames(false);
 
@@ -131,8 +158,8 @@ export default function BasicDetailsStep({
 
     updateFormData({ [name]: updatedValue });
 
-    if (invalidFields.includes(name) && (updatedValue === 0 || updatedValue)) {
-      setInvalidFields((prev) => prev.filter((field) => field !== name));
+    if (updatedValue === 0 || updatedValue) {
+      clearFieldError(name);
     }
   };
 
@@ -205,7 +232,14 @@ export default function BasicDetailsStep({
     setInvalidFields((prev) =>
       prev.filter((field) => field !== "unit_location" && field !== "project")
     );
-  }, [setInvalidFields]);
+    setFieldErrors((prev) => {
+      if (!prev.unit_location && !prev.project) return prev;
+      const next = { ...prev };
+      delete next.unit_location;
+      delete next.project;
+      return next;
+    });
+  }, [setInvalidFields, setFieldErrors]);
 
   const handleLocationSearchProject = useCallback(
     async (proj, meta = {}) => {
@@ -253,21 +287,33 @@ export default function BasicDetailsStep({
         developer_id: "",
         developer: "",
       });
-      if (payload.sub_district || payload.project) {
-        clearLocationInvalid();
-      }
+      // Clear sticky error; Next/Save re-validates leaf rules from hierarchy.
+      clearLocationInvalid();
     },
     [updateFormData, clearLocationInvalid],
   );
 
-  const selectedProjectFromList = useMemo(
-    () => allProjects.find((p) => p.en_name === formData.project || p.name === formData.project),
-    [allProjects, formData.project]
-  );
+  const selectedProjectFromList = useMemo(() => {
+    if (formData.project_id) {
+      const byId = allProjects.find(
+        (p) => String(p?.id) === String(formData.project_id)
+      );
+      if (byId) return byId;
+    }
+    if (!formData.project) return null;
+    return (
+      allProjects.find(
+        (p) => p.en_name === formData.project || p.name === formData.project
+      ) || null
+    );
+  }, [allProjects, formData.project, formData.project_id]);
 
-  // On edit: fill any missing location fields from the selected project once
+  // On edit: fill any missing location fields from the selected project once.
+  // all_projects_names is city+district only — fetch full project when the
+  // hierarchy is incomplete so sub_district is never silently dropped.
   useEffect(() => {
-    if (!isEdit || !selectedProjectFromList || didFillFromProject.current) return;
+    if (!isEdit || didFillFromProject.current) return;
+    if (!selectedProjectFromList && !formData.project_id) return;
     if (formData.city && formData.district && formData.sub_district) {
       didFillFromProject.current = true;
       return;
@@ -276,7 +322,33 @@ export default function BasicDetailsStep({
     let cancelled = false;
     (async () => {
       try {
-        const proj = selectedProjectFromList;
+        let proj = selectedProjectFromList || null;
+        const projectId =
+          (formData.project_id && String(formData.project_id).trim()) ||
+          (proj?.id != null ? String(proj.id) : "");
+
+        // Same strategy as select path + ensureUnitLocationPayload: names list
+        // omits sub_district, so resolve from the full project document.
+        const listIncomplete =
+          !proj?.city || !proj?.district || !proj?.sub_district;
+        const formIncomplete =
+          !formData.city || !formData.district || !formData.sub_district;
+        if (projectId && (listIncomplete || formIncomplete)) {
+          try {
+            const res = await fetchProjectById(projectId, false);
+            if (res?.data) {
+              proj = { ...(proj || {}), ...res.data };
+            }
+          } catch (error) {
+            console.error(
+              "Failed to fetch project for location fill:",
+              error?.message ?? error
+            );
+          }
+        }
+
+        if (cancelled || !proj) return;
+
         const resolved = await cityManager.resolveLocationHierarchyAsync({
           city: proj.city ?? "",
           district: proj.district ?? "",
@@ -312,6 +384,7 @@ export default function BasicDetailsStep({
   }, [
     isEdit,
     selectedProjectFromList,
+    formData.project_id,
     formData.city,
     formData.district,
     formData.sub_district,
@@ -345,7 +418,7 @@ export default function BasicDetailsStep({
           name="buildingType"
           value={formData.buildingType || ""}
           onChange={handleChange}
-          error={invalidFields.includes("buildingType")}
+          error={fieldErrorMessage("buildingType")}
           options={buildingTypeOptions}
           getValue={(opt) => opt.value}
           getLabel={(opt) => opt.label}
@@ -358,7 +431,7 @@ export default function BasicDetailsStep({
           value={formData.purpose || ""}
           onChange={handleChange}
           required
-          error={invalidFields.includes("purpose")}
+          error={fieldErrorMessage("purpose")}
           options={[
             {
               value: "rent",
@@ -430,13 +503,12 @@ export default function BasicDetailsStep({
               invalidFields.includes("project")
             }
             errorMessage={
-              invalidFields.includes("unit_location") ||
+              fieldErrors.unit_location ||
+              fieldErrors.project ||
+              (invalidFields.includes("unit_location") ||
               invalidFields.includes("project")
-                ? translate(
-                    "basicDetails.locationRequired",
-                    "Select a project or sub-district"
-                  )
-                : ""
+                ? translate("unitFormValidation.locationRequired")
+                : "")
             }
           />
 
@@ -481,7 +553,7 @@ export default function BasicDetailsStep({
                 value={numericValue(formData.roomsCount)}
                 onChange={(e) => handleChange(e, "number")}
                 placeholder="0"
-                error={invalidFields.includes("roomsCount")}
+                error={fieldErrorMessage("roomsCount")}
                 type="number"
                 max={15}
               />
@@ -494,7 +566,7 @@ export default function BasicDetailsStep({
               value={numericValue(formData.bathroomCount)}
               onChange={(e) => handleChange(e, "number")}
               placeholder="0"
-              error={invalidFields.includes("bathroomCount")}
+              error={fieldErrorMessage("bathroomCount")}
               type="number"
             />
           </>
@@ -519,7 +591,7 @@ export default function BasicDetailsStep({
           placeholder="0"
           type="number"
           required
-          error={invalidFields.includes("landArea")}
+          error={fieldErrorMessage("landArea")}
         />
 
         {/* Garden Size */}

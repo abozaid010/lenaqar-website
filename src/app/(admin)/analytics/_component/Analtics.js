@@ -27,6 +27,7 @@ import {
 } from "recharts";
 import FilterMonth from "./FilterMonth";
 import { useI18n } from "@/hooks/useI18n";
+import { useActionOptions } from "@/hooks/use-action-catalog";
 
 // Custom tooltip for the enhanced bar chart
 const CustomTooltip = ({ active, payload, label, t }) => {
@@ -134,36 +135,60 @@ const EnhancedDailyActionBarChart = ({ datamonth, t }) => {
   const [activeBarIndex, setActiveBarIndex] = useState(null);
   const [animatedBars, setAnimatedBars] = useState([]);
   const [chartData, setChartData] = useState([]);
+  const { options: catalogOptions } = useActionOptions({
+    includeFilterOnly: true,
+  });
 
-  // List of all possible actions (snake_case, matching your new data keys)
-  const ACTION_KEYS = [
-    "make_a_call",
-    "office_visit",
-    "property_view",
-    "not_interested",
-    "not_qualified",
-    "did_not_reply",
-    "follow_up_later",
-    "missing_requirement",
-    "blocked",
-    "no_action",
-    "qualified_lead"
-  ];
+  const ACTION_KEYS = useMemo(() => {
+    if (catalogOptions.length) {
+      return catalogOptions.map((action) =>
+        String(action.value).trim().toLowerCase().replace(/\s+/g, "_")
+      );
+    }
+    return [
+      "make_a_call",
+      "office_visit",
+      "property_view",
+      "not_interested",
+      "not_qualified",
+      "did_not_reply",
+      "follow_up_later",
+      "missing_requirement",
+      "blocked",
+      "no_action",
+      "qualified_lead",
+    ];
+  }, [catalogOptions]);
 
-  // Map action keys to display labels (add translations as needed)
-  const ACTION_LABELS = {
-    make_a_call: t?.dashboardFilter?.actions?.makeCall || "Make a call",
-    office_visit: t?.dashboardFilter?.actions?.officeVisit || "Office visit",
-    property_view: t?.dashboardFilter?.actions?.propertyView || "Property view",
-    not_interested: t?.dashboardFilter?.actions?.notInterested || "Not interested",
-    not_qualified: t?.dashboardFilter?.actions?.notQualified || "Not qualified",
-    did_not_reply: t?.dashboardFilter?.actions?.didNotReply || "Did not reply",
-    follow_up_later: t?.dashboardFilter?.actions?.followUpLater || "Follow up later",
-    missing_requirement: t?.dashboardFilter?.actions?.missingRequirement || "Missing requirement",
-    blocked: t?.dashboardFilter?.actions?.blocked || "Blocked",
-    no_action: t?.dashboardFilter?.actions?.noAction || "No Action",
-    qualified_lead: t?.dashboardFilter?.actions?.qualifiedLead || "Qualified Lead"
-  };
+  const ACTION_LABELS = useMemo(() => {
+    const fromCatalog = {};
+    catalogOptions.forEach((action) => {
+      const key = String(action.value)
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "_");
+      fromCatalog[key] = action.label;
+    });
+    return {
+      make_a_call: t?.dashboardFilter?.actions?.makeCall || "Make a call",
+      office_visit: t?.dashboardFilter?.actions?.officeVisit || "Office visit",
+      property_view: t?.dashboardFilter?.actions?.propertyView || "Property view",
+      not_interested:
+        t?.dashboardFilter?.actions?.notInterested || "Not interested",
+      not_qualified:
+        t?.dashboardFilter?.actions?.notQualified || "Not qualified",
+      did_not_reply: t?.dashboardFilter?.actions?.didNotReply || "Did not reply",
+      follow_up_later:
+        t?.dashboardFilter?.actions?.followUpLater || "Follow up later",
+      missing_requirement:
+        t?.dashboardFilter?.actions?.missingRequirement || "Missing requirement",
+      blocked: t?.dashboardFilter?.actions?.blocked || "Blocked",
+      no_action: t?.dashboardFilter?.actions?.noAction || "No Action",
+      qualified_lead:
+        t?.dashboardFilter?.actions?.qualifiedLead || "Qualified Lead",
+      ...fromCatalog,
+    };
+  }, [catalogOptions, t]);
 
   useEffect(() => {
     if (!Array.isArray(datamonth) || datamonth.length === 0) {
@@ -191,7 +216,7 @@ const EnhancedDailyActionBarChart = ({ datamonth, t }) => {
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [datamonth, t]);
+  }, [datamonth, ACTION_KEYS, ACTION_LABELS]);
 
   // Find min/max for Y axis
   const yMax = Math.max(...chartData.map(d => d.frequency), 2);

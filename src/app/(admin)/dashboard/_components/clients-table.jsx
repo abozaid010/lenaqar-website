@@ -391,7 +391,7 @@ export default function ClientsTable({ users, pagination }) {
                           </div>
                         ) : (
                           <span className="line-clamp-1">
-                            {getActionLabel(user.last_action, locale)}
+                            {getActionLabel(user.last_action, translate)}
                           </span>
                         )}
                       </td>
@@ -451,6 +451,7 @@ export default function ClientsTable({ users, pagination }) {
             setActionUser(null);
           }}
           onActionUpdate={handleActionUpdate}
+          ownerType={actionUser?.owner_type || null}
         />
       )}
 

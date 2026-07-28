@@ -33,6 +33,7 @@ const FALLBACK_ALL_ACTIONS = [
   "whatsapp",
   "whatsapp_api",
   "whatsapp_automation",
+  "leads_source_filter",
 ];
 
 function filterClientActions(actions) {
@@ -55,7 +56,13 @@ function getFallbackAvailableActionsForModule(moduleKey) {
     actions.push("import");
   }
   if (key === "conversation") {
-    actions.push("import", "whatsapp", "whatsapp_automation", "whatsapp_api");
+    actions.push(
+      "import",
+      "whatsapp",
+      "whatsapp_automation",
+      "whatsapp_api",
+      "leads_source_filter"
+    );
   }
 
   return actions;
@@ -71,6 +78,7 @@ const ACTION_LABEL_FALLBACKS = {
   whatsapp: "WhatsApp API Template",
   whatsapp_api: "WhatsApp API Template",
   whatsapp_automation: "WhatsApp Automation",
+  leads_source_filter: "Leads Source Filter",
 };
 
 const ACTION_LABEL_KEYS = {
@@ -83,6 +91,7 @@ const ACTION_LABEL_KEYS = {
   whatsapp: "modulePermissions.actions.whatsapp",
   whatsapp_api: "modulePermissions.actions.whatsappApi",
   whatsapp_automation: "modulePermissions.actions.whatsappAutomation",
+  leads_source_filter: "modulePermissions.actions.leadsSourceFilter",
 };
 
 export function getFallbackPermissionSchema() {

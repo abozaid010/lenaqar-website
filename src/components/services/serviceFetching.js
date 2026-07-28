@@ -4,20 +4,35 @@ import axiosInstance from "@/utils/axiosInstance";
 import { getApiErrorMessage } from "@/utils/localized-api-error";
 import { getClientid } from "./clientCookies";
 import { safeMergeParams } from "@/utils/safeJsonParser";
-import { SCHEDULE_VISIBLE_ACTIONS } from "@/utils/actions";
+import { SCHEDULE_VISIBLE_ACTIONS } from "@/utils/action-constants";
+import {
+  fetchActionCatalogServer,
+  getScheduledActionValuesFromCatalog,
+} from "@/lib/action-catalog.server";
 
 const normalizeAction = (value) => String(value || "").trim().toLowerCase();
 
 export async function getschedual(
   startDate,
   endDate,
-  actions = SCHEDULE_VISIBLE_ACTIONS
+  actions
 ) {
   try {
+    let resolvedActions = actions;
+    if (!Array.isArray(resolvedActions) || resolvedActions.length === 0) {
+      const catalog = await fetchActionCatalogServer();
+      resolvedActions =
+        getScheduledActionValuesFromCatalog(catalog) ||
+        SCHEDULE_VISIBLE_ACTIONS;
+    }
+    if (!resolvedActions.length) {
+      resolvedActions = SCHEDULE_VISIBLE_ACTIONS;
+    }
+
     const params = new URLSearchParams();
     params.set("start_date", startDate);
     params.set("end_date", endDate);
-    actions.forEach((action) => {
+    resolvedActions.forEach((action) => {
       params.append("action", action);
     });
     const response = await axiosInstance.get(
@@ -26,7 +41,7 @@ export async function getschedual(
 
     const serverActions = response.data?.data?.actions;
     const actionList = Array.isArray(serverActions) ? serverActions : [];
-    const allowedActions = new Set(actions.map(normalizeAction));
+    const allowedActions = new Set(resolvedActions.map(normalizeAction));
 
     // Keep a client-side guard so schedule never shows disallowed lead actions.
     return actionList.filter((item) =>

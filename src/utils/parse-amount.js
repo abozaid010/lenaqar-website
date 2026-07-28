@@ -34,6 +34,59 @@ export function isPositiveAmount(value) {
   return Number.isFinite(n) && n > 0;
 }
 
+/** True when the user entered a non-blank value (including 0 / invalid). */
+export function isAmountEntered(value) {
+  if (value === "" || value === null || value === undefined) return false;
+  if (typeof value === "string" && value.trim() === "") return false;
+  return true;
+}
+
+/**
+ * Classify a money/amount field without treating garbage as 0.
+ * @returns {{ status: "empty" } | { status: "invalid" } | { status: "valid", value: number }}
+ */
+export function classifyPositiveAmount(value) {
+  if (!isAmountEntered(value)) return { status: "empty" };
+
+  if (typeof value === "number") {
+    if (!Number.isFinite(value) || value <= 0) return { status: "invalid" };
+    return { status: "valid", value };
+  }
+
+  const str = String(normalizeToEnglishDigits(value)).trim();
+  if (!/\d/.test(str)) return { status: "invalid" };
+
+  const stripped = str.replace(/[^\d.]/g, "");
+  if (!stripped || stripped === ".") return { status: "invalid" };
+  if ((stripped.match(/\./g) || []).length > 1) return { status: "invalid" };
+
+  const n = parseFloat(stripped);
+  if (!Number.isFinite(n) || n <= 0) return { status: "invalid" };
+  return { status: "valid", value: n };
+}
+
+/**
+ * Classify a positive whole-number field (e.g. installment years).
+ * @returns {{ status: "empty" } | { status: "invalid" } | { status: "valid", value: number }}
+ */
+export function classifyPositiveInteger(value) {
+  if (!isAmountEntered(value)) return { status: "empty" };
+
+  if (typeof value === "number") {
+    if (!Number.isFinite(value) || value <= 0 || value !== Math.floor(value)) {
+      return { status: "invalid" };
+    }
+    return { status: "valid", value };
+  }
+
+  const str = String(normalizeToEnglishDigits(value)).trim();
+  if (!/^\d+$/.test(str)) return { status: "invalid" };
+
+  const n = parseInt(str, 10);
+  if (!Number.isFinite(n) || n <= 0) return { status: "invalid" };
+  return { status: "valid", value: n };
+}
+
 /**
  * Parse a money input string into form state: "" when empty, otherwise a number.
  * Strips formatting (commas, spaces, currency) and non-digits.

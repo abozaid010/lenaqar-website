@@ -11,7 +11,7 @@
 
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
-import { NEW_LEAD_ACTION } from "@/utils/actions";
+import { NEW_LEAD_ACTION } from "@/utils/action-normalize";
 
 /** Roles that may view and filter all leads. */
 export const DASHBOARD_ADMIN_ROLES = Object.freeze(["admin", "owner"]);
