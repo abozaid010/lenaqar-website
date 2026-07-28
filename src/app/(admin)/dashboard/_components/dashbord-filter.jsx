@@ -26,11 +26,13 @@ import {
 } from "@/constants/owner-type";
 import {
   LEAD_SOURCES,
+  LEAD_SOURCE_FILTER_ACTION,
   canShowLeadSourceFilter,
   getLeadSourceLabel,
   parseLeadSourceFilter,
   serializeLeadSourceFilter,
 } from "@/constants/lead-source";
+import { useModuleActions } from "@/hooks/useModuleActions";
 import { ChevronDown, FileSpreadsheet, Loader2, X, UserPlus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -363,6 +365,10 @@ export default function DashbordFilter({
   }, []);
 
   const { canShowBulkButton: canSendBulkWhatsapp } = useWhatsappBulkAccess();
+  const { has: hasConversationAction } = useModuleActions("conversation");
+  const canUseSourceFilter = canShowLeadSourceFilter(
+    hasConversationAction(LEAD_SOURCE_FILTER_ACTION)
+  );
 
   const { allVisibleRecipients, resolvedRecipients } = useDashboardLeadsBulk();
   /** Panel WhatsApp always targets all loaded leads; elsewhere prefer selection. */
@@ -373,9 +379,8 @@ export default function DashbordFilter({
   const showExportButton = isMounted && isAdminUser;
   const showWhatsappToolbarButton = isMounted && showSendWhatsappButton;
   const showAddLeadButton = !hideAddLead;
-  /** Source filter: Homey + admin/owner only. */
-  const showSourceFilter =
-    isMounted && canShowLeadSourceFilter(clientId, isAdminUser);
+  /** Source filter: conversation.leads_source_filter only (hidden until actions ready). */
+  const showSourceFilter = canUseSourceFilter;
 
   const handleOpenWhatsappBulk = () => {
     if (whatsappRecipients.length === 0) {
@@ -652,7 +657,7 @@ export default function DashbordFilter({
           params.append("owner_type", serializedOwnerType);
         }
       } else if (k === "source") {
-        if (canShowLeadSourceFilter(clientId, canViewAllDashboardLeads())) {
+        if (canUseSourceFilter) {
           const serializedSource = serializeLeadSourceFilter(v);
           if (serializedSource) {
             params.append("source", serializedSource);

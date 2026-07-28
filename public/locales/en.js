@@ -1042,6 +1042,7 @@ export default {
       whatsapp: "WhatsApp API Template",
       whatsappApi: "WhatsApp API Template",
       whatsappAutomation: "WhatsApp Automation",
+      leadsSourceFilter: "Leads Source Filter",
     },
   },
   adminClients: {

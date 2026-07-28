@@ -909,6 +909,7 @@ export default {
       whatsapp: "قالب واتساب API",
       whatsappApi: "قالب واتساب API",
       whatsappAutomation: "أتمتة واتساب",
+      leadsSourceFilter: "فلتر مصدر العملاء",
     },
   },
   adminClients: {

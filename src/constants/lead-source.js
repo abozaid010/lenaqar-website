@@ -73,14 +73,15 @@ export function serializeLeadSourceFilter(value) {
   return normalizeLeadSource(value);
 }
 
+/** Conversation module action that unlocks the dashboard source filter. */
+export const LEAD_SOURCE_FILTER_ACTION = "leads_source_filter";
+
 /**
  * Whether the dashboard source filter should be shown.
- * Homey tenant + admin/owner only.
- * @param {string | null | undefined} clientId
- * @param {boolean} isAdminOrOwner
+ * Requires `conversation.leads_source_filter` (see useModuleActions).
+ * @param {boolean} hasLeadSourceFilterAction
  * @returns {boolean}
  */
-export function canShowLeadSourceFilter(clientId, isAdminOrOwner) {
-  if (!isAdminOrOwner) return false;
-  return String(clientId || "").trim().toLowerCase() === "homey";
+export function canShowLeadSourceFilter(hasLeadSourceFilterAction) {
+  return Boolean(hasLeadSourceFilterAction);
 }
