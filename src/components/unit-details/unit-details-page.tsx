@@ -165,7 +165,7 @@ export default function UnitDetailsPage({
   const canShare = Boolean(unit.referenceCode?.trim());
 
   return (
-    <div className="bg-gray-50 flex-1">
+    <div className={`bg-gray-50 flex-1 ${!isPublic ? 'pb-28 lg:pb-0' : ''}`}>
       {/* Back */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <div className="mb-6 flex items-center justify-between gap-3">
@@ -250,11 +250,9 @@ export default function UnitDetailsPage({
         </div>
       </div>
 
-      {/* Mobile Sticky Action Bar — private CRM only */}
+      {/* Mobile Sticky Action Bar — private CRM only; owner contact for same-client units */}
       {!isPublic && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-50">
-          <MobileStickyActionBar unit={unit} />
-        </div>
+        <MobileStickyActionBar unit={unit} isOwnUnit={isOwnUnit} />
       )}
 
       <UnitShareLinksDialog

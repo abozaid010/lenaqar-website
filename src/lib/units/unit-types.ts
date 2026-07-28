@@ -175,6 +175,7 @@ export interface StickyInquiryCardProps {
 
 export interface MobileStickyActionBarProps {
   unit: UnitViewModel;
+  isOwnUnit?: boolean;
 }
 
 export interface SectionBlockProps {
