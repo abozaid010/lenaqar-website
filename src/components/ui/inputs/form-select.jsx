@@ -43,7 +43,13 @@ const FormSelect = ({
         <ChevronDown className="pointer-events-none absolute top-1/2 ltr:right-2 rtl:left-2 -translate-y-1/2 text-gray-400 w-5 h-5" />
       </div>
       {error && errorMessage && (
-        <div className="text-xs text-red-500 mt-1">{errorMessage}</div>
+        <p
+          role="alert"
+          data-field-invalid="true"
+          className="text-xs sm:text-sm text-red-600 mt-1.5 leading-snug break-words max-w-full"
+        >
+          {errorMessage}
+        </p>
       )}
     </div>
   );

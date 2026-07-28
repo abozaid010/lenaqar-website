@@ -11,7 +11,12 @@ import {
   isAmountEntered,
   sanitizePriceFields,
 } from "../parse-amount.js";
-import { validateSalePricing } from "../sale-pricing-validation.js";
+import {
+  applySaleApiAmountDefaults,
+  getDefaultDeliveredDateIso,
+  hasSalePaymentPlanInfo,
+  validateSalePricing,
+} from "../sale-pricing-validation.js";
 
 test("isAmountEntered treats blank as empty and 0 as entered", () => {
   assert.equal(isAmountEntered(""), false);
@@ -70,8 +75,8 @@ test("cash sale: missing totalPrice fails", () => {
   assert.equal(result.ok, false);
   assert.ok(result.invalidFields.includes("totalPrice"));
   assert.equal(
-    result.fieldErrors.totalPrice.fallback,
-    "Total price is required."
+    result.fieldErrors.totalPrice.key,
+    "unitFormValidation.totalPriceRequired"
   );
 });
 
@@ -104,9 +109,9 @@ test("installments: invalid numbers are rejected without coercion", () => {
     installment_years: "abc",
   });
   assert.equal(result.ok, false);
-  assert.equal(result.fieldErrors.downPayment.fallback, "Please enter a valid number.");
-  assert.equal(result.fieldErrors.remaining_amount.fallback, "Please enter a valid number.");
-  assert.equal(result.fieldErrors.installment_years.fallback, "Please enter a valid number.");
+  assert.equal(result.fieldErrors.downPayment.key, "unitFormValidation.invalidNumber");
+  assert.equal(result.fieldErrors.remaining_amount.key, "unitFormValidation.invalidNumber");
+  assert.equal(result.fieldErrors.installment_years.key, "unitFormValidation.invalidNumber");
 });
 
 test("sanitizePriceFields omits blank installment money fields", () => {
@@ -122,4 +127,88 @@ test("sanitizePriceFields omits blank installment money fields", () => {
   assert.equal("remaining_amount" in payload, false);
   assert.equal("paid_amount" in payload, false);
   assert.equal("over_price" in payload, false);
+});
+
+test("applySaleApiAmountDefaults restores API-required cash zeros", () => {
+  const sanitized = sanitizePriceFields({
+    purpose: "sell",
+    totalPrice: 2000000,
+    downPayment: "",
+    remaining_amount: "",
+    paid_amount: "",
+    over_price: "",
+  });
+  const payload = applySaleApiAmountDefaults(sanitized);
+
+  assert.equal(payload.totalPrice, 2000000);
+  assert.equal(payload.downPayment, 0);
+  assert.equal(payload.remaining_amount, 0);
+  assert.equal(payload.paid_amount, 0);
+  assert.equal(payload.over_price, 0);
+  assert.equal(payload.installment_years, 0);
+});
+
+test("applySaleApiAmountDefaults keeps positive installment values", () => {
+  const payload = applySaleApiAmountDefaults({
+    purpose: "sell",
+    totalPrice: 2000000,
+    downPayment: 200000,
+    remaining_amount: 1800000,
+    installment_years: 5,
+  });
+  assert.equal(payload.downPayment, 200000);
+  assert.equal(payload.remaining_amount, 1800000);
+  assert.equal(payload.installment_years, 5);
+  assert.equal(payload.paid_amount, 0);
+  assert.equal(payload.over_price, 0);
+});
+
+test("applySaleApiAmountDefaults does not alter rent payloads", () => {
+  const payload = applySaleApiAmountDefaults({
+    purpose: "rent",
+    monthlyRentPrice: 15000,
+  });
+  assert.equal("downPayment" in payload, false);
+  assert.equal(payload.monthlyRentPrice, 15000);
+});
+
+test("getDefaultDeliveredDateIso is one year before today", () => {
+  const fixed = new Date("2026-07-28T12:00:00.000Z");
+  assert.equal(getDefaultDeliveredDateIso(fixed), "2025-07-28");
+});
+
+test("hasSalePaymentPlanInfo ignores totalPrice-only cash", () => {
+  assert.equal(
+    hasSalePaymentPlanInfo({
+      totalPrice: 2000000,
+      downPayment: "",
+      paid_amount: "",
+      remaining_amount: "",
+      installment_years: "",
+      over_price: "",
+    }),
+    false
+  );
+  assert.equal(
+    hasSalePaymentPlanInfo({
+      totalPrice: 2000000,
+      downPayment: 0,
+      remaining_amount: 0,
+      installment_years: 0,
+    }),
+    false
+  );
+  assert.equal(
+    hasSalePaymentPlanInfo({
+      totalPrice: 2000000,
+      downPayment: 100000,
+    }),
+    true
+  );
+  assert.equal(
+    hasSalePaymentPlanInfo({
+      installment_years: 5,
+    }),
+    true
+  );
 });

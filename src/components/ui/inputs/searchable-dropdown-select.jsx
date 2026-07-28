@@ -735,9 +735,13 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
       </div>
 
       {hasError && displayErrorMessage && (
-        <div className="text-xs text-red-500 mt-1 px-1 animate-fade-in">
+        <p
+          role="alert"
+          data-field-invalid="true"
+          className="text-xs sm:text-sm text-red-600 mt-1.5 px-0.5 leading-snug break-words max-w-full animate-fade-in"
+        >
           {displayErrorMessage}
-        </div>
+        </p>
       )}
     </div>
   );

@@ -33,9 +33,9 @@ export default function SaleDetailsStep({
     }
   };
 
-  const fieldErrorMessage = (name, fallbackKey, fallbackText) => {
+  const fieldErrorMessage = (name, fallbackKey) => {
     if (!invalidFields.includes(name)) return false;
-    return fieldErrors[name] || translate(fallbackKey, fallbackText);
+    return fieldErrors[name] || (fallbackKey ? translate(fallbackKey) : false);
   };
 
   const handleChange = (e, type = "") => {
@@ -74,7 +74,10 @@ export default function SaleDetailsStep({
           value={formData.deliveryDate}
           onChange={handleChange}
           type="date"
-          error={invalidFields.includes("deliveryDate")}
+          error={fieldErrorMessage(
+            "deliveryDate",
+            "unitFormValidation.deliveryDateRequired"
+          )}
         />
       </div>
 
@@ -108,9 +111,10 @@ export default function SaleDetailsStep({
               }}
               error={
                 invalidFields.includes("owner_mobile")
-                  ? !String(commonFormData.owner_mobile ?? "").trim()
-                    ? translate("phoneField.required", "Phone number is required")
-                    : translate("phoneField.invalid", "Invalid phone number")
+                  ? fieldErrors.owner_mobile ||
+                    (!String(commonFormData.owner_mobile ?? "").trim()
+                      ? translate("unitFormValidation.ownerMobileRequired")
+                      : translate("unitFormValidation.ownerMobileInvalid"))
                   : undefined
               }
             />
@@ -136,8 +140,7 @@ export default function SaleDetailsStep({
             required
             error={fieldErrorMessage(
               "totalPrice",
-              "saleDetails.totalPriceRequired",
-              "Total price is required."
+              "unitFormValidation.totalPriceRequired"
             )}
           />
           
@@ -151,8 +154,7 @@ export default function SaleDetailsStep({
             adornment="EGP"
             error={fieldErrorMessage(
               "downPayment",
-              "saleDetails.downPaymentRequiredInstallments",
-              "Down payment is required when using installments."
+              "unitFormValidation.downPaymentRequiredInstallments"
             )}
           />
           
@@ -176,8 +178,7 @@ export default function SaleDetailsStep({
             adornment="EGP"
             error={fieldErrorMessage(
               "remaining_amount",
-              "saleDetails.remainingAmountRequiredInstallments",
-              "Remaining amount is required when using installments."
+              "unitFormValidation.remainingAmountRequiredInstallments"
             )}
           />
           
@@ -190,8 +191,7 @@ export default function SaleDetailsStep({
             type="number"
             error={fieldErrorMessage(
               "installment_years",
-              "saleDetails.installmentYearsRequiredInstallments",
-              "Installment years is required when using installments."
+              "unitFormValidation.installmentYearsRequiredInstallments"
             )}
           />
           

@@ -37,8 +37,23 @@ export default function RentalDetailsStep({
   updateCommonFormData,
   invalidFields = [],
   setInvalidFields = () => {},
+  fieldErrors = {},
+  setFieldErrors = () => {},
 }) {
   const { t, translate, translateStrict } = useI18n();
+
+  const clearFieldError = (name) => {
+    if (invalidFields.includes(name)) {
+      setInvalidFields((prev) => prev.filter((field) => field !== name));
+    }
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
+  };
 
   const unitVisibility = commonFormData?.visibility ?? commonFormData?.status;
   const isRentAvailable = isRentVisibilityAvailable(unitVisibility);
@@ -84,20 +99,12 @@ export default function RentalDetailsStep({
 
   const handleOwnerChange = (e) => {
     const { name, value } = e.target;
-
-    if (invalidFields.includes(name)) {
-      setInvalidFields((prev) => prev.filter((field) => field !== name));
-    }
-
+    clearFieldError(name);
     updateCommonFormData({ [name]: value });
   };
 
   const handleMonthlyRentChange = (value) => {
-    if (invalidFields.includes("monthlyRentPrice")) {
-      setInvalidFields((prev) =>
-        prev.filter((field) => field !== "monthlyRentPrice")
-      );
-    }
+    clearFieldError("monthlyRentPrice");
     const englishValue = convertArabicToEnglishNumbers(value);
     const rawValue = englishValue.replace(/\D/g, "");
     updateFormData({
@@ -168,10 +175,8 @@ export default function RentalDetailsStep({
           adornment="EGP"
           error={
             invalidFields.includes("monthlyRentPrice")
-              ? translate(
-                  "rentalDetails.monthlyRentRequired",
-                  "Enter monthly rent"
-                )
+              ? fieldErrors.monthlyRentPrice ||
+                translate("unitFormValidation.monthlyRentRequired")
               : false
           }
         />
@@ -231,16 +236,15 @@ export default function RentalDetailsStep({
               defaultCountry="EG"
               value={commonFormData.owner_mobile ?? ""}
               onChange={(next) => {
-                if (invalidFields?.includes("owner_mobile")) {
-                  setInvalidFields((prev) => prev.filter((f) => f !== "owner_mobile"));
-                }
+                clearFieldError("owner_mobile");
                 updateCommonFormData({ owner_mobile: next ?? "" });
               }}
               error={
                 invalidFields?.includes("owner_mobile")
-                  ? !String(commonFormData.owner_mobile ?? "").trim()
-                    ? translate("phoneField.required", "Phone number is required")
-                    : translate("phoneField.invalid", "Invalid phone number")
+                  ? fieldErrors.owner_mobile ||
+                    (!String(commonFormData.owner_mobile ?? "").trim()
+                      ? translate("unitFormValidation.ownerMobileRequired")
+                      : translate("unitFormValidation.ownerMobileInvalid"))
                   : undefined
               }
             />

@@ -14,17 +14,29 @@ export default function ImagesStep({
   setIsUploading,
   invalidFields = [],
   setInvalidFields = () => {},
+  fieldErrors = {},
+  setFieldErrors = () => {},
   maxImages = MAX_UNIT_IMAGES,
 }) {
   const { t, locale, translate } = useI18n();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    updateFormData({ [name]: value });
-
+  const clearFieldError = (name) => {
     if (invalidFields.includes(name)) {
       setInvalidFields((prev) => prev.filter((field) => field !== name));
     }
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    updateFormData({ [name]: value });
+    clearFieldError(name);
   };
 
   return (
@@ -37,6 +49,12 @@ export default function ImagesStep({
           value={formData.finishing}
           onChange={handleChange}
           error={invalidFields.includes("finishing")}
+          errorMessage={
+            invalidFields.includes("finishing")
+              ? fieldErrors.finishing ||
+                translate("unitFormValidation.finishingRequired")
+              : ""
+          }
           required
         >
           <option value="">{t.selectFinishingType}</option>
@@ -88,6 +106,15 @@ export default function ImagesStep({
               </svg>
             </div>
           </div>
+          {invalidFields.includes("furnishing") && (
+            <p
+              role="alert"
+              className="text-xs sm:text-sm text-red-600 mt-1.5 leading-snug break-words"
+            >
+              {fieldErrors.furnishing ||
+                translate("unitFormValidation.furnishingRequired")}
+            </p>
+          )}
         </div>
       </div>
 

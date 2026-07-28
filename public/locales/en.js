@@ -1739,6 +1739,9 @@ export default {
       "Select a leaf location: project, sub-district, or a district with no sub-districts. Choosing a project fills city, district, and area.",
     locationRequired:
       "Select a complete location down to the leaf (district, sub-district, or project)",
+    locationSelectDistrict: "Please select a district.",
+    locationSelectSubdistrict: "Please select a subdistrict.",
+    locationSelectDeepest: "Please select the deepest available location.",
     selectView: "Select view",
     placeholders: {
       unitTitle: "Enter unit title",
@@ -1800,6 +1803,37 @@ export default {
     installmentYearsRequiredInstallments:
       "Installment years is required when using installments.",
     invalidNumber: "Please enter a valid number.",
+    deliveryDateRequired: "Please select a delivery date.",
+  },
+  unitFormValidation: {
+    requiredFields: "Please complete all required fields.",
+    invalidNumber: "Please enter a valid number.",
+    fieldRequired: "This field is required.",
+    locationRequired: "Please select a valid location.",
+    locationSelectDistrict: "Please select a district.",
+    locationSelectSubdistrict: "Please select a subdistrict.",
+    locationSelectDeepest: "Please select the deepest available location.",
+    totalPriceRequired: "Total price is required.",
+    downPaymentRequiredInstallments:
+      "Down payment is required when using installments.",
+    remainingAmountRequiredInstallments:
+      "Remaining amount is required when using installments.",
+    installmentYearsRequiredInstallments:
+      "Installment years is required when using installments.",
+    deliveryDateRequired: "Please select a delivery date.",
+    deliveryDateRange:
+      "Delivery date must be between 30 years ago and 10 years from now.",
+    monthlyRentRequired: "Monthly rent is required.",
+    buildingTypeRequired: "Please select a building type.",
+    purposeRequired: "Please select a purpose.",
+    landAreaRequired: "Total area is required.",
+    roomsRequired: "Number of rooms is required.",
+    bathroomsRequired: "Number of bathrooms is required.",
+    finishingRequired: "Please select a finishing type.",
+    furnishingRequired: "Please select a furnishing type.",
+    ownerMobileRequired: "Owner mobile number is required.",
+    ownerMobileInvalid: "Please enter a valid owner mobile number.",
+    saveFailed: "We couldn't save this unit. Please check your entries and try again.",
   },
   rentalDetails: {
     availability: "Availability",
@@ -1811,7 +1845,7 @@ export default {
     monthly: "Monthly",
     price: "Price",
     monthlyRentPrice: "Monthly rent",
-    monthlyRentRequired: "Enter monthly rent",
+    monthlyRentRequired: "Monthly rent is required.",
     securityDeposit: "Security Deposit",
     cleaningFee: "Cleaning Fee",
     serviceFee: "Service Fee",

@@ -1,3 +1,5 @@
+import { UNIT_FORM_VALIDATION_KEYS as K } from "@/constants/unit-form-validation-keys";
+
 /** Max gallery images for the add/edit unit flow (images step + uploader). */
 export const MAX_UNIT_IMAGES = 10;
 
@@ -27,8 +29,9 @@ function asTrimmedString(value) {
  * - City → District (district has no subdistricts)
  *
  * Rejects city-only, empty selection, and district when that district has subdistricts.
+ * @returns {Promise<{ ok: true } | { ok: false, key: string, field: string }>}
  */
-export async function isValidUnitLocationLeaf(location = {}, cityManager) {
+export async function validateUnitLocationLeaf(location = {}, cityManager) {
   const project = asTrimmedString(
     location.project || location.project_id || location.projectId
   );
@@ -36,13 +39,26 @@ export async function isValidUnitLocationLeaf(location = {}, cityManager) {
   const district = asTrimmedString(location.district);
   const sub_district = asTrimmedString(location.sub_district);
 
+  const fail = (key) => ({
+    ok: false,
+    key,
+    field: "unit_location",
+  });
+
+  if (!city && !district && !sub_district && !project) {
+    return fail(K.locationRequired);
+  }
+
   // Project selected but parents not resolved yet (filled before save).
   if (!city || !district) {
-    return Boolean(project);
+    if (project) return { ok: true };
+    if (city && !district) return fail(K.locationSelectDistrict);
+    return fail(K.locationRequired);
   }
 
   if (!cityManager) {
-    return Boolean(sub_district || project);
+    if (sub_district || project) return { ok: true };
+    return fail(K.locationSelectDeepest);
   }
 
   await cityManager.initializeData();
@@ -51,13 +67,17 @@ export async function isValidUnitLocationLeaf(location = {}, cityManager) {
     : { city, district, sub_district };
 
   if (!resolved.city || !resolved.district) {
-    return Boolean(project);
+    if (project) return { ok: true };
+    if (resolved.city && !resolved.district) {
+      return fail(K.locationSelectDistrict);
+    }
+    return fail(K.locationRequired);
   }
 
   const cityObj = await cityManager.getCityByValue(resolved.city);
   if (!cityObj) {
-    // Unknown city in catalog — require a deeper node.
-    return Boolean(resolved.sub_district || project);
+    if (resolved.sub_district || project) return { ok: true };
+    return fail(K.locationSelectDeepest);
   }
 
   const subs = await cityManager.getSubDistrictsForCityDistrict(
@@ -66,12 +86,18 @@ export async function isValidUnitLocationLeaf(location = {}, cityManager) {
   );
 
   if (subs.length > 0) {
-    // District has subdistricts — must select one (project optional).
-    return Boolean(resolved.sub_district);
+    if (resolved.sub_district) return { ok: true };
+    return fail(K.locationSelectSubdistrict);
   }
 
-  // District has no subdistricts — district itself is a valid leaf (project optional).
-  return true;
+  // District has no subdistricts — district itself is a valid leaf.
+  return { ok: true };
+}
+
+/** @deprecated Prefer validateUnitLocationLeaf for specific error keys. */
+export async function isValidUnitLocationLeaf(location = {}, cityManager) {
+  const result = await validateUnitLocationLeaf(location, cityManager);
+  return result.ok;
 }
 
 /**

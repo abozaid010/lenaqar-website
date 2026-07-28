@@ -1555,6 +1555,9 @@ export default {
       "اختر موقعاً نهائياً: مشروعاً أو حياً فرعياً، أو منطقة بلا أحياء فرعية. اختيار مشروع يملأ المدينة والحي والمنطقة.",
     locationRequired:
       "اختر موقعاً كاملاً حتى المستوى النهائي (منطقة أو حي فرعي أو مشروع)",
+    locationSelectDistrict: "يرجى اختيار المنطقة.",
+    locationSelectSubdistrict: "يرجى اختيار الحي الفرعي.",
+    locationSelectDeepest: "يرجى اختيار أعمق مستوى متاح للموقع.",
     selectView: "اختر الإطلالة",
     placeholders: {
       unitTitle: "أدخل عنوان الوحدة",
@@ -1639,6 +1642,37 @@ export default {
     remainingAmountRequiredInstallments: "المبلغ المتبقي مطلوب عند استخدام التقسيط.",
     installmentYearsRequiredInstallments: "سنوات التقسيط مطلوبة عند استخدام التقسيط.",
     invalidNumber: "يرجى إدخال رقم صالح.",
+    deliveryDateRequired: "يرجى اختيار تاريخ التسليم.",
+  },
+  unitFormValidation: {
+    requiredFields: "يرجى إكمال جميع الحقول المطلوبة.",
+    invalidNumber: "يرجى إدخال رقم صالح.",
+    fieldRequired: "هذا الحقل مطلوب.",
+    locationRequired: "يرجى اختيار موقع صالح.",
+    locationSelectDistrict: "يرجى اختيار المنطقة.",
+    locationSelectSubdistrict: "يرجى اختيار الحي الفرعي.",
+    locationSelectDeepest: "يرجى اختيار أعمق مستوى متاح للموقع.",
+    totalPriceRequired: "السعر الإجمالي مطلوب.",
+    downPaymentRequiredInstallments: "المقدم مطلوب عند استخدام التقسيط.",
+    remainingAmountRequiredInstallments:
+      "المبلغ المتبقي مطلوب عند استخدام التقسيط.",
+    installmentYearsRequiredInstallments:
+      "سنوات التقسيط مطلوبة عند استخدام التقسيط.",
+    deliveryDateRequired: "يرجى اختيار تاريخ التسليم.",
+    deliveryDateRange:
+      "يجب أن يكون تاريخ التسليم بين 30 سنة مضت و 10 سنوات من الآن.",
+    monthlyRentRequired: "الإيجار الشهري مطلوب.",
+    buildingTypeRequired: "يرجى اختيار نوع المبنى.",
+    purposeRequired: "يرجى اختيار الغرض.",
+    landAreaRequired: "المساحة الإجمالية مطلوبة.",
+    roomsRequired: "عدد الغرف مطلوب.",
+    bathroomsRequired: "عدد الحمامات مطلوب.",
+    finishingRequired: "يرجى اختيار نوع التشطيب.",
+    furnishingRequired: "يرجى اختيار نوع التأثيث.",
+    ownerMobileRequired: "رقم جوال المالك مطلوب.",
+    ownerMobileInvalid: "يرجى إدخال رقم جوال مالك صالح.",
+    saveFailed:
+      "تعذر حفظ هذه الوحدة. يرجى مراجعة البيانات والمحاولة مرة أخرى.",
   },
   rentalDetails: {
     availability: "التوفر",
@@ -1650,7 +1684,7 @@ export default {
     monthly: "شهري",
     price: "السعر",
     monthlyRentPrice: "إيجار شهري",
-    monthlyRentRequired: "أدخل الإيجار الشهري",
+    monthlyRentRequired: "الإيجار الشهري مطلوب.",
     securityDeposit: "تأمين",
     cleaningFee: "رسوم التنظيف",
     serviceFee: "رسوم الخدمة",

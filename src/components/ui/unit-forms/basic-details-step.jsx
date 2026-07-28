@@ -27,6 +27,8 @@ export default function BasicDetailsStep({
   citiesAndDistricts: _citiesAndDistricts, // Keep for backward compatibility but don't use
   invalidFields = [],
   setInvalidFields = () => { },
+  fieldErrors = {},
+  setFieldErrors = () => {},
   developers = [],
   developersLoading = false,
   isEdit = false,
@@ -38,6 +40,30 @@ export default function BasicDetailsStep({
   const [locationFromProject, setLocationFromProject] = useState(false);
   const didNormalizeLocation = useRef(false);
   const didFillFromProject = useRef(false);
+
+  const clearFieldError = useCallback(
+    (name) => {
+      if (invalidFields.includes(name)) {
+        setInvalidFields((prev) => prev.filter((field) => field !== name));
+      }
+      if (fieldErrors[name]) {
+        setFieldErrors((prev) => {
+          const next = { ...prev };
+          delete next[name];
+          return next;
+        });
+      }
+    },
+    [invalidFields, fieldErrors, setInvalidFields, setFieldErrors]
+  );
+
+  const fieldErrorMessage = useCallback(
+    (name) => {
+      if (!invalidFields.includes(name)) return false;
+      return fieldErrors[name] || false;
+    },
+    [invalidFields, fieldErrors]
+  );
 
   const { data: projectsData } = useProjectsNames(false);
 
@@ -131,8 +157,8 @@ export default function BasicDetailsStep({
 
     updateFormData({ [name]: updatedValue });
 
-    if (invalidFields.includes(name) && (updatedValue === 0 || updatedValue)) {
-      setInvalidFields((prev) => prev.filter((field) => field !== name));
+    if (updatedValue === 0 || updatedValue) {
+      clearFieldError(name);
     }
   };
 
@@ -205,7 +231,14 @@ export default function BasicDetailsStep({
     setInvalidFields((prev) =>
       prev.filter((field) => field !== "unit_location" && field !== "project")
     );
-  }, [setInvalidFields]);
+    setFieldErrors((prev) => {
+      if (!prev.unit_location && !prev.project) return prev;
+      const next = { ...prev };
+      delete next.unit_location;
+      delete next.project;
+      return next;
+    });
+  }, [setInvalidFields, setFieldErrors]);
 
   const handleLocationSearchProject = useCallback(
     async (proj, meta = {}) => {
@@ -344,7 +377,7 @@ export default function BasicDetailsStep({
           name="buildingType"
           value={formData.buildingType || ""}
           onChange={handleChange}
-          error={invalidFields.includes("buildingType")}
+          error={fieldErrorMessage("buildingType")}
           options={buildingTypeOptions}
           getValue={(opt) => opt.value}
           getLabel={(opt) => opt.label}
@@ -357,7 +390,7 @@ export default function BasicDetailsStep({
           value={formData.purpose || ""}
           onChange={handleChange}
           required
-          error={invalidFields.includes("purpose")}
+          error={fieldErrorMessage("purpose")}
           options={[
             {
               value: "rent",
@@ -429,13 +462,12 @@ export default function BasicDetailsStep({
               invalidFields.includes("project")
             }
             errorMessage={
-              invalidFields.includes("unit_location") ||
+              fieldErrors.unit_location ||
+              fieldErrors.project ||
+              (invalidFields.includes("unit_location") ||
               invalidFields.includes("project")
-                ? translate(
-                    "basicDetails.locationRequired",
-                    "Select a complete location down to the leaf (district, sub-district, or project)"
-                  )
-                : ""
+                ? translate("unitFormValidation.locationRequired")
+                : "")
             }
           />
 
@@ -480,7 +512,7 @@ export default function BasicDetailsStep({
                 value={numericValue(formData.roomsCount)}
                 onChange={(e) => handleChange(e, "number")}
                 placeholder="0"
-                error={invalidFields.includes("roomsCount")}
+                error={fieldErrorMessage("roomsCount")}
                 type="number"
                 max={15}
               />
@@ -493,7 +525,7 @@ export default function BasicDetailsStep({
               value={numericValue(formData.bathroomCount)}
               onChange={(e) => handleChange(e, "number")}
               placeholder="0"
-              error={invalidFields.includes("bathroomCount")}
+              error={fieldErrorMessage("bathroomCount")}
               type="number"
             />
           </>
@@ -518,7 +550,7 @@ export default function BasicDetailsStep({
           placeholder="0"
           type="number"
           required
-          error={invalidFields.includes("landArea")}
+          error={fieldErrorMessage("landArea")}
         />
 
         {/* Garden Size */}

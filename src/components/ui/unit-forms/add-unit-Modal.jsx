@@ -26,9 +26,19 @@ import {
   MAX_UNIT_IMAGES,
   resolveMonthlyRentFromUnit,
   ensureUnitLocationPayload,
-  isValidUnitLocationLeaf,
+  validateUnitLocationLeaf,
 } from "./unit-form-constants";
-import { validateSalePricing } from "@/utils/sale-pricing-validation";
+import {
+  validateSalePricing,
+  applySaleApiAmountDefaults,
+  getDefaultDeliveredDateIso,
+  hasSalePaymentPlanInfo,
+} from "@/utils/sale-pricing-validation";
+import {
+  UNIT_FORM_VALIDATION_KEYS as VKEY,
+  UNIT_FORM_FIELD_REQUIRED_KEYS,
+  tValidation,
+} from "@/constants/unit-form-validation-keys";
 import { getValidatedClientId } from "@/utils/clientId-validator";
 import { isOwnClientUnit } from "@/lib/units/unit-ownership";
 import { resolveOwnerFromDashboardPhone } from "@/lib/units/resolve-owner-from-dashboard";
@@ -48,6 +58,16 @@ import {
   parseAmount,
   sanitizePriceFields,
 } from "@/utils/parse-amount";
+
+function scrollToFirstFieldError() {
+  if (typeof document === "undefined") return;
+  requestAnimationFrame(() => {
+    const el =
+      document.querySelector("[data-field-invalid='true']") ||
+      document.querySelector(".ring-red-500, .border-red-500");
+    el?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+  });
+}
 
 /** Safely format a date value to a YYYY-MM-DD input string; empty string when invalid. */
 function toDateInputValue(value) {
@@ -78,7 +98,7 @@ function cleanExtraInfo(text) {
 
 /**
  * Normalize counts/areas to numbers, and price fields to positive numbers only.
- * Missing / empty / non-positive prices are omitted (not sent as null or 0).
+ * Sale API still requires unused cash amount keys as 0 (see applySaleApiAmountDefaults).
  */
 function sanitizeAmountsForApi(data) {
   const out = { ...data };
@@ -93,7 +113,7 @@ function sanitizeAmountsForApi(data) {
       return;
     }
     const n = toIntAmount(raw);
-    // Optional installment years: omit blank / zero / non-positive (cash sale).
+    // Cash / unused: drop non-positive years; applySaleApiAmountDefaults sends 0.
     if (field === "installment_years" && (!Number.isFinite(n) || n <= 0)) {
       delete out[field];
       return;
@@ -110,7 +130,7 @@ function sanitizeAmountsForApi(data) {
     out[field] = toAmount(raw);
   });
 
-  const withPrices = sanitizePriceFields(out);
+  let withPrices = sanitizePriceFields(out);
 
   if (withPrices.purpose === "rent") {
     // Nested cadence map is no longer part of the rent API contract.
@@ -119,6 +139,11 @@ function sanitizeAmountsForApi(data) {
   if ("view" in withPrices) {
     withPrices.view = normalizeViewTypeValue(withPrices.view);
   }
+
+  // Cash sale: blank installment amounts were omitted above, but add-sale requires
+  // downPayment (and related amount keys) to be present — send 0 for unused fields.
+  withPrices = applySaleApiAmountDefaults(withPrices);
+
   return withPrices;
 }
 
@@ -151,9 +176,9 @@ function isOwnerMobileInvalid(formData, required) {
 function toastOwnerMobileValidationError(formData, translate) {
   const isRequired = !String(formData?.owner_mobile ?? "").trim();
   toast.error(
-    translate(
-      isRequired ? "phoneField.required" : "phoneField.invalid",
-      isRequired ? "Phone number is required" : "Invalid phone number"
+    tValidation(
+      translate,
+      isRequired ? VKEY.ownerMobileRequired : VKEY.ownerMobileInvalid
     )
   );
 }
@@ -301,15 +326,83 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   }));
 
   // specific sell form data
-  const [SellFormData, setSellFormData] = useState(() => ({
-    totalPrice: unitData?.totalPrice || "",
-    downPayment: unitData?.downPayment || "",
-    deliveryDate: toDateInputValue(unitData?.deliveryDate),
-    paid_amount: unitData?.paid_amount || "",
-    remaining_amount: unitData?.remaining_amount || "",
-    installment_years: unitData?.installment_years || "",
-    over_price: unitData?.over_price || "",
-  }));
+  const existingDeliveryDate = toDateInputValue(unitData?.deliveryDate);
+  const [SellFormData, setSellFormData] = useState(() => {
+    // Add only: default delivered date (1 year ago) when no saved date / payment plan.
+    const shouldDefaultDelivered =
+      !isEdit &&
+      !existingDeliveryDate &&
+      !hasSalePaymentPlanInfo({
+        downPayment: unitData?.downPayment,
+        paid_amount: unitData?.paid_amount,
+        remaining_amount: unitData?.remaining_amount,
+        installment_years: unitData?.installment_years,
+        over_price: unitData?.over_price,
+      });
+
+    return {
+      totalPrice: unitData?.totalPrice || "",
+      downPayment: unitData?.downPayment || "",
+      deliveryDate: existingDeliveryDate || (shouldDefaultDelivered ? getDefaultDeliveredDateIso() : ""),
+      paid_amount: unitData?.paid_amount || "",
+      remaining_amount: unitData?.remaining_amount || "",
+      installment_years: unitData?.installment_years || "",
+      over_price: unitData?.over_price || "",
+    };
+  });
+
+  // Tracks whether deliveryDate is the auto "delivered" default (cleared if payment plan starts).
+  const [deliveryDateAutoDefaulted, setDeliveryDateAutoDefaulted] = useState(
+    () =>
+      !isEdit &&
+      !existingDeliveryDate &&
+      !hasSalePaymentPlanInfo({
+        downPayment: unitData?.downPayment,
+        paid_amount: unitData?.paid_amount,
+        remaining_amount: unitData?.remaining_amount,
+        installment_years: unitData?.installment_years,
+        over_price: unitData?.over_price,
+      })
+  );
+
+  // Payment plan entered → drop auto-defaulted delivery date (require explicit choice).
+  // Payment plan cleared on add → restore delivered default if date is empty.
+  useEffect(() => {
+    const hasPlan = hasSalePaymentPlanInfo(SellFormData);
+
+    if (hasPlan && deliveryDateAutoDefaulted) {
+      setSellFormData((prev) => ({
+        ...prev,
+        deliveryDate: "",
+        deliveryStatus: "",
+      }));
+      setDeliveryDateAutoDefaulted(false);
+      return;
+    }
+
+    if (
+      !isEdit &&
+      !hasPlan &&
+      !SellFormData.deliveryDate &&
+      !deliveryDateAutoDefaulted
+    ) {
+      setSellFormData((prev) => ({
+        ...prev,
+        deliveryDate: getDefaultDeliveredDateIso(),
+        deliveryStatus: "ready to move",
+      }));
+      setDeliveryDateAutoDefaulted(true);
+    }
+  }, [
+    SellFormData.downPayment,
+    SellFormData.paid_amount,
+    SellFormData.remaining_amount,
+    SellFormData.installment_years,
+    SellFormData.over_price,
+    SellFormData.deliveryDate,
+    deliveryDateAutoDefaulted,
+    isEdit,
+  ]);
 
   // specific rent form data
   const [rentFormData, setRentFormData] = useState(() => ({
@@ -564,6 +657,13 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     setFormData((prev) => ({ ...prev, ...formDataPartial }));
     if (Object.keys(sellPartial).length) {
       setSellFormData((prev) => ({ ...prev, ...sellPartial }));
+      // Extracted / explicit delivery or payment plan must not keep the auto default.
+      if (
+        sellPartial.deliveryDate ||
+        hasSalePaymentPlanInfo({ ...SellFormData, ...sellPartial })
+      ) {
+        setDeliveryDateAutoDefaulted(false);
+      }
     }
     if (Object.keys(rentPartial).length) {
       setRentFormData((prev) => ({ ...prev, ...rentPartial }));
@@ -647,6 +747,21 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     return !isBefore(deliveryDate, minDate) && !isAfter(deliveryDate, maxDate);
   };
 
+  const applyFieldErrorsAndToast = (fields, errorsByField, toastKey) => {
+    const unique = [...new Set(fields)];
+    setInvalidFields(unique);
+    setFieldErrors(errorsByField);
+    if (toastKey) {
+      toast.error(tValidation(translate, toastKey));
+    } else if (unique.length > 0) {
+      const firstMsg =
+        errorsByField[unique[0]] ||
+        tValidation(translate, VKEY.requiredFields);
+      toast.error(firstMsg);
+    }
+    scrollToFirstFieldError();
+  };
+
   const validateStep = async (step) => {
     // Validate required fields for step 1
     if (step === 1) {
@@ -683,34 +798,30 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         (field) => formData[field] !== 0 && !formData[field]
       );
 
-      // Location must be a valid leaf (project, sub-district, or district with no subs)
-      const locationIsLeaf = await isValidUnitLocationLeaf(
+      const errorsByField = {};
+      for (const field of missingFields) {
+        const key =
+          UNIT_FORM_FIELD_REQUIRED_KEYS[field] || VKEY.fieldRequired;
+        errorsByField[field] = tValidation(translate, key);
+      }
+
+      const locationResult = await validateUnitLocationLeaf(
         formData,
         CityManager.getInstance()
       );
-      if (!locationIsLeaf) {
-        missingFields.push("unit_location");
+      if (!locationResult.ok) {
+        missingFields.push(locationResult.field || "unit_location");
+        errorsByField[locationResult.field || "unit_location"] = tValidation(
+          translate,
+          locationResult.key
+        );
       }
 
       if (missingFields.length > 0) {
-        setInvalidFields(missingFields);
-        if (missingFields.includes("unit_location")) {
-          toast.error(
-            translate(
-              "basicDetails.locationRequired",
-              "Select a complete location down to the leaf (district, sub-district, or project)"
-            )
-          );
-        } else {
-          toast.error(
-            translate(
-              "validation.requiredFields",
-              locale === "ar"
-                ? "يرجى إكمال جميع الحقول المطلوبة"
-                : "Please complete all required fields"
-            )
-          );
-        }
+        const toastKey = !locationResult.ok
+          ? locationResult.key
+          : VKEY.requiredFields;
+        applyFieldErrorsAndToast(missingFields, errorsByField, toastKey);
         return false;
       }
     }
@@ -719,87 +830,113 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     if (step === 2) {
       if (formData.purpose === "sell") {
         const missingFields = [];
+        const errorsByField = {};
+        const hasPlan = hasSalePaymentPlanInfo(SellFormData);
+        let effectiveDeliveryDate = SellFormData.deliveryDate;
+        let toastKey = null;
 
-        if (!SellFormData.deliveryDate) {
-          missingFields.push("deliveryDate");
+        if (hasPlan) {
+          if (!effectiveDeliveryDate) {
+            missingFields.push("deliveryDate");
+            errorsByField.deliveryDate = tValidation(
+              translate,
+              VKEY.deliveryDateRequired
+            );
+            toastKey = VKEY.deliveryDateRequired;
+          }
+        } else if (!effectiveDeliveryDate) {
+          if (!isEdit) {
+            effectiveDeliveryDate = getDefaultDeliveredDateIso();
+            setSellFormData((prev) => ({
+              ...prev,
+              deliveryDate: effectiveDeliveryDate,
+              deliveryStatus: "ready to move",
+            }));
+            setDeliveryDateAutoDefaulted(true);
+          } else {
+            missingFields.push("deliveryDate");
+            errorsByField.deliveryDate = tValidation(
+              translate,
+              VKEY.deliveryDateRequired
+            );
+            toastKey = VKEY.deliveryDateRequired;
+          }
         }
 
         if (ownerMobileRequired && isOwnerMobileInvalid(formData, ownerMobileRequired)) {
           missingFields.push("owner_mobile");
+          const isEmpty = !String(formData?.owner_mobile ?? "").trim();
+          errorsByField.owner_mobile = tValidation(
+            translate,
+            isEmpty ? VKEY.ownerMobileRequired : VKEY.ownerMobileInvalid
+          );
+          if (!toastKey) {
+            toastKey = isEmpty
+              ? VKEY.ownerMobileRequired
+              : VKEY.ownerMobileInvalid;
+          }
         }
 
         if (
-          SellFormData.deliveryDate &&
-          !validateDeliveryDate(SellFormData.deliveryDate)
+          effectiveDeliveryDate &&
+          !validateDeliveryDate(effectiveDeliveryDate)
         ) {
           missingFields.push("deliveryDate");
-          toast.error(
-            t.saleDetails.deleveryError ||
-            "Delivery date must be between 30 years ago and 10 years from now",
-            {
-              duration: 5000,
-            }
+          errorsByField.deliveryDate = tValidation(
+            translate,
+            VKEY.deliveryDateRange
           );
+          toastKey = VKEY.deliveryDateRange;
         }
 
         const pricing = validateSalePricing(SellFormData);
         if (!pricing.ok) {
           missingFields.push(...pricing.invalidFields);
+          for (const [field, err] of Object.entries(pricing.fieldErrors)) {
+            errorsByField[field] = tValidation(translate, err.key);
+          }
+          if (!toastKey && pricing.invalidFields[0]) {
+            toastKey = pricing.fieldErrors[pricing.invalidFields[0]]?.key;
+          }
         }
 
         if (missingFields.length > 0) {
-          const uniqueMissing = [...new Set(missingFields)];
-          setInvalidFields(uniqueMissing);
-
-          const translatedPricingErrors = {};
-          for (const [field, err] of Object.entries(pricing.fieldErrors)) {
-            translatedPricingErrors[field] = translate(err.key, err.fallback);
-          }
-          setFieldErrors(translatedPricingErrors);
-
-          if (pricing.invalidFields.length > 0) {
-            const first = pricing.invalidFields[0];
-            const firstErr = pricing.fieldErrors[first];
-            toast.error(translate(firstErr.key, firstErr.fallback));
-          } else if (uniqueMissing.includes("owner_mobile")) {
-            toastOwnerMobileValidationError(formData, translate);
-          } else if (
-            !(
-              uniqueMissing.includes("deliveryDate") &&
-              SellFormData.deliveryDate
-            )
-          ) {
-            // Skip generic toast when delivery-date range error was already shown
-            toast.error(
-              translate(
-                "validation.requiredFields",
-                locale === "ar"
-                  ? "يرجى إكمال جميع الحقول المطلوبة"
-                  : "Please complete all required fields"
-              )
-            );
-          }
+          applyFieldErrorsAndToast(
+            missingFields,
+            errorsByField,
+            toastKey || VKEY.requiredFields
+          );
           return false;
         }
 
         setFieldErrors({});
       } else if (formData.purpose === "rent") {
         if (ownerMobileRequired && isOwnerMobileInvalid(formData, ownerMobileRequired)) {
-          setInvalidFields(["owner_mobile"]);
-          toastOwnerMobileValidationError(formData, translate);
+          const isEmpty = !String(formData?.owner_mobile ?? "").trim();
+          const key = isEmpty
+            ? VKEY.ownerMobileRequired
+            : VKEY.ownerMobileInvalid;
+          applyFieldErrorsAndToast(
+            ["owner_mobile"],
+            { owner_mobile: tValidation(translate, key) },
+            key
+          );
           return false;
         }
 
         const hasValidPrice = isPositiveAmount(rentFormData.monthlyRentPrice);
 
         if (!hasValidPrice) {
-          toast.error(
-            translate(
-              "rentalDetails.monthlyRentRequired",
-              "Enter monthly rent"
-            )
+          applyFieldErrorsAndToast(
+            ["monthlyRentPrice"],
+            {
+              monthlyRentPrice: tValidation(
+                translate,
+                VKEY.monthlyRentRequired
+              ),
+            },
+            VKEY.monthlyRentRequired
           );
-          setInvalidFields(["monthlyRentPrice"]);
           return false;
         }
 
@@ -862,9 +999,14 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     }
 
     if (ownerMobileRequired && isOwnerMobileInvalid(formData, ownerMobileRequired)) {
-      setInvalidFields(["owner_mobile"]);
+      const isEmpty = !String(formData?.owner_mobile ?? "").trim();
+      const key = isEmpty ? VKEY.ownerMobileRequired : VKEY.ownerMobileInvalid;
       setCurrentStep(2);
-      toastOwnerMobileValidationError(formData, translate);
+      applyFieldErrorsAndToast(
+        ["owner_mobile"],
+        { owner_mobile: tValidation(translate, key) },
+        key
+      );
       return;
     }
 
@@ -888,12 +1030,16 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       }
       const missingFields = requiredFields.filter((field) => !formData[field]);
       if (missingFields.length > 0) {
-        setInvalidFields(missingFields);
-        toast.error(
-          translate(
-            "validation.requiredFields",
-            locale === "ar" ? "يرجى إكمال جميع الحقول المطلوبة" : "Please complete all required fields"
-          )
+        const errorsByField = {};
+        for (const field of missingFields) {
+          const key =
+            UNIT_FORM_FIELD_REQUIRED_KEYS[field] || VKEY.fieldRequired;
+          errorsByField[field] = tValidation(translate, key);
+        }
+        applyFieldErrorsAndToast(
+          missingFields,
+          errorsByField,
+          UNIT_FORM_FIELD_REQUIRED_KEYS[missingFields[0]] || VKEY.requiredFields
         );
         return;
       }
@@ -906,7 +1052,17 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
 
       // Merge form data based on purpose
       if (formData.purpose === "sell") {
-        finalFormData = { ...finalFormData, ...SellFormData };
+        const sellData = { ...SellFormData };
+        // Cash / delivered: never submit without a delivery date on create.
+        if (
+          !isEdit &&
+          !hasSalePaymentPlanInfo(sellData) &&
+          !sellData.deliveryDate
+        ) {
+          sellData.deliveryDate = getDefaultDeliveredDateIso();
+          sellData.deliveryStatus = "ready to move";
+        }
+        finalFormData = { ...finalFormData, ...sellData };
       } else if (formData.purpose === "rent") {
         finalFormData = { ...finalFormData, ...rentFormData };
         delete finalFormData.rentDurationType;
@@ -953,16 +1109,22 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       });
 
       // Final leaf check after location fill (add + edit).
-      const locationIsLeaf = await isValidUnitLocationLeaf(payload, cityManager);
-      if (!locationIsLeaf) {
+      const locationResult = await validateUnitLocationLeaf(
+        payload,
+        cityManager
+      );
+      if (!locationResult.ok) {
         keepInvalidFields = true;
-        setInvalidFields(["unit_location"]);
         setCurrentStep(1);
-        toast.error(
-          translate(
-            "basicDetails.locationRequired",
-            "Select a complete location down to the leaf (district, sub-district, or project)"
-          )
+        applyFieldErrorsAndToast(
+          [locationResult.field || "unit_location"],
+          {
+            [locationResult.field || "unit_location"]: tValidation(
+              translate,
+              locationResult.key
+            ),
+          },
+          locationResult.key
         );
         return;
       }
@@ -978,7 +1140,9 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       setExtractedSourceText("");
       onClose();
     } catch (error) {
-      toast.error(`${t.toasts.errorProcessing}: ${error.message}`);
+      // Never surface raw API / technical validation strings to the user.
+      console.error("[AddUnit] save failed:", error?.message ?? error);
+      toast.error(tValidation(translate, VKEY.saveFailed));
     } finally {
       if (!keepInvalidFields) {
         setInvalidFields([]);
@@ -1200,6 +1364,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           updateFormData={updateFormData}
           invalidFields={invalidFields}
           setInvalidFields={setInvalidFields}
+          fieldErrors={fieldErrors}
+          setFieldErrors={setFieldErrors}
           developers={sharedData.developers?.data ?? []}
           developersLoading={sharedData.developers?.isLoading ?? false}
         />
@@ -1212,9 +1378,12 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           clientType={clientType}
           showOwnerFields={showOwnerFields}
           ownerMobileRequired={ownerMobileRequired}
-          updateFormData={(newData) =>
-            setSellFormData((prev) => ({ ...prev, ...newData }))
-          }
+          updateFormData={(newData) => {
+            if ("deliveryDate" in newData) {
+              setDeliveryDateAutoDefaulted(false);
+            }
+            setSellFormData((prev) => ({ ...prev, ...newData }));
+          }}
           updateCommonFormData={updateFormData}
           invalidFields={invalidFields}
           setInvalidFields={setInvalidFields}
@@ -1236,6 +1405,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           updateCommonFormData={updateFormData}
           invalidFields={invalidFields}
           setInvalidFields={setInvalidFields}
+          fieldErrors={fieldErrors}
+          setFieldErrors={setFieldErrors}
         />
       )}
 
@@ -1245,6 +1416,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           updateFormData={updateFormData}
           invalidFields={invalidFields}
           setInvalidFields={setInvalidFields}
+          fieldErrors={fieldErrors}
+          setFieldErrors={setFieldErrors}
           isUploading={isUploading}
           setIsUploading={setIsUploading}
           maxImages={MAX_UNIT_IMAGES}
