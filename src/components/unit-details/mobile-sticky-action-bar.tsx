@@ -1,14 +1,28 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useI18n } from '@/hooks/useI18n';
-import { useUnitOwnership } from '@/hooks/useUnitOwnership';
+import EditUserInfoDialog from '@/app/(admin)/dashboard/_components/split-view/EditUserInfoDialog';
 import { formatPhoneForDisplay } from '@/components/phone/phone-utils';
+import { EditButton } from '@/components/ui/action-button';
 import CallButton from '@/components/ui/call-button';
 import WhatsAppButton from '@/components/ui/whatsapp-button';
+import { useI18n } from '@/hooks/useI18n';
+import { useUnitOwnership } from '@/hooks/useUnitOwnership';
 import { resolveOwnerFromDashboardPhone } from '@/lib/units/resolve-owner-from-dashboard';
 import type { MobileStickyActionBarProps } from '@/lib/units/unit-types';
 import { normalizeConversationPhone } from '@/utils/normalize-conversation-phone';
+
+type OwnerContact = {
+  name: string | null;
+  phone: string | null;
+  userId: string | null;
+  ownerType: string | null;
+};
+
+function stripBrokerPrefix(name: string | null): string {
+  if (!name) return '';
+  return name.replace(/^broker:\s*/i, '').trim();
+}
 
 export default function MobileStickyActionBar({
   unit,
@@ -18,40 +32,54 @@ export default function MobileStickyActionBar({
   const { isOwnUnit: isOwnUnitFromHook } = useUnitOwnership(unit);
   const isOwnUnit = Boolean(isOwnUnitProp) || isOwnUnitFromHook;
 
-  const ownerMobile = unit.ownerMobile?.trim() || null;
-  const [ownerName, setOwnerName] = useState<string | null>(
-    unit.ownerName?.trim() || null
-  );
+  const [contact, setContact] = useState<OwnerContact>({
+    name: unit.ownerName?.trim() || null,
+    phone: unit.ownerMobile?.trim() || null,
+    userId: null,
+    ownerType: null,
+  });
+  const [editOpen, setEditOpen] = useState(false);
 
   useEffect(() => {
-    const initialName = unit.ownerName?.trim() || null;
-    setOwnerName(initialName);
+    const phone = unit.ownerMobile?.trim() || null;
+    const name = unit.ownerName?.trim() || null;
 
-    if (!isOwnUnit || initialName || !ownerMobile) return;
+    setContact({
+      name,
+      phone,
+      userId: null,
+      ownerType: null,
+    });
+
+    if (!isOwnUnit || !phone) return;
 
     let cancelled = false;
     (async () => {
-      const resolved = await resolveOwnerFromDashboardPhone(ownerMobile);
-      if (!cancelled && resolved?.name) {
-        setOwnerName(resolved.name);
-      }
+      const resolved = await resolveOwnerFromDashboardPhone(phone);
+      if (cancelled || !resolved) return;
+
+      setContact((prev) => ({
+        name: prev.name || resolved.name || null,
+        phone: prev.phone,
+        userId: resolved.userId,
+        ownerType: resolved.ownerType,
+      }));
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [isOwnUnit, ownerMobile, unit.ownerName]);
+  }, [isOwnUnit, unit.ownerMobile, unit.ownerName]);
 
-  // Same-client units expose owner details directly; hide when unavailable.
-  if (!isOwnUnit || (!ownerName && !ownerMobile)) {
+  if (!isOwnUnit || (!contact.name && !contact.phone)) {
     return null;
   }
 
-  const displayPhone = ownerMobile
-    ? formatPhoneForDisplay(ownerMobile, 'EG') || ownerMobile
+  const displayPhone = contact.phone
+    ? formatPhoneForDisplay(contact.phone, 'EG') || contact.phone
     : null;
-  const whatsappPhone = ownerMobile
-    ? normalizeConversationPhone(ownerMobile) || ownerMobile
+  const whatsappPhone = contact.phone
+    ? normalizeConversationPhone(contact.phone) || contact.phone
     : null;
 
   const callLabel = translate(
@@ -62,25 +90,47 @@ export default function MobileStickyActionBar({
     'buttons.whatsapp',
     locale === 'ar' ? 'واتساب' : 'WhatsApp'
   );
-  const ownerLabel = translate(
-    'unitInquiry.owner',
-    locale === 'ar' ? 'المالك' : 'Owner'
+  const editLabel = translate(
+    'buttons.edit',
+    locale === 'ar' ? 'تعديل' : 'Edit'
   );
 
+  const handleContactUpdated = (
+    updatedLead: Record<string, unknown> | null,
+    _response: unknown,
+    submittedPayload?: Record<string, unknown>
+  ) => {
+    const source = updatedLead || submittedPayload || {};
+    setContact((prev) => ({
+      ...prev,
+      name:
+        typeof source.name === 'string' && source.name.trim()
+          ? source.name.trim()
+          : prev.name,
+      phone:
+        typeof source.phone_number === 'string' && source.phone_number.trim()
+          ? source.phone_number.trim()
+          : prev.phone,
+      ownerType:
+        typeof source.owner_type === 'string'
+          ? source.owner_type
+          : prev.ownerType,
+    }));
+  };
+
   return (
-    <div className="lg:hidden fixed bottom-0 inset-x-0 bg-white border-t shadow-lg z-50">
-      <div className="p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="flex items-center gap-3">
+    <>
+      <div className="lg:hidden fixed bottom-0 inset-x-0 bg-white border-t shadow-lg z-50">
+        <div className="flex items-center gap-3 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <div className="min-w-0 flex-1">
-            <p className="text-xs text-gray-500 truncate">{ownerLabel}</p>
-            {ownerName ? (
+            {contact.name ? (
               <p className="text-sm font-semibold text-gray-900 truncate">
-                {ownerName}
+                {contact.name}
               </p>
             ) : null}
             {displayPhone ? (
               <p
-                className={`truncate ${ownerName ? 'text-xs text-gray-600 mt-0.5' : 'text-sm font-semibold text-gray-900'}`}
+                className={`truncate ${contact.name ? 'text-xs text-gray-600' : 'text-sm font-semibold text-gray-900'}`}
                 dir="ltr"
               >
                 {displayPhone}
@@ -88,13 +138,12 @@ export default function MobileStickyActionBar({
             ) : null}
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            {ownerMobile ? (
+          <div className="flex items-center gap-1.5 shrink-0">
+            {contact.phone ? (
               <CallButton
-                phoneNumber={ownerMobile}
+                phoneNumber={contact.phone}
                 ariaLabel={callLabel}
                 title={callLabel}
-                className="!bg-primary !text-white !border-primary hover:!opacity-95 !h-11 !w-11 !min-h-11 !min-w-11"
               />
             ) : null}
             {whatsappPhone ? (
@@ -102,12 +151,29 @@ export default function MobileStickyActionBar({
                 phoneNumber={whatsappPhone}
                 ariaLabel={whatsappLabel}
                 title={whatsappLabel}
-                className="!bg-green-600 !text-white !border-green-600 hover:!bg-green-700 !h-11 !w-11 !min-h-11 !min-w-11"
+              />
+            ) : null}
+            {contact.userId ? (
+              <EditButton
+                size="md"
+                title={editLabel}
+                ariaLabel={editLabel}
+                onClick={() => setEditOpen(true)}
               />
             ) : null}
           </div>
         </div>
       </div>
-    </div>
+
+      <EditUserInfoDialog
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        userId={contact.userId}
+        initialName={stripBrokerPrefix(contact.name)}
+        initialPhone={contact.phone || ''}
+        initialOwnerType={contact.ownerType}
+        onSuccess={handleContactUpdated}
+      />
+    </>
   );
 }
