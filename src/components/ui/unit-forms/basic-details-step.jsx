@@ -10,6 +10,7 @@ import { normalizeViewTypeValue } from "@/data/constants";
 import { useProjectsNames } from "@/hooks/use-admin-shared-data";
 import ProjectsNamesManager from "@/utils/projects_names_manager";
 import CityManager from "@/utils/city_manager";
+import { fetchProjectById } from "@/utils/api";
 import {
   convertArabicToEnglishNumbers,
 } from "@/utils/formatters";
@@ -292,14 +293,27 @@ export default function BasicDetailsStep({
     [updateFormData, clearLocationInvalid],
   );
 
-  const selectedProjectFromList = useMemo(
-    () => allProjects.find((p) => p.en_name === formData.project || p.name === formData.project),
-    [allProjects, formData.project]
-  );
+  const selectedProjectFromList = useMemo(() => {
+    if (formData.project_id) {
+      const byId = allProjects.find(
+        (p) => String(p?.id) === String(formData.project_id)
+      );
+      if (byId) return byId;
+    }
+    if (!formData.project) return null;
+    return (
+      allProjects.find(
+        (p) => p.en_name === formData.project || p.name === formData.project
+      ) || null
+    );
+  }, [allProjects, formData.project, formData.project_id]);
 
-  // On edit: fill any missing location fields from the selected project once
+  // On edit: fill any missing location fields from the selected project once.
+  // all_projects_names is city+district only — fetch full project when the
+  // hierarchy is incomplete so sub_district is never silently dropped.
   useEffect(() => {
-    if (!isEdit || !selectedProjectFromList || didFillFromProject.current) return;
+    if (!isEdit || didFillFromProject.current) return;
+    if (!selectedProjectFromList && !formData.project_id) return;
     if (formData.city && formData.district && formData.sub_district) {
       didFillFromProject.current = true;
       return;
@@ -308,7 +322,33 @@ export default function BasicDetailsStep({
     let cancelled = false;
     (async () => {
       try {
-        const proj = selectedProjectFromList;
+        let proj = selectedProjectFromList || null;
+        const projectId =
+          (formData.project_id && String(formData.project_id).trim()) ||
+          (proj?.id != null ? String(proj.id) : "");
+
+        // Same strategy as select path + ensureUnitLocationPayload: names list
+        // omits sub_district, so resolve from the full project document.
+        const listIncomplete =
+          !proj?.city || !proj?.district || !proj?.sub_district;
+        const formIncomplete =
+          !formData.city || !formData.district || !formData.sub_district;
+        if (projectId && (listIncomplete || formIncomplete)) {
+          try {
+            const res = await fetchProjectById(projectId, false);
+            if (res?.data) {
+              proj = { ...(proj || {}), ...res.data };
+            }
+          } catch (error) {
+            console.error(
+              "Failed to fetch project for location fill:",
+              error?.message ?? error
+            );
+          }
+        }
+
+        if (cancelled || !proj) return;
+
         const resolved = await cityManager.resolveLocationHierarchyAsync({
           city: proj.city ?? "",
           district: proj.district ?? "",
@@ -344,6 +384,7 @@ export default function BasicDetailsStep({
   }, [
     isEdit,
     selectedProjectFromList,
+    formData.project_id,
     formData.city,
     formData.district,
     formData.sub_district,

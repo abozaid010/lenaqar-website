@@ -3,7 +3,8 @@
  * - Fetches data from /projectsv2/all_projects_names endpoint
  * - Provides formatted projects lists for dropdowns
  * - Uses ar_name and en_name for translations
- * - Stores only essential fields: id, en_name, ar_name, city, district
+ * - Core fields: id, en_name, ar_name, city, district
+ * - Passes through sub_district when the API includes it
  */
 class ProjectsNamesManager {
   constructor() {
@@ -150,6 +151,7 @@ class ProjectsNamesManager {
       ar_name: project.ar_name,
       city: project.city,
       district: project.district,
+      sub_district: project.sub_district || "",
       label: locale === "ar" ? project.ar_name : project.en_name,
     }));
   }
@@ -173,6 +175,7 @@ class ProjectsNamesManager {
         ar_name: project.ar_name,
         city: project.city,
         district: project.district,
+        sub_district: project.sub_district || "",
         label: locale === "ar" ? project.ar_name : project.en_name,
       }));
   }
