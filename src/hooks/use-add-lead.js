@@ -17,7 +17,7 @@ export function useAddLead({ onSuccess, clientId } = {}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const addNewLead = async (formData) => {
-    const { phonePayload, user_name, query, phone_number } = formData;
+    const { phonePayload, user_name, query, phone_number, owner_type } = formData;
 
     if (!user_name?.trim()) {
       toast.error(translate("common.nameRequired", "Name is required"));
@@ -49,6 +49,7 @@ export function useAddLead({ onSuccess, clientId } = {}) {
         client_id: clientId || "public",
         platform: "website",
         campaign_id: "added_manually",
+        ...(owner_type ? { owner_type } : {}),
       };
 
       const result = await addNewLeadAction(payload);

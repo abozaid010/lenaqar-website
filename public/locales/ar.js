@@ -1281,6 +1281,14 @@ export default {
   resalePage: {
     filterByUpdatedAt: "تاريخ التحديث",
     propertyTypeLabel: "نوع العقار",
+    brokerDetect: {
+      button: "تمييز وحدات الوسطاء",
+      hint: "البحث عن نوع المالك عبر البحث السريع ووضع علامة على وحدات الوسطاء",
+      checking: "جاري التحقق…",
+      noUnits: "لا توجد وحدات للتحقق منها في هذه الصفحة.",
+      done: "تم العثور على {count} وحدة وسيط",
+      failed: "فشل التحقق من ملاك الوسطاء. حاول مرة أخرى.",
+    },
   },
   unitsFilter: {
     allDevelopers: "جميع المطورين",

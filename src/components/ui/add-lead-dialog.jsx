@@ -1,29 +1,78 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { X, Loader2, UserPlus } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import LenaTextarea from "@/components/ui/inputs/lena-textarea";
 import { PhoneField } from "@/components/phone/PhoneField";
+import {
+  parsePhonePayload,
+  toPhoneFieldPublicValue,
+} from "@/components/phone/phone-utils";
 import { useAddLead } from "@/hooks/use-add-lead";
+import {
+  OWNER_TYPES,
+  getOwnerTypeLabel,
+} from "@/constants/owner-type";
 
-export default function AddLeadDialog({ isOpen, onClose, clientId }) {
+const EMPTY_FORM = {
+  user_name: "",
+  phone_number: "",
+  owner_type: "",
+  query: "",
+};
+
+export default function AddLeadDialog({
+  isOpen,
+  onClose,
+  clientId,
+  initialName = "",
+  initialPhone = "",
+  onSuccess,
+}) {
   const { translate, locale } = useI18n();
   const isRTL = locale === "ar";
-  
-  const [formData, setFormData] = useState({
-    user_name: "",
-    phone_number: "",
-    query: "",
-  });
+
+  const [formData, setFormData] = useState(EMPTY_FORM);
   const [phonePayload, setPhonePayload] = useState(null);
+
+  const ownerTypeOptions = useMemo(
+    () =>
+      OWNER_TYPES.map((value) => ({
+        value,
+        label: getOwnerTypeLabel(value, translate),
+      })),
+    [translate],
+  );
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const name = typeof initialName === "string" ? initialName.trim() : "";
+    const phone = typeof initialPhone === "string" ? initialPhone.trim() : "";
+
+    setFormData({
+      user_name: name,
+      phone_number: phone,
+      owner_type: "",
+      query: "",
+    });
+
+    if (phone) {
+      const parsed = parsePhonePayload(phone, "EG");
+      setPhonePayload(toPhoneFieldPublicValue(parsed));
+    } else {
+      setPhonePayload(null);
+    }
+  }, [isOpen, initialName, initialPhone]);
 
   const { addNewLead, isSubmitting } = useAddLead({
     clientId,
-    onSuccess: () => {
-      setFormData({ user_name: "", phone_number: "", query: "" });
+    onSuccess: (data) => {
+      setFormData(EMPTY_FORM);
       setPhonePayload(null);
+      onSuccess?.(data);
       onClose();
     },
   });
@@ -42,7 +91,7 @@ export default function AddLeadDialog({ isOpen, onClose, clientId }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200">
-      <div 
+      <div
         className="relative w-full max-w-md max-h-[90dvh] flex flex-col bg-white rounded-t-2xl sm:rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
         dir={isRTL ? "rtl" : "ltr"}
       >
@@ -89,6 +138,27 @@ export default function AddLeadDialog({ isOpen, onClose, clientId }) {
             }
             onValueChange={setPhonePayload}
           />
+
+          <div>
+            <label className="block text-xs text-gray-600 mb-0.5">
+              {translate("editContact.ownerType", "Lead type")}
+            </label>
+            <select
+              name="owner_type"
+              className="w-full border border-gray-200 rounded px-2 py-1.5 bg-white"
+              value={formData.owner_type}
+              onChange={handleChange}
+            >
+              <option value="">
+                {translate("editContact.ownerTypePlaceholder", "Not set")}
+              </option>
+              {ownerTypeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <LenaTextarea
             label={translate("dashboardFilter.notes")}

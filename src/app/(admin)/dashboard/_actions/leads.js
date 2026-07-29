@@ -53,8 +53,8 @@ const parseBulkImportValidationErrors = (error) => {
 
 /**
  * Server action to add a new lead.
- * Payload: user_id, user_name, query, client_id, platform, campaign_id, and `phone_number`
- * (combined E.164 international number from PhoneField).
+ * Payload: user_id, user_name, query, client_id, platform, campaign_id,
+ * optional `owner_type`, and `phone_number` (combined E.164 from PhoneField).
  */
 export async function addNewLeadAction(payload) {
   const clientId = await getClientid();

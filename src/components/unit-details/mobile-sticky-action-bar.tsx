@@ -7,6 +7,7 @@ import {
   maskPhoneForDisplay,
 } from '@/components/phone/phone-utils';
 import { EditButton } from '@/components/ui/action-button';
+import AddLeadDialog from '@/components/ui/add-lead-dialog';
 import CallButton from '@/components/ui/call-button';
 import WhatsAppButton from '@/components/ui/whatsapp-button';
 import { useI18n } from '@/hooks/useI18n';
@@ -32,7 +33,7 @@ export default function MobileStickyActionBar({
   isOwnUnit: isOwnUnitProp,
 }: MobileStickyActionBarProps) {
   const { translate, locale } = useI18n();
-  const { isOwnUnit: isOwnUnitFromHook } = useUnitOwnership(unit);
+  const { myClientId, isOwnUnit: isOwnUnitFromHook } = useUnitOwnership(unit);
   const isOwnUnit = Boolean(isOwnUnitProp) || isOwnUnitFromHook;
 
   const [contact, setContact] = useState<OwnerContact>({
@@ -41,7 +42,9 @@ export default function MobileStickyActionBar({
     userId: null,
     ownerType: null,
   });
+  const [ownerLookupDone, setOwnerLookupDone] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [addLeadOpen, setAddLeadOpen] = useState(false);
 
   useEffect(() => {
     const phone = unit.ownerMobile?.trim() || null;
@@ -53,20 +56,27 @@ export default function MobileStickyActionBar({
       userId: null,
       ownerType: null,
     });
+    setOwnerLookupDone(false);
 
-    if (!isOwnUnit || !phone) return;
+    if (!isOwnUnit || !phone) {
+      setOwnerLookupDone(true);
+      return;
+    }
 
     let cancelled = false;
     (async () => {
       const resolved = await resolveOwnerFromDashboardPhone(phone);
-      if (cancelled || !resolved) return;
+      if (cancelled) return;
 
-      setContact((prev) => ({
-        name: prev.name || resolved.name || null,
-        phone: prev.phone,
-        userId: resolved.userId,
-        ownerType: resolved.ownerType,
-      }));
+      if (resolved) {
+        setContact((prev) => ({
+          name: prev.name || resolved.name || null,
+          phone: prev.phone,
+          userId: resolved.userId,
+          ownerType: resolved.ownerType,
+        }));
+      }
+      setOwnerLookupDone(true);
     })();
 
     return () => {
@@ -99,6 +109,19 @@ export default function MobileStickyActionBar({
     'buttons.edit',
     locale === 'ar' ? 'تعديل' : 'Edit'
   );
+  const addLeadLabel = translate(
+    'dashboardFilter.ADD',
+    locale === 'ar' ? 'إضافة' : 'Add'
+  );
+
+  const handleContactActionClick = () => {
+    if (!ownerLookupDone) return;
+    if (contact.userId) {
+      setEditOpen(true);
+      return;
+    }
+    setAddLeadOpen(true);
+  };
 
   const handleContactUpdated = (
     updatedLead: Record<string, unknown> | null,
@@ -122,6 +145,31 @@ export default function MobileStickyActionBar({
           : prev.ownerType,
     }));
   };
+
+  const handleLeadAdded = (data?: Record<string, unknown> | null) => {
+    if (!data || typeof data !== 'object') return;
+    setContact((prev) => ({
+      ...prev,
+      name:
+        typeof data.user_name === 'string' && data.user_name.trim()
+          ? data.user_name.trim()
+          : prev.name,
+      phone:
+        typeof data.phone_number === 'string' && data.phone_number.trim()
+          ? data.phone_number.trim()
+          : prev.phone,
+      userId:
+        data.user_id != null && String(data.user_id).trim()
+          ? String(data.user_id)
+          : prev.userId,
+      ownerType:
+        typeof data.owner_type === 'string'
+          ? data.owner_type
+          : prev.ownerType,
+    }));
+  };
+
+  const actionLabel = contact.userId || !ownerLookupDone ? editLabel : addLeadLabel;
 
   return (
     <>
@@ -158,26 +206,36 @@ export default function MobileStickyActionBar({
                 title={whatsappLabel}
               />
             ) : null}
-            {contact.userId ? (
-              <EditButton
-                size="md"
-                title={editLabel}
-                ariaLabel={editLabel}
-                onClick={() => setEditOpen(true)}
-              />
-            ) : null}
+            <EditButton
+              size="lg"
+              title={actionLabel}
+              ariaLabel={actionLabel}
+              disabled={!ownerLookupDone}
+              onClick={handleContactActionClick}
+            />
           </div>
         </div>
       </div>
 
-      <EditUserInfoDialog
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
-        userId={contact.userId}
+      {contact.userId ? (
+        <EditUserInfoDialog
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          userId={contact.userId}
+          initialName={stripBrokerPrefix(contact.name)}
+          initialPhone={contact.phone || ''}
+          initialOwnerType={contact.ownerType}
+          onSuccess={handleContactUpdated}
+        />
+      ) : null}
+
+      <AddLeadDialog
+        isOpen={addLeadOpen}
+        onClose={() => setAddLeadOpen(false)}
+        clientId={myClientId}
         initialName={stripBrokerPrefix(contact.name)}
         initialPhone={contact.phone || ''}
-        initialOwnerType={contact.ownerType}
-        onSuccess={handleContactUpdated}
+        onSuccess={handleLeadAdded}
       />
     </>
   );

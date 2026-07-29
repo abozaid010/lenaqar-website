@@ -1410,6 +1410,14 @@ export default {
   resalePage: {
     filterByUpdatedAt: "Updated date",
     propertyTypeLabel: "Property type",
+    brokerDetect: {
+      button: "Mark broker units",
+      hint: "Look up owner type via quick-search and badge broker units",
+      checking: "Checking…",
+      noUnits: "No units to check on this page.",
+      done: "Found {count} broker unit(s)",
+      failed: "Failed to check broker owners. Please try again.",
+    },
   },
   unitsFilter: {
     allDevelopers: "All Developers",
