@@ -68,8 +68,31 @@ function getIconForKey(key?: string): any {
   return KEY_ICON_MAP[key] ?? Info;
 }
 
-// Keys to exclude — items shown elsewhere (pricing header, specs section)
-const EXCLUDED_KEYS = new Set(['referenceCode', 'area', 'delivery', 'totalPrice', 'downPayment', 'installmentYears', 'installmentAmount']);
+// Keys shown elsewhere (header badges, pricing section)
+const EXCLUDED_KEYS = new Set([
+  'referenceCode',
+  'delivery',
+  'deliveryDate',
+  'totalPrice',
+  'downPayment',
+  'installmentYears',
+  'installmentAmount',
+  'purpose',
+  'finishing',
+  'furnishing',
+  'propertyType',
+]);
+
+/** Spec keys that duplicate a quick-fact key (same data, different label). */
+const SPEC_DUPLICATE_OF_FACT: Record<string, string> = {
+  bedrooms: 'bedrooms',
+  bathrooms: 'bathrooms',
+  gardenSize: 'garden',
+  roofArea: 'roofArea',
+  garageArea: 'garage',
+  landArea: 'area',
+  deliveryDate: 'delivery',
+};
 
 interface CombinedQuickFactsProps {
   facts: UnitQuickFactsProps['facts'];
@@ -77,30 +100,40 @@ interface CombinedQuickFactsProps {
 }
 
 export default function UnitQuickFacts({ facts, specs = [] }: CombinedQuickFactsProps) {
-  const { t } = useI18n();
-  // Convert specifications to quick facts format
-  const specFacts = specs.map(spec => ({
-    label: spec.label,
-    value: spec.value,
-    icon: 'info',
-    key: spec.key,
-  }));
+  const { t, translate } = useI18n();
+  const factKeys = new Set(facts.map((f) => f.key).filter(Boolean));
 
-  // Combine quick facts and specifications
+  const specFacts = specs
+    .filter((spec) => {
+      if (!spec.key) return true;
+      if (EXCLUDED_KEYS.has(spec.key)) return false;
+      const duplicateOf = SPEC_DUPLICATE_OF_FACT[spec.key];
+      if (duplicateOf && factKeys.has(duplicateOf)) return false;
+      if (factKeys.has(spec.key)) return false;
+      return true;
+    })
+    .map((spec) => ({
+      label: spec.label,
+      value: spec.value,
+      icon: 'info',
+      key: spec.key,
+    }));
+
   const allFacts = [...facts, ...specFacts];
 
-  // Filter out unwanted items using the stable `key` field (locale-independent)
-  const filteredFacts = allFacts.filter(fact => {
+  const filteredFacts = allFacts.filter((fact) => {
     if (fact.key && EXCLUDED_KEYS.has(fact.key)) return false;
     return true;
   });
 
-  // Remove exact duplicates based on label and value
   const deduplicatedFacts = filteredFacts.filter((fact, index, self) => {
-    return self.findIndex(otherFact => 
-      fact.label.toLowerCase() === otherFact.label.toLowerCase() && 
-      fact.value === otherFact.value
-    ) === index;
+    return (
+      self.findIndex(
+        (otherFact) =>
+          fact.label.toLowerCase() === otherFact.label.toLowerCase() &&
+          fact.value === otherFact.value
+      ) === index
+    );
   });
 
   if (deduplicatedFacts.length === 0) {
@@ -109,7 +142,9 @@ export default function UnitQuickFacts({ facts, specs = [] }: CombinedQuickFacts
 
   return (
     <div className="bg-white rounded-lg border p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">{t?.unitQuickFacts?.title || "Quick Facts"}</h2>
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        {translate('unitQuickFacts.title', t?.unitQuickFacts?.title || 'Quick Facts')}
+      </h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {deduplicatedFacts.map((fact, index) => {
           const IconComponent = (fact.icon && iconMap[fact.icon])

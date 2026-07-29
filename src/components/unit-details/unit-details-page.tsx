@@ -8,6 +8,7 @@ import BackButton from '@/components/ui/back-button';
 import type { UnitViewModel, RawUnit } from '@/lib/units/unit-types';
 import UnitHeroGallery from './unit-hero-gallery';
 import UnitHeaderSummary from './unit-header-summary';
+import UnitPricingSection from './unit-pricing-section';
 import UnitQuickFacts from './unit-quick-facts';
 import StickyInquiryCard from './sticky-inquiry-card';
 import UnitDetailsAdminActions from './unit-details-admin-actions';
@@ -199,6 +200,9 @@ export default function UnitDetailsPage({
 
             {/* Header Summary */}
             <UnitHeaderSummary unit={unit} />
+
+            {/* Pricing — important values near top, same section pattern as location */}
+            <UnitPricingSection unit={unit} />
 
             {/* Location */}
             <UnitLocationSection unit={unit} isPublic={isPublic} />

@@ -16,6 +16,12 @@ export interface RawUnit {
   downPayment: number;
   dataSource: string;
   installment_years: number;
+  /** Remaining principal for installments (sale units). */
+  remaining_amount?: number | null;
+  /** Paid amount so far (sale units). */
+  paid_amount?: number | null;
+  /** Offer / over price (sale units). OpenAPI: "Offer price". */
+  over_price?: number | null;
   landArea: number;
   buildingType: string;
   bathroomCount: number;
@@ -113,6 +119,12 @@ export interface UnitViewModel {
   totalPrice: string | null;
   monthlyRentPrice: string | null;
   downPayment: string | null;
+  /** Formatted `over_price` (offer). */
+  overPrice: string | null;
+  /** Formatted `remaining_amount`. */
+  remainingAmount: string | null;
+  /** Formatted `paid_amount`. */
+  paidAmount: string | null;
   yearlyInstallment: string | null;
   monthlyInstallmentEstimate: string | null;
   installmentYearsLabel: string | null;

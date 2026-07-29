@@ -160,6 +160,9 @@ export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string
   );
   const monthlyRentPrice = formatCurrency(monthlyRentRaw);
   const downPayment = formatCurrency(rawUnit.downPayment);
+  const overPrice = formatCurrency(rawUnit.over_price);
+  const remainingAmount = formatCurrency(rawUnit.remaining_amount);
+  const paidAmount = formatCurrency(rawUnit.paid_amount);
   const yearlyInstallment = formatCurrency(rawUnit.installment_amount_yearly);
   const monthlyInstallmentEstimate = calculateMonthlyInstallment(rawUnit.installment_amount_yearly);
   const installmentYearsLabel = formatInstallmentYears(rawUnit.installment_years, t);
@@ -215,6 +218,9 @@ export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string
     totalPrice,
     monthlyRentPrice,
     downPayment,
+    overPrice,
+    remainingAmount,
+    paidAmount,
     yearlyInstallment,
     monthlyInstallmentEstimate,
     installmentYearsLabel,
@@ -405,6 +411,12 @@ export const getPricingItems = (unit: RawUnit) => {
   const downPayment = formatCurrency(unit.downPayment);
   if (downPayment) items.push({ label: 'Down Payment', value: downPayment });
 
+  const overPrice = formatCurrency(unit.over_price);
+  if (overPrice) items.push({ label: 'Offer', value: overPrice });
+
+  const remainingAmount = formatCurrency(unit.remaining_amount);
+  if (remainingAmount) items.push({ label: 'Remaining Amount', value: remainingAmount });
+
   const installmentYears = formatInstallmentYears(unit.installment_years);
   if (installmentYears) items.push({ label: 'Installment Period', value: installmentYears });
 
@@ -427,6 +439,9 @@ export const hasPricingInfo = (unit: RawUnit): boolean => {
   }
   return isMeaningfulNumber(unit.totalPrice) ||
     isMeaningfulNumber(unit.downPayment) ||
+    isMeaningfulNumber(unit.over_price) ||
+    isMeaningfulNumber(unit.remaining_amount) ||
+    isMeaningfulNumber(unit.installment_years) ||
     isMeaningfulNumber(unit.installment_amount_yearly);
 };
 
