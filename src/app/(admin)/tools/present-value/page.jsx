@@ -17,8 +17,8 @@ export async function generateMetadata() {
 
   return {
     title: clientName
-      ? `Present Value Calculator - ${clientName} | LENAAI`
-      : "Present Value Calculator | LENAAI",
+      ? `Present Value Calculator - ${clientName} | LENAAI AI Sales Agent`
+      : "Present Value Calculator - LENAAI AI Sales Agent",
     robots: { index: false, follow: false },
     alternates: { canonical: `${SITE_URL}/tools/present-value` },
   };
