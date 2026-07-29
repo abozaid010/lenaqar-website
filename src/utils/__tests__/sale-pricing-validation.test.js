@@ -13,6 +13,7 @@ import {
 } from "../parse-amount.js";
 import {
   applySaleApiAmountDefaults,
+  computeRemainingFromPaid,
   getDefaultDeliveredDateIso,
   hasSalePaymentPlanInfo,
   validateSalePricing,
@@ -80,7 +81,7 @@ test("cash sale: missing totalPrice fails", () => {
   );
 });
 
-test("installments: any one field requires all three", () => {
+test("installments: downPayment requires years; remaining stays optional", () => {
   const partial = validateSalePricing({
     totalPrice: 2000000,
     downPayment: 200000,
@@ -88,9 +89,17 @@ test("installments: any one field requires all three", () => {
     installment_years: "",
   });
   assert.equal(partial.ok, false);
-  assert.ok(partial.invalidFields.includes("remaining_amount"));
+  assert.equal(partial.invalidFields.includes("remaining_amount"), false);
   assert.ok(partial.invalidFields.includes("installment_years"));
   assert.equal(partial.invalidFields.includes("downPayment"), false);
+
+  const withoutRemaining = validateSalePricing({
+    totalPrice: 2000000,
+    downPayment: 200000,
+    remaining_amount: "",
+    installment_years: 5,
+  });
+  assert.equal(withoutRemaining.ok, true);
 
   const complete = validateSalePricing({
     totalPrice: 2000000,
@@ -99,6 +108,15 @@ test("installments: any one field requires all three", () => {
     installment_years: 5,
   });
   assert.equal(complete.ok, true);
+});
+
+test("computeRemainingFromPaid is totalPrice − paid_amount", () => {
+  assert.equal(computeRemainingFromPaid(2000000, 200000), 1800000);
+  assert.equal(computeRemainingFromPaid("2,000,000", "200,000"), 1800000);
+  assert.equal(computeRemainingFromPaid(2000000, ""), 2000000);
+  assert.equal(computeRemainingFromPaid(2000000, 2000000), 0);
+  assert.equal(computeRemainingFromPaid(2000000, 2500000), 0);
+  assert.equal(computeRemainingFromPaid("", 200000), null);
 });
 
 test("installments: invalid numbers are rejected without coercion", () => {
@@ -161,6 +179,18 @@ test("applySaleApiAmountDefaults keeps positive installment values", () => {
   assert.equal(payload.installment_years, 5);
   assert.equal(payload.paid_amount, 0);
   assert.equal(payload.over_price, 0);
+});
+
+test("applySaleApiAmountDefaults fills blank remaining from total − paid", () => {
+  const payload = applySaleApiAmountDefaults({
+    purpose: "sell",
+    totalPrice: 2000000,
+    downPayment: 200000,
+    paid_amount: 300000,
+    remaining_amount: "",
+    installment_years: 5,
+  });
+  assert.equal(payload.remaining_amount, 1700000);
 });
 
 test("applySaleApiAmountDefaults does not alter rent payloads", () => {

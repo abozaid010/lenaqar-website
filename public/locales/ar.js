@@ -2386,10 +2386,10 @@ export default {
     owner: "مالك",
     broker: "وسيط",
     developer: "مطوّر",
-    renter: "مستأجر",
+    renter: "موجر",
     buyer: "مشتري",
     seller: "بائع",
-    rentee: "راغب بالإيجار",
+    rentee: "مستاجر",
   },
   editContact: {
     title: "تعديل جهة الاتصال",

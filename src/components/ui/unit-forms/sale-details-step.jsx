@@ -1,9 +1,11 @@
 "use client";
 
+import { useRef } from "react";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { PhoneField } from "@/components/phone/PhoneField";
 import { useI18n } from "@/hooks/useI18n";
-import { parseMoneyInput } from "@/utils/parse-amount";
+import { isAmountEntered, parseMoneyInput } from "@/utils/parse-amount";
+import { computeRemainingFromPaid } from "@/utils/sale-pricing-validation";
 
 export default function SaleDetailsStep({
   formData,
@@ -19,6 +21,8 @@ export default function SaleDetailsStep({
   setFieldErrors = () => {},
 }) {
   const { t, translate, translateStrict } = useI18n();
+  // When false, remaining_amount tracks totalPrice − paid_amount automatically.
+  const remainingManualRef = useRef(isAmountEntered(formData.remaining_amount));
 
   const clearFieldError = (name) => {
     if (invalidFields.includes(name)) {
@@ -43,7 +47,46 @@ export default function SaleDetailsStep({
     clearFieldError(name);
 
     if (type === "money") {
-      updateFormData({ [name]: parseMoneyInput(value) });
+      const parsed = parseMoneyInput(value);
+
+      if (name === "remaining_amount") {
+        remainingManualRef.current = isAmountEntered(parsed);
+        updateFormData({ remaining_amount: parsed });
+        return;
+      }
+
+      if (
+        name === "totalPrice" ||
+        name === "paid_amount" ||
+        name === "downPayment"
+      ) {
+        const next = { [name]: parsed };
+        if (!remainingManualRef.current) {
+          const total =
+            name === "totalPrice" ? parsed : formData.totalPrice;
+          const paid =
+            name === "paid_amount" ? parsed : formData.paid_amount;
+          const down =
+            name === "downPayment" ? parsed : formData.downPayment;
+          // Only auto-fill once a payment-plan signal exists — never from
+          // totalPrice alone (that would turn a cash sale into installments).
+          const planLikely =
+            isAmountEntered(paid) ||
+            isAmountEntered(down) ||
+            isAmountEntered(formData.installment_years);
+          if (planLikely) {
+            const computed = computeRemainingFromPaid(total, paid);
+            if (computed != null) {
+              next.remaining_amount = computed;
+              clearFieldError("remaining_amount");
+            }
+          }
+        }
+        updateFormData(next);
+        return;
+      }
+
+      updateFormData({ [name]: parsed });
       return;
     }
 
@@ -51,6 +94,22 @@ export default function SaleDetailsStep({
       const today = new Date().toISOString().split("T")[0];
       const deliveryStatus = value > today ? "off-plan" : "ready to move";
       updateFormData({ deliveryStatus, deliveryDate: value });
+      return;
+    }
+
+    if (name === "installment_years" && !remainingManualRef.current) {
+      const next = { installment_years: value };
+      if (isAmountEntered(value)) {
+        const computed = computeRemainingFromPaid(
+          formData.totalPrice,
+          formData.paid_amount
+        );
+        if (computed != null) {
+          next.remaining_amount = computed;
+          clearFieldError("remaining_amount");
+        }
+      }
+      updateFormData(next);
       return;
     }
 
