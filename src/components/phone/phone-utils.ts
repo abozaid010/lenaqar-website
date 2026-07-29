@@ -149,6 +149,29 @@ export function formatPhoneForDisplay(
 }
 
 /**
+ * Masks the last `maskCount` digit characters for on-screen display.
+ * Non-digits (spaces, `+`, dashes) are preserved. Full number stays available for copy/call.
+ * @example maskPhoneForDisplay("+20 10 99900229") → "+20 10 9990****"
+ */
+export function maskPhoneForDisplay(
+  displayPhone?: string | null,
+  maskCount = 4,
+): string {
+  const value = String(displayPhone ?? "");
+  if (!value || maskCount <= 0) return value;
+
+  const chars = value.split("");
+  let remaining = maskCount;
+  for (let i = chars.length - 1; i >= 0 && remaining > 0; i -= 1) {
+    if (/\d/.test(chars[i])) {
+      chars[i] = "*";
+      remaining -= 1;
+    }
+  }
+  return chars.join("");
+}
+
+/**
  * Validation order: length hints from {@link validatePhoneNumberLength}, then
  * {@link isPossiblePhoneNumber}. Empty value yields an error only when `required` is true.
  */

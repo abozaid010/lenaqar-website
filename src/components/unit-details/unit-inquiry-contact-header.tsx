@@ -2,7 +2,10 @@
 
 import { MessageCircle, RefreshCw } from "lucide-react";
 import type { MouseEvent } from "react";
-import { formatPhoneForDisplay } from "@/components/phone/phone-utils";
+import {
+  formatPhoneForDisplay,
+  maskPhoneForDisplay,
+} from "@/components/phone/phone-utils";
 import CallButton from "@/components/ui/call-button";
 
 export interface UnitInquiryContactHeaderActions {
@@ -33,10 +36,10 @@ export default function UnitInquiryContactHeader({
   const displayName = name?.trim() || null;
   const rawPhone = phone?.trim() || null;
   const displayPhone = rawPhone
-    ? formatPhoneForDisplay(rawPhone, "EG") || rawPhone
+    ? maskPhoneForDisplay(formatPhoneForDisplay(rawPhone, "EG") || rawPhone)
     : null;
 
-  // Prefer name when both exist; fall back to phone when name is missing.
+  // Prefer name when both exist; fall back to masked phone when name is missing.
   const label = displayName || displayPhone;
 
   if (!label) {

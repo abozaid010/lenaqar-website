@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import EditUserInfoDialog from '@/app/(admin)/dashboard/_components/split-view/EditUserInfoDialog';
-import { formatPhoneForDisplay } from '@/components/phone/phone-utils';
+import {
+  formatPhoneForDisplay,
+  maskPhoneForDisplay,
+} from '@/components/phone/phone-utils';
 import { EditButton } from '@/components/ui/action-button';
 import CallButton from '@/components/ui/call-button';
 import WhatsAppButton from '@/components/ui/whatsapp-button';
@@ -76,7 +79,9 @@ export default function MobileStickyActionBar({
   }
 
   const displayPhone = contact.phone
-    ? formatPhoneForDisplay(contact.phone, 'EG') || contact.phone
+    ? maskPhoneForDisplay(
+        formatPhoneForDisplay(contact.phone, 'EG') || contact.phone
+      )
     : null;
   const whatsappPhone = contact.phone
     ? normalizeConversationPhone(contact.phone) || contact.phone
