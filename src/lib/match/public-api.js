@@ -8,7 +8,7 @@ import { fetchUnitsFilter } from "@/utils/api";
 
 /**
  * Normalize share `unit_filters` into the same query shape public listings use
- * for GET /public/v1/slim-list (via fetchUnitsFilter with usePublicEndpoint).
+ * for GET /public/v1/units (via fetchUnitsFilter with usePublicEndpoint).
  */
 function normalizeMatchUnitFilters(filters = {}) {
   const params = {
@@ -35,7 +35,7 @@ function normalizeMatchUnitFilters(filters = {}) {
 
 /**
  * Fetch matched units for the public share page (no login).
- * Uses `/public/v1/slim-list` so privacy fields stay off the payload and
+ * Uses `/public/v1/units` so privacy fields stay off the payload and
  * unauthenticated visitors are not bounced to login by the CRM BFF.
  */
 export async function fetchPublicMatchedUnits(filters = {}) {

@@ -1055,6 +1055,7 @@ export default function LeadDetailPane({
               name={displayName}
               userId={userId}
               onNameUpdate={() => afterMutation()}
+              showEditButton={false}
             />
             {headerPhoneDisplay ? (
               <span

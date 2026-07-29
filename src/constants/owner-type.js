@@ -6,6 +6,9 @@
  * never on `tags`.
  *
  * `developer` is kept for backward compatibility.
+ *
+ * `renter` is the side offering a unit for rent (موجر); `rentee` is the side
+ * looking to rent one (مستاجر). Do not swap these when editing locale labels.
  */
 export const OWNER_TYPES = [
   "owner",

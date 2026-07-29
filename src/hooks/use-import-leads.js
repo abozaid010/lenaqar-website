@@ -12,6 +12,7 @@ import {
   formatAllowedPlatformsList,
   normalizeLeadPlatform,
 } from "@/constants/lead-import";
+import { OWNER_TYPES, normalizeOwnerType } from "@/constants/owner-type";
 import { parseExcelFile } from "@/utils/excel-utils";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import {
@@ -149,6 +150,16 @@ const buildInvalidPlatformReason = (value, translate) =>
     .replace("{allowed}", formatAllowedPlatformsList())
     .replace("{default}", DEFAULT_LEAD_PLATFORM);
 
+const formatAllowedOwnerTypesList = () => OWNER_TYPES.join(", ");
+
+const buildInvalidOwnerTypeReason = (value, translate) =>
+  translate(
+    "dashboardFilter.importLeads.errors.invalidOwnerType",
+    'Invalid owner_type "{value}". Allowed values: {allowed}. Leave empty to omit.',
+  )
+    .replace("{value}", value)
+    .replace("{allowed}", formatAllowedOwnerTypesList());
+
 const buildLeadsFromSheet = ({
   headers,
   rows,
@@ -165,6 +176,7 @@ const buildLeadsFromSheet = ({
   const campaignIndex = byField.campaign_id ?? -1;
   const platformIndex = byField.platform ?? -1;
   const authorIndex = byField.author ?? -1;
+  const ownerTypeIndex = byField.owner_type ?? -1;
   const safeDefaultAuthor = String(defaultAuthor ?? "").trim();
 
   const safeClientId = String(clientId ?? "").trim();
@@ -181,10 +193,14 @@ const buildLeadsFromSheet = ({
     const rowNumber = rowIndex + 2;
     const rawPhone = row[phoneIndex];
     const platformRaw = platformIndex >= 0 ? String(row[platformIndex] ?? "").trim() : "";
+    const ownerTypeRaw =
+      ownerTypeIndex >= 0 ? String(row[ownerTypeIndex] ?? "").trim() : "";
 
     if (
       isHeaderLikeValue(rawPhone, LEAD_FIELD_ALIASES.phone) ||
-      (platformRaw && isHeaderLikeValue(platformRaw, LEAD_FIELD_ALIASES.platform))
+      (platformRaw && isHeaderLikeValue(platformRaw, LEAD_FIELD_ALIASES.platform)) ||
+      (ownerTypeRaw &&
+        isHeaderLikeValue(ownerTypeRaw, LEAD_FIELD_ALIASES.owner_type))
     ) {
       skippedRows.push({
         rowNumber,
@@ -239,6 +255,20 @@ const buildLeadsFromSheet = ({
     const authorRaw = authorIndex >= 0 ? String(row[authorIndex] ?? "").trim() : "";
     const author = authorRaw || safeDefaultAuthor;
 
+    // owner_type: optional top-level identity field. Empty = omit; invalid = skip.
+    let owner_type;
+    if (ownerTypeRaw) {
+      owner_type = normalizeOwnerType(ownerTypeRaw);
+      if (!owner_type) {
+        skippedRows.push({
+          rowNumber,
+          code: "INVALID_OWNER_TYPE",
+          reason: buildInvalidOwnerTypeReason(ownerTypeRaw, translate),
+        });
+        return;
+      }
+    }
+
     validLeadRows.push({
       rowNumber,
       payload: {
@@ -250,6 +280,7 @@ const buildLeadsFromSheet = ({
         platform,
         campaign_id: campaignRaw || DEFAULT_LEAD_CAMPAIGN_ID,
         author,
+        ...(owner_type ? { owner_type } : {}),
       },
     });
   });

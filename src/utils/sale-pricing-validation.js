@@ -2,10 +2,24 @@ import {
   classifyPositiveAmount,
   classifyPositiveInteger,
   isAmountEntered,
+  parseAmount,
 } from "./parse-amount.js";
 import { UNIT_FORM_VALIDATION_KEYS as K } from "../constants/unit-form-validation-keys.js";
 
 const INVALID_NUMBER = { key: K.invalidNumber };
+
+/**
+ * Default remaining when the user leaves it blank:
+ * remaining = max(0, totalPrice − paid_amount).
+ * Returns null when totalPrice is not a usable positive amount.
+ */
+export function computeRemainingFromPaid(totalPrice, paidAmount) {
+  const total = parseAmount(totalPrice);
+  if (!Number.isFinite(total) || total <= 0) return null;
+  const paid = parseAmount(paidAmount);
+  const remaining = total - (Number.isFinite(paid) ? paid : 0);
+  return remaining > 0 ? remaining : 0;
+}
 
 /**
  * Sale create/update API (`/units/v1/add-sale`, `/units/v1/update-sale`) requires
@@ -55,12 +69,26 @@ export function hasSalePaymentPlanInfo(data = {}) {
 
 /**
  * Ensure sale payloads include API-required amount keys (0 when unused / cash).
+ * When a payment plan is present and remaining_amount is blank, fill
+ * remaining = totalPrice − paid_amount before applying cash zeros.
  */
 export function applySaleApiAmountDefaults(payload) {
   if (!payload || typeof payload !== "object") return payload;
   if (payload.purpose !== "sell") return payload;
 
   const out = { ...payload };
+
+  const remainingBlank =
+    !("remaining_amount" in out) ||
+    out.remaining_amount === "" ||
+    out.remaining_amount == null;
+  if (remainingBlank && hasSalePaymentPlanInfo(out)) {
+    const computed = computeRemainingFromPaid(out.totalPrice, out.paid_amount);
+    if (computed != null) {
+      out.remaining_amount = computed;
+    }
+  }
+
   for (const field of SALE_API_ZERO_DEFAULT_FIELDS) {
     if (!(field in out) || out[field] === "" || out[field] == null) {
       out[field] = 0;
@@ -83,6 +111,8 @@ export function validateSalePricing(data = {}) {
     fieldErrors.totalPrice = INVALID_NUMBER;
   }
 
+  // Entering any installment field requires downPayment + years.
+  // remaining_amount stays optional (auto-filled as totalPrice − paid when blank).
   const installmentTouched =
     isAmountEntered(data.downPayment) ||
     isAmountEntered(data.remaining_amount) ||
@@ -96,13 +126,12 @@ export function validateSalePricing(data = {}) {
       fieldErrors.downPayment = INVALID_NUMBER;
     }
 
-    const remaining = classifyPositiveAmount(data.remaining_amount);
-    if (remaining.status === "empty") {
-      fieldErrors.remaining_amount = {
-        key: K.remainingAmountRequiredInstallments,
-      };
-    } else if (remaining.status === "invalid") {
-      fieldErrors.remaining_amount = INVALID_NUMBER;
+    // Optional: only reject when the user typed an invalid value.
+    if (isAmountEntered(data.remaining_amount)) {
+      const remaining = classifyPositiveAmount(data.remaining_amount);
+      if (remaining.status === "invalid") {
+        fieldErrors.remaining_amount = INVALID_NUMBER;
+      }
     }
 
     const years = classifyPositiveInteger(data.installment_years);

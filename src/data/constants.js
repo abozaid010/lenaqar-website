@@ -134,7 +134,7 @@ export const PROPERTY_INTENT_VALUES = [
 
 // Helper function to get building types with translations
 export const getBuildingTypes = (translations) => {
-  if (!translations?.buildingTypes) {
+  if (!translations) {
     return BUILDING_TYPE_VALUES.map(value => ({
       value,
       en_label: value,

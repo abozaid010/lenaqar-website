@@ -22,7 +22,7 @@ export function formatResolvedOwnerName(name, ownerType) {
  * Lazy lookup: if we already know this phone in the dashboard, return the
  * suggested owner display name (with broker prefix when applicable).
  * @param {string | null | undefined} phone
- * @returns {Promise<{ name: string, rawName: string, ownerType: string | null, userId: string | null } | null>}
+ * @returns {Promise<{ name: string | null, rawName: string, ownerType: string | null, userId: string | null } | null>}
  */
 export async function resolveOwnerFromDashboardPhone(phone) {
   const trimmed = String(phone ?? "").trim();
@@ -44,13 +44,15 @@ export async function resolveOwnerFromDashboardPhone(phone) {
 
     const rawName = String(match?.name ?? "").trim();
     const name = formatResolvedOwnerName(rawName, match?.owner_type);
-    if (!name) return null;
+    const userId = match?.user_id ? String(match.user_id) : null;
+    // Existing lead with empty name is still a registered lead — keep userId.
+    if (!name && !userId) return null;
 
     return {
-      name,
+      name: name || null,
       rawName,
       ownerType: normalizeOwnerType(match?.owner_type),
-      userId: match?.user_id ? String(match.user_id) : null,
+      userId,
     };
   } catch (error) {
     console.error(

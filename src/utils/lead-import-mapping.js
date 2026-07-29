@@ -80,6 +80,21 @@ export const LEAD_FIELD_ALIASES = {
     "created by",
     "created_by",
   ],
+  owner_type: [
+    "owner_type",
+    "owner type",
+    "ownertype",
+    "lead type",
+    "lead_type",
+    "leadtype",
+    "client type",
+    "client_type",
+    "clienttype",
+    "identity",
+    "نوع العميل",
+    "نوع المالك",
+    "نوع",
+  ],
 };
 
 /**
@@ -92,6 +107,7 @@ export const LEAD_FIELD_ORDER = [
   "name",
   "campaign_id",
   "author",
+  "owner_type",
   "notes",
   "platform",
 ];
@@ -104,6 +120,7 @@ export const FIELD_TO_API = {
   campaign_id: "campaign_id",
   platform: "platform",
   author: "author",
+  owner_type: "owner_type",
 };
 
 /**

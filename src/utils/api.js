@@ -144,13 +144,14 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
 
 /**
  * @typedef {Object} FetchUnitsFilterOptions
- * @property {boolean} [usePublicEndpoint=false] - When true, calls `/public/v1/slim-list`; otherwise `/units/v1/slim-list`.
+ * @property {boolean} [usePublicEndpoint=false] - When true, calls `/public/v1/units`; otherwise `/units/v1/slim-list`.
  */
-
+ 
 /**
  * Fetches a paginated, filtered units list (slim payload for grid cards).
  * All filters (visibility, city, purpose, etc.) belong in searchParams / query payload.
  * Full unit documents remain on `/units/all` and detail endpoints.
+ * Public (unauthenticated) path uses `/public/v1/units` — `/public/v1/slim-list` is not on the backend.
  */
 const fetchUnitsFilterBase = async (searchParams, { usePublicEndpoint = false } = {}) => {
   try {
@@ -161,7 +162,7 @@ const fetchUnitsFilterBase = async (searchParams, { usePublicEndpoint = false } 
     const params = usePublicEndpoint
       ? merged
       : enforceDashboardAuthorOnParams(merged);
-    const url = usePublicEndpoint ? "/public/v1/slim-list" : "/units/v1/slim-list";
+    const url = usePublicEndpoint ? "/public/v1/units" : "/units/v1/slim-list";
     const qs = new URLSearchParams(params).toString();
 
     const response = await axiosInstance.get(qs ? `${url}?${qs}` : url);

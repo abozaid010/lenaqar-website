@@ -912,6 +912,9 @@ export default {
       platformGuideTitle: "Platform column values",
       platformGuideText:
         "Use one of the exact values below in the platform column. Leave it empty to use {default}.",
+      ownerTypeGuideTitle: "Owner type column values",
+      ownerTypeGuideText:
+        "Use one of the exact values below in the owner_type column. Leave it empty to omit.",
       downloadTemplate: "Download template",
       template: {
         platformReference: "ALLOWED_PLATFORM_VALUES",
@@ -923,6 +926,7 @@ export default {
         campaignId: "campaign_id",
         platform: "platform",
         author: "author",
+        ownerType: "owner_type",
       },
       preview: {
         title: "Column mapping preview",
@@ -951,11 +955,13 @@ export default {
         missingPhoneColumn:
           "Could not find a phone column. Expected a column named phone (or mobile, contact, etc.). Found columns: {headers}",
         unrecognizedColumns:
-          "None of the columns match the expected format. Found: {headers}. Required: phone. Optional: name, notes, campaign_id, platform.",
+          "None of the columns match the expected format. Found: {headers}. Required: phone. Optional: name, notes, campaign_id, platform, owner_type.",
         missingClientId:
           "Missing client ID. Please log out and log in again, then retry import.",
         invalidPlatform:
           'Invalid platform "{value}". Allowed values: {allowed}. Leave empty to use "{default}".',
+        invalidOwnerType:
+          'Invalid owner_type "{value}". Allowed values: {allowed}. Leave empty to omit.',
         invalidPhone: "Phone is missing or invalid",
         allRowsInvalidPlatform:
           "No leads were imported. Every row has an invalid platform value. Allowed values: {allowed}. Leave platform empty to use {default}.",
@@ -1410,6 +1416,14 @@ export default {
   resalePage: {
     filterByUpdatedAt: "Updated date",
     propertyTypeLabel: "Property type",
+    brokerDetect: {
+      button: "Mark broker units",
+      hint: "Look up owner type via quick-search and badge broker units",
+      checking: "Checking…",
+      noUnits: "No units to check on this page.",
+      done: "Found {count} broker unit(s)",
+      failed: "Failed to check broker owners. Please try again.",
+    },
   },
   unitsFilter: {
     allDevelopers: "All Developers",

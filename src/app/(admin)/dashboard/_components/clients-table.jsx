@@ -21,14 +21,14 @@ import ClientsTablePagination from "./clients-table-pagination";
 import EmptyStateVideo from "@/components/ui/empty-state-video";
 
 export default function ClientsTable({ users, pagination }) {
-  const { t, locale } = useI18n();
+  const { t, locale, translate } = useI18n();
   const router = useRouter();
 
   // Get building types with translations from the active locale only
   const BUILDING_TYPES = useMemo(() => {
-    const slice = { buildingTypes: t.buildingTypes || {} };
+    const slice = { buildingTypes: translate("buildingTypes", {}) };
     return getBuildingTypes({ en: slice, ar: slice });
-  }, [t]);
+  }, [translate]);
 
   const [rowSelection, setRowSelection] = useState([]);
   const [loadingClientActions, setLoadingClientActions] = useState(null);

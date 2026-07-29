@@ -86,7 +86,7 @@ test('legacy "query" header still maps to notes', () => {
 });
 
 test("recommended template display labels map correctly", () => {
-  const headers = ["Name", "Phone", "Notes", "Campaign ID", "Platform"];
+  const headers = ["Name", "Phone", "Notes", "Campaign ID", "Platform", "Owner Type"];
   const { byField, unknownColumns } = buildColumnMapping(headers);
   assert.deepEqual(byField, {
     name: 0,
@@ -94,8 +94,42 @@ test("recommended template display labels map correctly", () => {
     notes: 2,
     campaign_id: 3,
     platform: 4,
+    owner_type: 5,
   });
   assert.equal(unknownColumns.length, 0);
+});
+
+test("owner_type column maps to API field owner_type", () => {
+  for (const header of [
+    "owner_type",
+    "Owner Type",
+    "OWNER_TYPE",
+    "lead type",
+    "Lead Type",
+    "client_type",
+    "نوع العميل",
+  ]) {
+    const { byField, mappedColumns, unknownColumns } = buildColumnMapping([
+      "Phone",
+      header,
+    ]);
+    assert.equal(byField.owner_type, 1, `owner_type not detected for "${header}"`);
+    assert.equal(unknownColumns.length, 0, `"${header}" leaked into notes`);
+    const col = mappedColumns.find((c) => c.field === "owner_type");
+    assert.equal(col?.apiField, "owner_type");
+  }
+});
+
+test("owner_type is not stolen by notes or platform", () => {
+  const { byField } = buildColumnMapping([
+    "Phone",
+    "owner_type",
+    "notes",
+    "platform",
+  ]);
+  assert.equal(byField.owner_type, 1);
+  assert.equal(byField.notes, 2);
+  assert.equal(byField.platform, 3);
 });
 
 test("each column is assigned to at most one field", () => {
