@@ -164,6 +164,22 @@ export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string
   const remainingAmount = formatCurrency(rawUnit.remaining_amount);
   const paidAmount = formatCurrency(rawUnit.paid_amount);
   const yearlyInstallment = formatCurrency(rawUnit.installment_amount_yearly);
+
+  // Present value: secondary sale only; never invent from totalPrice.
+  const rawPresentValue = !isRent && !isPrimary
+    ? (rawUnit as any).presentValue
+    : null;
+  const presentValueNum = isMeaningfulNumber(rawPresentValue) ? Number(rawPresentValue) : null;
+  const presentValue = presentValueNum != null ? formatCurrency(presentValueNum) : null;
+  let pricePerMeter: string | null = null;
+  if (presentValueNum != null) {
+    const apiPpm = (rawUnit as any).pricePerMeter;
+    if (isMeaningfulNumber(apiPpm)) {
+      pricePerMeter = formatCurrency(Number(apiPpm));
+    } else if (isMeaningfulNumber(rawUnit.landArea) && Number(rawUnit.landArea) > 0) {
+      pricePerMeter = formatCurrency(presentValueNum / Number(rawUnit.landArea));
+    }
+  }
   const monthlyInstallmentEstimate = calculateMonthlyInstallment(rawUnit.installment_amount_yearly);
   const installmentYearsLabel = formatInstallmentYears(rawUnit.installment_years, t);
   const deliveryDateLabel = formatDeliveryDate(rawUnit.deliveryDate, locale);
@@ -218,6 +234,8 @@ export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string
     totalPrice,
     monthlyRentPrice,
     downPayment,
+    presentValue,
+    pricePerMeter,
     overPrice,
     remainingAmount,
     paidAmount,

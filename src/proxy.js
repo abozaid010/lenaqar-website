@@ -31,6 +31,7 @@ const adminPaths = [
   'analytics', 'units', 'team', 'myProjects', 'developers', 'news', 'map', 'notifications',
   'market-index',
   'locations',
+  'tools',
 ];
 
 export function proxy(request) {

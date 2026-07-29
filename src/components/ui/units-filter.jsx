@@ -5,7 +5,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
 import { useProjectsNames, useDeveloperNames } from "@/hooks/use-admin-shared-data";
 import { getClientIdFromToken } from "@/lib/getRoleFromToken.client";
-import { FileSpreadsheet, Loader2, SlidersHorizontal, Trash2, X } from "lucide-react";
+import { Eye, FileSpreadsheet, Loader2, SlidersHorizontal, Trash2, X } from "lucide-react";
 import UnitsLocationSearch from "@/components/ui/inputs/units-location-search";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import SearchablePropertyTypeSelect from "@/components/ui/inputs/searchable-property-type-select";
@@ -40,6 +40,8 @@ import {
   buildUnitsSortOptions,
   decodeUnitsSortValue,
   encodeUnitsSortValue,
+  shouldShowPresentValueSortOptions,
+  UNITS_PRESENT_VALUE_SORT_FIELDS,
 } from "@/lib/units/units-sort";
 import { useUnitsFilterDraft } from "@/hooks/use-units-filter-draft";
 import {
@@ -154,9 +156,16 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     locale,
   });
 
+  const includePresentValueSorts = shouldShowPresentValueSortOptions(
+    draftFilters.purpose
+  );
+
   const SORT_OPTIONS = useMemo(
-    () => buildUnitsSortOptions(translate),
-    [translate]
+    () =>
+      buildUnitsSortOptions(translate, {
+        includePresentValueSorts,
+      }),
+    [translate, includePresentValueSorts]
   );
 
   const selectedSortValue = encodeUnitsSortValue(
@@ -437,8 +446,11 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         nextFilters.sort_order
       );
       const sortLabel =
-        buildUnitsSortOptions(translate).find((opt) => opt.value === sortValue)
-          ?.label || sortValue;
+        buildUnitsSortOptions(translate, {
+          includePresentValueSorts: shouldShowPresentValueSortOptions(
+            nextFilters.purpose
+          ),
+        }).find((opt) => opt.value === sortValue)?.label || sortValue;
       list.push({
         key: "sort",
         value: sortLabel,
@@ -455,6 +467,15 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     }
     if (nextFilters.resale) {
       list.push({ key: "resale", value: t.unitsFilter.resale });
+    }
+    if (nextFilters.show_present_value) {
+      list.push({
+        key: "show_present_value",
+        value: translate(
+          "unitsFilter.showPresentValue",
+          "Show present value"
+        ),
+      });
     }
     if (nextFilters.min_area || nextFilters.max_area) {
       const min = nextFilters.min_area || "";
@@ -563,7 +584,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     updateDraftFilters((prev) => {
       const next = { ...prev };
 
-      if (key === "my_inventory" || key === "resale") {
+      if (key === "my_inventory" || key === "resale" || key === "show_present_value") {
         next[key] = Boolean(value);
       } else if (
         key === "min_area" ||
@@ -572,6 +593,18 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         key === "max_price"
       ) {
         next[key] = value == null ? "" : String(value);
+      } else if (key === "purpose") {
+        const nextPurpose =
+          value && value !== "" && value !== "all" ? value : "";
+        next.purpose = nextPurpose;
+        // Drop PV sorts when switching to rent — API nulls PV for rent.
+        if (
+          !shouldShowPresentValueSortOptions(nextPurpose) &&
+          UNITS_PRESENT_VALUE_SORT_FIELDS.includes(next.sort_by)
+        ) {
+          next.sort_by = "";
+          next.sort_order = "";
+        }
       } else if (value && value !== "" && value !== "all") {
         let normalizedValue = value;
 
@@ -763,6 +796,11 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         return t.unitsFilter.myInventory;
       case "resale":
         return t.unitsFilter.resale;
+      case "show_present_value":
+        return translate(
+          "unitsFilter.showPresentValue",
+          "Show present value"
+        );
       case "min_area":
         return value || t.unitsFilter.minArea;
       case "max_area":
@@ -821,6 +859,11 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       }
       if (filterValues.my_inventory) labels.push(t.unitsFilter.myInventory);
       if (filterValues.resale) labels.push(t.unitsFilter.resale);
+      if (filterValues.show_present_value) {
+        labels.push(
+          translate("unitsFilter.showPresentValue", "Show present value")
+        );
+      }
 
       if (filterValues.min_area || filterValues.max_area) {
         const min = filterValues.min_area || "";
@@ -1017,6 +1060,31 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           <span className="whitespace-nowrap text-xs">
             {t.uploadExcel?.button || "Upload"}
           </span>
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            applyExternalFilters({
+              ...draftFilters,
+              show_present_value: !draftFilters.show_present_value,
+            })
+          }
+          className={`shrink-0 flex h-10 w-10 items-center justify-center rounded-md border transition-colors shadow-sm ${
+            draftFilters.show_present_value
+              ? "border-primary bg-primary text-white"
+              : "border-gray-300 bg-white text-gray-600 hover:border-primary/40 hover:text-primary"
+          }`}
+          aria-label={translate(
+            "unitsFilter.showPresentValue",
+            "Show present value"
+          )}
+          title={translate(
+            "unitsFilter.showPresentValue",
+            "Show present value"
+          )}
+          aria-pressed={Boolean(draftFilters.show_present_value)}
+        >
+          <Eye size={18} aria-hidden />
         </button>
         {showBulkToolbar && (
           <label className="flex min-w-0 flex-1 items-center gap-1.5 h-10 px-2 rounded-md border border-gray-300 bg-white text-sm font-medium cursor-pointer select-none hover:bg-gray-50">
@@ -1416,6 +1484,31 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
                   <FileSpreadsheet size={18} />
                 </button>
                 <AddUnitButton />
+                <button
+                  type="button"
+                  onClick={() =>
+                    applyExternalFilters({
+                      ...draftFilters,
+                      show_present_value: !draftFilters.show_present_value,
+                    })
+                  }
+                  className={`shrink-0 flex min-h-11 min-w-11 items-center justify-center rounded-md border shadow-sm transition-colors ${
+                    draftFilters.show_present_value
+                      ? "border-primary bg-primary text-white"
+                      : "border-gray-300 bg-white text-gray-600 hover:border-primary/40 hover:text-primary"
+                  }`}
+                  aria-label={translate(
+                    "unitsFilter.showPresentValue",
+                    "Show present value"
+                  )}
+                  title={translate(
+                    "unitsFilter.showPresentValue",
+                    "Show present value"
+                  )}
+                  aria-pressed={Boolean(draftFilters.show_present_value)}
+                >
+                  <Eye size={19} aria-hidden />
+                </button>
                 {showBulkToolbar && bulkSelection.hasSelection && (
                   <button
                     type="button"

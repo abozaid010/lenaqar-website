@@ -12,6 +12,7 @@ import {
   resolveMonthlyRentPrice,
   resolveSaleTotalPrice,
 } from "@/lib/units/unit-price";
+import { toNullableFiniteNumber } from "@/lib/units/present-value";
 
 export function normalizeSlimPurpose(purpose) {
   if (purpose == null || purpose === "") return purpose;
@@ -32,7 +33,7 @@ export function mapSlimUnitToListItem(slim) {
   const monthlyRentPrice = isRent ? resolveMonthlyRentPrice(slim) : null;
   const totalPrice = isRent
     ? monthlyRentPrice
-    : resolveSaleTotalPrice(slim) ?? toNullableNumber(slim.totalPrice);
+    : resolveSaleTotalPrice(slim) ?? toNullableFiniteNumber(slim.totalPrice);
 
   const imageUrl = slim.image;
   const existingImages = Array.isArray(slim.images) ? slim.images : [];
@@ -47,6 +48,14 @@ export function mapSlimUnitToListItem(slim) {
   const buildingType = slim.buildingType ?? slim.property_type ?? null;
   const project = slim.project ?? null;
   const ownerMobile = slim.owner_mobile ?? slim.ownerMobile ?? null;
+  const isPrimary = Boolean(slim.is_primary ?? slim.isPrimary);
+  const presentValue = isRent || isPrimary
+    ? null
+    : toNullableFiniteNumber(slim.presentValue);
+  const pricePerMeter =
+    presentValue == null
+      ? null
+      : toNullableFiniteNumber(slim.pricePerMeter);
 
   return {
     ...slim,
@@ -71,13 +80,11 @@ export function mapSlimUnitToListItem(slim) {
     landArea: slim.landArea ?? slim.area ?? null,
     roomsCount: slim.roomsCount ?? slim.bedrooms ?? null,
     images,
+    is_primary: isPrimary,
+    isPrimary,
+    presentValue,
+    pricePerMeter,
   };
-}
-
-function toNullableNumber(value) {
-  if (value === null || value === undefined || value === "") return null;
-  const n = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(n) ? n : null;
 }
 
 /**

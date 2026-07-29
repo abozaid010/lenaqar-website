@@ -888,6 +888,26 @@ export const addUnit = withErrorHandling(async (unitData) => {
   return response.data;
 });
 
+/**
+ * Preview-only present value calculation. Does NOT create/update a unit.
+ * POST /units/v1/calculate-present-value
+ */
+export async function calculatePresentValue(payload) {
+  const response = await axiosInstance.post(
+    `/units/v1/calculate-present-value`,
+    payload
+  );
+  const json = response.data;
+  if (json?.status === false) {
+    const err = new Error(
+      json?.error_message || json?.message || "Calculation failed"
+    );
+    err.response = { data: json };
+    throw err;
+  }
+  return json?.data ?? json;
+}
+
 export const addUnitRent = withErrorHandling(async (unitData) => {
   const response = await axiosInstance.post(`/units/v1/add-rent`, unitData);
   return response.data;

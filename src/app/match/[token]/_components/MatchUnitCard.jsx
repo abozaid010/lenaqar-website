@@ -18,6 +18,11 @@ import {
   resolveMonthlyRentPrice,
   resolveSaleTotalPrice,
 } from "@/lib/units/unit-price";
+import {
+  canShowPresentValue,
+  resolvePresentValue,
+  resolvePricePerMeter,
+} from "@/lib/units/present-value";
 
 const MAX_IMAGES = 4;
 
@@ -41,6 +46,7 @@ export default function MatchUnitCard({
   onToggleLike,
   onToggleSelect,
   savingLike,
+  showPresentValue = false,
 }) {
   const { translate } = useI18n();
   const [galleryOpen, setGalleryOpen] = useState(false);
@@ -62,6 +68,12 @@ export default function MatchUnitCard({
   const price = isRentPurpose(unit?.purpose)
     ? resolveMonthlyRentPrice(unit)
     : resolveSaleTotalPrice(unit);
+  const presentValue =
+    showPresentValue && canShowPresentValue(unit)
+      ? resolvePresentValue(unit)
+      : null;
+  const pricePerMeter =
+    presentValue != null ? resolvePricePerMeter(unit) : null;
   const rooms = unit?.roomsCount ?? unit?.bedrooms;
   const baths = unit?.bathroomCount ?? unit?.bathrooms;
   const area = unit?.landArea ?? unit?.land_area;
@@ -120,12 +132,48 @@ export default function MatchUnitCard({
             {area} m²
           </span>
         )}
-        {price != null && (
-          <span className="font-semibold text-primary ms-auto">
-            {formatCurrency(price)}
-          </span>
-        )}
       </div>
+
+      {(presentValue != null || price != null) && (
+        <div className="space-y-0.5">
+          {presentValue != null ? (
+            <>
+              <div className="flex items-baseline justify-between gap-2 text-xs">
+                <span className="text-gray-500">
+                  {translate("unitPricing.presentValue", "Present value")}
+                </span>
+                <span className="font-semibold text-primary">
+                  {formatCurrency(presentValue)}
+                </span>
+              </div>
+              {price != null ? (
+                <div className="flex items-baseline justify-between gap-2 text-xs text-gray-600">
+                  <span>
+                    {translate("unitPricing.askingPrice", "Asking price")}
+                  </span>
+                  <span className="font-medium">{formatCurrency(price)}</span>
+                </div>
+              ) : null}
+              {pricePerMeter != null ? (
+                <div className="flex items-baseline justify-between gap-2 text-xs text-gray-600">
+                  <span>
+                    {translate("unitPricing.pricePerMeter", "Price / m²")}
+                  </span>
+                  <span className="font-medium">
+                    {formatCurrency(pricePerMeter)}
+                  </span>
+                </div>
+              ) : null}
+            </>
+          ) : price != null ? (
+            <div className="text-end">
+              <span className="font-semibold text-primary text-xs">
+                {formatCurrency(price)}
+              </span>
+            </div>
+          ) : null}
+        </div>
+      )}
     </div>
   );
 

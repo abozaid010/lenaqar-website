@@ -5,7 +5,12 @@ export const UNITS_SORT_FIELDS = [
   "monthlyRentPrice",
   "area",
   "deliveryDate",
+  "presentValue",
+  "pricePerMeter",
 ];
+
+/** Present-value sorts — sale / secondary contexts only. */
+export const UNITS_PRESENT_VALUE_SORT_FIELDS = ["presentValue", "pricePerMeter"];
 
 export const UNITS_SORT_ORDERS = ["asc", "desc"];
 
@@ -44,12 +49,25 @@ export function decodeUnitsSortValue(value) {
 }
 
 /**
+ * @param {string | null | undefined} purpose
+ * @returns {boolean}
+ */
+export function shouldShowPresentValueSortOptions(purpose) {
+  const p = String(purpose || "").trim().toLowerCase();
+  // Hide for rent-only listings; show for sell or unset (mixed inventory).
+  return p !== "rent" && p !== "lease";
+}
+
+/**
  * Build localized sort options (field + direction pairs).
  * Price is one pair: backend sorts by totalPrice when set, else monthlyRentPrice.
  * @param {(key: string, fallback?: string) => string} translate
+ * @param {{ includePresentValueSorts?: boolean }} [options]
  */
-export function buildUnitsSortOptions(translate) {
-  return [
+export function buildUnitsSortOptions(translate, options = {}) {
+  const includePresentValueSorts = options.includePresentValueSorts !== false;
+
+  const optionsList = [
     {
       value: "",
       label: translate("unitsFilter.sort.default", "Default"),
@@ -93,4 +111,39 @@ export function buildUnitsSortOptions(translate) {
       ),
     },
   ];
+
+  if (includePresentValueSorts) {
+    optionsList.push(
+      {
+        value: "presentValue:asc",
+        label: translate(
+          "unitsFilter.sort.presentValueLowHigh",
+          "Present value (low → high)"
+        ),
+      },
+      {
+        value: "presentValue:desc",
+        label: translate(
+          "unitsFilter.sort.presentValueHighLow",
+          "Present value (high → low)"
+        ),
+      },
+      {
+        value: "pricePerMeter:asc",
+        label: translate(
+          "unitsFilter.sort.pricePerMeterLowHigh",
+          "Price / m² (low → high)"
+        ),
+      },
+      {
+        value: "pricePerMeter:desc",
+        label: translate(
+          "unitsFilter.sort.pricePerMeterHighLow",
+          "Price / m² (high → low)"
+        ),
+      }
+    );
+  }
+
+  return optionsList;
 }

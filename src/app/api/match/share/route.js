@@ -33,7 +33,8 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { client_id, user_id, lead, requirements } = body || {};
+    const { client_id, user_id, lead, requirements, include_present_value } =
+      body || {};
 
     if (!user_id) {
       return NextResponse.json(
@@ -45,6 +46,14 @@ export async function POST(request) {
     const resolvedClientId =
       client_id || cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value || "";
 
+    const sharePayload = {
+      client_id: resolvedClientId,
+      user_id,
+      lead,
+      requirements,
+      include_present_value: Boolean(include_present_value),
+    };
+
     // Try backend share API first
     try {
       const backendRes = await bffFetch(`${API_BASE_URL}/match/share/v1`, {
@@ -55,7 +64,7 @@ export async function POST(request) {
           Authorization: `Bearer ${accessToken}`,
           ...(resolvedClientId ? { "x-client-id": resolvedClientId } : {}),
         },
-        body: JSON.stringify({ client_id: resolvedClientId, user_id, lead, requirements }),
+        body: JSON.stringify(sharePayload),
         cache: "no-store",
       });
 
@@ -63,21 +72,30 @@ export async function POST(request) {
         const json = await backendRes.json();
         const token = json?.data?.token || json?.data?.share_token || json?.token;
         if (token) {
-          return NextResponse.json({ status: true, data: { token, source: "backend" } });
+          return NextResponse.json({
+            status: true,
+            data: {
+              token,
+              source: "backend",
+              include_present_value: Boolean(include_present_value),
+            },
+          });
         }
       }
     } catch {
       // fall through to BFF-signed token
     }
 
-    const token = signMatchSharePayload({
-      client_id: resolvedClientId,
-      user_id,
-      lead: lead || {},
-      requirements: requirements || {},
-    });
+    const token = signMatchSharePayload(sharePayload);
 
-    return NextResponse.json({ status: true, data: { token, source: "bff" } });
+    return NextResponse.json({
+      status: true,
+      data: {
+        token,
+        source: "bff",
+        include_present_value: Boolean(include_present_value),
+      },
+    });
   } catch (e) {
     return NextResponse.json(
       { status: false, message: e?.message || "Failed to create share link" },

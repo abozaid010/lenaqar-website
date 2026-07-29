@@ -14,10 +14,14 @@ export const UNITS_FILTER_PARAM_KEYS = [
   "max_area",
   "my_inventory",
   "resale",
+  "show_present_value",
   "author",
   "sort_by",
   "sort_order",
 ];
+
+/** UI-only filter keys — never sent to slim-list API. */
+export const UNITS_UI_ONLY_FILTER_KEYS = ["show_present_value"];
 
 const STORAGE_KEY_PREFIX = "lena_units_favorite_searches";
 
@@ -42,6 +46,7 @@ export function createEmptyFilters() {
     max_area: "",
     my_inventory: false,
     resale: false,
+    show_present_value: false,
     author: "",
     sort_by: "",
     sort_order: "",
@@ -65,6 +70,7 @@ export function filtersFromSearchParams(searchParams) {
     max_area: searchParams.get("max_area") || "",
     my_inventory: searchParams.get("my_inventory") === "true",
     resale: searchParams.get("resale") === "true",
+    show_present_value: searchParams.get("show_present_value") === "true",
     author: searchParams.get("author") || "",
     sort_by: searchParams.get("sort_by") || "",
     sort_order: searchParams.get("sort_order") || "",
@@ -80,7 +86,7 @@ export function filtersToSearchParams(filters, baseParams = new URLSearchParams(
 
   UNITS_FILTER_PARAM_KEYS.forEach((key) => {
     const value = filters[key];
-    if (key === "my_inventory" || key === "resale") {
+    if (key === "my_inventory" || key === "resale" || key === "show_present_value") {
       if (value) params.set(key, "true");
       return;
     }
@@ -95,13 +101,15 @@ export function filtersToSearchParams(filters, baseParams = new URLSearchParams(
 export function hasActiveFilters(filters) {
   return UNITS_FILTER_PARAM_KEYS.some((key) => {
     const value = filters[key];
-    if (key === "my_inventory" || key === "resale") return Boolean(value);
+    if (key === "my_inventory" || key === "resale" || key === "show_present_value") {
+      return Boolean(value);
+    }
     return value && String(value).trim() !== "" && value !== "all";
   });
 }
 
 export function normalizeFilterFieldValue(key, value) {
-  if (key === "my_inventory" || key === "resale") {
+  if (key === "my_inventory" || key === "resale" || key === "show_present_value") {
     return Boolean(value);
   }
   if (value == null || value === "all") return "";
@@ -111,7 +119,7 @@ export function normalizeFilterFieldValue(key, value) {
 export function areFiltersEqual(a, b) {
   if (!a || !b) return false;
   return UNITS_FILTER_PARAM_KEYS.every((key) => {
-    if (key === "my_inventory" || key === "resale") {
+    if (key === "my_inventory" || key === "resale" || key === "show_present_value") {
       return Boolean(a[key]) === Boolean(b[key]);
     }
     return normalizeFilterFieldValue(key, a[key]) === normalizeFilterFieldValue(key, b[key]);
