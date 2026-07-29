@@ -108,9 +108,9 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
   // Labels come from the active locale via i18n (no dual locale import).
   const BUILDING_TYPES = useMemo(() => {
-    const slice = { buildingTypes: t.buildingTypes || {} };
+    const slice = { buildingTypes: translate("buildingTypes", {}) };
     return getBuildingTypes({ en: slice, ar: slice });
-  }, [t]);
+  }, [translate]);
 
   const FURNISHING_TYPES = useMemo(() => {
     const slice = {

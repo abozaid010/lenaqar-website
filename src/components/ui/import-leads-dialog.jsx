@@ -8,6 +8,7 @@ import {
   LEAD_IMPORT_TEMPLATE_COLUMNS,
   LEAD_IMPORT_TEMPLATE_EXAMPLE_ROW,
 } from "@/constants/lead-import";
+import { OWNER_TYPES } from "@/constants/owner-type";
 import { useI18n } from "@/hooks/useI18n";
 import { useImportLeads } from "@/hooks/use-import-leads";
 
@@ -34,6 +35,7 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
     campaign_id: "dashboardFilter.importLeads.columns.campaignId",
     platform: "dashboardFilter.importLeads.columns.platform",
     author: "dashboardFilter.importLeads.columns.author",
+    owner_type: "dashboardFilter.importLeads.columns.ownerType",
   };
 
   const requiredColumns = useMemo(
@@ -64,11 +66,16 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
         key: "platform",
         label: translate("dashboardFilter.importLeads.columns.platform"),
       },
+      {
+        key: "owner_type",
+        label: translate("dashboardFilter.importLeads.columns.ownerType"),
+      },
     ],
     [translate],
   );
 
   const allowedPlatforms = useMemo(() => formatAllowedPlatformsList(), []);
+  const allowedOwnerTypes = useMemo(() => OWNER_TYPES.join(", "), []);
 
   const downloadTemplate = () => {
     const headerLine = LEAD_IMPORT_TEMPLATE_COLUMNS.join(",");
@@ -80,6 +87,7 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
         "Follow up next week",
         "summer_campaign",
         "whatsapp",
+        "broker",
       ],
     ].map((row) => row.join(","));
     const csvContent = `${headerLine}\n${exampleLines.join("\n")}\n`;
@@ -178,6 +186,17 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
               </p>
               <p className="font-mono text-[11px] break-words text-primary">
                 {allowedPlatforms}
+              </p>
+            </div>
+            <div className="rounded-md border border-gray-200 bg-white p-2 text-xs text-gray-600 space-y-1">
+              <p className="font-medium text-gray-700">
+                {translate("dashboardFilter.importLeads.ownerTypeGuideTitle")}
+              </p>
+              <p>
+                {translate("dashboardFilter.importLeads.ownerTypeGuideText")}
+              </p>
+              <p className="font-mono text-[11px] break-words text-primary">
+                {allowedOwnerTypes}
               </p>
             </div>
             <div>

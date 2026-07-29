@@ -26,6 +26,7 @@ export const LEAD_IMPORT_TEMPLATE_COLUMNS = [
   "Notes",
   "Campaign ID",
   "Platform",
+  "Owner Type",
 ];
 
 export const LEAD_IMPORT_TEMPLATE_EXAMPLE_ROW = [
@@ -34,6 +35,7 @@ export const LEAD_IMPORT_TEMPLATE_EXAMPLE_ROW = [
   "Interested in 2 bedroom apartment",
   "summer_campaign",
   "website",
+  "buyer",
 ];
 
 /**

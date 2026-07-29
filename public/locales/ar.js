@@ -779,6 +779,9 @@ export default {
       platformGuideTitle: "قيم عمود المنصة (platform)",
       platformGuideText:
         "استخدم إحدى القيم التالية حرفياً في عمود platform. اتركه فارغاً لاستخدام {default}.",
+      ownerTypeGuideTitle: "قيم عمود نوع العميل (owner_type)",
+      ownerTypeGuideText:
+        "استخدم إحدى القيم التالية حرفياً في عمود owner_type. اتركه فارغاً لتخطي الحقل.",
       downloadTemplate: "تحميل قالب",
       template: {
         platformReference: "ALLOWED_PLATFORM_VALUES",
@@ -790,6 +793,7 @@ export default {
         campaignId: "campaign_id",
         platform: "platform",
         author: "author",
+        ownerType: "owner_type",
       },
       preview: {
         title: "معاينة ربط الأعمدة",
@@ -818,11 +822,13 @@ export default {
         missingPhoneColumn:
           "تعذر العثور على عمود الهاتف. المتوقع عمود باسم phone (أو mobile أو contact وغيرها). الأعمدة الموجودة: {headers}",
         unrecognizedColumns:
-          "لا يطابق أي عمود التنسيق المتوقع. الموجود: {headers}. المطلوب: phone. اختياري: name و notes و campaign_id و platform.",
+          "لا يطابق أي عمود التنسيق المتوقع. الموجود: {headers}. المطلوب: phone. اختياري: name و notes و campaign_id و platform و owner_type.",
         missingClientId:
           "معرف العميل مفقود. يرجى تسجيل الخروج ثم الدخول مرة أخرى وإعادة المحاولة.",
         invalidPlatform:
           'قيمة منصة غير صالحة "{value}". القيم المسموحة: {allowed}. اترك الحقل فارغاً لاستخدام "{default}".',
+        invalidOwnerType:
+          'قيمة owner_type غير صالحة "{value}". القيم المسموحة: {allowed}. اترك الحقل فارغاً لتخطي الحقل.',
         invalidPhone: "رقم الهاتف مفقود أو غير صالح",
         allRowsInvalidPlatform:
           "لم يتم استيراد أي عميل. كل الصفوف تحتوي على قيمة platform غير صالحة. القيم المسموحة: {allowed}. اترك platform فارغاً لاستخدام {default}.",

@@ -6,7 +6,12 @@ import { Pencil, Check, X } from "lucide-react";
 import { updateUserName } from "@/utils/api";
 import toast from "react-hot-toast";
 
-export default function ChatWith({ name: initialName, userId, onNameUpdate }) {
+export default function ChatWith({
+  name: initialName,
+  userId,
+  onNameUpdate,
+  showEditButton = true,
+}) {
   const { translate } = useI18n();
   const [isEditing, setIsEditing] = useState(false);
   const [nameValue, setNameValue] = useState(initialName || "");
@@ -99,6 +104,18 @@ export default function ChatWith({ name: initialName, userId, onNameUpdate }) {
     }
   };
 
+  const nameLabel = (
+    <h1 className="text-sm text-primary/90 truncate">
+      <span className="text-primary font-bold">
+        {displayName || translate("clientsTable.newLead", "New Lead")}
+      </span>
+    </h1>
+  );
+
+  if (!showEditButton) {
+    return <div className="min-w-0">{nameLabel}</div>;
+  }
+
   if (isEditing) {
     return (
       <div className="flex items-center gap-2">
@@ -141,12 +158,7 @@ export default function ChatWith({ name: initialName, userId, onNameUpdate }) {
 
   return (
     <div className="flex items-center gap-1.5 group/name min-w-0">
-      <h1 className="text-sm text-primary/90 truncate">
-        <span className="text-primary font-bold">
-          {displayName ||
-            translate("clientsTable.newLead", "New Lead")}
-        </span>
-      </h1>
+      {nameLabel}
       <button
         type="button"
         onClick={startEditing}
