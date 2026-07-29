@@ -135,6 +135,9 @@ export default function LeadDetailPane({
   const [editReqOpen, setEditReqOpen] = useState(false);
   const [editContactOpen, setEditContactOpen] = useState(false);
   const [creatingMatch, setCreatingMatch] = useState(false);
+  const [matchShareDialogOpen, setMatchShareDialogOpen] = useState(false);
+  const [includePresentValueInShare, setIncludePresentValueInShare] =
+    useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [newTagInput, setNewTagInput] = useState("");
@@ -418,7 +421,13 @@ export default function LeadDetailPane({
     [leadNotes, onInvalidateList, queryClient, userId],
   );
 
-  const handleOpenMatch = async () => {
+  const handleOpenMatch = () => {
+    if (!userId || creatingMatch) return;
+    setIncludePresentValueInShare(false);
+    setMatchShareDialogOpen(true);
+  };
+
+  const handleConfirmMatchShare = async () => {
     if (!userId || creatingMatch) return;
     setCreatingMatch(true);
     try {
@@ -432,10 +441,12 @@ export default function LeadDetailPane({
           phone_number: phoneNumber,
         },
         requirements: req,
+        include_present_value: Boolean(includePresentValueInShare),
       });
       if (!token) {
         throw new Error("No share token returned");
       }
+      setMatchShareDialogOpen(false);
       window.open(`/match/${encodeURIComponent(token)}`, "_blank", "noopener,noreferrer");
     } catch (e) {
       toast.error(
@@ -1336,6 +1347,61 @@ export default function LeadDetailPane({
                 className="px-3 py-1.5 bg-red-600 text-white rounded"
               >
                 {isDeleting ? "…" : common.delete}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {matchShareDialogOpen && (
+        <div className="fixed inset-0 z-[70] bg-black/30 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-4 max-w-sm w-full shadow-xl text-sm">
+            <p className="font-medium text-gray-900 mb-2">
+              {translate(
+                "matchPage.shareDialogTitle",
+                "Share matched units"
+              )}
+            </p>
+            <p className="text-gray-600 mb-3">
+              {translate(
+                "matchPage.shareDialogHint",
+                "Choose whether to include present value on the shared match page."
+              )}
+            </p>
+            <label className="flex items-start gap-2 mb-4 cursor-pointer">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 accent-primary shrink-0"
+                checked={includePresentValueInShare}
+                onChange={(e) =>
+                  setIncludePresentValueInShare(e.target.checked)
+                }
+              />
+              <span className="text-gray-700">
+                {translate(
+                  "matchPage.includePresentValue",
+                  "Share present value with the lead"
+                )}
+              </span>
+            </label>
+            <div className="flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => setMatchShareDialogOpen(false)}
+                disabled={creatingMatch}
+                className="px-3 py-1.5 border rounded"
+              >
+                {common.cancel}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmMatchShare}
+                disabled={creatingMatch}
+                className="px-3 py-1.5 bg-primary text-white rounded disabled:opacity-50"
+              >
+                {creatingMatch
+                  ? "…"
+                  : translate("matchPage.openMatch", "Open match")}
               </button>
             </div>
           </div>

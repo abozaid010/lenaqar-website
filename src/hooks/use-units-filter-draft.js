@@ -351,7 +351,7 @@ export function useUnitsFilterDraft({
         next = { ...next, city: "", district: "", sub_district: "" };
       } else if (key === "sort" || key === "sort_by" || key === "sort_order") {
         next = { ...next, sort_by: "", sort_order: "" };
-      } else if (key === "my_inventory" || key === "resale") {
+      } else if (key === "my_inventory" || key === "resale" || key === "show_present_value") {
         next = { ...next, [key]: false };
       } else {
         next = { ...next, [key]: "" };

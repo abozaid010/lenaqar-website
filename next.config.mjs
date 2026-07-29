@@ -86,6 +86,7 @@ const nextConfig = {
       'social-media',
       'market-index',
       'locations',
+      'tools',
     ];
     // `api` is excluded so `/api/social-media/*` BFF routes are not rewritten to pages.
     const clientIdSegment = "/:clientId((?!api$)[^/]+)";

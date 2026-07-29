@@ -16,6 +16,7 @@ import {
   Settings,
   LineChart,
   MapPinned,
+  Wrench,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -541,6 +542,21 @@ const SidebarComponent = ({
             >
               <MapPin className="h-5 w-5 mr-3" />
               <span>{translate("sidebar.map")}</span>
+            </Link>
+          )}
+
+          {isMounted && units.canView && (
+            <Link
+              href={navHref("/tools")}
+              prefetch={true}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isLinkActive("/tools")
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              <Wrench className="h-5 w-5 mr-3" />
+              <span>{translate("sidebar.tools", "Tools")}</span>
             </Link>
           )}
 

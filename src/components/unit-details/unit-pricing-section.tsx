@@ -11,12 +11,30 @@ interface UnitPricingSectionProps {
  * Pricing & payment block — same section pattern as location (label/value grid).
  * API keys (SalePropertyDetails): totalPrice, monthlyRentPrice, downPayment,
  * over_price (offer), remaining_amount, installment_years, installment_amount_yearly,
- * paid_amount, deliveryDate.
+ * paid_amount, deliveryDate, presentValue, pricePerMeter (secondary sale only).
  */
 export default function UnitPricingSection({ unit }: UnitPricingSectionProps) {
   const { t, translate } = useI18n();
 
+  const showPresentValue = Boolean(unit.presentValue) && !unit.isPrimary && !unit.monthlyRentPrice;
+
   const rows = [
+    ...(showPresentValue
+      ? [
+          {
+            key: 'presentValue',
+            label: translate('unitPricing.presentValue', 'Present value'),
+            value: unit.presentValue,
+            emphasize: true,
+          },
+          {
+            key: 'pricePerMeter',
+            label: translate('unitPricing.pricePerMeter', 'Price / m²'),
+            value: unit.pricePerMeter,
+            emphasize: false,
+          },
+        ]
+      : []),
     {
       key: 'price',
       label: unit.monthlyRentPrice
@@ -26,16 +44,19 @@ export default function UnitPricingSection({ unit }: UnitPricingSectionProps) {
           )
         : translate('unitPricing.totalPrice', t?.unitPricing?.totalPrice || 'Total Price'),
       value: unit.monthlyRentPrice || unit.totalPrice,
+      emphasize: !showPresentValue,
     },
     {
       key: 'downPayment',
       label: translate('saleDetails.downPayment', t?.saleDetails?.downPayment || 'Down Payment'),
       value: unit.downPayment,
+      emphasize: false,
     },
     {
       key: 'over_price',
       label: translate('saleDetails.over_price', t?.saleDetails?.over_price || 'Over Price'),
       value: unit.overPrice,
+      emphasize: false,
     },
     {
       key: 'remaining_amount',
@@ -44,6 +65,7 @@ export default function UnitPricingSection({ unit }: UnitPricingSectionProps) {
         t?.saleDetails?.remaining_amount || 'Remaining Amount'
       ),
       value: unit.remainingAmount,
+      emphasize: false,
     },
     {
       key: 'installment_years',
@@ -52,6 +74,7 @@ export default function UnitPricingSection({ unit }: UnitPricingSectionProps) {
         t?.saleDetails?.installment_years || 'Installment Years'
       ),
       value: unit.installmentYearsLabel,
+      emphasize: false,
     },
     {
       key: 'installment_amount_yearly',
@@ -60,11 +83,13 @@ export default function UnitPricingSection({ unit }: UnitPricingSectionProps) {
         t?.saleDetails?.installment || t?.unitPricing?.yearlyInstallment || 'Yearly Installment'
       ),
       value: unit.yearlyInstallment,
+      emphasize: false,
     },
     {
       key: 'paid_amount',
       label: translate('saleDetails.paid_amount', t?.saleDetails?.paid_amount || 'Paid Amount'),
       value: unit.paidAmount,
+      emphasize: false,
     },
     {
       key: 'delivery',
@@ -73,6 +98,7 @@ export default function UnitPricingSection({ unit }: UnitPricingSectionProps) {
         t?.unitPricing?.expectedDelivery || 'Expected Delivery'
       ),
       value: unit.deliveryDateLabel,
+      emphasize: false,
     },
   ].filter((row) => row.value);
 
@@ -89,7 +115,7 @@ export default function UnitPricingSection({ unit }: UnitPricingSectionProps) {
             <dt className="text-sm text-gray-600">{row.label}</dt>
             <dd
               className={
-                row.key === 'price'
+                row.emphasize
                   ? 'text-base font-semibold text-gray-900 mt-1'
                   : 'text-sm font-medium text-gray-900 mt-1'
               }

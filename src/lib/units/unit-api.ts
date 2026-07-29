@@ -120,6 +120,7 @@ export async function fetchUnitsFilterServer(
     delete base.client_id;
     delete base.clientId;
     delete base.visibility;
+    delete base.show_present_value;
 
     const params: Record<string, unknown> = {
       ...base,

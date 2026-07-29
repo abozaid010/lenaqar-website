@@ -38,6 +38,10 @@ export default function MatchPublicPage({ token }) {
     return `${window.location.origin}/match/${token}`;
   }, [token]);
 
+  const showPresentValue = Boolean(
+    context?.include_present_value ?? context?.includePresentValue
+  );
+
   const leadName =
     context?.lead?.name || context?.lead?.display_name || "";
   const leadPhone =
@@ -273,6 +277,7 @@ export default function MatchPublicPage({ token }) {
                   onToggleLike={handleToggleLike}
                   onToggleSelect={handleToggleSelect}
                   savingLike={savingLikeId === String(id)}
+                  showPresentValue={showPresentValue}
                 />
               );
             })}

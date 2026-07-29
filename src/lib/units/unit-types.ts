@@ -22,6 +22,10 @@ export interface RawUnit {
   paid_amount?: number | null;
   /** Offer / over price (sale units). OpenAPI: "Offer price". */
   over_price?: number | null;
+  /** Comparable cash-equivalent value (secondary sale only; backend-owned). */
+  presentValue?: number | null;
+  /** presentValue / area when available (backend-owned). */
+  pricePerMeter?: number | null;
   landArea: number;
   buildingType: string;
   bathroomCount: number;
@@ -119,6 +123,10 @@ export interface UnitViewModel {
   totalPrice: string | null;
   monthlyRentPrice: string | null;
   downPayment: string | null;
+  /** Formatted present value (secondary sale only). */
+  presentValue: string | null;
+  /** Formatted price per m² from present value. */
+  pricePerMeter: string | null;
   /** Formatted `over_price` (offer). */
   overPrice: string | null;
   /** Formatted `remaining_amount`. */

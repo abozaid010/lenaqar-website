@@ -6,6 +6,7 @@ import QueryErrorState from "@/components/ui/query-error-state";
 import { useUnitsPageData } from "@/hooks/use-units-page-data";
 import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-context";
 import { enforceDashboardAuthorOnParams } from "@/lib/dashboard-lead-access";
+import { UNITS_UI_ONLY_FILTER_KEYS } from "@/lib/units/favorite-searches";
 import { useEffect, useMemo } from "react";
 
 export default function UnitsPageQueryOptimized({
@@ -24,6 +25,11 @@ export default function UnitsPageQueryOptimized({
     delete base.clientId;
     delete base.visibility;
 
+    // UI-only toggles (e.g. show_present_value) must not hit the API
+    UNITS_UI_ONLY_FILTER_KEYS.forEach((key) => {
+      delete base[key];
+    });
+
     const params = {
       ...base,
       page_size: Number(base.page_size) || 16,
@@ -31,12 +37,15 @@ export default function UnitsPageQueryOptimized({
     };
 
     // Send is_primary only when resale filter is explicitly enabled.
-    if (base.resale === "true") {
+    if (raw?.resale === "true" || raw?.resale === true) {
       params.is_primary = false;
     }
 
     // ONLY send client_id when My Inventory is ON
-    if (base.my_inventory === "true" && currentClientId) {
+    if (
+      (raw?.my_inventory === "true" || raw?.my_inventory === true) &&
+      currentClientId
+    ) {
       params.client_id = currentClientId;
     }
 
@@ -53,6 +62,10 @@ export default function UnitsPageQueryOptimized({
 
     return scoped;
   };
+
+  const showPresentValue =
+    searchParams?.show_present_value === "true" ||
+    searchParams?.show_present_value === true;
 
   const searchParamsWithClient = useMemo(() => {
     return buildUnitsListParams(searchParams);
@@ -118,6 +131,7 @@ export default function UnitsPageQueryOptimized({
           units={units}
           pagination={pagination}
           readonly={publicUnits}
+          showPresentValue={showPresentValue}
         />
       )}
     </div>

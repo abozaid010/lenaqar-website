@@ -30,6 +30,11 @@ import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-co
 import {
   getUnitSelectionIdFromListItem,
 } from "@/lib/units/unit-whatsapp-recipient";
+import {
+  canShowPresentValue,
+  resolvePresentValue,
+  resolvePricePerMeter,
+} from "@/lib/units/present-value";
 
 export default function UnitsGrid({
   units,
@@ -44,6 +49,8 @@ export default function UnitsGrid({
    * @type {Set<string> | null | undefined}
    */
   brokerUnitIds = null,
+  /** When true, show presentValue + price/m² on secondary sale cards (filter toggle). */
+  showPresentValue: showPresentValueProp = false,
 }) {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareUnitCode, setShareUnitCode] = useState(null);
@@ -51,6 +58,9 @@ export default function UnitsGrid({
   const { t, locale, translate, localeUtils } = useI18n();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const showPresentValue =
+    showPresentValueProp ||
+    searchParams?.get?.("show_present_value") === "true";
   const clientId = LenaCookiesManager.getClientId();
   const { canShowBulkButton } = useWhatsappBulkAccess();
   const bulkSelection = useUnitsBulkSelectionOptional();
@@ -290,15 +300,72 @@ export default function UnitsGrid({
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-between w-full min-w-0">
-                        <span className="font-semibold text-base sm:text-lg lg:text-[21px] truncate">
-                          {u.totalPrice != null && u.totalPrice !== "" && formatPrice(u.totalPrice)
+                      (() => {
+                        const presentValue =
+                          showPresentValue && canShowPresentValue(u)
+                            ? resolvePresentValue(u)
+                            : null;
+                        const pricePerMeter =
+                          presentValue != null ? resolvePricePerMeter(u) : null;
+                        const askingLabel =
+                          u.totalPrice != null &&
+                          u.totalPrice !== "" &&
+                          formatPrice(u.totalPrice)
                             ? `${formatPrice(u.totalPrice)} ${egpLabel}`
                             : allowMissingFields
                               ? "—"
-                              : t?.common?.na || "N/A"}
-                        </span>
-                      </div>
+                              : t?.common?.na || "N/A";
+
+                        if (presentValue != null) {
+                          return (
+                            <div className="flex flex-col gap-0.5 w-full min-w-0">
+                              <div className="flex items-baseline justify-between gap-2 min-w-0">
+                                <span className="text-[10px] sm:text-[11px] font-medium opacity-90 shrink-0">
+                                  {translate(
+                                    "unitPricing.presentValue",
+                                    "Present value"
+                                  )}
+                                </span>
+                                <span className="font-semibold text-base sm:text-lg lg:text-[21px] truncate">
+                                  {`${formatPrice(presentValue)} ${egpLabel}`}
+                                </span>
+                              </div>
+                              <div className="flex items-baseline justify-between gap-2 min-w-0 text-[11px] sm:text-xs opacity-90">
+                                <span className="shrink-0">
+                                  {translate(
+                                    "unitPricing.askingPrice",
+                                    "Asking price"
+                                  )}
+                                </span>
+                                <span className="truncate font-medium">
+                                  {askingLabel}
+                                </span>
+                              </div>
+                              {pricePerMeter != null && formatPrice(pricePerMeter) ? (
+                                <div className="flex items-baseline justify-between gap-2 min-w-0 text-[11px] sm:text-xs opacity-90">
+                                  <span className="shrink-0">
+                                    {translate(
+                                      "unitPricing.pricePerMeter",
+                                      "Price / m²"
+                                    )}
+                                  </span>
+                                  <span className="truncate font-medium">
+                                    {`${formatPrice(pricePerMeter)} ${egpLabel}`}
+                                  </span>
+                                </div>
+                              ) : null}
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div className="flex items-center justify-between w-full min-w-0">
+                            <span className="font-semibold text-base sm:text-lg lg:text-[21px] truncate">
+                              {askingLabel}
+                            </span>
+                          </div>
+                        );
+                      })()
                     )}
                   </div>
                 </div>

@@ -34,7 +34,16 @@ export async function GET(_request, { params }) {
       if (res.ok) {
         const json = await res.json();
         const data = json?.data ?? json;
-        return NextResponse.json({ status: true, data: { ...data, source: "backend" } });
+        return NextResponse.json({
+          status: true,
+          data: {
+            ...data,
+            include_present_value: Boolean(
+              data?.include_present_value ?? data?.includePresentValue
+            ),
+            source: "backend",
+          },
+        });
       }
     } catch {
       // BFF fallback
@@ -48,7 +57,8 @@ export async function GET(_request, { params }) {
       );
     }
 
-    const { client_id, user_id, lead, requirements } = payload;
+    const { client_id, user_id, lead, requirements, include_present_value } =
+      payload;
     const unitFilters = requirementToUnitsFilter(requirements, client_id);
     const interactions = getMatchInteractions(token);
 
@@ -61,6 +71,7 @@ export async function GET(_request, { params }) {
         lead,
         requirements,
         unit_filters: unitFilters,
+        include_present_value: Boolean(include_present_value),
         liked_unit_ids: interactions.likedUnitIds || [],
         viewing_requests: interactions.viewingRequests || [],
         source: "bff",
