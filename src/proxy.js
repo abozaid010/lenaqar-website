@@ -32,6 +32,7 @@ const adminPaths = [
   'market-index',
   'locations',
   'tools',
+  'matching',
 ];
 
 /**
