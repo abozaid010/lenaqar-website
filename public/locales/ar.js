@@ -1948,6 +1948,10 @@ export default {
     delete: "حذف",
     deleteFail: "فشل حذف الوحدة. يرجى المحاولة مرة أخرى.",
     deleteError: "حدث خطأ أثناء حذف الوحدة.",
+    saveSuccessTitle: "تم الحفظ",
+    saveSuccessMessage: "تم حفظ التعديلات بنجاح.",
+    previewUnit: "معاينة الوحدة",
+    continueEditing: "متابعة التعديل",
   },
   unitDetails: {
     title: "تفاصيل الوحدة",

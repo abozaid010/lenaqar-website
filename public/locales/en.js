@@ -2106,6 +2106,10 @@ export default {
     delete: "Delete",
     deleteFail: "Failed to delete unit. Please try again.",
     deleteError: "An error occurred while deleting the unit.",
+    saveSuccessTitle: "Unit saved",
+    saveSuccessMessage: "Your changes have been saved successfully.",
+    previewUnit: "Preview Unit",
+    continueEditing: "Continue Editing",
   },
   unitDetails: {
     title: "Unit Details",
