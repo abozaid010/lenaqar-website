@@ -3,7 +3,7 @@ import { useI18n } from '@/hooks/useI18n';
 import type { ChatTurn } from '@/hooks/useConversation';
 import type { StickyInquiryCardProps } from '@/lib/units/unit-types';
 import { contactInfo } from '@/lib/contact-info';
-import { buildPublicUnitShareUrl } from '@/lib/units/unit-share-links';
+import { buildAdminUnitShareUrl } from '@/lib/units/unit-share-links';
 import ChatConversation from '@/components/chat/chat-conversation';
 import ChatImagesToUnit from '@/components/unit-details/chat-images-to-unit';
 import UnitInquiryContactHeader from '@/components/unit-details/unit-inquiry-contact-header';
@@ -18,6 +18,7 @@ export default function StickyInquiryCard({
   unit,
   rawUnit,
   isOwnUnit: isOwnUnitProp,
+  hideChat = false,
 }: StickyInquiryCardProps) {
   const { translate, locale } = useI18n();
   const { myClientId: currentClientId, isOwnUnit: isOwnUnitFromHook } = useUnitOwnership(unit);
@@ -44,8 +45,9 @@ export default function StickyInquiryCard({
 
   useEffect(() => {
     const code = unit.referenceCode?.trim();
-    setUnitUrl(code ? buildPublicUnitShareUrl(code) : '');
-  }, [unit.referenceCode]);
+    const listingClientId = unit.clientId?.trim() || null;
+    setUnitUrl(code ? buildAdminUnitShareUrl(code, listingClientId) : '');
+  }, [unit.referenceCode, unit.clientId]);
 
   const receiverPhone = useMemo(
     () =>
@@ -59,7 +61,7 @@ export default function StickyInquiryCard({
   const showOwnerContact = Boolean(
     isOwnUnit && (unit.ownerName?.trim() || unit.ownerMobile?.trim())
   );
-  const showChatImageActions = isOwnUnit;
+  const showChatImageActions = isOwnUnit && !hideChat;
 
   const callLabel = translate(
     "buttons.call",
@@ -161,9 +163,11 @@ export default function StickyInquiryCard({
             }
             actions={{
               onWhatsApp: handleWhatsApp,
-              onRefresh: () => {
-                void conversationControls?.refetch();
-              },
+              onRefresh: hideChat
+                ? undefined
+                : () => {
+                    void conversationControls?.refetch();
+                  },
               callDisabled: !(
                 contactData?.phone?.trim() ||
                 contactData?.whatsapp?.trim() ||
@@ -171,26 +175,33 @@ export default function StickyInquiryCard({
               ) || loading,
               whatsappDisabled: !(contactData?.whatsapp || contactData?.phone) || loading,
               refreshDisabled:
-                !conversationControls || conversationControls.isFetching || loading,
+                hideChat ||
+                !conversationControls ||
+                conversationControls.isFetching ||
+                loading,
               refreshLoading: conversationControls?.isFetching ?? false,
               callLabel,
               whatsappLabel,
               refreshLabel,
             }}
           />
-          <ChatConversation
-            phoneNumber={normalizeConversationPhone(receiverPhone) || receiverPhone}
-            clientId={currentClientId}
-            unitUrl={unitUrl}
-            messageLimit={UNIT_CONVERSATION_MESSAGE_LIMIT}
-            compact
-            fillHeight
-            className="flex-1 min-h-0"
-            onConversationControls={handleConversationControls}
-            onMessagesChange={handleConversationMessages}
-          />
-          {showChatImageActions && rawUnit ? (
-            <ChatImagesToUnit messages={conversationMessages} rawUnit={rawUnit} />
+          {!hideChat ? (
+            <>
+              <ChatConversation
+                phoneNumber={normalizeConversationPhone(receiverPhone) || receiverPhone}
+                clientId={currentClientId}
+                unitUrl={unitUrl}
+                messageLimit={UNIT_CONVERSATION_MESSAGE_LIMIT}
+                compact
+                fillHeight
+                className="flex-1 min-h-0"
+                onConversationControls={handleConversationControls}
+                onMessagesChange={handleConversationMessages}
+              />
+              {showChatImageActions && rawUnit ? (
+                <ChatImagesToUnit messages={conversationMessages} rawUnit={rawUnit} />
+              ) : null}
+            </>
           ) : null}
         </>
       ) : !loading && !receiverPhone && (contactData?.name || contactData?.phone) ? (

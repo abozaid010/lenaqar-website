@@ -12,6 +12,8 @@ interface UnitShareLinksDialogProps {
   isOpen: boolean;
   onClose: () => void;
   unitCode: string | null | undefined;
+  /** Listing client's id for the permanent canonical share URL. */
+  listingClientId?: string | null;
 }
 
 interface ShareLinkRowProps {
@@ -69,6 +71,7 @@ export default function UnitShareLinksDialog({
   isOpen,
   onClose,
   unitCode,
+  listingClientId,
 }: UnitShareLinksDialogProps) {
   const { translate } = useI18n();
   const { data: messagingConfig } = useMessagingProviderConfig();
@@ -83,7 +86,11 @@ export default function UnitShareLinksDialog({
 
   const code = unitCode?.trim() || null;
   const { websiteUrl, whatsappUrl, whatsappDirectUrl } = code
-    ? buildUnitShareLinks({ code, whatsappNumber: linkedWhatsappNumber })
+    ? buildUnitShareLinks({
+        code,
+        listingClientId,
+        whatsappNumber: linkedWhatsappNumber,
+      })
     : { websiteUrl: '', whatsappUrl: null, whatsappDirectUrl: null };
   const whatsappOpenUrl = whatsappDirectUrl ?? whatsappUrl;
   const whatsappMessage = code ? buildUnitWhatsappShareMessage(code) : '';

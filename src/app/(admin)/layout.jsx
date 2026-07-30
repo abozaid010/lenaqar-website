@@ -9,14 +9,54 @@ import { getCachedClientProfile } from "@/lib/getCachedClientProfile.server";
 import { extractModuleActionsFromProfile } from "@/lib/whatsapp-bulk-access";
 import { getUnreadNotificationsCount } from "@/lib/notifications.server";
 import { getLocationsCatalog } from "@/lib/locations/locations-catalog.server";
+import PublicUnitHeader from "@/app/allProberties/_components/Header";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { safeCookieParse } from "@/utils/safeJsonParser";
 import { SELECTION_COLORS } from "@/constants/colors";
 
+/**
+ * Anonymous viewers can open shareable unit detail URLs under this layout group
+ * (proxy allowlists /{clientId}/units/{code}). Render a public shell — no Sidebar,
+ * no profile fetch — so CRM chrome never leaks into privacy_mode.
+ */
+function isAnonymousUnitDetailPath(pathname, hasSession) {
+  if (hasSession || !pathname) return false;
+  const segments = pathname.split("/").filter(Boolean);
+  if (
+    segments.length === 3 &&
+    segments[1] === "units" &&
+    segments[2] !== "pending-approval"
+  ) {
+    return true;
+  }
+  if (
+    segments.length === 2 &&
+    segments[0] === "units" &&
+    segments[1] !== "pending-approval"
+  ) {
+    return true;
+  }
+  return false;
+}
+
 const Layout = async ({ children }) => {
-  // Get the clientID from the cookie on the server then pass it to the Sidebar
   const cookieStore = await cookies();
+  const headerStore = await headers();
+  const browserPathname = headerStore.get("x-lena-pathname") || "";
+  const refreshToken = cookieStore.get(COOKIE_KEYS.REFRESH_TOKEN)?.value;
+  const hasSession = Boolean(refreshToken);
+
+  if (isAnonymousUnitDetailPath(browserPathname, hasSession)) {
+    return (
+      <>
+        <PublicUnitHeader />
+        <main className="mt-20 min-h-screen bg-gray-50">{children}</main>
+      </>
+    );
+  }
+
+  // Get the clientID from the cookie on the server then pass it to the Sidebar
   const clientID = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value;
   const clientInfoCookie = cookieStore.get(COOKIE_KEYS.CLIENT_INFO)?.value;
   const clientName = clientInfoCookie

@@ -109,16 +109,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const unitPages: MetadataRoute.Sitemap = units
     .filter((unit: any) => unit?.code?.trim())
     .slice(0, 5000)
-    .map((unit: any) => ({
-    url: `${MAIN_SITE_URL}/allProberties/${encodeURIComponent(String(unit.code).trim())}`,
-    lastModified: unit.updatedAt
-      ? new Date(unit.updatedAt)
-      : unit.createdAt
-        ? new Date(unit.createdAt)
-        : now,
-    changeFrequency: 'daily' as const,
-    priority: 0.6,
-  }));
+    .map((unit: any) => {
+      const code = encodeURIComponent(String(unit.code).trim());
+      const listingClientId =
+        (unit?.clientId != null && String(unit.clientId).trim()) ||
+        (unit?.client_id != null && String(unit.client_id).trim()) ||
+        null;
+      const path = listingClientId
+        ? `/${listingClientId}/units/${code}`
+        : `/allProberties/${code}`;
+      return {
+        url: `${MAIN_SITE_URL}${path}`,
+        lastModified: unit.updatedAt
+          ? new Date(unit.updatedAt)
+          : unit.createdAt
+            ? new Date(unit.createdAt)
+            : now,
+        changeFrequency: 'daily' as const,
+        priority: 0.6,
+      };
+    });
 
   return [
     ...staticPages,

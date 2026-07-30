@@ -1,42 +1,109 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { SITE_URL } from "../../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
-import { transformUnitToViewModel } from "@/lib/units/unit-selectors";
-import { isOwnClientUnit } from "@/lib/units/unit-ownership";
-import { resolveAdminUnitByCodeParam } from "@/lib/units/unit-legacy-redirect";
+import { loadCanonicalUnitDetail } from "@/lib/units/unit-detail-loader";
 import {
-  buildAdminUnitDetailPath,
-  encodeUnitCodeForPath,
+  buildAdminUnitShareUrl,
   normalizeUnitCodeParam,
 } from "@/lib/units/unit-share-links";
+import { isPrivacyRestrictedViewMode } from "@/lib/units/unit-view-mode";
 import UnitDetailsPage from "@/components/unit-details/unit-details-page";
 import { getServerTranslations } from "@/utils/getServerTranslations";
+import { getDisplayImageUrl } from "@/utils/imageUtils";
+
+const FALLBACK_OG_IMAGE = `${SITE_URL}/images/property_placeholder.jpg`;
+
+function getFirstImageUrl(unit) {
+  const media = unit?.heroImages ?? unit?.images;
+  if (!Array.isArray(media)) return null;
+  const firstImage = media.find(
+    (item) => typeof item === "string" || (item?.url && item?.type !== "video")
+  );
+  if (!firstImage) return null;
+  return typeof firstImage === "string" ? firstImage : firstImage.url;
+}
 
 export async function generateMetadata({ params }) {
   const { code: rawCode } = await params;
   const cookieStore = await cookies();
-  const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value || null;
+  const headerStore = await headers();
+  const browserPathname = headerStore.get("x-lena-pathname");
+  const locale = cookieStore.get("lang")?.value || "ar";
 
   try {
-    const rawUnit = await resolveAdminUnitByCodeParam(rawCode, clientId);
-    if (!rawUnit) {
+    const { t } = await getServerTranslations(locale);
+    const loaded = await loadCanonicalUnitDetail({
+      rawCode,
+      browserPathname,
+      t,
+      locale,
+    });
+    if (!loaded) {
       return {
         title: "Unit Not Found",
         description: "The requested unit could not be found.",
       };
     }
 
-    const unit = transformUnitToViewModel(rawUnit);
+    const { unit, viewMode, listingClientId, detailPath, normalizedCode } =
+      loaded;
+    const isPrivacy = isPrivacyRestrictedViewMode(viewMode);
+    const absoluteUrl = listingClientId
+      ? buildAdminUnitShareUrl(normalizedCode, listingClientId)
+      : `${SITE_URL}${detailPath}`;
+
+    if (isPrivacy) {
+      const firstImageUrl = getDisplayImageUrl(getFirstImageUrl(unit));
+      const ogImageUrl = firstImageUrl || FALLBACK_OG_IMAGE;
+      const title = unit?.title
+        ? `${unit.title} - Property Details | LENAAI AI Sales Agent`
+        : "Property Details - AI Sales Agent | LENAAI";
+      const description = unit
+        ? `${unit.title || "Property"} - View detailed property information including specifications, pricing, and availability.`
+        : "View detailed property information including specifications, pricing, and availability.";
+
+      return {
+        title,
+        description,
+        keywords: [
+          "property details",
+          "real estate",
+          "apartment",
+          "villa",
+          "commercial property",
+          unit?.locationLabel && `properties in ${unit.locationLabel}`,
+        ].filter(Boolean),
+        openGraph: {
+          title,
+          description,
+          url: absoluteUrl,
+          type: "website",
+          images: [
+            {
+              url: ogImageUrl,
+              width: 1200,
+              height: 630,
+              alt: unit?.title || "Property Image",
+            },
+          ],
+        },
+        twitter: {
+          card: "summary_large_image",
+          title,
+          description,
+          images: [ogImageUrl],
+        },
+        alternates: {
+          canonical: absoluteUrl,
+        },
+      };
+    }
+
     const clientName = cookieStore.get(COOKIE_KEYS.CLIENT_INFO)?.value
       ? JSON.parse(cookieStore.get(COOKIE_KEYS.CLIENT_INFO)?.value)?.client_name
       : null;
-    const normalizedCode = normalizeUnitCodeParam(rawCode);
-    const detailPath = normalizedCode
-      ? buildAdminUnitDetailPath(normalizedCode, clientId)
-      : "/units";
-
     const title = unit?.title
       ? `${unit.title} - Admin Unit Details | LENAAI AI Sales Agent`
       : clientName
@@ -52,7 +119,7 @@ export async function generateMetadata({ params }) {
       openGraph: {
         title,
         description,
-        url: `${SITE_URL}${detailPath}`,
+        url: absoluteUrl,
         type: "website",
       },
       robots: {
@@ -60,19 +127,19 @@ export async function generateMetadata({ params }) {
         follow: false,
       },
       alternates: {
-        canonical: `${SITE_URL}${detailPath}`,
+        canonical: absoluteUrl,
       },
     };
   } catch (error) {
     if (error?.digest?.startsWith?.("NEXT_REDIRECT")) throw error;
     return {
-      title: "Admin Unit Details",
-      description: "Manage unit details in LENAAI AI Sales Agent dashboard.",
+      title: "Unit Details",
+      description: "View unit details in LENAAI AI Sales Agent.",
     };
   }
 }
 
-export default async function PrivateUnitDetailsPage({ params }) {
+export default async function CanonicalUnitDetailsPage({ params }) {
   const { code: rawCode } = await params;
 
   if (!normalizeUnitCodeParam(rawCode)) {
@@ -80,36 +147,61 @@ export default async function PrivateUnitDetailsPage({ params }) {
   }
 
   const cookieStore = await cookies();
+  const headerStore = await headers();
+  const browserPathname = headerStore.get("x-lena-pathname");
   const locale = cookieStore.get("lang")?.value || "ar";
-  const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value || null;
   const { t } = await getServerTranslations(locale);
 
   try {
-    const rawUnit = await resolveAdminUnitByCodeParam(rawCode, clientId);
-    if (!rawUnit) {
+    const loaded = await loadCanonicalUnitDetail({
+      rawCode,
+      browserPathname,
+      t,
+      locale,
+    });
+    if (!loaded) {
       notFound();
     }
 
-    const unit = transformUnitToViewModel(rawUnit, t, locale);
-    const normalizedCode = normalizeUnitCodeParam(rawUnit.code) || rawCode;
-    const detailPath = buildAdminUnitDetailPath(normalizedCode, clientId);
-    const isOwnUnit = isOwnClientUnit(rawUnit, clientId);
+    const {
+      unit,
+      rawUnit,
+      isOwnUnit,
+      viewMode,
+      listingClientId,
+      detailPath,
+      normalizedCode,
+    } = loaded;
+
+    const breadcrumbUrl = listingClientId
+      ? buildAdminUnitShareUrl(normalizedCode, listingClientId)
+      : `${SITE_URL}${detailPath}`;
+    const isPrivacy = isPrivacyRestrictedViewMode(viewMode);
+    const unitsListUrl = listingClientId
+      ? `${SITE_URL}/${listingClientId}/units`
+      : `${SITE_URL}/units`;
 
     return (
       <>
         <BreadcrumbSchema
           items={[
             {
-              name: "Units",
-              url: `${SITE_URL}/units`,
+              name: isPrivacy ? "All Properties" : "Units",
+              url: isPrivacy ? `${SITE_URL}/allProberties` : unitsListUrl,
             },
             {
               name: unit.title || "Unit Details",
-              url: `${SITE_URL}${detailPath}`,
+              url: breadcrumbUrl,
             },
           ]}
         />
-        <UnitDetailsPage unit={unit} rawUnit={rawUnit} isOwnUnit={isOwnUnit} />
+        <UnitDetailsPage
+          unit={unit}
+          rawUnit={rawUnit}
+          isOwnUnit={isOwnUnit}
+          viewMode={viewMode}
+          listingClientId={listingClientId}
+        />
       </>
     );
   } catch (error) {

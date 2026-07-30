@@ -54,6 +54,7 @@ export default function UnitsGrid({
 }) {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareUnitCode, setShareUnitCode] = useState(null);
+  const [shareListingClientId, setShareListingClientId] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
   const { t, locale, translate, localeUtils } = useI18n();
   const pathname = usePathname();
@@ -141,12 +142,18 @@ export default function UnitsGrid({
     });
   };
 
-  const handleShareClick = (code, e) => {
+  const handleShareClick = (unit, e) => {
     e.preventDefault();
     e.stopPropagation();
-    const normalizedCode = resolveUnitCodeFromListItem({ code });
+    const normalizedCode = resolveUnitCodeFromListItem(unit);
     if (!normalizedCode) return;
+    const listingId =
+      (unit?.clientId != null && String(unit.clientId).trim()) ||
+      (unit?.client_id != null && String(unit.client_id).trim()) ||
+      clientId ||
+      null;
     setShareUnitCode(normalizedCode);
+    setShareListingClientId(listingId);
     setShowShareDialog(true);
   };
 
@@ -416,7 +423,7 @@ export default function UnitsGrid({
                 {unitCode && (
                   <button
                     type="button"
-                    onClick={(e) => handleShareClick(unitCode, e)}
+                    onClick={(e) => handleShareClick(u, e)}
                     className="absolute top-3 end-3 z-30 flex items-center justify-center min-h-10 min-w-10 p-2 rounded-full bg-white/90 text-primary shadow-md hover:bg-white transition-colors"
                     aria-label={translate("unitShare.title", "Share Property")}
                   >
@@ -443,8 +450,10 @@ export default function UnitsGrid({
         onClose={() => {
           setShowShareDialog(false);
           setShareUnitCode(null);
+          setShareListingClientId(null);
         }}
         unitCode={shareUnitCode}
+        listingClientId={shareListingClientId}
       />
     </>
   );
