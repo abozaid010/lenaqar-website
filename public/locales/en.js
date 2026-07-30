@@ -1461,6 +1461,12 @@ export default {
     upTo: "Up to",
     myInventory: "My Inventory",
     resale: "Resale",
+    inventoryType: "Inventory",
+    inventoryTypes: {
+      primary: "Primary",
+      resale: "Resale",
+      both: "Both",
+    },
     showPresentValue: "Show present value",
     minArea: "Min Area",
     maxArea: "Max Area",

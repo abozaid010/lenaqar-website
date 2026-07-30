@@ -1327,6 +1327,12 @@ export default {
     upTo: "إلى",
     myInventory: "مخزوني",
     resale: "إعادة بيع",
+    inventoryType: "المخزون",
+    inventoryTypes: {
+      primary: "أساسي",
+      resale: "إعادة بيع",
+      both: "الكل",
+    },
     showPresentValue: "إظهار القيمة الحالية",
     minArea: "الحد الأدنى للمساحة",
     maxArea: "الحد الأقصى للمساحة",

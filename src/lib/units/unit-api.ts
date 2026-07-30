@@ -9,6 +9,7 @@ import { getRestrictedDashboardAuthorEmailFromToken, getRoleFromToken } from '@/
 import { getCachedClientProfile } from '@/lib/getCachedClientProfile.server';
 import { extractModuleActionsFromProfile } from '@/lib/whatsapp-bulk-access';
 import { getRestrictedResaleAuthorEmailForRole } from '@/lib/resale-author-access';
+import { applyResaleFilterToApiParams } from '@/lib/units/favorite-searches';
 import { COOKIE_KEYS } from '@/constants/cookieKeys';
 import { cookies } from 'next/headers';
 import { safeMergeParams } from '@/utils/safeJsonParser';
@@ -122,15 +123,17 @@ export async function fetchUnitsFilterServer(
     delete base.visibility;
     delete base.show_present_value;
 
+    const resaleRaw = base.resale;
+    delete base.resale;
+
     const params: Record<string, unknown> = {
       ...base,
       page_size: Number(base.page_size) || 16,
       visibility: 'visible',
     };
 
-    if (base.resale === 'true') {
-      params.is_primary = false;
-    }
+    // primary → is_primary=true; resale → is_primary=false; both → omit is_primary
+    applyResaleFilterToApiParams(params, resaleRaw);
 
     if (base.my_inventory === 'true' && clientId) {
       params.client_id = clientId;

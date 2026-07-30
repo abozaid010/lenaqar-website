@@ -1,6 +1,7 @@
 import {
   createEmptyFilters,
   hasActiveFilters,
+  normalizeResaleFilter,
 } from "@/lib/units/favorite-searches";
 
 const STORAGE_KEY_PREFIX = "lena_units_session_filters";
@@ -16,7 +17,9 @@ function parseStoredFilters(raw) {
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
       return createEmptyFilters();
     }
-    return { ...createEmptyFilters(), ...parsed };
+    const merged = { ...createEmptyFilters(), ...parsed };
+    merged.resale = normalizeResaleFilter(merged.resale);
+    return merged;
   } catch {
     return createEmptyFilters();
   }

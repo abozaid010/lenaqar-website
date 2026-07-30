@@ -21,7 +21,44 @@ export const UNITS_FILTER_PARAM_KEYS = [
 ];
 
 /** UI-only filter keys — never sent to slim-list API. */
-export const UNITS_UI_ONLY_FILTER_KEYS = ["show_present_value"];
+export const UNITS_UI_ONLY_FILTER_KEYS = ["show_present_value", "resale"];
+
+/** Resale inventory filter: "" | "both" = all units; "primary" | "resale". */
+export const RESALE_FILTER_BOTH = "";
+export const RESALE_FILTER_PRIMARY = "primary";
+export const RESALE_FILTER_RESALE = "resale";
+
+/**
+ * Normalize URL / stored / legacy boolean resale values.
+ * Legacy `true` / `"true"` → resale-only.
+ */
+export function normalizeResaleFilter(value) {
+  if (value === true || value === "true" || value === RESALE_FILTER_RESALE) {
+    return RESALE_FILTER_RESALE;
+  }
+  if (value === RESALE_FILTER_PRIMARY) {
+    return RESALE_FILTER_PRIMARY;
+  }
+  return RESALE_FILTER_BOTH;
+}
+
+/**
+ * Map UI `resale` filter onto API params: deletes `resale`, sets `is_primary`
+ * only for primary/resale. Both leaves `is_primary` unset.
+ */
+export function applyResaleFilterToApiParams(params, resaleValue) {
+  if (!params || typeof params !== "object") return params;
+  delete params.resale;
+  const normalized = normalizeResaleFilter(resaleValue);
+  if (normalized === RESALE_FILTER_PRIMARY) {
+    params.is_primary = true;
+  } else if (normalized === RESALE_FILTER_RESALE) {
+    params.is_primary = false;
+  } else {
+    delete params.is_primary;
+  }
+  return params;
+}
 
 const STORAGE_KEY_PREFIX = "lena_units_favorite_searches";
 
@@ -45,7 +82,7 @@ export function createEmptyFilters() {
     min_area: "",
     max_area: "",
     my_inventory: false,
-    resale: false,
+    resale: RESALE_FILTER_BOTH,
     show_present_value: false,
     author: "",
     sort_by: "",
@@ -69,7 +106,7 @@ export function filtersFromSearchParams(searchParams) {
     min_area: searchParams.get("min_area") || "",
     max_area: searchParams.get("max_area") || "",
     my_inventory: searchParams.get("my_inventory") === "true",
-    resale: searchParams.get("resale") === "true",
+    resale: normalizeResaleFilter(searchParams.get("resale")),
     show_present_value: searchParams.get("show_present_value") === "true",
     author: searchParams.get("author") || "",
     sort_by: searchParams.get("sort_by") || "",
@@ -86,8 +123,15 @@ export function filtersToSearchParams(filters, baseParams = new URLSearchParams(
 
   UNITS_FILTER_PARAM_KEYS.forEach((key) => {
     const value = filters[key];
-    if (key === "my_inventory" || key === "resale" || key === "show_present_value") {
+    if (key === "my_inventory" || key === "show_present_value") {
       if (value) params.set(key, "true");
+      return;
+    }
+    if (key === "resale") {
+      const normalized = normalizeResaleFilter(value);
+      if (normalized === RESALE_FILTER_PRIMARY || normalized === RESALE_FILTER_RESALE) {
+        params.set(key, normalized);
+      }
       return;
     }
     if (value && String(value).trim() !== "" && value !== "all") {
@@ -101,16 +145,26 @@ export function filtersToSearchParams(filters, baseParams = new URLSearchParams(
 export function hasActiveFilters(filters) {
   return UNITS_FILTER_PARAM_KEYS.some((key) => {
     const value = filters[key];
-    if (key === "my_inventory" || key === "resale" || key === "show_present_value") {
+    if (key === "my_inventory" || key === "show_present_value") {
       return Boolean(value);
+    }
+    if (key === "resale") {
+      const normalized = normalizeResaleFilter(value);
+      return (
+        normalized === RESALE_FILTER_PRIMARY ||
+        normalized === RESALE_FILTER_RESALE
+      );
     }
     return value && String(value).trim() !== "" && value !== "all";
   });
 }
 
 export function normalizeFilterFieldValue(key, value) {
-  if (key === "my_inventory" || key === "resale" || key === "show_present_value") {
+  if (key === "my_inventory" || key === "show_present_value") {
     return Boolean(value);
+  }
+  if (key === "resale") {
+    return normalizeResaleFilter(value);
   }
   if (value == null || value === "all") return "";
   return String(value).trim();
@@ -119,7 +173,7 @@ export function normalizeFilterFieldValue(key, value) {
 export function areFiltersEqual(a, b) {
   if (!a || !b) return false;
   return UNITS_FILTER_PARAM_KEYS.every((key) => {
-    if (key === "my_inventory" || key === "resale" || key === "show_present_value") {
+    if (key === "my_inventory" || key === "show_present_value") {
       return Boolean(a[key]) === Boolean(b[key]);
     }
     return normalizeFilterFieldValue(key, a[key]) === normalizeFilterFieldValue(key, b[key]);
@@ -166,12 +220,16 @@ export function parseStoredFavorites(raw) {
     if (!Array.isArray(parsed)) return [];
     return parsed
       .filter((item) => item && typeof item === "object" && item.id && item.name)
-      .map((item) => ({
-        id: String(item.id),
-        name: normalizeFavoriteName(item.name),
-        filters: { ...createEmptyFilters(), ...(item.filters || {}) },
-        savedAt: item.savedAt || new Date().toISOString(),
-      }));
+      .map((item) => {
+        const filters = { ...createEmptyFilters(), ...(item.filters || {}) };
+        filters.resale = normalizeResaleFilter(filters.resale);
+        return {
+          id: String(item.id),
+          name: normalizeFavoriteName(item.name),
+          filters,
+          savedAt: item.savedAt || new Date().toISOString(),
+        };
+      });
   } catch {
     return [];
   }
