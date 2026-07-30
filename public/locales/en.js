@@ -562,11 +562,14 @@ export default {
       "Match loaded leads with relevant units, review recommendations, then send WhatsApp messages.",
     sections: {
       audience: "Audience Selection",
+      loadedLeads: "Loaded Leads",
       results: "Matching Results",
     },
     filters: {
       audienceHint:
         "Narrow the loaded audience by lead details, activity, or a specific contact.",
+      showFilters: "Show filters",
+      hideFilters: "Hide filters",
       leadDetails: "Lead details",
       ownerType: "Owner type",
       ownerTypeAll: "All",

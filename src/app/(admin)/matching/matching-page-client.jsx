@@ -163,20 +163,26 @@ export default function MatchingPageClient() {
         onChange={handleFiltersChange}
       />
 
-      <MatchingLeadsList
-        leads={loadedLeads}
-        isLoading={isLoading}
-        isFetchingNextPage={isFetchingNextPage}
-        hasNextPage={Boolean(hasNextPage)}
-        onLoadMore={() => fetchNextPage()}
-      />
+      <div className="grid min-w-0 grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.7fr)]">
+        <div className="min-w-0">
+          <MatchingLeadsList
+            leads={loadedLeads}
+            isLoading={isLoading}
+            isFetchingNextPage={isFetchingNextPage}
+            hasNextPage={Boolean(hasNextPage)}
+            onLoadMore={() => fetchNextPage()}
+          />
+        </div>
 
-      <MatchingResultsSection
-        phase={session.phase}
-        progress={session.progress}
-        results={session.results}
-        onDismissUnit={session.dismissRecommendedUnit}
-      />
+        <div className="min-w-0">
+          <MatchingResultsSection
+            phase={session.phase}
+            progress={session.progress}
+            results={session.results}
+            onDismissUnit={session.dismissRecommendedUnit}
+          />
+        </div>
+      </div>
 
       <MatchingWhatsappPreviewDialog
         isOpen={previewOpen}

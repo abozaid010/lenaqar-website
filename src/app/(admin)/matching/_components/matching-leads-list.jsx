@@ -15,29 +15,48 @@ export default function MatchingLeadsList({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-10">
-        <LoadingSpinner />
+      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+        <div className="border-b border-gray-100 px-4 py-3">
+          <h2 className="text-sm font-semibold text-gray-900">
+            {translate("matching.sections.loadedLeads")}
+          </h2>
+        </div>
+        <div className="flex items-center justify-center py-10">
+          <LoadingSpinner />
+        </div>
       </div>
     );
   }
 
   if (!leads.length) {
     return (
-      <p className="text-sm text-gray-500 py-6 text-center">
-        {translate("matching.empty.noLeads")}
-      </p>
+      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+        <div className="border-b border-gray-100 px-4 py-3">
+          <h2 className="text-sm font-semibold text-gray-900">
+            {translate("matching.sections.loadedLeads")}
+          </h2>
+        </div>
+        <p className="px-4 py-10 text-center text-sm text-gray-500">
+          {translate("matching.empty.noLeads")}
+        </p>
+      </div>
     );
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-        <p className="text-sm text-gray-700">
-          {translate("matching.leadsLoaded", "{count} leads loaded").replace(
-            "{count}",
-            String(leads.length),
-          )}
-        </p>
+    <section className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+      <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-3">
+        <div className="min-w-0">
+          <h2 className="text-sm font-semibold text-gray-900">
+            {translate("matching.sections.loadedLeads")}
+          </h2>
+          <p className="mt-0.5 text-xs text-gray-500">
+            {translate("matching.leadsLoaded", "{count} leads loaded").replace(
+              "{count}",
+              String(leads.length),
+            )}
+          </p>
+        </div>
         {hasNextPage && (
           <button
             type="button"
@@ -51,7 +70,7 @@ export default function MatchingLeadsList({
           </button>
         )}
       </div>
-      <ul className="divide-y divide-gray-100 max-h-64 overflow-y-auto">
+      <ul className="max-h-[32rem] divide-y divide-gray-100 overflow-y-auto">
         {leads.map((lead) => {
           const id = lead.user_id || lead.id;
           return (
@@ -71,6 +90,6 @@ export default function MatchingLeadsList({
           );
         })}
       </ul>
-    </div>
+    </section>
   );
 }

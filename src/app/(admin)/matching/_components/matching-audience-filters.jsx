@@ -21,7 +21,13 @@ import {
   parseDashboardActionFilter,
   serializeDashboardActionFilter,
 } from "@/utils/action-constants";
-import { CalendarRange, Search, SlidersHorizontal, Users } from "lucide-react";
+import {
+  CalendarRange,
+  ChevronDown,
+  Search,
+  SlidersHorizontal,
+  Users,
+} from "lucide-react";
 
 const DATE_PRESETS = [
   { id: "0", daysAgo: 0, labelKey: "matching.filters.today", fallback: "Today" },
@@ -37,6 +43,7 @@ const DATE_PRESETS = [
 export default function MatchingAudienceFilters({ filters, onChange }) {
   const { translate } = useI18n();
   const [searchDraft, setSearchDraft] = useState(filters.query || "");
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const startDay = getDashboardDateDay(filters.start_date) || "";
   const endDay = getDashboardDateDay(filters.end_date) || "";
@@ -64,22 +71,48 @@ export default function MatchingAudienceFilters({ filters, onChange }) {
   };
 
   return (
-    <section className="space-y-5 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
-      <div className="flex items-start gap-3 border-b border-gray-100 pb-4">
+    <section className="rounded-xl border border-gray-200 bg-white shadow-sm">
+      <button
+        type="button"
+        className={`flex w-full items-center gap-3 p-4 text-start transition-colors hover:bg-gray-50 sm:px-5 ${
+          isExpanded ? "border-b border-gray-100" : ""
+        }`}
+        onClick={() => setIsExpanded((expanded) => !expanded)}
+        aria-expanded={isExpanded}
+        aria-controls="matching-audience-filters"
+      >
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
         </span>
-        <div>
-          <h2 className="text-base font-semibold text-gray-900">
+        <span className="min-w-0 flex-1">
+          <span className="block text-base font-semibold text-gray-900">
             {translate("matching.sections.audience")}
-          </h2>
-          <p className="mt-0.5 text-xs leading-5 text-gray-500">
+          </span>
+          <span className="mt-0.5 block truncate text-xs leading-5 text-gray-500">
             {translate("matching.filters.audienceHint")}
-          </p>
-        </div>
-      </div>
+          </span>
+        </span>
+        <span className="inline-flex shrink-0 items-center gap-2 text-xs font-medium text-primary">
+          {translate(
+            isExpanded
+              ? "matching.filters.hideFilters"
+              : "matching.filters.showFilters",
+          )}
+          <ChevronDown
+            className={`h-4 w-4 transition-transform duration-200 ${
+              isExpanded ? "rotate-180" : ""
+            }`}
+            aria-hidden="true"
+          />
+        </span>
+      </button>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {isExpanded && (
+        <div
+          id="matching-audience-filters"
+          className="space-y-5 p-4 sm:p-5"
+        >
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <fieldset className="min-w-0 space-y-4 rounded-lg border border-gray-200 bg-gray-50/60 p-4">
           <legend className="px-1">
             <span className="inline-flex items-center gap-2 text-sm font-semibold text-gray-800">
@@ -224,40 +257,42 @@ export default function MatchingAudienceFilters({ filters, onChange }) {
             </p>
           )}
         </fieldset>
-      </div>
+          </div>
 
-      <div className="rounded-lg border border-gray-200 bg-gray-50/60 p-4">
-        <label
-          htmlFor="matching_search"
-          className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-800"
-        >
-          <Search className="h-4 w-4 text-primary" aria-hidden="true" />
-          {translate("matching.filters.search")}
-        </label>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <input
-            id="matching_search"
-            type="search"
-            className="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            placeholder={translate("matching.filters.searchPlaceholder")}
-            value={searchDraft}
-            onChange={(e) => setSearchDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                patch({ query: searchDraft.trim() });
-              }
-            }}
-          />
-          <button
-            type="button"
-            className="h-10 shrink-0 rounded-md bg-primary px-5 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
-            onClick={() => patch({ query: searchDraft.trim() })}
-          >
-            {translate("matching.filters.search")}
-          </button>
+          <div className="rounded-lg border border-gray-200 bg-gray-50/60 p-4">
+            <label
+              htmlFor="matching_search"
+              className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-800"
+            >
+              <Search className="h-4 w-4 text-primary" aria-hidden="true" />
+              {translate("matching.filters.search")}
+            </label>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <input
+                id="matching_search"
+                type="search"
+                className="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                placeholder={translate("matching.filters.searchPlaceholder")}
+                value={searchDraft}
+                onChange={(e) => setSearchDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    patch({ query: searchDraft.trim() });
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="h-10 shrink-0 rounded-md bg-primary px-5 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
+                onClick={() => patch({ query: searchDraft.trim() })}
+              >
+                {translate("matching.filters.search")}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }
