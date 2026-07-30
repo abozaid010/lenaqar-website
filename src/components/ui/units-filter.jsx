@@ -5,7 +5,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
 import { useProjectsNames, useDeveloperNames } from "@/hooks/use-admin-shared-data";
 import { getClientIdFromToken } from "@/lib/getRoleFromToken.client";
-import { Eye, FileSpreadsheet, Loader2, SlidersHorizontal, Trash2, X } from "lucide-react";
+import { Eye, FileSpreadsheet, Handshake, Loader2, SlidersHorizontal, Trash2, X } from "lucide-react";
 import UnitsLocationSearch from "@/components/ui/inputs/units-location-search";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import SearchablePropertyTypeSelect from "@/components/ui/inputs/searchable-property-type-select";
@@ -32,10 +32,15 @@ const UploadUnitsExcelDialog = dynamic(
   }
 );
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
+import { useBrokerUnitsBadgeOptional } from "@/context/broker-units-badge-context";
 import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-context";
 import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
 import { BULK_AVAILABILITY_DEFAULT_MESSAGE_AR } from "@/lib/units/unit-whatsapp-recipient";
+import { detectBrokerUnitIds } from "@/lib/units/detect-broker-units";
 import { createEmptyFilters, normalizeResaleFilter } from "@/lib/units/favorite-searches";
+import { canViewAllDashboardLeads } from "@/lib/dashboard-lead-access";
+import { isHomeyClientId } from "@/lib/dashboard-filters-storage";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import {
   buildUnitsSortOptions,
   decodeUnitsSortValue,
@@ -380,15 +385,29 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const [isMounted, setIsMounted] = useState(false);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isWhatsappBulkOpen, setIsWhatsappBulkOpen] = useState(false);
+  const [isHomeyClient, setIsHomeyClient] = useState(false);
+  const [isAdminUser, setIsAdminUser] = useState(false);
+  const [isDetectingBrokers, setIsDetectingBrokers] = useState(false);
+  const [brokerDetectProgress, setBrokerDetectProgress] = useState({
+    done: 0,
+    total: 0,
+  });
   const [cityLabels, setCityLabels] = useState({});
   const [districtLabels, setDistrictLabels] = useState({});
   const [subDistrictLabels, setSubDistrictLabels] = useState({});
   const { canShowBulkButton } = useWhatsappBulkAccess();
   const bulkSelection = useUnitsBulkSelectionOptional();
+  const brokerBadges = useBrokerUnitsBadgeOptional();
 
   useEffect(() => {
     setIsMounted(true);
+    setIsHomeyClient(isHomeyClientId(LenaCookiesManager.getClientId()));
+    setIsAdminUser(canViewAllDashboardLeads());
   }, []);
+
+  /** Homey admin/owner only — same detect behavior as hidden units; never shown to others. */
+  const canMarkBrokerUnits =
+    !isPublic && isMounted && isHomeyClient && isAdminUser && Boolean(brokerBadges);
 
   // Lock body scroll while the mobile filter sheet is open
   useEffect(() => {
@@ -437,6 +456,81 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     }
     setIsWhatsappBulkOpen(true);
   };
+
+  const handleDetectBrokerUnits = useCallback(async () => {
+    if (!canMarkBrokerUnits || isDetectingBrokers || !brokerBadges) return;
+    const units = bulkSelection?.visibleUnits;
+    if (!units?.length) {
+      toast.error(
+        translate(
+          "resalePage.brokerDetect.noUnits",
+          "No units to check on this page."
+        )
+      );
+      return;
+    }
+
+    setIsDetectingBrokers(true);
+    setBrokerDetectProgress({ done: 0, total: 0 });
+    try {
+      const ids = await detectBrokerUnitIds(units, {
+        onProgress: (done, total) => setBrokerDetectProgress({ done, total }),
+      });
+      brokerBadges.mergeDetectedBrokerIds(ids);
+      toast.success(
+        translate(
+          "resalePage.brokerDetect.done",
+          "Found {count} broker unit(s)"
+        ).replace("{count}", String(ids.size))
+      );
+    } catch (error) {
+      console.error("Broker detect failed:", error?.message ?? error);
+      toast.error(
+        translate(
+          "resalePage.brokerDetect.failed",
+          "Failed to check broker owners. Please try again."
+        )
+      );
+    } finally {
+      setIsDetectingBrokers(false);
+    }
+  }, [
+    canMarkBrokerUnits,
+    isDetectingBrokers,
+    brokerBadges,
+    bulkSelection?.visibleUnits,
+    translate,
+  ]);
+
+  const brokerDetectButton =
+    canMarkBrokerUnits ? (
+      <button
+        type="button"
+        onClick={handleDetectBrokerUnits}
+        disabled={
+          isDetectingBrokers || !(bulkSelection?.visibleUnits?.length > 0)
+        }
+        className="shrink-0 flex h-10 w-10 min-h-11 min-w-11 lg:min-h-10 lg:min-w-10 items-center justify-center rounded-md border border-amber-300 bg-amber-50 text-amber-900 shadow-sm hover:bg-amber-100 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+        title={translate(
+          "resalePage.brokerDetect.hint",
+          "Look up owner type via quick-search and badge broker units"
+        )}
+        aria-label={translate(
+          "resalePage.brokerDetect.button",
+          "Mark broker units"
+        )}
+      >
+        {isDetectingBrokers ? (
+          <span className="text-[10px] font-semibold tabular-nums leading-none">
+            {brokerDetectProgress.total > 0
+              ? `${brokerDetectProgress.done}/${brokerDetectProgress.total}`
+              : "…"}
+          </span>
+        ) : (
+          <Handshake size={18} aria-hidden />
+        )}
+      </button>
+    ) : null;
 
   const buildActiveFilters = useCallback((nextFilters) => {
     const list = [];
@@ -1114,6 +1208,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         >
           <Eye size={18} aria-hidden />
         </button>
+        {brokerDetectButton}
         {showBulkToolbar && (
           <label className="flex min-w-0 flex-1 items-center gap-1.5 h-10 px-2 rounded-md border border-gray-300 bg-white text-sm font-medium cursor-pointer select-none hover:bg-gray-50">
             <input
@@ -1570,6 +1665,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
                 >
                   <Eye size={19} aria-hidden />
                 </button>
+                {brokerDetectButton}
                 {showBulkToolbar && bulkSelection.hasSelection && (
                   <button
                     type="button"

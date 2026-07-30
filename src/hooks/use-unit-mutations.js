@@ -44,8 +44,35 @@ export function useAddUnit(fromExcel = false) {
         throw new Error(res?.error || res?.error_message || res?.message || "Failed to add unit");
       }
 
-      // Return the full response for Excel uploads to access inserted_ids
-      return fromExcel ? res : formData;
+      // Excel uploads need the full response (inserted_ids, summary, …).
+      if (fromExcel) return res;
+
+      // Prefer API payload so callers can navigate to the new unit (code / unitId).
+      const apiUnit =
+        res?.data && typeof res.data === "object" && !Array.isArray(res.data)
+          ? res.data
+          : res && typeof res === "object"
+            ? res
+            : {};
+      const code =
+        apiUnit.code ??
+        apiUnit.unit_code ??
+        apiUnit.referenceCode ??
+        formData.code ??
+        "";
+      const unitId =
+        apiUnit.unitId ??
+        apiUnit.unit_id ??
+        apiUnit.id ??
+        formData.unitId ??
+        "";
+
+      return {
+        ...formData,
+        ...apiUnit,
+        code: code ? String(code) : "",
+        unitId: unitId ? String(unitId) : formData.unitId,
+      };
     },
     onMutate: async (formData) => {
       if (fromExcel) return;

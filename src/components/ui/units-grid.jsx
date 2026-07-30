@@ -45,7 +45,7 @@ export default function UnitsGrid({
   linkQueryParams = "",
   /**
    * TEMP: unit selection ids whose owner is a broker (from manual quick-search).
-   * When provided, cards show a "Broker" badge. Units page does not pass this.
+   * When provided, cards show a "Broker" badge.
    * @type {Set<string> | null | undefined}
    */
   brokerUnitIds = null,

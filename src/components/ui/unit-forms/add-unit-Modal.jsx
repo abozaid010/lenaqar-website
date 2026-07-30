@@ -189,7 +189,7 @@ export default function AddUnitModal({
   onClose,
   onUnitsExtracted,
   isPageMode = false,
-  /** When set (edit flows), called after a successful save instead of onClose — caller owns success UX. */
+  /** When set, called after a successful save instead of onClose — caller owns success UX. Receives the saved unit payload when available. */
   onSaveSuccess,
 }) {
   const modalRef = useRef(null);
@@ -1138,17 +1138,21 @@ export default function AddUnitModal({
       }
 
       if (!isEdit) {
-        await addUnitMutation.mutateAsync(payload);
-        toast.success(t.toasts.unitAdded);
+        const saved = await addUnitMutation.mutateAsync(payload);
         setExtractedSourceText("");
-        onClose();
+        if (typeof onSaveSuccess === "function") {
+          onSaveSuccess(saved);
+        } else {
+          toast.success(t.toasts.unitAdded);
+          onClose();
+        }
         return;
       }
 
       await updateUnitMutation.mutateAsync(payload);
       setExtractedSourceText("");
       if (typeof onSaveSuccess === "function") {
-        onSaveSuccess();
+        onSaveSuccess(payload);
       } else {
         toast.success(t.toasts.unitUpdated);
         onClose();

@@ -1934,6 +1934,8 @@ export default {
       "Installment years is required when using installments.",
     invalidNumber: "Please enter a valid number.",
     deliveryDateRequired: "Please select a delivery date.",
+    downPaymentMismatchHint:
+      "Down payment usually equals Paid Amount + Over Price. You can keep a different value.",
   },
   unitFormValidation: {
     requiredFields: "Please complete all required fields.",
@@ -2110,6 +2112,9 @@ export default {
     saveSuccessTitle: "Unit saved successfully",
     saveSuccessMessage:
       "All changes were saved. Preview the unit or return to your list.",
+    addSuccessTitle: "Unit added successfully",
+    addSuccessMessage:
+      "Your unit was created. Preview it or return to your list.",
     previewUnit: "Preview Unit",
   },
   unitDetails: {

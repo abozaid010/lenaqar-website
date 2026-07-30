@@ -4,6 +4,7 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 import UnitsGrid from "@/components/ui/units-grid";
 import QueryErrorState from "@/components/ui/query-error-state";
 import { useUnitsPageData } from "@/hooks/use-units-page-data";
+import { useBrokerUnitsBadgeOptional } from "@/context/broker-units-badge-context";
 import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-context";
 import { enforceDashboardAuthorOnParams } from "@/lib/dashboard-lead-access";
 import {
@@ -94,6 +95,7 @@ export default function UnitsPageQueryOptimized({
 
   const bulkSelection = useUnitsBulkSelectionOptional();
   const setVisibleUnitsFromList = bulkSelection?.setVisibleUnitsFromList;
+  const brokerBadges = useBrokerUnitsBadgeOptional();
 
   useEffect(() => {
     if (!publicUnits && setVisibleUnitsFromList) {
@@ -133,6 +135,7 @@ export default function UnitsPageQueryOptimized({
           pagination={pagination}
           readonly={publicUnits}
           showPresentValue={showPresentValue}
+          brokerUnitIds={brokerBadges?.brokerUnitIds ?? null}
         />
       )}
     </div>

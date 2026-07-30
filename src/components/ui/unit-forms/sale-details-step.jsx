@@ -5,7 +5,11 @@ import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { PhoneField } from "@/components/phone/PhoneField";
 import { useI18n } from "@/hooks/useI18n";
 import { isAmountEntered, parseMoneyInput } from "@/utils/parse-amount";
-import { computeRemainingFromPaid } from "@/utils/sale-pricing-validation";
+import {
+  computeDownPaymentFromPaidAndOver,
+  computeRemainingFromPaid,
+  isDownPaymentMatchingPaidAndOver,
+} from "@/utils/sale-pricing-validation";
 
 export default function SaleDetailsStep({
   formData,
@@ -23,6 +27,9 @@ export default function SaleDetailsStep({
   const { t, translate, translateStrict } = useI18n();
   // When false, remaining_amount tracks totalPrice − paid_amount automatically.
   const remainingManualRef = useRef(isAmountEntered(formData.remaining_amount));
+  // When false, empty downPayment may be filled as paid_amount + over_price.
+  // Never overwrite a value the user typed into downPayment.
+  const downPaymentManualRef = useRef(isAmountEntered(formData.downPayment));
 
   const clearFieldError = (name) => {
     if (invalidFields.includes(name)) {
@@ -42,6 +49,14 @@ export default function SaleDetailsStep({
     return fieldErrors[name] || (fallbackKey ? translate(fallbackKey) : false);
   };
 
+  const maybeAutoFillDownPayment = (nextPaid, nextOver, patch) => {
+    if (downPaymentManualRef.current) return;
+    const computed = computeDownPaymentFromPaidAndOver(nextPaid, nextOver);
+    if (computed == null) return;
+    patch.downPayment = computed;
+    clearFieldError("downPayment");
+  };
+
   const handleChange = (e, type = "") => {
     const { name, value } = e.target;
     clearFieldError(name);
@@ -55,19 +70,55 @@ export default function SaleDetailsStep({
         return;
       }
 
+      if (name === "downPayment") {
+        downPaymentManualRef.current = isAmountEntered(parsed);
+        const next = { downPayment: parsed };
+        // Cleared by user → allow helper math again and refill if paid+over exist.
+        if (!downPaymentManualRef.current) {
+          maybeAutoFillDownPayment(
+            formData.paid_amount,
+            formData.over_price,
+            next
+          );
+        }
+        if (!remainingManualRef.current) {
+          const planLikely =
+            isAmountEntered(formData.paid_amount) ||
+            isAmountEntered(next.downPayment) ||
+            isAmountEntered(formData.installment_years);
+          if (planLikely) {
+            const computed = computeRemainingFromPaid(
+              formData.totalPrice,
+              formData.paid_amount
+            );
+            if (computed != null) {
+              next.remaining_amount = computed;
+              clearFieldError("remaining_amount");
+            }
+          }
+        }
+        updateFormData(next);
+        return;
+      }
+
       if (
         name === "totalPrice" ||
         name === "paid_amount" ||
-        name === "downPayment"
+        name === "over_price"
       ) {
         const next = { [name]: parsed };
-        if (!remainingManualRef.current) {
+        const nextPaid =
+          name === "paid_amount" ? parsed : formData.paid_amount;
+        const nextOver =
+          name === "over_price" ? parsed : formData.over_price;
+
+        maybeAutoFillDownPayment(nextPaid, nextOver, next);
+
+        if (!remainingManualRef.current && name !== "over_price") {
           const total =
             name === "totalPrice" ? parsed : formData.totalPrice;
-          const paid =
-            name === "paid_amount" ? parsed : formData.paid_amount;
-          const down =
-            name === "downPayment" ? parsed : formData.downPayment;
+          const paid = nextPaid;
+          const down = next.downPayment ?? formData.downPayment;
           // Only auto-fill once a payment-plan signal exists — never from
           // totalPrice alone (that would turn a cash sale into installments).
           const planLikely =
@@ -121,6 +172,19 @@ export default function SaleDetailsStep({
     clearFieldError(name);
     updateCommonFormData({ [name]: value });
   };
+
+  const downPaymentMismatch =
+    !isDownPaymentMatchingPaidAndOver(
+      formData.downPayment,
+      formData.paid_amount,
+      formData.over_price
+    );
+  const downPaymentWarning = downPaymentMismatch
+    ? translate(
+        "saleDetails.downPaymentMismatchHint",
+        "Down payment usually equals Paid Amount + Over Price. You can keep a different value."
+      )
+    : "";
 
   return (
     <>
@@ -215,6 +279,7 @@ export default function SaleDetailsStep({
               "downPayment",
               "unitFormValidation.downPaymentRequiredInstallments"
             )}
+            warning={downPaymentWarning}
           />
           
           <LenaTextField

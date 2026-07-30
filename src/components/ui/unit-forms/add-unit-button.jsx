@@ -2,20 +2,39 @@
 
 import { useI18n } from "@/hooks/useI18n";
 import { Edit, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import AddUnitModal from "./add-unit-Modal";
+import UnitSaveSuccessDialog from "./unit-save-success-dialog";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import {
+  buildAdminUnitDetailPath,
+  buildUnitDetailHrefFromListItem,
+} from "@/lib/units/unit-share-links";
+import { buildAdminUnitsListPath } from "@/utils/units-navigation-source";
 
 export default function AddUnitButton({ isEdit = false, unitData, disabled = false }) {
-  const { t } = useI18n();
+  const { t, locale, translate } = useI18n();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [extractedQueue, setExtractedQueue] = useState([]);
   const [initialUnitData, setInitialUnitData] = useState(null);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [savedUnit, setSavedUnit] = useState(null);
 
   const openModal = () => {
     if (disabled) return;
     setInitialUnitData(null);
     setExtractedQueue([]);
+    setShowSaveSuccess(false);
+    setSavedUnit(null);
     setIsOpen(true);
+  };
+
+  const closeModalFully = () => {
+    setInitialUnitData(null);
+    setExtractedQueue([]);
+    setIsOpen(false);
   };
 
   const closeModal = () => {
@@ -24,9 +43,7 @@ export default function AddUnitButton({ isEdit = false, unitData, disabled = fal
       setExtractedQueue((q) => q.slice(1));
       setIsOpen(true);
     } else {
-      setInitialUnitData(null);
-      setExtractedQueue([]);
-      setIsOpen(false);
+      closeModalFully();
     }
   };
 
@@ -36,7 +53,44 @@ export default function AddUnitButton({ isEdit = false, unitData, disabled = fal
     setIsOpen(true);
   };
 
+  const handleSaveSuccess = (unit) => {
+    setSavedUnit(unit && typeof unit === "object" ? unit : null);
+    setExtractedQueue([]);
+    setInitialUnitData(null);
+    setIsOpen(false);
+    setShowSaveSuccess(true);
+  };
+
+  const handleDismissToList = () => {
+    setShowSaveSuccess(false);
+    setSavedUnit(null);
+    // Stay on the current units list URL so filters/search/cache stay intact.
+  };
+
+  const handlePreviewUnit = () => {
+    setShowSaveSuccess(false);
+    const clientId = LenaCookiesManager.getClientId();
+    const href =
+      buildUnitDetailHrefFromListItem(savedUnit, { clientId }) ||
+      (savedUnit?.code
+        ? buildAdminUnitDetailPath(savedUnit.code, clientId)
+        : null);
+    setSavedUnit(null);
+    if (href) {
+      router.push(href);
+      return;
+    }
+    router.push(buildAdminUnitsListPath(clientId));
+  };
+
   const unitDataToPass = isEdit ? unitData : initialUnitData ?? unitData;
+  const canPreview = Boolean(
+    savedUnit &&
+      (savedUnit.code ||
+        savedUnit.unitId ||
+        savedUnit.unit_id ||
+        savedUnit.id)
+  );
 
   return (
     <>
@@ -65,8 +119,26 @@ export default function AddUnitButton({ isEdit = false, unitData, disabled = fal
           unitData={unitDataToPass}
           onClose={closeModal}
           onUnitsExtracted={handleUnitsExtracted}
+          onSaveSuccess={isEdit ? undefined : handleSaveSuccess}
         />
       )}
+
+      <UnitSaveSuccessDialog
+        isOpen={showSaveSuccess}
+        onDismiss={handleDismissToList}
+        onPreview={handlePreviewUnit}
+        canPreview={canPreview}
+        title={translate(
+          "unitPage.addSuccessTitle",
+          locale === "ar" ? "تمت إضافة الوحدة بنجاح" : "Unit added successfully"
+        )}
+        message={translate(
+          "unitPage.addSuccessMessage",
+          locale === "ar"
+            ? "تم إنشاء الوحدة. يمكنك معاينتها أو العودة إلى القائمة."
+            : "Your unit was created. Preview it or return to your list."
+        )}
+      />
     </>
   );
 }

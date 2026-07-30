@@ -1768,6 +1768,8 @@ export default {
     installmentYearsRequiredInstallments: "سنوات التقسيط مطلوبة عند استخدام التقسيط.",
     invalidNumber: "يرجى إدخال رقم صالح.",
     deliveryDateRequired: "يرجى اختيار تاريخ التسليم.",
+    downPaymentMismatchHint:
+      "المقدم عادةً يساوي المدفوع + الزيادة. يمكنك الإبقاء على قيمة مختلفة.",
   },
   unitFormValidation: {
     requiredFields: "يرجى إكمال جميع الحقول المطلوبة.",
@@ -1952,6 +1954,9 @@ export default {
     saveSuccessTitle: "تم حفظ الوحدة بنجاح",
     saveSuccessMessage:
       "تم حفظ جميع التعديلات. يمكنك معاينة الوحدة أو العودة إلى القائمة.",
+    addSuccessTitle: "تمت إضافة الوحدة بنجاح",
+    addSuccessMessage:
+      "تم إنشاء الوحدة. يمكنك معاينتها أو العودة إلى القائمة.",
     previewUnit: "معاينة الوحدة",
   },
   unitDetails: {

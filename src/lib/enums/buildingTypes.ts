@@ -49,6 +49,46 @@ export const BUILDING_TYPE_VALUES = [
 
 export type BuildingTypeValue = (typeof BUILDING_TYPE_VALUES)[number];
 
+/**
+ * Building types treated as commercial for unit-form field visibility
+ * (e.g. outdoor area is commercial-only; residential hides it).
+ */
+export const COMMERCIAL_BUILDING_TYPES = [
+  "office",
+  "shop",
+  "pharmacy",
+  "clinic",
+  "cabinet",
+  "commercial",
+  "office villa",
+  "food and beverage",
+  "retail",
+  "admin",
+  "bank",
+  "medical",
+  "warehouse",
+  "beauty salon",
+  "cafe",
+  "gym",
+  "parking",
+  "garage",
+  "workspace",
+  "storage",
+] as const;
+
+export type CommercialBuildingTypeValue =
+  (typeof COMMERCIAL_BUILDING_TYPES)[number];
+
+export function isCommercialBuildingType(
+  buildingType: string | null | undefined
+): boolean {
+  const v = String(buildingType ?? "")
+    .trim()
+    .toLowerCase();
+  if (!v) return false;
+  return (COMMERCIAL_BUILDING_TYPES as readonly string[]).includes(v);
+}
+
 export type TranslateFn = (key: string, fallback?: string | null) => string;
 
 const humanize = (value: string): string => {
