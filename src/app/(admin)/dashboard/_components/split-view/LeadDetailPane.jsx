@@ -59,7 +59,8 @@ import EditRequirementDialog from "./EditRequirementDialog";
 import EditUserInfoDialog from "./EditUserInfoDialog";
 import LeadDetailTabs from "./LeadDetailTabs";
 import BulkLeadActionDialog from "./BulkLeadActionDialog";
-import { getOwnerTypeLabel, normalizeOwnerType } from "@/constants/owner-type";
+import { getOwnerTypeLabel, normalizeOwnerType, isListingOwnerType } from "@/constants/owner-type";
+import LeadOwnerUnitsPanel from "./LeadOwnerUnitsPanel";
 import { useLocalizedLocationLabels } from "@/hooks/use-localized-location-labels";
 import { isDashboardAdminRole } from "@/lib/dashboard-lead-access";
 import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
@@ -190,7 +191,8 @@ export default function LeadDetailPane({
   const { data: requirements } = useQuery({
     queryKey: ["requirements", userId],
     queryFn: () => getClientRequirements(userId),
-    enabled: !!userId,
+    enabled:
+      !!userId && !isListingOwnerType(leadSummary?.owner_type),
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
   });
@@ -261,6 +263,7 @@ export default function LeadDetailPane({
   const ownerType = normalizeOwnerType(
     leadSummary?.owner_type ?? data?.data?.owner_type,
   );
+  const showListedUnits = isListingOwnerType(ownerType);
   const ownerTypeLabel = ownerType ? getOwnerTypeLabel(ownerType, translate) : "";
   const companyName =
     leadSummary?.company_name ?? data?.data?.company_name ?? "";
@@ -924,8 +927,10 @@ export default function LeadDetailPane({
     },
     {
       id: "requirements",
-      label: translate("leadDetail.tabs.requirements"),
-      icon: FileText,
+      label: showListedUnits
+        ? translate("leadDetail.tabs.units")
+        : translate("leadDetail.tabs.requirements"),
+      icon: showListedUnits ? Home : FileText,
     },
     {
       id: "actions",
@@ -1170,7 +1175,13 @@ export default function LeadDetailPane({
 
           {activeTab === "requirements" && (
             <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 bg-gray-50/40">
-              {renderRequirementSummaryCard()}
+              {showListedUnits ? (
+                <LeadOwnerUnitsPanel
+                  phone={phoneE164ForLinks || phoneNumber || ""}
+                />
+              ) : (
+                renderRequirementSummaryCard()
+              )}
             </div>
           )}
 
