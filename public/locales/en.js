@@ -1518,6 +1518,7 @@ export default {
       all: "All phone numbers",
       search: "Search by name or phone",
       noResults: "No matching phone numbers",
+      usePhone: "Use {phone}",
     },
     favoriteSearches: {
       title: "Favorite Searches",

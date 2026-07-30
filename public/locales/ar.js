@@ -1384,6 +1384,7 @@ export default {
       all: "كل أرقام الهاتف",
       search: "ابحث بالاسم أو الهاتف",
       noResults: "لا توجد أرقام مطابقة",
+      usePhone: "استخدم {phone}",
     },
     favoriteSearches: {
       title: "عمليات البحث المفضلة",
