@@ -565,6 +565,9 @@ export default {
       results: "Matching Results",
     },
     filters: {
+      audienceHint:
+        "Narrow the loaded audience by lead details, activity, or a specific contact.",
+      leadDetails: "Lead details",
       ownerType: "Owner type",
       ownerTypeAll: "All",
       dateRange: "Date range",

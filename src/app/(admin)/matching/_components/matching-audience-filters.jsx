@@ -21,6 +21,7 @@ import {
   parseDashboardActionFilter,
   serializeDashboardActionFilter,
 } from "@/utils/action-constants";
+import { CalendarRange, Search, SlidersHorizontal, Users } from "lucide-react";
 
 const DATE_PRESETS = [
   { id: "0", daysAgo: 0, labelKey: "matching.filters.today", fallback: "Today" },
@@ -63,51 +64,102 @@ export default function MatchingAudienceFilters({ filters, onChange }) {
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 space-y-4">
-      <h2 className="text-sm font-semibold text-gray-900">
-        {translate("matching.sections.audience")}
-      </h2>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-gray-600">
-            {translate("matching.filters.ownerType")}
-          </label>
-          <select
-            className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
-            value={filters.owner_type || ""}
-            onChange={(e) => {
-              const raw = e.target.value;
-              const serialized = serializeOwnerTypeFilter(raw);
-              patch({ owner_type: serialized || "" });
-            }}
-          >
-            <option value="">
-              {translate("matching.filters.ownerTypeAll")}
-            </option>
-            {OWNER_TYPES.map((value) => (
-              <option key={value} value={value}>
-                {getOwnerTypeLabel(value, translate)}
-              </option>
-            ))}
-          </select>
+    <section className="space-y-5 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
+      <div className="flex items-start gap-3 border-b border-gray-100 pb-4">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+        </span>
+        <div>
+          <h2 className="text-base font-semibold text-gray-900">
+            {translate("matching.sections.audience")}
+          </h2>
+          <p className="mt-0.5 text-xs leading-5 text-gray-500">
+            {translate("matching.filters.audienceHint")}
+          </p>
         </div>
+      </div>
 
-        <div className="flex flex-col gap-1 sm:col-span-2">
-          <label className="text-xs font-medium text-gray-600">
-            {translate("matching.filters.dateRange")}
-          </label>
-          <div className="flex flex-wrap gap-2 mb-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <fieldset className="min-w-0 space-y-4 rounded-lg border border-gray-200 bg-gray-50/60 p-4">
+          <legend className="px-1">
+            <span className="inline-flex items-center gap-2 text-sm font-semibold text-gray-800">
+              <Users className="h-4 w-4 text-primary" aria-hidden="true" />
+              {translate("matching.filters.leadDetails")}
+            </span>
+          </legend>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <label
+                htmlFor="matching_owner_type"
+                className="text-xs font-medium text-gray-700"
+              >
+                {translate("matching.filters.ownerType")}
+              </label>
+              <select
+                id="matching_owner_type"
+                className="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                value={filters.owner_type || ""}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  const serialized = serializeOwnerTypeFilter(raw);
+                  patch({ owner_type: serialized || "" });
+                }}
+              >
+                <option value="">
+                  {translate("matching.filters.ownerTypeAll")}
+                </option>
+                {OWNER_TYPES.map((value) => (
+                  <option key={value} value={value}>
+                    {getOwnerTypeLabel(value, translate)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <label className="text-xs font-medium text-gray-700">
+                {translate("matching.filters.leadAction")}
+              </label>
+              <ActionSelect
+                selectionMode="multiple"
+                includeFilterOnly
+                ownerType={filters.owner_type || null}
+                values={actionValues}
+                onValuesChange={(values) => {
+                  patch({
+                    action: serializeDashboardActionFilter(values) || "",
+                  });
+                }}
+                className="min-h-10 bg-white text-sm"
+              />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset className="min-w-0 space-y-4 rounded-lg border border-gray-200 bg-gray-50/60 p-4">
+          <legend className="px-1">
+            <span className="inline-flex items-center gap-2 text-sm font-semibold text-gray-800">
+              <CalendarRange className="h-4 w-4 text-primary" aria-hidden="true" />
+              {translate("matching.filters.dateRange")}
+            </span>
+          </legend>
+
+          <div
+            className="flex flex-wrap gap-2"
+            aria-label={translate("matching.filters.presets")}
+          >
             {DATE_PRESETS.map((preset) => {
               const selected = activePresetId === preset.id;
               return (
                 <button
                   key={preset.id}
                   type="button"
-                  className={`rounded-md px-2.5 py-1 text-xs font-medium border ${
+                  aria-pressed={selected}
+                  className={`rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors ${
                     selected
-                      ? "bg-primary text-white border-primary"
-                      : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                      ? "border-primary bg-primary text-white"
+                      : "border-gray-200 bg-white text-gray-700 hover:border-primary/30 hover:bg-primary/5"
                   }`}
                   onClick={() => {
                     const range = buildDashboardDateRangeDaysAgo(preset.daysAgo);
@@ -122,14 +174,19 @@ export default function MatchingAudienceFilters({ filters, onChange }) {
               );
             })}
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="flex flex-col gap-1">
-              <span className="text-[11px] text-gray-500">
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <label
+                htmlFor="matching_start_date"
+                className="text-xs font-medium text-gray-700"
+              >
                 {translate("matching.filters.startDate")}
-              </span>
+              </label>
               <input
+                id="matching_start_date"
                 type="date"
-                className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+                className="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 value={startDay}
                 onChange={(e) => {
                   const ymd = e.target.value;
@@ -138,13 +195,17 @@ export default function MatchingAudienceFilters({ filters, onChange }) {
                 }}
               />
             </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-[11px] text-gray-500">
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <label
+                htmlFor="matching_end_date"
+                className="text-xs font-medium text-gray-700"
+              >
                 {translate("matching.filters.endDate")}
-              </span>
+              </label>
               <input
+                id="matching_end_date"
                 type="date"
-                className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+                className="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 value={endDay}
                 onChange={(e) => {
                   const ymd = e.target.value;
@@ -155,62 +216,49 @@ export default function MatchingAudienceFilters({ filters, onChange }) {
             </div>
           </div>
           {isDateInvalid && (
-            <p className="text-xs text-red-600 mt-1">
+            <p className="text-xs text-red-600" role="alert">
               {translate(
                 "dashboardSummary.invalid_date_range",
                 "Start date must be before or equal to end date",
               )}
             </p>
           )}
-        </div>
+        </fieldset>
+      </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-gray-600">
-            {translate("matching.filters.leadAction")}
-          </label>
-          <ActionSelect
-            selectionMode="multiple"
-            includeFilterOnly
-            ownerType={filters.owner_type || null}
-            values={actionValues}
-            onValuesChange={(values) => {
-              patch({
-                action: serializeDashboardActionFilter(values) || "",
-              });
+      <div className="rounded-lg border border-gray-200 bg-gray-50/60 p-4">
+        <label
+          htmlFor="matching_search"
+          className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-800"
+        >
+          <Search className="h-4 w-4 text-primary" aria-hidden="true" />
+          {translate("matching.filters.search")}
+        </label>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <input
+            id="matching_search"
+            type="search"
+            className="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            placeholder={translate("matching.filters.searchPlaceholder")}
+            value={searchDraft}
+            onChange={(e) => setSearchDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                patch({ query: searchDraft.trim() });
+              }
             }}
-            className="text-sm"
           />
-        </div>
-
-        <div className="flex flex-col gap-1 sm:col-span-2 lg:col-span-4">
-          <label className="text-xs font-medium text-gray-600">
+          <button
+            type="button"
+            className="h-10 shrink-0 rounded-md bg-primary px-5 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
+            onClick={() => patch({ query: searchDraft.trim() })}
+          >
             {translate("matching.filters.search")}
-          </label>
-          <div className="flex gap-2">
-            <input
-              type="search"
-              className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
-              placeholder={translate("matching.filters.searchPlaceholder")}
-              value={searchDraft}
-              onChange={(e) => setSearchDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  patch({ query: searchDraft.trim() });
-                }
-              }}
-            />
-            <button
-              type="button"
-              className="shrink-0 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white"
-              onClick={() => patch({ query: searchDraft.trim() })}
-            >
-              {translate("matching.filters.search")}
-            </button>
-          </div>
+          </button>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 

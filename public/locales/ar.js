@@ -571,6 +571,9 @@ export default {
       results: "نتائج المطابقة",
     },
     filters: {
+      audienceHint:
+        "حدّد العملاء المحمّلين حسب بيانات العميل أو النشاط أو ابحث عن عميل محدد.",
+      leadDetails: "بيانات العميل",
       ownerType: "نوع العميل",
       ownerTypeAll: "الكل",
       dateRange: "الفترة الزمنية",
