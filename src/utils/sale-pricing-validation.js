@@ -22,6 +22,33 @@ export function computeRemainingFromPaid(totalPrice, paidAmount) {
 }
 
 /**
+ * Helper math: downPayment = paid_amount + over_price.
+ * Returns null unless both paid and over are entered and each is >= 0.
+ */
+export function computeDownPaymentFromPaidAndOver(paidAmount, overPrice) {
+  if (!isAmountEntered(paidAmount) || !isAmountEntered(overPrice)) return null;
+  const paid = parseAmount(paidAmount);
+  const over = parseAmount(overPrice);
+  if (!Number.isFinite(paid) || paid < 0) return null;
+  if (!Number.isFinite(over) || over < 0) return null;
+  return paid + over;
+}
+
+/**
+ * True when downPayment matches paid + over (or when there is nothing to compare).
+ * Used for a soft, non-blocking warning only.
+ */
+export function isDownPaymentMatchingPaidAndOver(
+  downPayment,
+  paidAmount,
+  overPrice
+) {
+  const expected = computeDownPaymentFromPaidAndOver(paidAmount, overPrice);
+  if (expected == null || !isAmountEntered(downPayment)) return true;
+  return parseAmount(downPayment) === expected;
+}
+
+/**
  * Sale create/update API (`/units/v1/add-sale`, `/units/v1/update-sale`) requires
  * these amount keys on the body. Cash sales leave them blank in the UI; omitting
  * the key causes FastAPI validation errors such as:

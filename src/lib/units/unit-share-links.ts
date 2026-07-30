@@ -28,6 +28,8 @@ type UnitListLinkFields = {
   unitId?: unknown;
   unit_id?: unknown;
   id?: unknown;
+  clientId?: unknown;
+  client_id?: unknown;
 };
 
 /** Safely read a unit code from list/API payloads (string or number). */
@@ -52,6 +54,9 @@ export function resolveUnitIdFromListItem(
 /**
  * Detail href for a unit card: prefers code, falls back to unitId (legacy route resolves by id).
  * Returns null when neither identifier is available.
+ *
+ * Always uses the canonical `/{listingClientId}/units/{code}` path when a clientId is known.
+ * `readonly` is kept for API compat but no longer switches to /allProberties.
  */
 export function buildUnitDetailHrefFromListItem(
   unit: UnitListLinkFields | null | undefined,
@@ -66,23 +71,35 @@ export function buildUnitDetailHrefFromListItem(
   const segment = code ?? unitId;
   if (!segment) return null;
 
-  const path = opts?.readonly
-    ? buildPublicUnitDetailPath(segment)
-    : buildAdminUnitDetailPath(segment, opts?.clientId);
+  const listingClientId =
+    (unit?.clientId != null && String(unit.clientId).trim()) ||
+    (unit?.client_id != null && String(unit.client_id).trim()) ||
+    opts?.clientId ||
+    null;
+
+  const path = buildAdminUnitDetailPath(segment, listingClientId);
   return path + (opts?.queryParams || '');
 }
 
-/** Public marketing share URL: https://lenaai.net/allProberties/{code} */
-export function buildPublicUnitShareUrl(code: string): string {
-  const normalized = normalizeUnitCodeParam(code);
-  if (!normalized) return `${SITE_URL}/allProberties`;
-  return `${SITE_URL}/allProberties/${encodeUnitCodeForPath(normalized)}`;
+/**
+ * @deprecated Prefer buildCanonicalUnitShareUrl — kept as alias for redirects/legacy callers.
+ * Public marketing share URL historically pointed at /allProberties/{code}.
+ */
+export function buildPublicUnitShareUrl(code: string, listingClientId?: string | null): string {
+  return buildCanonicalUnitShareUrl(code, listingClientId);
 }
 
-/** Relative public detail path for in-app navigation. */
-export function buildPublicUnitDetailPath(code: string): string {
+/** Relative public detail path — now aliases to canonical admin path when clientId known. */
+export function buildPublicUnitDetailPath(
+  code: string,
+  listingClientId?: string | null
+): string {
   const normalized = normalizeUnitCodeParam(code);
-  if (!normalized) return '/allProberties';
+  if (!normalized) return listingClientId ? `/${listingClientId}/units` : '/allProberties';
+  if (listingClientId) {
+    return buildAdminUnitDetailPath(normalized, listingClientId);
+  }
+  // Without listing clientId, keep legacy alias path (redirect page resolves clientId).
   return `/allProberties/${encodeUnitCodeForPath(normalized)}`;
 }
 
@@ -106,12 +123,20 @@ export function buildAdminUnitEditPath(
   return `${detail}/edit`;
 }
 
-/** Full admin CRM share URL: https://example.com/{clientId}/units/{code} */
+/** Full canonical share URL: https://example.com/{listingClientId}/units/{code} */
 export function buildAdminUnitShareUrl(
   code: string,
   clientId?: string | null
 ): string {
   return `${SITE_URL}${buildAdminUnitDetailPath(code, clientId)}`;
+}
+
+/** Canonical permanent share URL (same as buildAdminUnitShareUrl). */
+export function buildCanonicalUnitShareUrl(
+  code: string,
+  listingClientId?: string | null
+): string {
+  return buildAdminUnitShareUrl(code, listingClientId);
 }
 
 /** Arabic prefix for the pre-filled WhatsApp message when sharing a unit. */
@@ -144,13 +169,14 @@ export function buildUnitWhatsAppShareUrl(
 
 export function buildUnitShareLinks(opts: {
   code: string;
+  listingClientId?: string | null;
   whatsappNumber?: string | null;
 }): {
   websiteUrl: string;
   whatsappUrl: string | null;
   whatsappDirectUrl: string | null;
 } {
-  const websiteUrl = buildPublicUnitShareUrl(opts.code);
+  const websiteUrl = buildCanonicalUnitShareUrl(opts.code, opts.listingClientId);
   const whatsappUrl = normalizeUnitCodeParam(opts.code)
     ? buildPublicUnitWhatsAppPageUrl(opts.code)
     : null;

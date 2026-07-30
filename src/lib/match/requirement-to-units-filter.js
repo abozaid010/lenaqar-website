@@ -4,6 +4,8 @@
  * Rent and sale both use min_price / max_price (monthly for rent, total for sale).
  */
 
+import { normalizePricingRange } from "../matching/pricing-range.js";
+
 export const MATCH_UNITS_PAGE_SIZE = 6;
 
 function pickLast(v) {
@@ -57,28 +59,20 @@ export const LOWERCASE_UNIT_FILTER_KEYS = new Set([
 
 function applyPriceFilters(filters, requirement, purpose) {
   const p = String(purpose || "").toLowerCase();
-  const minPrice = toPositiveNumber(requirement.min_price);
-  const maxPrice = toPositiveNumber(requirement.max_price);
-  const totalPrice = toPositiveNumber(requirement.totalPrice);
-  const monthlyInstallment = toPositiveNumber(requirement.monthlyInstallment);
+  if (p !== "rent" && p !== "buy" && p !== "sell") return;
+
+  const priceRange = normalizePricingRange({
+    min: requirement.min_price,
+    max: requirement.max_price,
+    single: requirement.totalPrice,
+  });
+  if (priceRange?.min != null) filters.min_price = priceRange.min;
+  if (priceRange?.max != null) filters.max_price = priceRange.max;
 
   if (p === "rent") {
-    if (minPrice != null) filters.min_price = minPrice;
-    if (maxPrice != null) filters.max_price = maxPrice;
-    if (totalPrice != null && maxPrice == null && minPrice == null) {
-      filters.max_price = totalPrice;
-    }
+    const monthlyInstallment = toPositiveNumber(requirement.monthlyInstallment);
     if (monthlyInstallment != null) {
       filters.monthly_installment = monthlyInstallment;
-    }
-    return;
-  }
-
-  if (p === "buy" || p === "sell") {
-    if (minPrice != null) filters.min_price = minPrice;
-    if (maxPrice != null) filters.max_price = maxPrice;
-    if (totalPrice != null && maxPrice == null && minPrice == null) {
-      filters.max_price = totalPrice;
     }
   }
 }
@@ -129,8 +123,13 @@ export function requirementToUnitsFilter(requirement, clientId) {
   const deliveryDate = requirement.deliveryDate;
   if (deliveryDate) filters.delivery_date = String(deliveryDate).trim();
 
-  const downPayment = toPositiveNumber(requirement.downPayment);
-  if (downPayment != null) filters.down_payment = downPayment;
+  const downPaymentRange = normalizePricingRange({
+    single: requirement.downPayment,
+  });
+  // The existing API accepts one upper-bound down_payment filter.
+  if (downPaymentRange?.max != null) {
+    filters.down_payment = downPaymentRange.max;
+  }
 
   applyPriceFilters(filters, requirement, purpose);
 

@@ -13,9 +13,11 @@ import {
 } from "../parse-amount.js";
 import {
   applySaleApiAmountDefaults,
+  computeDownPaymentFromPaidAndOver,
   computeRemainingFromPaid,
   getDefaultDeliveredDateIso,
   hasSalePaymentPlanInfo,
+  isDownPaymentMatchingPaidAndOver,
   validateSalePricing,
 } from "../sale-pricing-validation.js";
 
@@ -241,4 +243,19 @@ test("hasSalePaymentPlanInfo ignores totalPrice-only cash", () => {
     }),
     true
   );
+});
+
+test("computeDownPaymentFromPaidAndOver sums entered non-negative amounts", () => {
+  assert.equal(computeDownPaymentFromPaidAndOver("", 100), null);
+  assert.equal(computeDownPaymentFromPaidAndOver(100, ""), null);
+  assert.equal(computeDownPaymentFromPaidAndOver(100000, 50000), 150000);
+  assert.equal(computeDownPaymentFromPaidAndOver(0, 0), 0);
+  assert.equal(computeDownPaymentFromPaidAndOver("1,000", "500"), 1500);
+});
+
+test("isDownPaymentMatchingPaidAndOver soft-checks equation", () => {
+  assert.equal(isDownPaymentMatchingPaidAndOver("", 100, 50), true);
+  assert.equal(isDownPaymentMatchingPaidAndOver(150, 100, 50), true);
+  assert.equal(isDownPaymentMatchingPaidAndOver(200, 100, 50), false);
+  assert.equal(isDownPaymentMatchingPaidAndOver(100, 100, ""), true);
 });

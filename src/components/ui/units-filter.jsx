@@ -5,7 +5,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
 import { useProjectsNames, useDeveloperNames } from "@/hooks/use-admin-shared-data";
 import { getClientIdFromToken } from "@/lib/getRoleFromToken.client";
-import { Eye, FileSpreadsheet, Loader2, SlidersHorizontal, Trash2, X } from "lucide-react";
+import { Eye, FileSpreadsheet, Handshake, Loader2, SlidersHorizontal, Trash2, X } from "lucide-react";
 import UnitsLocationSearch from "@/components/ui/inputs/units-location-search";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import SearchablePropertyTypeSelect from "@/components/ui/inputs/searchable-property-type-select";
@@ -32,10 +32,15 @@ const UploadUnitsExcelDialog = dynamic(
   }
 );
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
+import { useBrokerUnitsBadgeOptional } from "@/context/broker-units-badge-context";
 import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-context";
 import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
 import { BULK_AVAILABILITY_DEFAULT_MESSAGE_AR } from "@/lib/units/unit-whatsapp-recipient";
-import { createEmptyFilters } from "@/lib/units/favorite-searches";
+import { detectBrokerUnitIds } from "@/lib/units/detect-broker-units";
+import { createEmptyFilters, normalizeResaleFilter } from "@/lib/units/favorite-searches";
+import { canViewAllDashboardLeads } from "@/lib/dashboard-lead-access";
+import { isHomeyClientId } from "@/lib/dashboard-filters-storage";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import {
   buildUnitsSortOptions,
   decodeUnitsSortValue,
@@ -380,15 +385,29 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const [isMounted, setIsMounted] = useState(false);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isWhatsappBulkOpen, setIsWhatsappBulkOpen] = useState(false);
+  const [isHomeyClient, setIsHomeyClient] = useState(false);
+  const [isAdminUser, setIsAdminUser] = useState(false);
+  const [isDetectingBrokers, setIsDetectingBrokers] = useState(false);
+  const [brokerDetectProgress, setBrokerDetectProgress] = useState({
+    done: 0,
+    total: 0,
+  });
   const [cityLabels, setCityLabels] = useState({});
   const [districtLabels, setDistrictLabels] = useState({});
   const [subDistrictLabels, setSubDistrictLabels] = useState({});
   const { canShowBulkButton } = useWhatsappBulkAccess();
   const bulkSelection = useUnitsBulkSelectionOptional();
+  const brokerBadges = useBrokerUnitsBadgeOptional();
 
   useEffect(() => {
     setIsMounted(true);
+    setIsHomeyClient(isHomeyClientId(LenaCookiesManager.getClientId()));
+    setIsAdminUser(canViewAllDashboardLeads());
   }, []);
+
+  /** Homey admin/owner only — same detect behavior as hidden units; never shown to others. */
+  const canMarkBrokerUnits =
+    !isPublic && isMounted && isHomeyClient && isAdminUser && Boolean(brokerBadges);
 
   // Lock body scroll while the mobile filter sheet is open
   useEffect(() => {
@@ -438,6 +457,81 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     setIsWhatsappBulkOpen(true);
   };
 
+  const handleDetectBrokerUnits = useCallback(async () => {
+    if (!canMarkBrokerUnits || isDetectingBrokers || !brokerBadges) return;
+    const units = bulkSelection?.visibleUnits;
+    if (!units?.length) {
+      toast.error(
+        translate(
+          "resalePage.brokerDetect.noUnits",
+          "No units to check on this page."
+        )
+      );
+      return;
+    }
+
+    setIsDetectingBrokers(true);
+    setBrokerDetectProgress({ done: 0, total: 0 });
+    try {
+      const ids = await detectBrokerUnitIds(units, {
+        onProgress: (done, total) => setBrokerDetectProgress({ done, total }),
+      });
+      brokerBadges.mergeDetectedBrokerIds(ids);
+      toast.success(
+        translate(
+          "resalePage.brokerDetect.done",
+          "Found {count} broker unit(s)"
+        ).replace("{count}", String(ids.size))
+      );
+    } catch (error) {
+      console.error("Broker detect failed:", error?.message ?? error);
+      toast.error(
+        translate(
+          "resalePage.brokerDetect.failed",
+          "Failed to check broker owners. Please try again."
+        )
+      );
+    } finally {
+      setIsDetectingBrokers(false);
+    }
+  }, [
+    canMarkBrokerUnits,
+    isDetectingBrokers,
+    brokerBadges,
+    bulkSelection?.visibleUnits,
+    translate,
+  ]);
+
+  const brokerDetectButton =
+    canMarkBrokerUnits ? (
+      <button
+        type="button"
+        onClick={handleDetectBrokerUnits}
+        disabled={
+          isDetectingBrokers || !(bulkSelection?.visibleUnits?.length > 0)
+        }
+        className="shrink-0 flex h-10 w-10 min-h-11 min-w-11 lg:min-h-10 lg:min-w-10 items-center justify-center rounded-md border border-amber-300 bg-amber-50 text-amber-900 shadow-sm hover:bg-amber-100 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+        title={translate(
+          "resalePage.brokerDetect.hint",
+          "Look up owner type via quick-search and badge broker units"
+        )}
+        aria-label={translate(
+          "resalePage.brokerDetect.button",
+          "Mark broker units"
+        )}
+      >
+        {isDetectingBrokers ? (
+          <span className="text-[10px] font-semibold tabular-nums leading-none">
+            {brokerDetectProgress.total > 0
+              ? `${brokerDetectProgress.done}/${brokerDetectProgress.total}`
+              : "…"}
+          </span>
+        ) : (
+          <Handshake size={18} aria-hidden />
+        )}
+      </button>
+    ) : null;
+
   const buildActiveFilters = useCallback((nextFilters) => {
     const list = [];
     if (nextFilters.sort_by && nextFilters.sort_order) {
@@ -465,8 +559,19 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     if (nextFilters.my_inventory) {
       list.push({ key: "my_inventory", value: t.unitsFilter.myInventory });
     }
-    if (nextFilters.resale) {
-      list.push({ key: "resale", value: t.unitsFilter.resale });
+    {
+      const resaleValue = normalizeResaleFilter(nextFilters.resale);
+      if (resaleValue === "primary") {
+        list.push({
+          key: "resale",
+          value: translate("unitsFilter.inventoryTypes.primary", "Primary"),
+        });
+      } else if (resaleValue === "resale") {
+        list.push({
+          key: "resale",
+          value: translate("unitsFilter.inventoryTypes.resale", "Resale"),
+        });
+      }
     }
     if (nextFilters.show_present_value) {
       list.push({
@@ -584,8 +689,10 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     updateDraftFilters((prev) => {
       const next = { ...prev };
 
-      if (key === "my_inventory" || key === "resale" || key === "show_present_value") {
+      if (key === "my_inventory" || key === "show_present_value") {
         next[key] = Boolean(value);
+      } else if (key === "resale") {
+        next.resale = normalizeResaleFilter(value);
       } else if (
         key === "min_area" ||
         key === "max_area" ||
@@ -794,8 +901,16 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         return resolveAuthorDisplayLabel(value, authorOptions) || value;
       case "my_inventory":
         return t.unitsFilter.myInventory;
-      case "resale":
-        return t.unitsFilter.resale;
+      case "resale": {
+        const resaleValue = normalizeResaleFilter(value || filters.resale);
+        if (resaleValue === "primary") {
+          return translate("unitsFilter.inventoryTypes.primary", "Primary");
+        }
+        if (resaleValue === "resale") {
+          return translate("unitsFilter.inventoryTypes.resale", "Resale");
+        }
+        return translate("unitsFilter.inventoryTypes.both", "Both");
+      }
       case "show_present_value":
         return translate(
           "unitsFilter.showPresentValue",
@@ -858,7 +973,14 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         );
       }
       if (filterValues.my_inventory) labels.push(t.unitsFilter.myInventory);
-      if (filterValues.resale) labels.push(t.unitsFilter.resale);
+      {
+        const resaleValue = normalizeResaleFilter(filterValues.resale);
+        if (resaleValue === "primary") {
+          labels.push(translate("unitsFilter.inventoryTypes.primary", "Primary"));
+        } else if (resaleValue === "resale") {
+          labels.push(translate("unitsFilter.inventoryTypes.resale", "Resale"));
+        }
+      }
       if (filterValues.show_present_value) {
         labels.push(
           translate("unitsFilter.showPresentValue", "Show present value")
@@ -1086,6 +1208,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         >
           <Eye size={18} aria-hidden />
         </button>
+        {brokerDetectButton}
         {showBulkToolbar && (
           <label className="flex min-w-0 flex-1 items-center gap-1.5 h-10 px-2 rounded-md border border-gray-300 bg-white text-sm font-medium cursor-pointer select-none hover:bg-gray-50">
             <input
@@ -1329,25 +1452,58 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           </label>
         </div>
 
-        {/* Resale filter — hidden for now
         <div className="w-full min-w-0">
-          <label
-            className={`flex w-full items-center gap-2 h-10 px-3 rounded-md border text-sm font-medium cursor-pointer select-none ${
-              draftFilters.resale
-                ? "bg-orange-50 border-orange-300 text-orange-700"
-                : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
-            }`}
+          <p className="text-xs font-medium text-[#494A4B] mb-1.5">
+            {translate("unitsFilter.inventoryType", "Inventory")}
+          </p>
+          <div
+            className="flex flex-wrap items-center gap-2"
+            role="group"
+            aria-label={translate("unitsFilter.inventoryType", "Inventory")}
           >
-            <input
-              type="checkbox"
-              className="h-4 w-4 accent-orange-600 shrink-0"
-              checked={draftFilters.resale}
-              onChange={(e) => handleFilterChange("resale", e.target.checked)}
-            />
-            <span className="truncate text-xs">{t.unitsFilter.resale}</span>
-          </label>
+            {[
+              {
+                value: "primary",
+                label: translate("unitsFilter.inventoryTypes.primary", "Primary"),
+              },
+              {
+                value: "resale",
+                label: translate("unitsFilter.inventoryTypes.resale", "Resale"),
+              },
+              {
+                value: "",
+                label: translate("unitsFilter.inventoryTypes.both", "Both"),
+              },
+            ].map((option) => {
+              const current = normalizeResaleFilter(draftFilters.resale);
+              const isSelected =
+                option.value === ""
+                  ? current === ""
+                  : current === option.value;
+
+              return (
+                <label
+                  key={option.value || "both"}
+                  className={`flex flex-1 min-w-0 items-center gap-2 h-10 px-3 rounded-md border text-xs font-medium cursor-pointer select-none transition-colors ${
+                    isSelected
+                      ? "bg-primary/10 border-primary/40 text-primary"
+                      : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="resale"
+                    value={option.value || "both"}
+                    checked={isSelected}
+                    onChange={() => handleFilterChange("resale", option.value)}
+                    className="h-4 w-4 accent-primary shrink-0"
+                  />
+                  <span className="truncate">{option.label}</span>
+                </label>
+              );
+            })}
+          </div>
         </div>
-        */}
 
         <div className="w-full min-w-0 grid grid-cols-2 gap-2">
           <LenaTextField
@@ -1509,6 +1665,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
                 >
                   <Eye size={19} aria-hidden />
                 </button>
+                {brokerDetectButton}
                 {showBulkToolbar && bulkSelection.hasSelection && (
                   <button
                     type="button"

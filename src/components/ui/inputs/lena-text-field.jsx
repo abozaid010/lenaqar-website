@@ -22,6 +22,7 @@ import { useEffect, useRef, forwardRef, useImperativeHandle, useState } from "re
  * @param {boolean|string} props.error - Error state (boolean) or error message (string)
  * @param {string} props.errorMessage - Error message (if error is boolean)
  * @param {string} props.helperText - Helper text to display below field
+ * @param {string|boolean} props.warning - Soft warning message (non-blocking); ignored when error is set
  * @param {string} props.type - Input type (text, number, email, url, etc.)
  * @param {ReactNode} props.adornment - Optional adornment element
  * @param {string} props.className - Additional CSS classes
@@ -39,6 +40,7 @@ const LenaTextField = forwardRef(({
   error = false,
   errorMessage = "",
   helperText = "",
+  warning = "",
   type = "text",
   adornment = null,
   className = "",
@@ -107,6 +109,15 @@ const LenaTextField = forwardRef(({
   // Determine error state and message
   const hasError = !!error || !!errorMessage;
   const displayErrorMessage = typeof error === "string" ? error : errorMessage;
+  const warningMessage =
+    typeof warning === "string" ? warning.trim() : warning ? String(warning) : "";
+  const showWarning = !hasError && Boolean(warningMessage);
+  const belowMessage = hasError
+    ? displayErrorMessage
+    : showWarning
+      ? warningMessage
+      : helperText;
+  const showBelow = Boolean(belowMessage);
   
   // Determine if label should float (focused or has value)
   const hasValue = value !== null && value !== undefined && value !== "";
@@ -215,16 +226,20 @@ const LenaTextField = forwardRef(({
         )}
       </div>
 
-      {/* Helper Text or Error Message */}
-      {(helperText || hasError) && (
+      {/* Helper / warning / error message */}
+      {showBelow && (
         <p
           role={hasError && displayErrorMessage ? "alert" : undefined}
           data-field-invalid={hasError ? "true" : undefined}
           className={`text-xs sm:text-sm mt-1.5 px-0.5 leading-snug break-words max-w-full transition-all duration-200 ${
-            hasError ? "text-red-600 animate-fade-in" : "text-gray-400"
+            hasError
+              ? "text-red-600 animate-fade-in"
+              : showWarning
+                ? "text-amber-700"
+                : "text-gray-400"
           }`}
         >
-          {hasError && displayErrorMessage ? displayErrorMessage : helperText}
+          {belowMessage}
         </p>
       )}
     </div>

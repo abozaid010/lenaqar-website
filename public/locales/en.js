@@ -554,6 +554,93 @@ export default {
     marketIndex: "Market Index",
     locations: "Locations",
     tools: "Tools",
+    matching: "Matching",
+  },
+  matching: {
+    title: "Matching",
+    description:
+      "Match loaded leads with relevant units, review recommendations, then send WhatsApp messages.",
+    sections: {
+      audience: "Audience Selection",
+      loadedLeads: "Loaded Leads",
+      results: "Matching Results",
+    },
+    filters: {
+      audienceHint:
+        "Narrow the loaded audience by lead details, activity, or a specific contact.",
+      showFilters: "Show filters",
+      hideFilters: "Hide filters",
+      leadDetails: "Lead details",
+      ownerType: "Owner type",
+      ownerTypeAll: "All",
+      dateRange: "Date range",
+      leadAction: "Lead action",
+      search: "Search",
+      searchPlaceholder: "Search by name or phone",
+      startDate: "Start date",
+      endDate: "End date",
+      presets: "Presets",
+      lastWeek: "Last week",
+      lastMonth: "Last month",
+      last3Months: "Last 3 months",
+      lastYear: "Last year",
+      today: "Today",
+    },
+    actions: {
+      findMatches: "Find Matches",
+      sendRecommendations: "Send WhatsApp Recommendations",
+      loadMore: "Load more",
+      dismissUnit: "Remove recommendation",
+      removeUnit: "Remove unit",
+    },
+    progress: {
+      matching: "Matching... {done} / {total} Leads",
+      sending: "Sending... {done} / {total}",
+    },
+    empty: {
+      noLeads: "No leads found for the selected filters.",
+      noResults: "Run Find Matches to see recommendations.",
+      noValidRequirements: "No leads have a valid requirement with pricing.",
+      noRecommendations: "No successful recommendations to send.",
+      noMatchingUnits: "No matching units found.",
+    },
+    errors: {
+      requirementFetch: "Unable to retrieve requirement.",
+      unitsFetch: "Unable to match units.",
+    },
+    status: {
+      ready: "Ready",
+      missingRequirement: "Missing Requirement",
+      missingPrice: "Missing Price",
+      noMatchingUnits: "No Matching Units",
+      readyToSend: "Ready To Send",
+      sent: "Sent",
+      failed: "Failed",
+      requirementError: "Unable to retrieve requirement",
+      unitsError: "Unable to match units",
+    },
+    warning: {
+      missingPrice:
+        "Missing pricing information. Unable to generate recommendations.",
+    },
+    card: {
+      matchingUnits: "{count} Matching Units",
+      recommended: "Recommended",
+      allUnits: "All Matching Units",
+      requirementSummary: "Requirement Summary",
+    },
+    preview: {
+      title: "WhatsApp Recommendations Preview",
+      submit: "Send",
+      leadMessage: "Message",
+      recommendedUnits: "Recommended units",
+      noEligible: "No eligible leads to send.",
+    },
+    send: {
+      success: "Sent {count} message(s)",
+      successWithErrors: "Sent {count} message(s) ({errors} failed)",
+    },
+    leadsLoaded: "{count} leads loaded",
   },
   dashboardSummary: {
     title: "Dashboard",
@@ -696,7 +783,26 @@ export default {
       ariaLabel: "Lead detail sections",
       conversations: "Conversations",
       requirements: "Requirements",
+      units: "Units",
       actions: "Actions",
+    },
+    ownerUnits: {
+      title: "Listed units",
+      count: "{count} units",
+      preview: "Preview",
+      previewTitle: "Unit {code}",
+      edit: "Edit",
+      empty: "No units found for this owner phone.",
+      noPhone: "This lead has no phone number to look up listed units.",
+      loadFailed: "Unable to load listed units.",
+      fields: {
+        code: "Code",
+        area: "Area",
+        bedrooms: "Bedrooms",
+        furnishing: "Furnishing",
+        project: "Project",
+        district: "District",
+      },
     },
     header: {
       lastActivity: "Last activity",
@@ -731,6 +837,7 @@ export default {
       deleteLead: "Delete lead",
       replyModeHint: "Choose how new messages from this lead are answered.",
       noTags: "No tags yet.",
+      authorLabel: "Author",
       tagExists: "Tag already exists",
       tagAdded: "Tag added successfully",
       tagRemoved: "Tag removed successfully",
@@ -1461,6 +1568,12 @@ export default {
     upTo: "Up to",
     myInventory: "My Inventory",
     resale: "Resale",
+    inventoryType: "Inventory",
+    inventoryTypes: {
+      primary: "Primary",
+      resale: "Resale",
+      both: "Both",
+    },
     showPresentValue: "Show present value",
     minArea: "Min Area",
     maxArea: "Max Area",
@@ -1512,6 +1625,7 @@ export default {
       all: "All phone numbers",
       search: "Search by name or phone",
       noResults: "No matching phone numbers",
+      usePhone: "Use {phone}",
     },
     favoriteSearches: {
       title: "Favorite Searches",
@@ -1927,6 +2041,8 @@ export default {
       "Installment years is required when using installments.",
     invalidNumber: "Please enter a valid number.",
     deliveryDateRequired: "Please select a delivery date.",
+    downPaymentMismatchHint:
+      "Down payment usually equals Paid Amount + Over Price. You can keep a different value.",
   },
   unitFormValidation: {
     requiredFields: "Please complete all required fields.",
@@ -2092,6 +2208,7 @@ export default {
 
   unitPage: {
     backToUnits: "Back to Units",
+    backToHiddenUnits: "Back to Hidden Units",
     in: "in",
     deleteUnit: "Delete Unit",
     confirmDeleteMsg: "Are you sure you want to delete this unit?",
@@ -2099,6 +2216,13 @@ export default {
     delete: "Delete",
     deleteFail: "Failed to delete unit. Please try again.",
     deleteError: "An error occurred while deleting the unit.",
+    saveSuccessTitle: "Unit saved successfully",
+    saveSuccessMessage:
+      "All changes were saved. Preview the unit or return to your list.",
+    addSuccessTitle: "Unit added successfully",
+    addSuccessMessage:
+      "Your unit was created. Preview it or return to your list.",
+    previewUnit: "Preview Unit",
   },
   unitDetails: {
     title: "Unit Details",

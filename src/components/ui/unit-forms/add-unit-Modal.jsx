@@ -183,7 +183,15 @@ function toastOwnerMobileValidationError(formData, translate) {
   );
 }
 
-export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtracted, isPageMode = false }) {
+export default function AddUnitModal({
+  isEdit,
+  unitData,
+  onClose,
+  onUnitsExtracted,
+  isPageMode = false,
+  /** When set, called after a successful save instead of onClose — caller owns success UX. Receives the saved unit payload when available. */
+  onSaveSuccess,
+}) {
   const modalRef = useRef(null);
   const ownerNameLookupPhoneRef = useRef(null);
   const { t, locale, translate } = useI18n();
@@ -1130,15 +1138,25 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       }
 
       if (!isEdit) {
-        await addUnitMutation.mutateAsync(payload);
-        toast.success(t.toasts.unitAdded);
-      } else {
-        await updateUnitMutation.mutateAsync(payload);
-        toast.success(t.toasts.unitUpdated);
+        const saved = await addUnitMutation.mutateAsync(payload);
+        setExtractedSourceText("");
+        if (typeof onSaveSuccess === "function") {
+          onSaveSuccess(saved);
+        } else {
+          toast.success(t.toasts.unitAdded);
+          onClose();
+        }
+        return;
       }
 
+      await updateUnitMutation.mutateAsync(payload);
       setExtractedSourceText("");
-      onClose();
+      if (typeof onSaveSuccess === "function") {
+        onSaveSuccess(payload);
+      } else {
+        toast.success(t.toasts.unitUpdated);
+        onClose();
+      }
     } catch (error) {
       // Never surface raw API / technical validation strings to the user.
       console.error("[AddUnit] save failed:", error?.message ?? error);

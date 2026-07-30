@@ -6,6 +6,8 @@ import { useI18n } from '@/hooks/useI18n';
 import { useUnitOwnership } from '@/hooks/useUnitOwnership';
 import BackButton from '@/components/ui/back-button';
 import type { UnitViewModel, RawUnit } from '@/lib/units/unit-types';
+import type { UnitViewMode } from '@/lib/units/unit-view-mode';
+import { isPrivacyRestrictedViewMode } from '@/lib/units/unit-view-mode';
 import UnitHeroGallery from './unit-hero-gallery';
 import UnitHeaderSummary from './unit-header-summary';
 import UnitPricingSection from './unit-pricing-section';
@@ -22,18 +24,22 @@ interface UnitDetailsPageProps {
   /** Server-computed ownership (same isOwnClientUnit rule as Homey unit pages). */
   isOwnUnit?: boolean;
   /**
-   * Public marketing page (`/allProberties/...`).
-   * Hides owner contact, author, phase/building, and private inquiry UI.
+   * @deprecated Prefer `viewMode`. Kept for callers that only pass isPublic.
+   * Public marketing / privacy-restricted experience.
    */
   isPublic?: boolean;
+  /** Canonical viewing mode resolved by the RSC page. */
+  viewMode?: UnitViewMode;
+  /** Listing client's id — used for permanent share URLs. */
+  listingClientId?: string | null;
 }
 
 function UnitLocationSection({
   unit,
-  isPublic = false,
+  hidePhase = false,
 }: {
   unit: UnitViewModel;
-  isPublic?: boolean;
+  hidePhase?: boolean;
 }) {
   const { locale, translate, t } = useI18n();
   const [labels, setLabels] = useState({
@@ -104,8 +110,8 @@ function UnitLocationSection({
       value: projectLabel,
       href: unit.projectHref || undefined,
     },
-    // Phase / building is internal — never on public pages.
-    ...(!isPublic
+    // Phase / building is internal — never on privacy-restricted pages.
+    ...(!hidePhase
       ? [
           {
             key: 'phase',
@@ -153,27 +159,48 @@ export default function UnitDetailsPage({
   unit,
   rawUnit,
   isOwnUnit: isOwnUnitProp,
-  isPublic = false,
+  isPublic: isPublicProp,
+  viewMode: viewModeProp,
+  listingClientId,
 }: UnitDetailsPageProps) {
   const { t, locale, translate } = useI18n();
   const { isOwnUnit: isOwnUnitFromHook } = useUnitOwnership(unit);
+
+  const viewMode: UnitViewMode =
+    viewModeProp ||
+    (isPublicProp ? 'privacy_mode' : 'same_client_with_permission');
+  const isPrivacy = isPrivacyRestrictedViewMode(viewMode);
+  const isAnonymousPublic = viewMode === 'privacy_mode';
+  const isExternalClient = viewMode === 'external_client';
   // Prefer server truth when true; allow client cookie read to upgrade after hydration.
-  // Public pages never treat the viewer as owner for private contact/inquiry UI.
+  // Privacy-restricted modes never treat the viewer as owner.
   const isOwnUnit =
-    !isPublic && (Boolean(isOwnUnitProp) || isOwnUnitFromHook);
+    !isPrivacy && (Boolean(isOwnUnitProp) || isOwnUnitFromHook);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const unitNotes = typeof unit.notes === 'string' ? unit.notes.trim() : '';
   const canShare = Boolean(unit.referenceCode?.trim());
+  // CRM chrome: same-client full UI, or external listing-contact card (no chat).
+  const showCrmSidebar = !isAnonymousPublic;
+  const showAdminActions = viewMode === 'same_client_with_permission';
+  const showMobileOwnerBar = viewMode === 'same_client_with_permission';
 
   return (
-    <div className={`bg-gray-50 flex-1 ${!isPublic ? 'pb-28 lg:pb-0' : ''}`}>
+    <div
+      className={`bg-gray-50 flex-1 ${showMobileOwnerBar ? 'pb-28 lg:pb-0' : ''}`}
+    >
       {/* Back */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <div className="mb-6 flex items-center justify-between gap-3">
-          <BackButton fallbackRoute={isPublic ? '/allProberties' : '/units'} />
-          {!isPublic && (
+          <BackButton
+            fallbackRoute={isAnonymousPublic ? '/allProberties' : '/units'}
+          />
+          {showAdminActions && (
             <Suspense fallback={null}>
-              <UnitDetailsAdminActions unit={unit} rawUnit={rawUnit} isOwnUnit={isOwnUnit} />
+              <UnitDetailsAdminActions
+                unit={unit}
+                rawUnit={rawUnit}
+                isOwnUnit={isOwnUnit}
+              />
             </Suspense>
           )}
         </div>
@@ -183,14 +210,13 @@ export default function UnitDetailsPage({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
           className={
-            isPublic
-              ? 'space-y-8'
-              : 'grid grid-cols-1 lg:grid-cols-3 gap-8'
+            showCrmSidebar
+              ? 'grid grid-cols-1 lg:grid-cols-3 gap-8'
+              : 'space-y-8'
           }
         >
           {/* Left Column - Main Content */}
-          <div className={isPublic ? 'space-y-8' : 'lg:col-span-2 space-y-8'}>
-            {/* Hero Gallery */}
+          <div className={showCrmSidebar ? 'lg:col-span-2 space-y-8' : 'space-y-8'}>
             <UnitHeroGallery
               images={unit.heroImages}
               isPrimary={unit.isPrimary}
@@ -198,21 +224,16 @@ export default function UnitDetailsPage({
               onShare={() => setShowShareDialog(true)}
             />
 
-            {/* Header Summary */}
             <UnitHeaderSummary unit={unit} />
 
-            {/* Pricing — important values near top, same section pattern as location */}
             <UnitPricingSection unit={unit} />
 
-            {/* Location */}
-            <UnitLocationSection unit={unit} isPublic={isPublic} />
+            <UnitLocationSection unit={unit} hidePhase={isPrivacy} />
 
-            {/* Quick Facts */}
             {(unit.quickFacts.length > 0 || unit.specs.length > 0) && (
               <UnitQuickFacts facts={unit.quickFacts} specs={unit.specs} />
             )}
 
-            {/* Notes */}
             {unitNotes && (
               <div className="bg-white rounded-lg border p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">
@@ -223,8 +244,7 @@ export default function UnitDetailsPage({
             )}
           </div>
 
-          {/* Right Column - Sticky Sidebar (CRM only) */}
-          {!isPublic && (
+          {showCrmSidebar && (
             <div className="lg:col-span-1">
               <div className="lg:sticky lg:top-8 lg:self-start space-y-6">
                 <div className="hidden lg:block h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)]">
@@ -232,12 +252,15 @@ export default function UnitDetailsPage({
                     unit={unit}
                     rawUnit={rawUnit}
                     isOwnUnit={isOwnUnit}
+                    hideChat={isExternalClient}
                   />
                 </div>
 
-                {unit.trustItems.length > 0 && (
+                {!isPrivacy && unit.trustItems.length > 0 && (
                   <div className="bg-white rounded-lg border p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{t?.projectPage?.propertyInfo || 'Property Information'}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      {t?.projectPage?.propertyInfo || 'Property Information'}
+                    </h3>
                     <div className="space-y-3">
                       {unit.trustItems.map((item, index) => (
                         <div key={index} className="flex justify-between items-center">
@@ -254,8 +277,7 @@ export default function UnitDetailsPage({
         </div>
       </div>
 
-      {/* Mobile Sticky Action Bar — private CRM only; owner contact for same-client units */}
-      {!isPublic && (
+      {showMobileOwnerBar && (
         <MobileStickyActionBar unit={unit} isOwnUnit={isOwnUnit} />
       )}
 
@@ -263,6 +285,7 @@ export default function UnitDetailsPage({
         isOpen={showShareDialog}
         onClose={() => setShowShareDialog(false)}
         unitCode={unit.referenceCode}
+        listingClientId={listingClientId ?? unit.clientId}
       />
     </div>
   );

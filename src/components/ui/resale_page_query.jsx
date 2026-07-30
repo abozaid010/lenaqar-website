@@ -130,13 +130,31 @@ function phonesMatch(a, b) {
   return false;
 }
 
+/**
+ * True when the typed value looks like a phone (not an email), so it can be
+ * used as a custom owner-phone filter when the person is not on the team list.
+ */
+function isLikelyOwnerPhoneQuery(raw) {
+  const trimmed = String(raw ?? "").trim();
+  if (!trimmed || trimmed.includes("@")) return false;
+  if (phoneToE164(trimmed, "EG")) return true;
+  const digits = trimmed.replace(/\D/g, "");
+  return digits.length >= 8;
+}
+
+function normalizeOwnerPhoneQuery(raw) {
+  const trimmed = String(raw ?? "").trim();
+  if (!trimmed) return "";
+  return phoneToE164(trimmed, "EG") || trimmed;
+}
+
 function getTeamPhoneOptionLabel(option) {
   return getAuthorOptionLabel(option) || (option?.email ?? "") || (option?.phone ?? "");
 }
 
-/** Selected value is team member email; label prefers name. */
-function resolveTeamPhoneDisplayLabel(email, options) {
-  const selected = typeof email === "string" ? email.trim() : "";
+/** Selected value is team member email OR a custom typed phone. */
+function resolveTeamPhoneDisplayLabel(value, options) {
+  const selected = typeof value === "string" ? value.trim() : "";
   if (!selected) return "";
   const match = (options || []).find(
     (option) =>
@@ -144,11 +162,20 @@ function resolveTeamPhoneDisplayLabel(email, options) {
       option.email.toLowerCase() === selected.toLowerCase(),
   );
   if (match) return getTeamPhoneOptionLabel(match);
+  const byPhone = (options || []).find((option) =>
+    phonesMatch(option?.phone, selected),
+  );
+  if (byPhone) return getTeamPhoneOptionLabel(byPhone);
   return selected;
 }
 
-function resolveSelectedTeamMemberPhone(email, options) {
-  const selected = typeof email === "string" ? email.trim() : "";
+/**
+ * Resolve the phone to query `/units/by-owner-phone`.
+ * - Team member email → their phone
+ * - Custom typed phone (not on the list) → use that phone directly
+ */
+function resolveSelectedTeamMemberPhone(value, options) {
+  const selected = typeof value === "string" ? value.trim() : "";
   if (!selected) return "";
   const match = (options || []).find(
     (option) =>
@@ -156,11 +183,15 @@ function resolveSelectedTeamMemberPhone(email, options) {
       option.email.toLowerCase() === selected.toLowerCase(),
   );
   if (match?.phone) return String(match.phone).trim();
-  // Legacy: value used to be the phone itself.
+  // Legacy / custom: value used to be the phone itself.
   const byPhone = (options || []).find((option) =>
     phonesMatch(option?.phone, selected),
   );
-  return byPhone?.phone ? String(byPhone.phone).trim() : "";
+  if (byPhone?.phone) return String(byPhone.phone).trim();
+  if (isLikelyOwnerPhoneQuery(selected)) {
+    return normalizeOwnerPhoneQuery(selected);
+  }
+  return "";
 }
 
 export default function ResalePageQuery({ searchParams, initialUnitsData = null }) {
@@ -1576,6 +1607,14 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
                         "unitsFilter.teamPhone.noResults",
                         "No matching phone numbers"
                       )}
+                      allowCreate
+                      isValidCreateValue={isLikelyOwnerPhoneQuery}
+                      formatCreateLabel={(query) =>
+                        translate(
+                          "unitsFilter.teamPhone.usePhone",
+                          "Use {phone}"
+                        ).replace("{phone}", query)
+                      }
                       isLoading={isTeamLoading}
                       className={FILTER_BUTTON_CLASS}
                     />
@@ -1777,6 +1816,14 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
                     "unitsFilter.teamPhone.noResults",
                     "No matching phone numbers"
                   )}
+                  allowCreate
+                  isValidCreateValue={isLikelyOwnerPhoneQuery}
+                  formatCreateLabel={(query) =>
+                    translate(
+                      "unitsFilter.teamPhone.usePhone",
+                      "Use {phone}"
+                    ).replace("{phone}", query)
+                  }
                   isLoading={isTeamLoading}
                   className={FILTER_BUTTON_CLASS}
                 />

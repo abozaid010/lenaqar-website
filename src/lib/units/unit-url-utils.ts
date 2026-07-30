@@ -228,10 +228,19 @@ export async function findUnitBySlug(slug: string): Promise<string | null> {
 
 export function getUnitUrl(unit: {
   code?: string | null;
+  clientId?: string | null;
+  client_id?: string | null;
 }): string {
   const code = unit?.code;
   if (!code || !String(code).trim()) {
     return "/units";
   }
-  return `/units/${encodeURIComponent(String(code).trim())}`;
+  const listingClientId =
+    (unit?.clientId != null && String(unit.clientId).trim()) ||
+    (unit?.client_id != null && String(unit.client_id).trim()) ||
+    null;
+  const segment = encodeURIComponent(String(code).trim());
+  return listingClientId
+    ? `/${listingClientId}/units/${segment}`
+    : `/units/${segment}`;
 }

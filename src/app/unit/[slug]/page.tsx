@@ -10,9 +10,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: 'Property Details',
     description: 'View property details, pricing, and specifications.',
-    alternates: {
-      canonical: `/allProberties/${slug}`,
-    },
   };
 }
 

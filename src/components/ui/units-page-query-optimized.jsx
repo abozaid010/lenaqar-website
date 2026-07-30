@@ -4,9 +4,13 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 import UnitsGrid from "@/components/ui/units-grid";
 import QueryErrorState from "@/components/ui/query-error-state";
 import { useUnitsPageData } from "@/hooks/use-units-page-data";
+import { useBrokerUnitsBadgeOptional } from "@/context/broker-units-badge-context";
 import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-context";
 import { enforceDashboardAuthorOnParams } from "@/lib/dashboard-lead-access";
-import { UNITS_UI_ONLY_FILTER_KEYS } from "@/lib/units/favorite-searches";
+import {
+  applyResaleFilterToApiParams,
+  UNITS_UI_ONLY_FILTER_KEYS,
+} from "@/lib/units/favorite-searches";
 import { useEffect, useMemo } from "react";
 
 export default function UnitsPageQueryOptimized({
@@ -25,7 +29,7 @@ export default function UnitsPageQueryOptimized({
     delete base.clientId;
     delete base.visibility;
 
-    // UI-only toggles (e.g. show_present_value) must not hit the API
+    // UI-only toggles (e.g. show_present_value, resale) must not hit the API
     UNITS_UI_ONLY_FILTER_KEYS.forEach((key) => {
       delete base[key];
     });
@@ -36,10 +40,8 @@ export default function UnitsPageQueryOptimized({
       visibility: "visible",
     };
 
-    // Send is_primary only when resale filter is explicitly enabled.
-    if (raw?.resale === "true" || raw?.resale === true) {
-      params.is_primary = false;
-    }
+    // primary → is_primary=true; resale → is_primary=false; both → omit is_primary
+    applyResaleFilterToApiParams(params, raw?.resale);
 
     // ONLY send client_id when My Inventory is ON
     if (
@@ -93,6 +95,7 @@ export default function UnitsPageQueryOptimized({
 
   const bulkSelection = useUnitsBulkSelectionOptional();
   const setVisibleUnitsFromList = bulkSelection?.setVisibleUnitsFromList;
+  const brokerBadges = useBrokerUnitsBadgeOptional();
 
   useEffect(() => {
     if (!publicUnits && setVisibleUnitsFromList) {
@@ -132,6 +135,7 @@ export default function UnitsPageQueryOptimized({
           pagination={pagination}
           readonly={publicUnits}
           showPresentValue={showPresentValue}
+          brokerUnitIds={brokerBadges?.brokerUnitIds ?? null}
         />
       )}
     </div>

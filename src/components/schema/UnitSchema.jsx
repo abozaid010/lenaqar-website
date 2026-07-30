@@ -1,5 +1,4 @@
-import { SITE_URL } from "@/app/metadata";
-import { buildPublicUnitShareUrl } from "@/lib/units/unit-share-links";
+import { buildCanonicalUnitShareUrl } from "@/lib/units/unit-share-links";
 import { isRentVisibilityAvailable } from "@/constants/property-visibility";
 import {
   isRentPurpose,
@@ -7,15 +6,18 @@ import {
   resolveSaleTotalPrice,
 } from "@/lib/units/unit-price";
 
-export default function UnitSchema({ unit, isPublic = false }) {
+export default function UnitSchema({ unit }) {
   if (!unit) return null;
 
   const code = unit.code ?? unit.referenceCode;
   if (!code?.trim()) return null;
 
-  const baseUrl = isPublic
-    ? buildPublicUnitShareUrl(code)
-    : `${SITE_URL}/units/${encodeURIComponent(code.trim())}`;
+  const listingClientId =
+    (unit?.clientId != null && String(unit.clientId).trim()) ||
+    (unit?.client_id != null && String(unit.client_id).trim()) ||
+    null;
+
+  const baseUrl = buildCanonicalUnitShareUrl(code, listingClientId);
 
   const offerPrice = isRentPurpose(unit.purpose)
     ? resolveMonthlyRentPrice(unit)

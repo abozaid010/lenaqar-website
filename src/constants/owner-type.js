@@ -20,6 +20,12 @@ export const OWNER_TYPES = [
   "rentee",
 ];
 
+/**
+ * Supply-side identities that list units (not demand-side buyers/rentees).
+ * Used to show listed units instead of a requirement card in lead detail.
+ */
+export const LISTING_OWNER_TYPES = ["owner", "seller", "renter"];
+
 /** Translation keys for each owner type label (see locales `ownerType`). */
 export const OWNER_TYPE_TRANSLATION_KEYS = {
   owner: "ownerType.owner",
@@ -40,6 +46,16 @@ export function normalizeOwnerType(value) {
   if (value == null) return null;
   const normalized = String(value).trim().toLowerCase();
   return OWNER_TYPES.includes(normalized) ? normalized : null;
+}
+
+/**
+ * True when the lead lists inventory (owner / seller / renter).
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+export function isListingOwnerType(value) {
+  const normalized = normalizeOwnerType(value);
+  return normalized != null && LISTING_OWNER_TYPES.includes(normalized);
 }
 
 /**

@@ -17,6 +17,7 @@ import {
   LineChart,
   MapPinned,
   Wrench,
+  Sparkles,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -332,6 +333,21 @@ const SidebarComponent = ({
             >
               <LayoutDashboard className="h-5 w-5 mr-3" />
               <span>{translate("sidebar.dashboard")}</span>
+            </Link>
+          )}
+
+          {isMounted && conversation.canView && (
+            <Link
+              href={navHref("/matching")}
+              prefetch={true}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isLinkActive("/matching")
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              <Sparkles className="h-5 w-5 mr-3" />
+              <span>{translate("sidebar.matching")}</span>
             </Link>
           )}
 

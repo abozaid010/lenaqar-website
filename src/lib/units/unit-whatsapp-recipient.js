@@ -1,5 +1,5 @@
 import {
-  buildPublicUnitShareUrl,
+  buildCanonicalUnitShareUrl,
   resolveUnitCodeFromListItem,
   resolveUnitIdFromListItem,
 } from "@/lib/units/unit-share-links";
@@ -48,7 +48,14 @@ export function unitToWhatsappRecipient(unit, clientId = null) {
   const unitCode = resolveUnitCodeFromListItem(unit);
   const linkSegment = unitCode ?? unitId;
   const fallback = resolved.chat_id || resolved.phone_number || "";
-  const unitLink = linkSegment ? buildPublicUnitShareUrl(linkSegment) : null;
+  const listingClientId =
+    (unit?.clientId != null && String(unit.clientId).trim()) ||
+    (unit?.client_id != null && String(unit.client_id).trim()) ||
+    clientId ||
+    null;
+  const unitLink = linkSegment
+    ? buildCanonicalUnitShareUrl(linkSegment, listingClientId)
+    : null;
 
   return {
     ...resolved,

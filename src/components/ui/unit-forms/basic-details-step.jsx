@@ -4,7 +4,7 @@ import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import UnitLocationSearch from "@/components/ui/unit-forms/unit-location-search";
 import { useI18n } from "@/hooks/useI18n";
-import { getBuildingTypeOptions } from "@/lib/enums/buildingTypes";
+import { getBuildingTypeOptions, isCommercialBuildingType } from "@/lib/enums/buildingTypes";
 import { useLocaleConstants } from "@/utils/localeConstants";
 import { normalizeViewTypeValue } from "@/data/constants";
 import { useProjectsNames } from "@/hooks/use-admin-shared-data";
@@ -606,18 +606,20 @@ export default function BasicDetailsStep({
           />
         )}
 
-        {/* Outdoor Area */}
-        <LenaTextField
-          label={`${translate(
-            "basicDetails.outdoorArea",
-            t.basicDetails.outdoorArea 
-          )} (m²)`}
-          name="outdoor_area"
-          value={numericValue(formData.outdoor_area)}
-          onChange={(e) => handleChange(e, "number")}
-          placeholder="0"
-          type="number"
-        />
+        {/* Outdoor Area — commercial units only */}
+        {isCommercialBuildingType(formData.buildingType) && (
+          <LenaTextField
+            label={`${translate(
+              "basicDetails.outdoorArea",
+              t.basicDetails.outdoorArea 
+            )} (m²)`}
+            name="outdoor_area"
+            value={numericValue(formData.outdoor_area)}
+            onChange={(e) => handleChange(e, "number")}
+            placeholder="0"
+            type="number"
+          />
+        )}
       </div>
 
     </>

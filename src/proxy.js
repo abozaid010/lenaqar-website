@@ -32,7 +32,39 @@ const adminPaths = [
   'market-index',
   'locations',
   'tools',
+  'matching',
 ];
+
+/**
+ * Canonical unit detail is publicly shareable:
+ *   /{clientId}/units/{code}  or  /units/{code}
+ * List, edit, and pending-approval stay protected.
+ */
+function isPublicShareableUnitDetail(segments) {
+  // /{clientId}/units/{code}  (not pending-approval, not …/edit)
+  if (
+    segments.length === 3 &&
+    segments[1] === "units" &&
+    segments[2] !== "pending-approval"
+  ) {
+    return true;
+  }
+  // bare /units/{code}
+  if (
+    segments.length === 2 &&
+    segments[0] === "units" &&
+    segments[1] !== "pending-approval"
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function nextWithPathname(request, pathname) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-lena-pathname", pathname);
+  return NextResponse.next({ request: { headers: requestHeaders } });
+}
 
 export function proxy(request) {
   const { pathname } = request.nextUrl;
@@ -90,7 +122,11 @@ export function proxy(request) {
   }
 
   // Backward compat: bare /{adminPath} → /{clientId}/{adminPath}
+  // Exception: shareable unit detail stays public when anonymous (no login bounce).
   if (segments.length >= 1 && adminPaths.includes(segments[0])) {
+    if (isPublicShareableUnitDetail(segments) && !refreshToken) {
+      return withProxyDebug(nextWithPathname(request, pathname), request);
+    }
     const dest = cookieClientId
       ? `/${cookieClientId}/${pathname.slice(1)}`
       : '/login';
@@ -101,6 +137,11 @@ export function proxy(request) {
   const isClientAdminRoute = segments.length >= 2 && adminPaths.includes(segments[1]);
 
   if (isClientAdminRoute) {
+    // Shareable unit detail: allow anonymous (privacy_mode) without login redirect.
+    if (isPublicShareableUnitDetail(segments) && !refreshToken) {
+      return withProxyDebug(nextWithPathname(request, pathname), request);
+    }
+
     // No refresh token: must log in again
     if (!refreshToken) {
       const response = NextResponse.redirect(new URL("/login", SITE_HOME_PAGE));
@@ -116,7 +157,7 @@ export function proxy(request) {
       // hiccup, not an invalid refresh token) for this navigation — don't loop through
       // another one. Let the page load and hand recovery to the client-side refresh.
       if (request.nextUrl.searchParams.get("authRetry") === "1") {
-        return withProxyDebug(NextResponse.next(), request);
+        return withProxyDebug(nextWithPathname(request, pathname), request);
       }
       const redirectParam = encodeURIComponent(
         request.nextUrl.pathname + request.nextUrl.search
@@ -129,7 +170,7 @@ export function proxy(request) {
       );
     }
     // Authenticated protected route: allow through (logged in dev for visibility)
-    return withProxyDebug(NextResponse.next(), request);
+    return withProxyDebug(nextWithPathname(request, pathname), request);
   }
 
   // Home page: redirect logged-in user to their dashboard

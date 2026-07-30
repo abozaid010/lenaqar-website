@@ -191,6 +191,8 @@ export interface StickyInquiryCardProps {
   unit: UnitViewModel;
   rawUnit?: RawUnit;
   isOwnUnit?: boolean;
+  /** Hide chat UI (external_client privacy mode — listing contact only). */
+  hideChat?: boolean;
 }
 
 export interface MobileStickyActionBarProps {

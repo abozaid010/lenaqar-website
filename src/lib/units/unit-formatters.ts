@@ -186,7 +186,14 @@ export const buildDeveloperHref = (unit: any): string | null => {
 export const buildUnitHref = (unit: any): string | null => {
   const code = unit?.code ?? unit?.referenceCode;
   if (!code || !String(code).trim()) return null;
-  return `/allProberties/${encodeURIComponent(String(code).trim())}`;
+  const listingClientId =
+    (unit?.clientId != null && String(unit.clientId).trim()) ||
+    (unit?.client_id != null && String(unit.client_id).trim()) ||
+    null;
+  const segment = encodeURIComponent(String(code).trim());
+  return listingClientId
+    ? `/${listingClientId}/units/${segment}`
+    : `/allProberties/${segment}`;
 };
 
 /**
