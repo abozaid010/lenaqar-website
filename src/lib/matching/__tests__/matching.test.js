@@ -5,11 +5,75 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
+import { requirementToUnitsFilter } from "../../match/requirement-to-units-filter.js";
+import { normalizePricingRange } from "../pricing-range.js";
 import { hasMatchablePricing } from "../requirement-pricing.js";
 import {
   UnitRecommendationService,
   getMatchingUnitId,
 } from "../unit-recommendation-service.js";
+
+test("normalizePricingRange expands a single total price upward", () => {
+  assert.deepEqual(normalizePricingRange({ single: 5_000_000 }), {
+    min: 5_000_000,
+    max: 6_000_000,
+  });
+});
+
+test("normalizePricingRange expands explicit bounds by 20 percent", () => {
+  assert.deepEqual(
+    normalizePricingRange({ min: 4_000_000, max: 5_000_000 }),
+    {
+      min: 3_200_000,
+      max: 6_000_000,
+    },
+  );
+});
+
+test("rent totalPrice produces a monthly search range", () => {
+  const filters = requirementToUnitsFilter(
+    { purpose: "rent", totalPrice: 18_000 },
+    "homey",
+  );
+
+  assert.equal(filters.min_price, 18_000);
+  assert.equal(filters.max_price, 21_600);
+});
+
+test("rent min and max are expanded by 20 percent", () => {
+  const filters = requirementToUnitsFilter({
+    purpose: "rent",
+    min_price: 15_000,
+    max_price: 20_000,
+  });
+
+  assert.equal(filters.min_price, 12_000);
+  assert.equal(filters.max_price, 24_000);
+});
+
+test("down payment uses the normalized upper bound without changing API keys", () => {
+  const filters = requirementToUnitsFilter({
+    purpose: "sell",
+    downPayment: 500_000,
+  });
+
+  assert.equal(filters.down_payment, 600_000);
+  assert.equal("min_down_payment" in filters, false);
+  assert.equal("max_down_payment" in filters, false);
+});
+
+test("normalizePricingRange rejects invalid, zero, negative, and null values", () => {
+  for (const value of [null, undefined, 0, -1, Number.NaN, "invalid"]) {
+    assert.equal(normalizePricingRange({ single: value }), null);
+  }
+});
+
+test("normalizePricingRange preserves fractional precision", () => {
+  const range = normalizePricingRange({ min: 100.55, max: 200.55 });
+
+  assert.ok(Math.abs(range.min - 80.44) < Number.EPSILON * 100);
+  assert.ok(Math.abs(range.max - 240.66) < Number.EPSILON * 300);
+});
 
 test("hasMatchablePricing requires at least one positive price field", () => {
   assert.equal(hasMatchablePricing(null), false);

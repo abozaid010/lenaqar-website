@@ -268,6 +268,9 @@ export default function LeadDetailPane({
   const companyName =
     leadSummary?.company_name ?? data?.data?.company_name ?? "";
   const leadNotes = leadSummary?.notes ?? data?.data?.notes ?? "";
+  const leadAuthor = String(
+    leadSummary?.author ?? data?.data?.author ?? "",
+  ).trim();
 
   const clearSelection = useCallback(() => {
     const usp = new URLSearchParams(searchParams.toString());
@@ -1246,6 +1249,19 @@ export default function LeadDetailPane({
                       {translate("leadDetail.actionsTab.noTags")}
                     </p>
                   )}
+                  {leadAuthor ? (
+                    <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                      <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
+                        {translate("leadDetail.actionsTab.authorLabel", "Author")}
+                      </span>
+                      <TagChip
+                        label={leadAuthor}
+                        size="xs"
+                        compact
+                        removable={false}
+                      />
+                    </div>
+                  ) : null}
                   <form
                     onSubmit={handleAddTag}
                     className="flex flex-wrap gap-2"
