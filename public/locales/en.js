@@ -2099,6 +2099,7 @@ export default {
 
   unitPage: {
     backToUnits: "Back to Units",
+    backToHiddenUnits: "Back to Hidden Units",
     in: "in",
     deleteUnit: "Delete Unit",
     confirmDeleteMsg: "Are you sure you want to delete this unit?",
@@ -2106,10 +2107,10 @@ export default {
     delete: "Delete",
     deleteFail: "Failed to delete unit. Please try again.",
     deleteError: "An error occurred while deleting the unit.",
-    saveSuccessTitle: "Unit saved",
-    saveSuccessMessage: "Your changes have been saved successfully.",
+    saveSuccessTitle: "Unit saved successfully",
+    saveSuccessMessage:
+      "All changes were saved. Preview the unit or return to your list.",
     previewUnit: "Preview Unit",
-    continueEditing: "Continue Editing",
   },
   unitDetails: {
     title: "Unit Details",

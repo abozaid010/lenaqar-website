@@ -2,10 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CheckCircle2 } from "lucide-react";
 import EditUnitForm from "@/components/ui/unit-forms/add-unit-Modal";
 import { useI18n } from "@/hooks/useI18n";
 import { buildAdminUnitDetailPath } from "@/lib/units/unit-share-links";
-import { appendUnitsSourcePendingQuery } from "@/utils/units-navigation-source";
+import {
+  appendUnitsSourcePendingQuery,
+  buildUnitsListPathForSection,
+  consumeUnitsListOrigin,
+} from "@/utils/units-navigation-source";
 
 export default function EditUnitClient({
   rawUnit,
@@ -16,24 +21,33 @@ export default function EditUnitClient({
   const router = useRouter();
   const { locale, translate } = useI18n();
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const section = fromPendingApproval ? "pending_approval" : "units";
 
   const detailPath = appendUnitsSourcePendingQuery(
     buildAdminUnitDetailPath(unitCode, clientId),
     fromPendingApproval
   );
 
-  /** Cancel / back: return to unit detail. Do not clear list origin — filters stay intact. */
+  /** Cancel / back from the form: return to unit detail. */
   const handleClose = () => {
     router.push(detailPath);
   };
 
-  /** Successful save: keep edit context and show a lightweight success overlay. */
+  /** Successful save: stay put and show a clear success overlay. */
   const handleSaveSuccess = () => {
     setShowSaveSuccess(true);
   };
 
-  const handleContinueEditing = () => {
+  /**
+   * Same as the previous post-save dismiss: return to the originating list
+   * (hidden/pending units or units) with filters/search preserved.
+   */
+  const handleDismissToList = () => {
     setShowSaveSuccess(false);
+    const origin = consumeUnitsListOrigin(section);
+    const returnPath =
+      origin ?? buildUnitsListPathForSection(section, clientId);
+    router.push(returnPath);
   };
 
   const handlePreviewUnit = () => {
@@ -44,11 +58,21 @@ export default function EditUnitClient({
   useEffect(() => {
     if (!showSaveSuccess) return undefined;
     const onKeyDown = (e) => {
-      if (e.key === "Escape") handleContinueEditing();
+      if (e.key === "Escape") handleDismissToList();
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [showSaveSuccess]);
+
+  const dismissLabel = fromPendingApproval
+    ? translate(
+        "unitPage.backToHiddenUnits",
+        locale === "ar" ? "العودة إلى الوحدات المخفية" : "Back to Hidden Units"
+      )
+    : translate(
+        "unitPage.backToUnits",
+        locale === "ar" ? "العودة إلى الوحدات" : "Back to Units"
+      );
 
   return (
     <>
@@ -67,39 +91,46 @@ export default function EditUnitClient({
           role="dialog"
           aria-modal="true"
           aria-labelledby="unit-save-success-title"
-          onClick={handleContinueEditing}
+          aria-describedby="unit-save-success-message"
+          onClick={handleDismissToList}
         >
           <div
-            className="bg-white rounded-t-2xl sm:rounded-xl shadow-xl w-full sm:max-w-md p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:pb-5"
+            className="bg-white rounded-t-2xl sm:rounded-xl shadow-xl w-full sm:max-w-md p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:pb-6 text-center"
             onClick={(e) => e.stopPropagation()}
           >
+            <div
+              className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-50"
+              aria-hidden="true"
+            >
+              <CheckCircle2 className="h-10 w-10 text-green-600" strokeWidth={2} />
+            </div>
             <h3
               id="unit-save-success-title"
-              className="text-lg font-semibold text-gray-900"
+              className="text-xl font-semibold text-gray-900"
             >
               {translate(
                 "unitPage.saveSuccessTitle",
-                locale === "ar" ? "تم الحفظ" : "Unit saved"
+                locale === "ar" ? "تم حفظ الوحدة بنجاح" : "Unit saved successfully"
               )}
             </h3>
-            <p className="mt-2 text-sm text-gray-600">
+            <p
+              id="unit-save-success-message"
+              className="mt-2 text-sm text-gray-600"
+            >
               {translate(
                 "unitPage.saveSuccessMessage",
                 locale === "ar"
-                  ? "تم حفظ التعديلات بنجاح."
-                  : "Your changes have been saved successfully."
+                  ? "تم حفظ جميع التعديلات. يمكنك معاينة الوحدة أو العودة إلى القائمة."
+                  : "All changes were saved. Preview the unit or return to your list."
               )}
             </p>
-            <div className="mt-5 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-center gap-2">
               <button
                 type="button"
-                onClick={handleContinueEditing}
+                onClick={handleDismissToList}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors min-h-11 sm:min-h-0"
               >
-                {translate(
-                  "unitPage.continueEditing",
-                  locale === "ar" ? "متابعة التعديل" : "Continue Editing"
-                )}
+                {dismissLabel}
               </button>
               <button
                 type="button"

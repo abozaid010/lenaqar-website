@@ -1941,6 +1941,7 @@ export default {
   failedToUploadImage: "فشل في تحميل الصورة",
   unitPage: {
     backToUnits: "العودة إلى الوحدات",
+    backToHiddenUnits: "العودة إلى الوحدات المخفية",
     in: "في",
     deleteUnit: "حذف الوحدة",
     confirmDeleteMsg: "هل أنت متأكد أنك تريد حذف هذه الوحدة؟",
@@ -1948,10 +1949,10 @@ export default {
     delete: "حذف",
     deleteFail: "فشل حذف الوحدة. يرجى المحاولة مرة أخرى.",
     deleteError: "حدث خطأ أثناء حذف الوحدة.",
-    saveSuccessTitle: "تم الحفظ",
-    saveSuccessMessage: "تم حفظ التعديلات بنجاح.",
+    saveSuccessTitle: "تم حفظ الوحدة بنجاح",
+    saveSuccessMessage:
+      "تم حفظ جميع التعديلات. يمكنك معاينة الوحدة أو العودة إلى القائمة.",
     previewUnit: "معاينة الوحدة",
-    continueEditing: "متابعة التعديل",
   },
   unitDetails: {
     title: "تفاصيل الوحدة",
