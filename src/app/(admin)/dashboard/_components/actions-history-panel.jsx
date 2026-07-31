@@ -104,10 +104,10 @@ function ActivityTimelineItem({
             </p>
             <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-gray-500">
               <span
-                className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                className={`rounded px-1.5 py-0.5 text-[9px] font-semibold ${
                   isAI
-                    ? "bg-gray-100 text-gray-600"
-                    : "bg-primary/10 text-primary"
+                    ? "uppercase tracking-wide bg-gray-100 text-gray-600"
+                    : "normal-case tracking-normal bg-primary/10 text-primary"
                 }`}
               >
                 {authorLabel}

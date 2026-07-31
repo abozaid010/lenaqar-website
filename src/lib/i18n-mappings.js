@@ -44,6 +44,7 @@ export const propertyMappings = {
   // Finishing types mapping
   finishingTypes: {
     finished: "property.finishing.finished",
+    "fully finished": "property.finishing.fullyFinished",
     "semi-finished": "property.finishing.semiFinished",
     "semi finished": "property.finishing.semiFinished",
     "core & shell": "property.finishing.coreShell",
@@ -51,6 +52,7 @@ export const propertyMappings = {
     unfinished: "property.finishing.unfinished",
     "white box": "property.finishing.whiteBox",
     flixy: "property.finishing.flixy",
+    turnkey: "property.furnishing.turnkey",
   },
 
   // Furnishing types mapping

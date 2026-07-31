@@ -2317,6 +2317,7 @@ export default {
       "core & shell": "Core & Shell",
       flixy: "Flixy",
       "white box": "White Box",
+      turnkey: "Turnkey",
       unfinished: "Unfinished",
       finished: "Finished",
     },

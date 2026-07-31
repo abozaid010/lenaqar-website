@@ -7,18 +7,43 @@ import {
 } from "@/data/constants";
 import { useI18n } from "@/hooks/useI18n";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { isHomeyClientId } from "@/lib/dashboard-filters-storage";
+import { validateLocationLeaf } from "@/lib/locations/validate-location-leaf";
+import { tValidation } from "@/constants/unit-form-validation-keys";
 import {
   getClientRequirements,
   updateUserRequirements,
 } from "@/utils/api";
+import CityManager from "@/utils/city_manager";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import LenaTextarea from "@/components/ui/inputs/lena-textarea";
 import UnitsLocationSearch from "@/components/ui/inputs/units-location-search";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
+import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import { useProjectsNames } from "@/hooks/use-admin-shared-data";
-import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+
+/** Homey-only UI default when no location is set. User can still change it. */
+const HOMEY_DEFAULT_LOCATION = {
+  city: "cairo",
+  district: "new cairo",
+  sub_district: "madinaty",
+};
+
+/** Prefill Homey default only when city/district/sub_district are all empty. */
+function withDefaultLocation(clientId, location = {}) {
+  const city = location.city || "";
+  const district = location.district || "";
+  const sub_district = location.sub_district || "";
+  if (city || district || sub_district) {
+    return { city, district, sub_district };
+  }
+  if (isHomeyClientId(clientId)) {
+    return { ...HOMEY_DEFAULT_LOCATION };
+  }
+  return { city: "", district: "", sub_district: "" };
+}
 
 // The PUT /requirements/{requirement_id} endpoint is keyed by the
 // requirement's own id (not the user id). The GET response may expose it
@@ -52,6 +77,17 @@ function pickSingleValue(v) {
   return String(v);
 }
 
+/** Map API/display values onto the canonical English enum sent to the API. */
+function normalizeEnumValue(raw, allowedValues) {
+  const picked = pickSingleValue(raw);
+  if (!picked) return "";
+  const needle = picked.trim().toLowerCase();
+  const match = allowedValues.find(
+    (v) => String(v).trim().toLowerCase() === needle,
+  );
+  return match || "";
+}
+
 function numberToFieldValue(v) {
   if (v === null || v === undefined || v === "") return "";
   const n = Number(v);
@@ -59,6 +95,26 @@ function numberToFieldValue(v) {
 }
 
 const PURPOSE_VALUES = ["rent", "buy", "sell"];
+
+/** CamelCase i18n keys — avoid spaces/& in translate() paths (sanitizer rejects them). */
+const FINISHING_LABEL_KEYS = {
+  "fully finished": "property.finishing.fullyFinished",
+  "semi finished": "property.finishing.semiFinished",
+  "core & shell": "property.finishing.coreShell",
+  flixy: "property.finishing.flixy",
+  "white box": "property.finishing.whiteBox",
+  turnkey: "property.furnishing.turnkey",
+};
+
+const FURNISHING_LABEL_KEYS = {
+  furnished: "property.furnishing.furnished",
+  unfurnished: "property.furnishing.unfurnished",
+  hotel_furnished: "property.furnishing.hotelFurnished",
+  "partially furnished": "property.furnishing.partiallyFurnished",
+  "semi furnished": "property.furnishing.semiFurnished",
+  flixy: "property.furnishing.flixy",
+  turnkey: "property.furnishing.turnkey",
+};
 
 function buildPriceFieldsForPayload(form) {
   const purpose = String(form.purpose || "").toLowerCase();
@@ -83,12 +139,11 @@ function buildPriceFieldsForPayload(form) {
 }
 
 function createEmptyForm(userId = "") {
+  const client_id = LenaCookiesManager.getClientId() || "";
   return {
-    client_id: "",
+    client_id,
     user_id: userId,
-    city: "",
-    district: "",
-    sub_district: "",
+    ...withDefaultLocation(client_id),
     project: "",
     buildingType: "",
     finishingType: "",
@@ -116,12 +171,14 @@ export default function EditRequirementDialog({
   const [saving, setSaving] = useState(false);
   const [requirementId, setRequirementId] = useState(null);
   const [form, setForm] = useState(() => createEmptyForm());
+  const [locationError, setLocationError] = useState("");
 
   const tr = (key, fallback) => translate(key, fallback);
 
   useEffect(() => {
     if (!open) {
       setRequirementId(null);
+      setLocationError("");
       return undefined;
     }
     if (!userId) return undefined;
@@ -130,22 +187,42 @@ export default function EditRequirementDialog({
       setLoading(true);
       try {
         const raw = await getClientRequirements(userId);
-        if (cancelled || raw?.error) {
+        if (cancelled) return;
+        // API returns response.data.data — can be null when the lead has no requirement.
+        if (raw?.error || !raw || typeof raw !== "object") {
           if (raw?.error) toast.error(String(raw.error));
+          setRequirementId(null);
+          setForm(createEmptyForm(userId));
           return;
         }
         setRequirementId(pickRequirementId(raw));
+        const client_id =
+          String(raw.client_id || LenaCookiesManager.getClientId() || "").trim();
         setForm({
           ...createEmptyForm(userId),
-          client_id: raw.client_id ?? "",
-          city: pickSingleValue(raw.city),
-          district: pickSingleValue(raw.district),
-          sub_district: pickSingleValue(raw.sub_district),
+          client_id,
+          ...withDefaultLocation(client_id, {
+            city: pickSingleValue(raw.city),
+            district: pickSingleValue(raw.district),
+            sub_district: pickSingleValue(raw.sub_district),
+          }),
           project: pickSingleValue(raw.project),
-          buildingType: pickSingleValue(raw.buildingType),
-          finishingType: pickSingleValue(raw.finishingType),
-          furnishingType: pickSingleValue(raw.furnishingType),
-          purpose: pickSingleValue(raw.purpose ?? raw.propertyPurpose),
+          buildingType: normalizeEnumValue(
+            raw.buildingType,
+            BUILDING_TYPE_VALUES,
+          ),
+          finishingType: normalizeEnumValue(
+            raw.finishingType,
+            FINISHING_TYPE_VALUES,
+          ),
+          furnishingType: normalizeEnumValue(
+            raw.furnishingType,
+            FURNISHING_TYPE_VALUES,
+          ),
+          purpose: normalizeEnumValue(
+            raw.purpose ?? raw.propertyPurpose,
+            PURPOSE_VALUES,
+          ),
           land_area: numberToFieldValue(raw.land_area),
           roomsCount: numberToFieldValue(raw.roomsCount),
           bathroomCount: numberToFieldValue(raw.bathroomCount),
@@ -191,10 +268,14 @@ export default function EditRequirementDialog({
       }));
       return;
     }
+    if (name === "project") {
+      setLocationError("");
+    }
     set(name, value);
   };
 
   const handleLocationChange = (payload) => {
+    setLocationError("");
     setForm((prev) => {
       const nextCity = payload?.city
         ? String(payload.city).toLowerCase().trim()
@@ -243,18 +324,24 @@ export default function EditRequirementDialog({
       .trim()
       .replace(/\b\w/g, (c) => c.toUpperCase());
 
-  const getOptionLabel = (groupKey, value) => {
-    const stringValue = String(value);
-    return tr(
-      `property.${groupKey}.${stringValue}`,
-      toDisplayLabel(stringValue),
-    );
+  const getPurposeLabel = (value) =>
+    tr(`basicDetails.purposes.${value}`, toDisplayLabel(value));
+
+  const getBuildingTypeLabel = (value) =>
+    tr(`property.buildingTypes.${value}`, toDisplayLabel(value));
+
+  const getFinishingLabel = (value) => {
+    const key = FINISHING_LABEL_KEYS[String(value).toLowerCase()];
+    return key ? tr(key, toDisplayLabel(value)) : toDisplayLabel(value);
   };
 
-  if (!open) return null;
+  const getFurnishingLabel = (value) => {
+    const key = FURNISHING_LABEL_KEYS[String(value).toLowerCase()];
+    return key ? tr(key, toDisplayLabel(value)) : toDisplayLabel(value);
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e?.preventDefault?.();
     if (!userId) return;
     if (!requirementId) {
       toast.error(
@@ -267,9 +354,28 @@ export default function EditRequirementDialog({
       );
       return;
     }
+
+    const locationResult = await validateLocationLeaf(
+      {
+        city: form.city,
+        district: form.district,
+        sub_district: form.sub_district,
+        project: form.project,
+      },
+      CityManager.getInstance(),
+    );
+    if (!locationResult.ok) {
+      const message = tValidation(translate, locationResult.key);
+      setLocationError(message);
+      toast.error(message);
+      return;
+    }
+    setLocationError("");
+
     setSaving(true);
     try {
       const clientId = form.client_id || LenaCookiesManager.getClientId() || "";
+      const purpose = normalizeEnumValue(form.purpose, PURPOSE_VALUES) || null;
       const payload = {
         client_id: clientId,
         user_id: userId,
@@ -277,14 +383,19 @@ export default function EditRequirementDialog({
         district: form.district,
         sub_district: form.sub_district,
         project: form.project,
-        buildingType: form.buildingType,
-        finishingType: form.finishingType,
-        furnishingType: form.furnishingType,
-        purpose: form.purpose || null,
+        buildingType:
+          normalizeEnumValue(form.buildingType, BUILDING_TYPE_VALUES) || null,
+        finishingType:
+          normalizeEnumValue(form.finishingType, FINISHING_TYPE_VALUES) ||
+          null,
+        furnishingType:
+          normalizeEnumValue(form.furnishingType, FURNISHING_TYPE_VALUES) ||
+          null,
+        purpose,
         land_area: toNum(form.land_area),
         roomsCount: toNum(form.roomsCount),
         bathroomCount: toNum(form.bathroomCount),
-        ...buildPriceFieldsForPayload(form),
+        ...buildPriceFieldsForPayload({ ...form, purpose: purpose || "" }),
         notes: typeof form.notes === "string" ? form.notes.trim() : "",
         score: {},
       };
@@ -334,372 +445,355 @@ export default function EditRequirementDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/40 sm:p-3">
-      <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-xl w-full sm:max-w-xl max-h-[min(94dvh,100%)] flex flex-col">
-        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b shrink-0">
-          <div className="min-w-0">
-            <h3 className="text-base font-semibold text-gray-900 truncate">
-              {tr(
-                "dashboard.requirementsDialog.title",
-                locale === "ar" ? "تعديل المتطلبات" : "Edit Requirements",
-              )}
-            </h3>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="shrink-0 flex items-center justify-center min-h-10 min-w-10 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100"
-            aria-label={tr("buttons.cancel", locale === "ar" ? "إلغاء" : "Cancel")}
-          >
-            <X className="w-5 h-5" />
-          </button>
+    <UnifiedDialog
+      isOpen={open}
+      onClose={onClose}
+      title={tr(
+        "dashboard.requirementsDialog.title",
+        locale === "ar" ? "تعديل المتطلبات" : "Edit Requirements",
+      )}
+      cancelLabel={tr("buttons.cancel", locale === "ar" ? "إلغاء" : "Cancel")}
+      onCancel={onClose}
+      submitLabel={
+        saving
+          ? tr(
+              "common.saving",
+              locale === "ar" ? "جارٍ الحفظ..." : "Saving...",
+            )
+          : tr("common.save", locale === "ar" ? "حفظ" : "Save")
+      }
+      onSubmit={handleSubmit}
+      submitDisabled={loading || saving || !requirementId}
+      submitLoading={saving}
+      closeOnEscape
+      dialogClassName="sm:max-w-xl"
+      bodyClassName="space-y-5 text-sm !p-4"
+    >
+      {loading ? (
+        <div className="p-6 text-center text-sm text-gray-500">
+          {tr(
+            "dashboard.requirementsDialog.loading",
+            locale === "ar" ? "جارٍ التحميل..." : "Loading...",
+          )}
         </div>
+      ) : (
+        <>
+          {/* Location */}
+          <section className="space-y-3">
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              {tr(
+                "dashboard.requirementsDialog.sections.location",
+                locale === "ar" ? "الموقع" : "Location",
+              )}
+            </h4>
+            <div className="grid grid-cols-1 gap-3">
+              <UnitsLocationSearch
+                name="requirement_location"
+                label={tr(
+                  "dashboard.requirementsDialog.fields.location",
+                  locale === "ar" ? "الموقع" : "Location",
+                )}
+                city={form.city}
+                district={form.district}
+                subDistrict={form.sub_district}
+                onChange={handleLocationChange}
+                required
+                error={Boolean(locationError)}
+                errorMessage={locationError}
+                showAllOption={false}
+                placeholder={tr(
+                  "basicDetails.locationSearchPlaceholder",
+                  locale === "ar"
+                    ? "ابحث عن مدينة أو منطقة أو حي…"
+                    : "Search city, district, or area…",
+                )}
+                className={dropdownClassName}
+              />
+              <p className="text-xs text-gray-500 -mt-1">
+                {tr(
+                  "basicDetails.locationSearchHint",
+                  locale === "ar"
+                    ? "اختر موقعاً نهائياً: حي فرعي، أو منطقة بلا أحياء فرعية، أو مشروع."
+                    : "Select a leaf location: sub-district, a district with no sub-districts, or a project.",
+                )}
+              </p>
+              <SearchableProjectSelect
+                name="project"
+                label={tr(
+                  "dashboard.requirementsDialog.fields.project",
+                  locale === "ar" ? "المشروع" : "Project",
+                )}
+                value={form.project}
+                onChange={handleFieldChange}
+                projects={projectsData || []}
+                city={form.city || ""}
+                district={form.district || ""}
+                isLoading={projectsLoading}
+                placeholder={
+                  t?.unitsFilter?.allCompounds ||
+                  (locale === "ar" ? "اختر المشروع" : "Select project")
+                }
+                className={dropdownClassName}
+              />
+            </div>
+          </section>
 
-        {loading ? (
-          <div className="p-10 text-center text-sm text-gray-500">
-            {tr(
-              "dashboard.requirementsDialog.loading",
-              locale === "ar" ? "جارٍ التحميل..." : "Loading...",
+          {/* Property */}
+          <section className="space-y-3">
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              {tr(
+                "dashboard.requirementsDialog.sections.property",
+                locale === "ar" ? "العقار" : "Property",
+              )}
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-medium text-gray-600">
+                  {tr(
+                    "dashboard.requirementsDialog.fields.purpose",
+                    locale === "ar" ? "الغرض" : "Purpose",
+                  )}
+                </label>
+                <select
+                  className={inputClassName}
+                  value={form.purpose}
+                  onChange={(e) =>
+                    handleFieldChange({
+                      target: { name: "purpose", value: e.target.value },
+                    })
+                  }
+                >
+                  <option value="">{notSpecifiedLabel}</option>
+                  {PURPOSE_VALUES.map((v) => (
+                    <option key={v} value={v}>
+                      {getPurposeLabel(v)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-600">
+                  {tr(
+                    "dashboard.requirementsDialog.fields.buildingType",
+                    locale === "ar" ? "نوع العقار" : "Building Type",
+                  )}
+                </label>
+                <select
+                  className={inputClassName}
+                  value={form.buildingType}
+                  onChange={(e) => set("buildingType", e.target.value)}
+                >
+                  <option value="">{notSpecifiedLabel}</option>
+                  {BUILDING_TYPE_VALUES.map((v) => (
+                    <option key={v} value={v}>
+                      {getBuildingTypeLabel(v)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-600">
+                  {tr(
+                    "dashboard.requirementsDialog.fields.finishing",
+                    locale === "ar" ? "التشطيب" : "Finishing",
+                  )}
+                </label>
+                <select
+                  className={inputClassName}
+                  value={form.finishingType}
+                  onChange={(e) => set("finishingType", e.target.value)}
+                >
+                  <option value="">{notSpecifiedLabel}</option>
+                  {FINISHING_TYPE_VALUES.map((v) => (
+                    <option key={v} value={v}>
+                      {getFinishingLabel(v)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-600">
+                  {tr(
+                    "dashboard.requirementsDialog.fields.furnishing",
+                    locale === "ar" ? "الفرش" : "Furnishing",
+                  )}
+                </label>
+                <select
+                  className={inputClassName}
+                  value={form.furnishingType}
+                  onChange={(e) => set("furnishingType", e.target.value)}
+                >
+                  <option value="">{notSpecifiedLabel}</option>
+                  {FURNISHING_TYPE_VALUES.map((v) => (
+                    <option key={v} value={v}>
+                      {getFurnishingLabel(v)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </section>
+
+          {/* Size */}
+          <section className="space-y-3">
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              {tr(
+                "dashboard.requirementsDialog.sections.measurements",
+                locale === "ar" ? "المساحة والغرف" : "Size",
+              )}
+            </h4>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <LenaTextField
+                name="roomsCount"
+                type="number"
+                label={tr(
+                  "dashboard.requirementsDialog.fields.rooms",
+                  locale === "ar" ? "الغرف" : "Rooms",
+                )}
+                value={form.roomsCount}
+                onChange={(e) => set("roomsCount", e.target.value)}
+              />
+              <LenaTextField
+                name="bathroomCount"
+                type="number"
+                label={tr(
+                  "dashboard.requirementsDialog.fields.baths",
+                  locale === "ar" ? "الحمامات" : "Baths",
+                )}
+                value={form.bathroomCount}
+                onChange={(e) => set("bathroomCount", e.target.value)}
+              />
+              <LenaTextField
+                name="land_area"
+                type="number"
+                label={tr(
+                  "dashboard.requirementsDialog.fields.land",
+                  locale === "ar" ? "المساحة" : "Area",
+                )}
+                value={form.land_area}
+                onChange={(e) => set("land_area", e.target.value)}
+                adornment="m²"
+              />
+            </div>
+          </section>
+
+          {/* Budget */}
+          <section className="space-y-3">
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              {tr(
+                "dashboard.requirementsDialog.sections.pricing",
+                locale === "ar" ? "الميزانية" : "Budget",
+              )}
+            </h4>
+
+            {!purposeKey && (
+              <p className="text-xs text-gray-500">
+                {tr(
+                  "dashboard.requirementsDialog.pricing.selectPurpose",
+                  locale === "ar"
+                    ? "اختر الغرض أولاً لعرض حقول الميزانية"
+                    : "Select purpose first to show budget fields",
+                )}
+              </p>
             )}
-          </div>
-        ) : (
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col flex-1 min-h-0 text-sm"
-          >
-            <div className="overflow-y-auto overscroll-contain flex-1 min-h-0 px-4 py-4 space-y-5">
-              {/* Location */}
-              <section className="space-y-3">
-                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                  {tr(
-                    "dashboard.requirementsDialog.sections.location",
-                    locale === "ar" ? "الموقع" : "Location",
-                  )}
-                </h4>
-                <div className="grid grid-cols-1 gap-3">
-                  <UnitsLocationSearch
-                    name="requirement_location"
-                    label={tr(
-                      "dashboard.requirementsDialog.fields.location",
-                      locale === "ar" ? "الموقع" : "Location",
-                    )}
-                    city={form.city}
-                    district={form.district}
-                    subDistrict={form.sub_district}
-                    onChange={handleLocationChange}
-                    allOptionLabel={notSpecifiedLabel}
-                    placeholder={tr(
-                      "unitsFilter.locationSearchPlaceholder",
-                      locale === "ar"
-                        ? "ابحث عن مدينة أو منطقة أو حي…"
-                        : "Search city, district, or area…",
-                    )}
-                    className={dropdownClassName}
-                  />
-                  <SearchableProjectSelect
-                    name="project"
-                    label={tr(
-                      "dashboard.requirementsDialog.fields.project",
-                      locale === "ar" ? "المشروع" : "Project",
-                    )}
-                    value={form.project}
-                    onChange={handleFieldChange}
-                    projects={projectsData || []}
-                    city={form.city || ""}
-                    district={form.district || ""}
-                    isLoading={projectsLoading}
-                    placeholder={
-                      t?.unitsFilter?.allCompounds ||
-                      (locale === "ar" ? "اختر المشروع" : "Select project")
-                    }
-                    className={dropdownClassName}
-                  />
-                </div>
-              </section>
 
-              {/* Property */}
-              <section className="space-y-3">
-                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                  {tr(
-                    "dashboard.requirementsDialog.sections.property",
-                    locale === "ar" ? "العقار" : "Property",
-                  )}
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-medium text-gray-600">
-                      {tr(
-                        "dashboard.requirementsDialog.fields.purpose",
-                        locale === "ar" ? "الغرض" : "Purpose",
-                      )}
-                    </label>
-                    <select
-                      className={inputClassName}
-                      value={form.purpose}
-                      onChange={(e) =>
-                        handleFieldChange({
-                          target: { name: "purpose", value: e.target.value },
-                        })
-                      }
-                    >
-                      <option value="">{notSpecifiedLabel}</option>
-                      {PURPOSE_VALUES.map((v) => (
-                        <option key={v} value={v}>
-                          {tr(`propertyPurpose.${v}`, toDisplayLabel(v))}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-gray-600">
-                      {tr(
-                        "dashboard.requirementsDialog.fields.buildingType",
-                        locale === "ar" ? "نوع العقار" : "Building Type",
-                      )}
-                    </label>
-                    <select
-                      className={inputClassName}
-                      value={form.buildingType}
-                      onChange={(e) => set("buildingType", e.target.value)}
-                    >
-                      <option value="">{notSpecifiedLabel}</option>
-                      {BUILDING_TYPE_VALUES.map((v) => (
-                        <option key={v} value={v}>
-                          {getOptionLabel("buildingTypes", v)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-gray-600">
-                      {tr(
-                        "dashboard.requirementsDialog.fields.finishing",
-                        locale === "ar" ? "التشطيب" : "Finishing",
-                      )}
-                    </label>
-                    <select
-                      className={inputClassName}
-                      value={form.finishingType}
-                      onChange={(e) => set("finishingType", e.target.value)}
-                    >
-                      <option value="">{notSpecifiedLabel}</option>
-                      {FINISHING_TYPE_VALUES.map((v) => (
-                        <option key={v} value={v}>
-                          {getOptionLabel("finishing", v)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-gray-600">
-                      {tr(
-                        "dashboard.requirementsDialog.fields.furnishing",
-                        locale === "ar" ? "الفرش" : "Furnishing",
-                      )}
-                    </label>
-                    <select
-                      className={inputClassName}
-                      value={form.furnishingType}
-                      onChange={(e) => set("furnishingType", e.target.value)}
-                    >
-                      <option value="">{notSpecifiedLabel}</option>
-                      {FURNISHING_TYPE_VALUES.map((v) => (
-                        <option key={v} value={v}>
-                          {tr(
-                            `property.furnishing.${v}`,
-                            toDisplayLabel(v),
-                          )}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </section>
-
-              {/* Size */}
-              <section className="space-y-3">
-                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                  {tr(
-                    "dashboard.requirementsDialog.sections.measurements",
-                    locale === "ar" ? "المساحة والغرف" : "Size",
-                  )}
-                </h4>
-                <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                  <LenaTextField
-                    name="roomsCount"
-                    type="number"
-                    label={tr(
-                      "dashboard.requirementsDialog.fields.rooms",
-                      locale === "ar" ? "الغرف" : "Rooms",
-                    )}
-                    value={form.roomsCount}
-                    onChange={(e) => set("roomsCount", e.target.value)}
-                  />
-                  <LenaTextField
-                    name="bathroomCount"
-                    type="number"
-                    label={tr(
-                      "dashboard.requirementsDialog.fields.baths",
-                      locale === "ar" ? "الحمامات" : "Baths",
-                    )}
-                    value={form.bathroomCount}
-                    onChange={(e) => set("bathroomCount", e.target.value)}
-                  />
-                  <LenaTextField
-                    name="land_area"
-                    type="number"
-                    label={tr(
-                      "dashboard.requirementsDialog.fields.land",
-                      locale === "ar" ? "المساحة" : "Area",
-                    )}
-                    value={form.land_area}
-                    onChange={(e) => set("land_area", e.target.value)}
-                    adornment="m²"
-                  />
-                </div>
-              </section>
-
-              {/* Budget */}
-              <section className="space-y-3">
-                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                  {tr(
-                    "dashboard.requirementsDialog.sections.pricing",
-                    locale === "ar" ? "الميزانية" : "Budget",
-                  )}
-                </h4>
-
-                {!purposeKey && (
-                  <p className="text-xs text-gray-500">
-                    {tr(
-                      "dashboard.requirementsDialog.pricing.selectPurpose",
-                      locale === "ar"
-                        ? "اختر الغرض أولاً لعرض حقول الميزانية"
-                        : "Select purpose first to show budget fields",
-                    )}
-                  </p>
-                )}
-
-                {isBuyOrSell && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <LenaTextField
-                      name="min_price"
-                      type="money"
-                      label={tr(
-                        "dashboard.requirementsDialog.fields.minBudget",
-                        locale === "ar" ? "الحد الأدنى" : "Min budget",
-                      )}
-                      value={form.min_price}
-                      onChange={handlePriceChange}
-                      adornment="EGP"
-                    />
-                    <LenaTextField
-                      name="max_price"
-                      type="money"
-                      label={tr(
-                        "dashboard.requirementsDialog.fields.maxBudget",
-                        locale === "ar" ? "الحد الأقصى" : "Max budget",
-                      )}
-                      value={form.max_price}
-                      onChange={handlePriceChange}
-                      adornment="EGP"
-                    />
-                    <LenaTextField
-                      name="downPayment"
-                      type="money"
-                      label={tr(
-                        "dashboard.requirementsDialog.fields.downPayment",
-                        locale === "ar" ? "المقدم" : "Down payment",
-                      )}
-                      value={form.downPayment}
-                      onChange={handlePriceChange}
-                      adornment="EGP"
-                    />
-                  </div>
-                )}
-
-                {isRent && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <LenaTextField
-                      name="min_price"
-                      type="money"
-                      label={tr(
-                        "dashboard.requirementsDialog.fields.minMonthlyRent",
-                        locale === "ar"
-                          ? "أقل إيجار شهري"
-                          : "Min monthly rent",
-                      )}
-                      value={form.min_price}
-                      onChange={handlePriceChange}
-                      adornment="EGP"
-                    />
-                    <LenaTextField
-                      name="max_price"
-                      type="money"
-                      label={tr(
-                        "dashboard.requirementsDialog.fields.maxMonthlyRent",
-                        locale === "ar"
-                          ? "أقصى إيجار شهري"
-                          : "Max monthly rent",
-                      )}
-                      value={form.max_price}
-                      onChange={handlePriceChange}
-                      adornment="EGP"
-                    />
-                  </div>
-                )}
-              </section>
-
-              <section className="space-y-3">
-                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                  {tr(
-                    "dashboard.requirementsDialog.sections.notes",
-                    locale === "ar" ? "ملاحظات إضافية" : "Additional Notes",
-                  )}
-                </h4>
-                <LenaTextarea
-                  name="notes"
+            {isBuyOrSell && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <LenaTextField
+                  name="min_price"
+                  type="money"
                   label={tr(
-                    "dashboard.requirementsDialog.fields.notes",
-                    locale === "ar" ? "ملاحظات" : "Notes",
+                    "dashboard.requirementsDialog.fields.minBudget",
+                    locale === "ar" ? "الحد الأدنى" : "Min budget",
                   )}
-                  value={form.notes}
-                  onChange={(e) => set("notes", e.target.value)}
-                  placeholder={tr(
-                    "dashboard.requirementsDialog.fields.notesPlaceholder",
-                    locale === "ar"
-                      ? "أضف ملاحظات إضافية عن المتطلب..."
-                      : "Add more notes about this requirement…",
-                  )}
-                  rows={4}
-                  className="text-sm"
+                  value={form.min_price}
+                  onChange={handlePriceChange}
+                  adornment="EGP"
                 />
-              </section>
-            </div>
+                <LenaTextField
+                  name="max_price"
+                  type="money"
+                  label={tr(
+                    "dashboard.requirementsDialog.fields.maxBudget",
+                    locale === "ar" ? "الحد الأقصى" : "Max budget",
+                  )}
+                  value={form.max_price}
+                  onChange={handlePriceChange}
+                  adornment="EGP"
+                />
+                <LenaTextField
+                  name="downPayment"
+                  type="money"
+                  label={tr(
+                    "dashboard.requirementsDialog.fields.downPayment",
+                    locale === "ar" ? "المقدم" : "Down payment",
+                  )}
+                  value={form.downPayment}
+                  onChange={handlePriceChange}
+                  adornment="EGP"
+                />
+              </div>
+            )}
 
-            <div className="shrink-0 border-t bg-white/95 backdrop-blur px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="min-h-11 flex-1 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                {tr("buttons.cancel", locale === "ar" ? "إلغاء" : "Cancel")}
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="min-h-11 flex-[1.4] rounded-md bg-primary text-white text-sm font-semibold hover:bg-primary/90 disabled:opacity-60"
-              >
-                {saving
-                  ? tr(
-                      "common.saving",
-                      locale === "ar" ? "جارٍ الحفظ..." : "Saving...",
-                    )
-                  : tr("common.save", locale === "ar" ? "حفظ" : "Save")}
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
-    </div>
+            {isRent && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <LenaTextField
+                  name="min_price"
+                  type="money"
+                  label={tr(
+                    "dashboard.requirementsDialog.fields.minMonthlyRent",
+                    locale === "ar"
+                      ? "أقل إيجار شهري"
+                      : "Min monthly rent",
+                  )}
+                  value={form.min_price}
+                  onChange={handlePriceChange}
+                  adornment="EGP"
+                />
+                <LenaTextField
+                  name="max_price"
+                  type="money"
+                  label={tr(
+                    "dashboard.requirementsDialog.fields.maxMonthlyRent",
+                    locale === "ar"
+                      ? "أقصى إيجار شهري"
+                      : "Max monthly rent",
+                  )}
+                  value={form.max_price}
+                  onChange={handlePriceChange}
+                  adornment="EGP"
+                />
+              </div>
+            )}
+          </section>
+
+          <section className="space-y-3">
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              {tr(
+                "dashboard.requirementsDialog.sections.notes",
+                locale === "ar" ? "ملاحظات إضافية" : "Additional Notes",
+              )}
+            </h4>
+            <LenaTextarea
+              name="notes"
+              label={tr(
+                "dashboard.requirementsDialog.fields.notes",
+                locale === "ar" ? "ملاحظات" : "Notes",
+              )}
+              value={form.notes}
+              onChange={(e) => set("notes", e.target.value)}
+              placeholder={tr(
+                "dashboard.requirementsDialog.fields.notesPlaceholder",
+                locale === "ar"
+                  ? "أضف ملاحظات إضافية عن المتطلب..."
+                  : "Add more notes about this requirement…",
+              )}
+              rows={4}
+              className="text-sm"
+            />
+          </section>
+        </>
+      )}
+    </UnifiedDialog>
   );
 }

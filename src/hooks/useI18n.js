@@ -183,6 +183,7 @@ export function useI18n() {
     // Finishing types
     getFinishing: (finishing) => getMapped(finishing?.toLowerCase(), {
       finished: 'property.finishing.finished',
+      'fully finished': 'property.finishing.fullyFinished',
       'semi-finished': 'property.finishing.semiFinished',
       'semi finished': 'property.finishing.semiFinished',
       'core & shell': 'property.finishing.coreShell',
@@ -190,6 +191,7 @@ export function useI18n() {
       unfinished: 'property.finishing.unfinished',
       'white box': 'property.finishing.whiteBox',
       flixy: 'property.finishing.flixy',
+      turnkey: 'property.furnishing.turnkey',
     }),
     
     // Furnishing types

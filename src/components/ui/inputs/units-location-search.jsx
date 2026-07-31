@@ -32,7 +32,8 @@ function optionKey(kind, parts) {
 
 /**
  * Combined location picker: search and pick city, district, or sub-district.
- * Unlike leaf-only pickers, any hierarchy level is valid (or clear / "all").
+ * Unlike leaf-only pickers, any hierarchy level is selectable in the UI;
+ * callers that require a leaf should validate with `validateLocationLeaf`.
  */
 export default function UnitsLocationSearch({
   city = "",
@@ -47,6 +48,9 @@ export default function UnitsLocationSearch({
   allOptionLabel,
   placeholder,
   disabled = false,
+  required = false,
+  error = false,
+  errorMessage = "",
 }) {
   const { locale, translate } = useI18n();
   const cityManager = CityManager.getInstance();
@@ -230,6 +234,9 @@ export default function UnitsLocationSearch({
       value={selectedKey}
       onChange={handleChange}
       disabled={disabled}
+      required={required}
+      error={error}
+      errorMessage={errorMessage}
       isLoading={geoLoading}
       showAllOption={showAllOption}
       allOptionLabel={resolvedAllLabel}

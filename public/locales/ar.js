@@ -2135,6 +2135,7 @@ export default {
       "core & shell": "دون تشطيب",
       flixy: "فليكسي",
       "white box": "صندوق أبيض",
+      turnkey: "تسليم مفتاح",
       unfinished: "غير مشطب",
       finished: "مشطب",
     },
