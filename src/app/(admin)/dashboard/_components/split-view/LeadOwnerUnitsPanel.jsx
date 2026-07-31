@@ -14,6 +14,7 @@ import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { formatCurrency } from "@/utils/formatters";
 import {
   buildAdminUnitEditPath,
+  buildUnitDetailHrefFromListItem,
   resolveUnitCodeFromListItem,
   resolveUnitIdFromListItem,
 } from "@/lib/units/unit-share-links";
@@ -21,7 +22,7 @@ import {
   isRentPurpose,
   resolveUnitDisplayPrice,
 } from "@/lib/units/unit-price";
-import { formatFurnishing } from "@/lib/units/unit-formatters";
+import { formatFurnishing, formatPurpose } from "@/lib/units/unit-formatters";
 
 function toPositiveNumber(value) {
   if (value == null || value === "") return null;
@@ -74,6 +75,7 @@ function getOwnerUnitCardModel(unit, t, clientId, translate) {
     unit?.furnishing ?? unit?.furnishingType,
     t,
   );
+  const purpose = formatPurpose(unit?.purpose, t);
   const project = unit?.project || "";
   const district = unit?.district || "";
   const priceLabel = isRentPurpose(unit?.purpose)
@@ -87,6 +89,9 @@ function getOwnerUnitCardModel(unit, t, clientId, translate) {
   const editHref = code
     ? buildAdminUnitEditPath(code, listingClientId)
     : null;
+  const detailHref = buildUnitDetailHrefFromListItem(unit, {
+    clientId: listingClientId,
+  });
   return {
     code,
     thumb,
@@ -94,10 +99,12 @@ function getOwnerUnitCardModel(unit, t, clientId, translate) {
     area,
     bedrooms,
     furnishing,
+    purpose,
     project,
     district,
     priceLabel,
     editHref,
+    detailHref,
   };
 }
 
@@ -205,59 +212,94 @@ function OwnerUnitCardHorizontal({ unit, onPreview, translate, t, clientId }) {
     price,
     area,
     bedrooms,
+    furnishing,
+    purpose,
     project,
     district,
     editHref,
+    detailHref,
   } = getOwnerUnitCardModel(unit, t, clientId, translate);
+
+  const codeLabel = code || getUnitKey(unit) || "—";
+  const openDetailsLabel = translate(
+    "leadDetail.ownerUnits.openDetails",
+    "Open unit details",
+  );
 
   return (
     <div className="flex w-[168px] shrink-0 flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-colors hover:border-primary/40">
       <button
         type="button"
         onClick={() => onPreview(unit)}
-        className="flex min-w-0 flex-1 flex-col text-start focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/30"
+        className="relative h-20 w-full overflow-hidden bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/30"
+        aria-label={translate("leadDetail.ownerUnits.preview", "Preview")}
       >
-        <div className="relative h-20 w-full overflow-hidden bg-gray-100">
-          {thumb ? (
-            <ImageWithLoader
-              src={thumb}
-              alt={code || "unit"}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-[10px] text-gray-400">
-              {translate("matchPage.noImages", "No images")}
-            </div>
+        {thumb ? (
+          <ImageWithLoader
+            src={thumb}
+            alt={code || "unit"}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-[10px] text-gray-400">
+            {translate("matchPage.noImages", "No images")}
+          </div>
+        )}
+        {(purpose || furnishing) && (
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-wrap gap-1 p-1">
+            {purpose ? (
+              <span className="max-w-full truncate rounded bg-black/65 px-1.5 py-0.5 text-[9px] font-medium leading-tight text-white">
+                {purpose}
+              </span>
+            ) : null}
+            {furnishing ? (
+              <span className="max-w-full truncate rounded bg-black/65 px-1.5 py-0.5 text-[9px] font-medium leading-tight text-white">
+                {furnishing}
+              </span>
+            ) : null}
+          </div>
+        )}
+      </button>
+
+      <div className="space-y-0.5 p-2">
+        {detailHref ? (
+          <Link
+            href={detailHref}
+            className="block truncate text-xs font-semibold text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-sm"
+            title={openDetailsLabel}
+            aria-label={`${openDetailsLabel}: ${codeLabel}`}
+          >
+            {codeLabel}
+          </Link>
+        ) : (
+          <p className="truncate text-xs font-semibold text-gray-800">
+            {codeLabel}
+          </p>
+        )}
+        <p className="truncate text-[10px] text-gray-500">
+          {[project, district].filter(Boolean).join(" · ") || "—"}
+        </p>
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10px] text-gray-600">
+          {price != null && (
+            <span className="font-semibold text-gray-900">
+              {formatCurrency(price)}
+            </span>
+          )}
+          {bedrooms != null && bedrooms !== "" && (
+            <span className="inline-flex items-center gap-0.5">
+              <Bed className="h-2.5 w-2.5" aria-hidden />
+              {bedrooms}
+            </span>
+          )}
+          {area != null && (
+            <span className="inline-flex items-center gap-0.5">
+              <Square className="h-2.5 w-2.5" aria-hidden />
+              {area} m²
+            </span>
           )}
         </div>
-        <div className="space-y-0.5 p-2">
-          <p className="truncate text-xs font-semibold text-primary">
-            {code || getUnitKey(unit) || "—"}
-          </p>
-          <p className="truncate text-[10px] text-gray-500">
-            {[project, district].filter(Boolean).join(" · ") || "—"}
-          </p>
-          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10px] text-gray-600">
-            {price != null && (
-              <span className="font-semibold text-gray-900">
-                {formatCurrency(price)}
-              </span>
-            )}
-            {bedrooms != null && bedrooms !== "" && (
-              <span className="inline-flex items-center gap-0.5">
-                <Bed className="h-2.5 w-2.5" aria-hidden />
-                {bedrooms}
-              </span>
-            )}
-            {area != null && (
-              <span className="inline-flex items-center gap-0.5">
-                <Square className="h-2.5 w-2.5" aria-hidden />
-                {area} m²
-              </span>
-            )}
-          </div>
-        </div>
-      </button>
+      </div>
+
       {editHref ? (
         <Link
           href={editHref}

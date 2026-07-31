@@ -1040,15 +1040,21 @@ export default function LeadDetailPane({
               <button
                 type="button"
                 onClick={() => setOpenAddAction(true)}
-                className={`${DASHBOARD_BUTTON} h-10 min-h-10 lg:h-8 lg:min-h-[32px] text-sm lg:text-xs shrink-0 px-3`}
-              >
-                <Plus className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
-                {translate(
+                className={`${DASHBOARD_BUTTON} h-10 w-10 min-h-10 min-w-10 lg:h-8 lg:w-8 lg:min-h-8 lg:min-w-8 shrink-0 !px-0`}
+                title={translate(
                   "actionForm.addNewAction",
                   locale === "ar"
                     ? "إضافة إجراء جديد"
-                    : "Add New Action"
+                    : "Add New Action",
                 )}
+                aria-label={translate(
+                  "actionForm.addNewAction",
+                  locale === "ar"
+                    ? "إضافة إجراء جديد"
+                    : "Add New Action",
+                )}
+              >
+                <Plus className="w-4 h-4" aria-hidden />
               </button>
             ) : null
           }
@@ -1057,6 +1063,23 @@ export default function LeadDetailPane({
 
       {renderLeadSummaryCard()}
 
+      {leadAuthor ? (
+        <section className="rounded-lg border border-gray-200 bg-white p-3 sm:p-4">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
+              {translate("leadDetail.actionsTab.authorLabel", "Author")}
+            </span>
+            <TagChip
+              label={leadAuthor}
+              size="xs"
+              compact
+              removable={false}
+            />
+          </div>
+        </section>
+      ) : null}
+
+      {/* TEMP: tags UI hidden — restore when tags shipping again
       <section className="rounded-lg border border-gray-200 bg-white p-3 sm:p-4">
         <h5 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
           {translate("leadDetail.actionsTab.sections.tags")}
@@ -1113,6 +1136,7 @@ export default function LeadDetailPane({
           </form>
         </div>
       </section>
+      */}
 
       {canShowDeleteLead && (
         <section className="rounded-lg border border-red-200 bg-red-50/40 p-3 sm:p-4">

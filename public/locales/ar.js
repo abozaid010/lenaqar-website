@@ -2533,6 +2533,7 @@ export default {
       preview: "معاينة",
       previewTitle: "وحدة {code}",
       edit: "تعديل",
+      openDetails: "فتح تفاصيل الوحدة",
       empty: "لا توجد وحدات لهذا رقم المالك.",
       noPhone: "لا يوجد رقم هاتف لهذا العميل لجلب وحداته.",
       loadFailed: "تعذر تحميل الوحدات المدرجة.",

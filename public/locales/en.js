@@ -792,6 +792,7 @@ export default {
       preview: "Preview",
       previewTitle: "Unit {code}",
       edit: "Edit",
+      openDetails: "Open unit details",
       empty: "No units found for this owner phone.",
       noPhone: "This lead has no phone number to look up listed units.",
       loadFailed: "Unable to load listed units.",
