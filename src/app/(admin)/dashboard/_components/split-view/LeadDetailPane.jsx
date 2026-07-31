@@ -1323,18 +1323,8 @@ export default function LeadDetailPane({
           </div>
         </div>
 
-        {/* Desktop: conversation + actions side-by-side */}
+        {/* Desktop: chat first, actions at inline-end (EN: right, AR: left) */}
         <div className="hidden lg:flex flex-1 min-h-0 flex-row overflow-hidden bg-white">
-          <aside
-            className="shrink-0 w-[min(300px,36%)] xl:w-[300px] border-e border-gray-100 overflow-y-auto overscroll-contain bg-gray-50/40"
-            aria-label={translate(
-              "leadDetail.tabs.actions",
-              "Actions",
-            )}
-          >
-            {renderActionsMetaColumn()}
-          </aside>
-
           <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
             <ChatConversation
               userId={userId}
@@ -1344,6 +1334,16 @@ export default function LeadDetailPane({
               className="flex-1 min-h-0"
             />
           </div>
+
+          <aside
+            className="shrink-0 w-[min(300px,36%)] xl:w-[300px] border-s border-gray-100 overflow-y-auto overscroll-contain bg-gray-50/40"
+            aria-label={translate(
+              "leadDetail.tabs.actions",
+              "Actions",
+            )}
+          >
+            {renderActionsMetaColumn()}
+          </aside>
         </div>
       </div>
 
