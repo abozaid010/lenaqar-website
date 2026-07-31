@@ -7,6 +7,7 @@ import {
   getOwnerTypeLabel,
   normalizeOwnerType,
 } from "@/constants/owner-type";
+import { ArrowDown } from "lucide-react";
 
 export default function LeadRow({
   user,
@@ -14,6 +15,10 @@ export default function LeadRow({
   selected,
   onSelect,
   onCall,
+  onMoveToBottom,
+  handledFlash = false,
+  advanceFlash = false,
+  sessionHandled = false,
   bulkSelected = false,
   onToggleBulkSelection,
   showBulkCheckbox = false,
@@ -24,6 +29,10 @@ export default function LeadRow({
     (rawPhone && (formatPhoneForDisplay(rawPhone, "EG") || rawPhone)) || "—";
   const ownerType = normalizeOwnerType(user.owner_type);
   const ownerTypeLabel = ownerType ? getOwnerTypeLabel(ownerType, translate) : "";
+  const moveToBottomLabel = translate(
+    "dashboardFilter.moveLeadToBottom",
+    "Move to bottom and select next",
+  );
 
   return (
     <div
@@ -40,7 +49,9 @@ export default function LeadRow({
       }}
       className={`w-full flex flex-row items-center gap-2 text-start px-3 py-2.5 lg:py-2 chat-list-row transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25d366]/30 ${
         selected ? "chat-list-row--selected" : ""
-      }`}
+      }${sessionHandled ? " chat-list-row--session-handled" : ""}${
+        handledFlash ? " chat-list-row--handled" : ""
+      }${advanceFlash ? " chat-list-row--advance" : ""}`}
     >
       {(showBulkCheckbox || index != null) && (
         <div className="shrink-0 w-8 lg:w-5 flex flex-col items-center gap-0.5">
@@ -101,13 +112,30 @@ export default function LeadRow({
         </span>
       </div>
 
-      {rawPhone ? (
-        <CallButton
-          phoneNumber={rawPhone}
-          className="shrink-0 hover:text-primary"
-          onClick={onCall ? () => onCall(user) : undefined}
-        />
-      ) : null}
+      <div className="shrink-0 flex items-center gap-0.5">
+        {onMoveToBottom ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              onMoveToBottom(user);
+            }}
+            className="inline-flex items-center justify-center h-7 w-7 min-h-7 min-w-7 p-0 rounded-md text-chat-text-muted hover:text-primary hover:bg-primary/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+            title={moveToBottomLabel}
+            aria-label={moveToBottomLabel}
+          >
+            <ArrowDown className="w-3.5 h-3.5" aria-hidden />
+          </button>
+        ) : null}
+        {rawPhone ? (
+          <CallButton
+            phoneNumber={rawPhone}
+            className="shrink-0 hover:text-primary"
+            onClick={onCall ? () => onCall(user) : undefined}
+          />
+        ) : null}
+      </div>
     </div>
   );
 }
