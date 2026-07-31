@@ -38,8 +38,10 @@ import {
   Landmark,
   ListChecks,
   MapPin,
+  MessageCircle,
   Pencil,
   Plus,
+  Settings2,
   Sparkles,
   Square,
   Tag,
@@ -55,11 +57,16 @@ import { ThreeDotsLoader } from "@/components/ui/loading-spinner";
 import EditRequirementDialog from "./EditRequirementDialog";
 import EditUserInfoDialog from "./EditUserInfoDialog";
 import BulkLeadActionDialog from "./BulkLeadActionDialog";
+import LeadDetailTabs from "./LeadDetailTabs";
 import { getOwnerTypeLabel, normalizeOwnerType, isListingOwnerType } from "@/constants/owner-type";
 import LeadOwnerUnitsPanel from "./LeadOwnerUnitsPanel";
 import { useLocalizedLocationLabels } from "@/hooks/use-localized-location-labels";
 import { isDashboardAdminRole } from "@/lib/dashboard-lead-access";
 import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
+
+/** Mobile-only detail sections (desktop keeps chat + actions side-by-side). */
+const VALID_MOBILE_TABS = new Set(["conversations", "actions"]);
+const DEFAULT_MOBILE_TAB = "conversations";
 
 // ---------- Requirement summary helpers (local to this file) ----------
 
@@ -136,6 +143,39 @@ export default function LeadDetailPane({
   const [isDeleting, setIsDeleting] = useState(false);
   const [newTagInput, setNewTagInput] = useState("");
   const [isAddingTag, setIsAddingTag] = useState(false);
+
+  const rawTabParam = searchParams.get("tab");
+  const mobileTab = VALID_MOBILE_TABS.has(rawTabParam)
+    ? rawTabParam
+    : DEFAULT_MOBILE_TAB;
+
+  const setMobileTab = useCallback(
+    (nextTab) => {
+      if (!VALID_MOBILE_TABS.has(nextTab)) return;
+      const usp = new URLSearchParams(searchParams.toString());
+      if (nextTab === DEFAULT_MOBILE_TAB) {
+        usp.delete("tab");
+      } else {
+        usp.set("tab", nextTab);
+      }
+      const qs = usp.toString();
+      router.replace(
+        `${window.location.pathname}${qs ? `?${qs}` : ""}`,
+        { scroll: false },
+      );
+    },
+    [router, searchParams],
+  );
+
+  // New lead → always land on Conversations on mobile.
+  useEffect(() => {
+    if (!userId) return;
+    const current = searchParams.get("tab");
+    if (current && current !== DEFAULT_MOBILE_TAB) {
+      setMobileTab(DEFAULT_MOBILE_TAB);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only on lead change
+  }, [userId]);
 
   const { data, error, isLoading } = useQuery({
     queryKey: ["chatHistory", userId, LEAD_CONVERSATION_MESSAGE_LIMIT],
@@ -982,7 +1022,7 @@ export default function LeadDetailPane({
   );
 
   const renderActionsMetaColumn = () => (
-    <div className="flex flex-col gap-3 p-3 sm:p-4">
+    <div className="flex flex-col gap-4 p-3 sm:p-4">
       <section className="rounded-lg border border-gray-200 bg-white overflow-hidden">
         <ActionsHistoryPanel
           actions={rowActions}
@@ -1000,9 +1040,9 @@ export default function LeadDetailPane({
               <button
                 type="button"
                 onClick={() => setOpenAddAction(true)}
-                className={`${DASHBOARD_BUTTON} h-8 min-h-[32px] text-xs shrink-0`}
+                className={`${DASHBOARD_BUTTON} h-10 min-h-10 lg:h-8 lg:min-h-[32px] text-sm lg:text-xs shrink-0 px-3`}
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
                 {translate(
                   "actionForm.addNewAction",
                   locale === "ar"
@@ -1017,13 +1057,13 @@ export default function LeadDetailPane({
 
       {renderLeadSummaryCard()}
 
-      <section className="rounded-lg border border-gray-200 bg-white p-3">
+      <section className="rounded-lg border border-gray-200 bg-white p-3 sm:p-4">
         <h5 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
           {translate("leadDetail.actionsTab.sections.tags")}
         </h5>
-        <div className="space-y-2">
+        <div className="space-y-3">
           {leadSummary?.tags && leadSummary.tags.length > 0 ? (
-            <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto">
+            <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
               {leadSummary.tags.map((tag, index) => (
                 <TagChip
                   key={`${tag}-${index}`}
@@ -1035,7 +1075,7 @@ export default function LeadDetailPane({
               ))}
             </div>
           ) : (
-            <p className="text-xs text-gray-500">
+            <p className="text-sm lg:text-xs text-gray-500">
               {translate("leadDetail.actionsTab.noTags")}
             </p>
           )}
@@ -1052,19 +1092,19 @@ export default function LeadDetailPane({
               />
             </div>
           ) : null}
-          <form onSubmit={handleAddTag} className="flex flex-wrap gap-2">
+          <form onSubmit={handleAddTag} className="flex flex-col sm:flex-row flex-wrap gap-2">
             <input
               type="text"
               value={newTagInput}
               onChange={(e) => setNewTagInput(e.target.value)}
               placeholder={translate("clientsTable.tags.addPlaceholder")}
-              className="flex-1 min-w-[140px] px-2.5 py-2 min-h-10 lg:py-1.5 lg:min-h-0 text-base lg:text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+              className="flex-1 min-w-0 sm:min-w-[140px] px-3 py-2.5 min-h-11 lg:px-2.5 lg:py-1.5 lg:min-h-0 text-base lg:text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
               disabled={isAddingTag}
             />
             <button
               type="submit"
               disabled={!newTagInput.trim() || isAddingTag}
-              className="px-3 py-2 min-h-10 lg:py-1.5 lg:min-h-0 text-sm lg:text-xs bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto px-4 py-2.5 min-h-11 lg:px-3 lg:py-1.5 lg:min-h-0 text-sm lg:text-xs bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isAddingTag
                 ? "..."
@@ -1075,19 +1115,19 @@ export default function LeadDetailPane({
       </section>
 
       {canShowDeleteLead && (
-        <section className="rounded-lg border border-red-200 bg-red-50/40 p-3">
+        <section className="rounded-lg border border-red-200 bg-red-50/40 p-3 sm:p-4">
           <h5 className="flex items-center gap-1.5 text-[11px] font-semibold text-red-700 uppercase tracking-wide mb-2">
             <AlertTriangle className="w-3.5 h-3.5" aria-hidden="true" />
             {translate("leadDetail.actionsTab.sections.dangerZone")}
           </h5>
-          <p className="text-[11px] text-red-700/80 mb-2">
+          <p className="text-xs text-red-700/80 mb-3">
             {translate("leadDetail.actionsTab.dangerZoneHint")}
           </p>
           <button
             type="button"
             onClick={() => setShowDeleteConfirm(true)}
             disabled={isDeleting}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs border border-red-300 bg-white text-red-700 rounded-md hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-1.5 w-full sm:w-auto px-3 py-2.5 min-h-11 lg:py-1.5 lg:min-h-0 text-sm lg:text-xs border border-red-300 bg-white text-red-700 rounded-md hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Trash2 className="w-3.5 h-3.5" />
             {translate("leadDetail.actionsTab.deleteLead")}
@@ -1096,6 +1136,19 @@ export default function LeadDetailPane({
       )}
     </div>
   );
+
+  const mobileTabItems = [
+    {
+      id: "conversations",
+      label: translate("leadDetail.tabs.conversations"),
+      icon: MessageCircle,
+    },
+    {
+      id: "actions",
+      label: translate("leadDetail.tabs.actions"),
+      icon: Settings2,
+    },
+  ];
 
   return (
     <>
@@ -1211,10 +1264,38 @@ export default function LeadDetailPane({
           )}
         </div>
 
-        {/* Conversation + actions/meta — side-by-side on desktop, stacked on mobile */}
-        <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden bg-white">
+        {/* Mobile: one section at a time (full height) — avoids cramped 42vh stack */}
+        <div className="lg:hidden flex-1 min-h-0 flex flex-col overflow-hidden bg-white">
+          <LeadDetailTabs
+            value={mobileTab}
+            onChange={setMobileTab}
+            tabs={mobileTabItems}
+            ariaLabel={translate("leadDetail.tabs.ariaLabel")}
+          />
+          <div
+            role="tabpanel"
+            className="flex-1 min-h-0 flex flex-col overflow-hidden"
+          >
+            {mobileTab === "conversations" ? (
+              <ChatConversation
+                userId={userId}
+                chatId={chatId}
+                clientId={clientId}
+                messageLimit={LEAD_CONVERSATION_MESSAGE_LIMIT}
+                className="flex-1 min-h-0"
+              />
+            ) : (
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain bg-gray-50/40">
+                {renderActionsMetaColumn()}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Desktop: conversation + actions side-by-side */}
+        <div className="hidden lg:flex flex-1 min-h-0 flex-row overflow-hidden bg-white">
           <aside
-            className="order-2 lg:order-1 shrink-0 w-full lg:w-[min(300px,36%)] xl:w-[300px] max-h-[42vh] lg:max-h-none lg:border-e border-t lg:border-t-0 border-gray-100 overflow-y-auto overscroll-contain bg-gray-50/40"
+            className="shrink-0 w-[min(300px,36%)] xl:w-[300px] border-e border-gray-100 overflow-y-auto overscroll-contain bg-gray-50/40"
             aria-label={translate(
               "leadDetail.tabs.actions",
               "Actions",
@@ -1223,7 +1304,7 @@ export default function LeadDetailPane({
             {renderActionsMetaColumn()}
           </aside>
 
-          <div className="order-1 lg:order-2 flex-1 min-h-[45vh] lg:min-h-0 flex flex-col overflow-hidden">
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
             <ChatConversation
               userId={userId}
               chatId={chatId}
