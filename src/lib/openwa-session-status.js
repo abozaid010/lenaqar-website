@@ -5,13 +5,13 @@ import {
   resolveSenderPhoneNumber,
 } from "@/lib/whatsapp-messaging-provider";
 
-/** Production OpenWA service is mounted under /webhook/openwa on api.lenaai.net */
+/** Production CloudAPI OpenWA status routes are mounted under /webhook/openwa. */
 const OPENWA_API_PREFIX = "/webhook/openwa";
 
-/** Verified: GET {API_BASE_URL}/webhook/openwa/sessions/status (X-API-Key). */
+/** Verified: GET {API_BASE_URL}/webhook/openwa/sessions/status (X-API-Key = OPENWA_SESSION_API_KEY). */
 export const OPENWA_BULK_SESSIONS_STATUS_PATH = `${OPENWA_API_PREFIX}/sessions/status`;
 
-/** Verified: GET {API_BASE_URL}/webhook/openwa/session/status?session_id=… (X-API-Key). */
+/** Verified: GET {API_BASE_URL}/webhook/openwa/session/status?session_id=… (X-API-Key = OPENWA_SESSION_API_KEY). */
 export const OPENWA_SINGLE_SESSION_STATUS_PATH = `${OPENWA_API_PREFIX}/session/status`;
 
 const OPENWA_TERMINAL_FAILURE_STATUSES = new Set([

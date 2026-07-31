@@ -11,7 +11,13 @@ import {
   resolveOpenwaStatusesFromBulk,
 } from "@/lib/openwa-session-status";
 
-const OPENWA_API_KEY = (process.env.OPENWA_API_KEY ?? "").trim();
+/**
+ * CloudAPI lock for GET /webhook/openwa/session(s)/status (X-API-Key).
+ * Not OPENWA_API_KEY — that key is CloudAPI → OpenWA REST only.
+ */
+const OPENWA_SESSION_API_KEY = (
+  process.env.OPENWA_SESSION_API_KEY ?? ""
+).trim();
 
 async function fetchProfileLinkedWhatsapp(accessToken) {
   const response = await bffFetch(`${API_BASE_URL}/client/v1/profile`, {
@@ -64,8 +70,8 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!OPENWA_API_KEY) {
-      logOpenwaConnectionTrace("bff.missing_openwa_key");
+    if (!OPENWA_SESSION_API_KEY) {
+      logOpenwaConnectionTrace("bff.missing_openwa_session_key");
       return NextResponse.json(
         { error: "OpenWA session API is not configured" },
         { status: 503 }
@@ -96,7 +102,7 @@ export async function GET() {
 
     const bulkPayload = await fetchBulkOpenwaSessionsStatus(
       API_BASE_URL,
-      OPENWA_API_KEY
+      OPENWA_SESSION_API_KEY
     );
 
     const { sessions: bulkSessions } =
@@ -105,7 +111,7 @@ export async function GET() {
     const { sessions } = await enrichOpenwaSessionsWithSingleStatus(
       bulkSessions,
       API_BASE_URL,
-      OPENWA_API_KEY
+      OPENWA_SESSION_API_KEY
     );
 
     return NextResponse.json({
