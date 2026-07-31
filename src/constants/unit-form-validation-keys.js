@@ -2,16 +2,15 @@
  * Central i18n keys for unit add/edit client-side validation.
  * All user-facing copy lives in public/locales/{en,ar}.js under unitFormValidation.
  */
+import { LOCATION_VALIDATION_KEYS } from "@/lib/locations/location-validation-keys";
+
 export const UNIT_FORM_VALIDATION_KEYS = {
   requiredFields: "unitFormValidation.requiredFields",
   invalidNumber: "unitFormValidation.invalidNumber",
   fieldRequired: "unitFormValidation.fieldRequired",
 
-  // Location
-  locationRequired: "unitFormValidation.locationRequired",
-  locationSelectDistrict: "unitFormValidation.locationSelectDistrict",
-  locationSelectSubdistrict: "unitFormValidation.locationSelectSubdistrict",
-  locationSelectDeepest: "unitFormValidation.locationSelectDeepest",
+  // Location (shared with requirements / other leaf pickers)
+  ...LOCATION_VALIDATION_KEYS,
 
   // Sale pricing
   totalPriceRequired: "unitFormValidation.totalPriceRequired",

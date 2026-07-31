@@ -3,7 +3,7 @@
 import { useId, useRef, useCallback } from "react";
 
 /**
- * Accessible 3-tab strip used by LeadDetailPane.
+ * Accessible tab strip (e.g. ScheduleUserDetailsDialog).
  *
  * Props:
  *  - value: active tab id
@@ -85,7 +85,7 @@ export default function LeadDetailTabs({ value, onChange, tabs, ariaLabel }) {
             }}
             onKeyDown={(e) => handleKeyDown(e, index)}
             className={[
-              "relative inline-flex items-center justify-center gap-1.5 shrink-0 px-3 py-2 text-xs sm:text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-t-md",
+              "relative inline-flex flex-1 items-center justify-center gap-1.5 shrink-0 px-3 py-3 sm:py-2.5 lg:py-2 text-sm sm:text-xs lg:text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-t-md min-h-11 lg:min-h-0",
               isActive
                 ? "text-primary"
                 : "text-gray-500 hover:text-gray-700 hover:bg-gray-50",

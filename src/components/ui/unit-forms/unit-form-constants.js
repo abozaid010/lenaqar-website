@@ -1,4 +1,9 @@
-import { UNIT_FORM_VALIDATION_KEYS as K } from "@/constants/unit-form-validation-keys";
+import {
+  validateLocationLeaf as validateUnitLocationLeaf,
+  isValidLocationLeaf as isValidUnitLocationLeaf,
+} from "@/lib/locations/validate-location-leaf";
+
+export { validateUnitLocationLeaf, isValidUnitLocationLeaf };
 
 /** Max gallery images for the add/edit unit flow (images step + uploader). */
 export const MAX_UNIT_IMAGES = 10;
@@ -19,85 +24,6 @@ export function resolveMonthlyRentFromUnit(unit) {
 function asTrimmedString(value) {
   if (value == null) return "";
   return String(value).trim();
-}
-
-/**
- * A unit location is valid only when it points at a leaf in the hierarchy:
- * - City → District → Subdistrict → Project
- * - City → District → Subdistrict
- * - City → District → Project (district has no subdistricts)
- * - City → District (district has no subdistricts)
- *
- * Rejects city-only, empty selection, and district when that district has subdistricts.
- * @returns {Promise<{ ok: true } | { ok: false, key: string, field: string }>}
- */
-export async function validateUnitLocationLeaf(location = {}, cityManager) {
-  const project = asTrimmedString(
-    location.project || location.project_id || location.projectId
-  );
-  const city = asTrimmedString(location.city);
-  const district = asTrimmedString(location.district);
-  const sub_district = asTrimmedString(location.sub_district);
-
-  const fail = (key) => ({
-    ok: false,
-    key,
-    field: "unit_location",
-  });
-
-  if (!city && !district && !sub_district && !project) {
-    return fail(K.locationRequired);
-  }
-
-  // Project selected but parents not resolved yet (filled before save).
-  if (!city || !district) {
-    if (project) return { ok: true };
-    if (city && !district) return fail(K.locationSelectDistrict);
-    return fail(K.locationRequired);
-  }
-
-  if (!cityManager) {
-    if (sub_district || project) return { ok: true };
-    return fail(K.locationSelectDeepest);
-  }
-
-  await cityManager.initializeData();
-  const resolved = cityManager.resolveLocationHierarchy
-    ? cityManager.resolveLocationHierarchy({ city, district, sub_district })
-    : { city, district, sub_district };
-
-  if (!resolved.city || !resolved.district) {
-    if (project) return { ok: true };
-    if (resolved.city && !resolved.district) {
-      return fail(K.locationSelectDistrict);
-    }
-    return fail(K.locationRequired);
-  }
-
-  const cityObj = await cityManager.getCityByValue(resolved.city);
-  if (!cityObj) {
-    if (resolved.sub_district || project) return { ok: true };
-    return fail(K.locationSelectDeepest);
-  }
-
-  const subs = await cityManager.getSubDistrictsForCityDistrict(
-    cityObj.id,
-    resolved.district
-  );
-
-  if (subs.length > 0) {
-    if (resolved.sub_district) return { ok: true };
-    return fail(K.locationSelectSubdistrict);
-  }
-
-  // District has no subdistricts — district itself is a valid leaf.
-  return { ok: true };
-}
-
-/** @deprecated Prefer validateUnitLocationLeaf for specific error keys. */
-export async function isValidUnitLocationLeaf(location = {}, cityManager) {
-  const result = await validateUnitLocationLeaf(location, cityManager);
-  return result.ok;
 }
 
 /**

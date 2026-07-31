@@ -29,7 +29,11 @@ import {
 } from "@/constants/whatsapp-messaging";
 import { normalizeLastAction } from "@/utils/action-normalize";
 import { enforceDashboardAuthorOnParams } from "@/lib/dashboard-lead-access";
-import { toApiStartDate, toApiEndDate } from "@/utils/dashboardDate";
+import {
+  toApiStartDate,
+  toApiEndDate,
+  toDashboardApiDateParams,
+} from "@/utils/dashboardDate";
 import { resolveQuickSearchFromParams } from "@/utils/lead-list-search";
 
 // Auth API
@@ -105,14 +109,18 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
       query: _query,
       ...restMerged
     } = merged;
-    const params = enforceDashboardAuthorOnParams({
-      ...restMerged,
-      limit: merged.limit ?? 100,
-      ...(action && action !== "all" ? { action } : {}),
-      ...(pageParam?.cursor
-        ? { cursor: pageParam.cursor, direction: pageParam.direction ?? "forward" }
-        : {}),
-    });
+    // URL/UI keep local calendar datetimes; API needs absolute UTC so Cairo
+    // (UTC+3) "end Jul 30" does not include Jul 31 00:00–02:59 local.
+    const params = toDashboardApiDateParams(
+      enforceDashboardAuthorOnParams({
+        ...restMerged,
+        limit: merged.limit ?? 100,
+        ...(action && action !== "all" ? { action } : {}),
+        ...(pageParam?.cursor
+          ? { cursor: pageParam.cursor, direction: pageParam.direction ?? "forward" }
+          : {}),
+      }),
+    );
 
     const response = await axiosInstance.get(`messages/v2/all`, {
       params,

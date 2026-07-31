@@ -109,3 +109,61 @@ export function isDashboardDateBeforeToday(
   if (!day) return false;
   return day < toLocalYmd(now);
 }
+
+/**
+ * Fill missing dashboard start/end dates with defaults.
+ * Never overwrites an explicit end_date — even when it ends before today —
+ * so a user-chosen historical range stays intact for the leads API.
+ */
+export function fillMissingDashboardDateFilters<
+  T extends { start_date?: string; end_date?: string },
+>(filters: T, now: Date = new Date()): T {
+  const next = { ...filters };
+  if (!next.start_date) {
+    next.start_date = getDefaultDashboardStartDate(now);
+  }
+  if (!next.end_date) {
+    next.end_date = getDefaultDashboardEndDate(now);
+  }
+  return next;
+}
+
+/**
+ * Local calendar-day start → absolute UTC ISO for the API.
+ * Example (Africa/Cairo, UTC+3): 2026-07-30 → 2026-07-29T21:00:00.000Z
+ */
+export function localDayStartToUtcIso(dateStr: string | null | undefined): string | null {
+  const day = getDashboardDateDay(dateStr);
+  if (!day) return null;
+  const [y, m, d] = day.split("-").map(Number);
+  return new Date(y, m - 1, d, 0, 0, 0, 0).toISOString();
+}
+
+/**
+ * Local calendar-day end → absolute UTC ISO for the API.
+ * Example (Africa/Cairo, UTC+3): 2026-07-30 → 2026-07-30T20:59:59.999Z
+ *
+ * Without this, naive `YYYY-MM-DDT23:59:59` is treated as UTC by the backend and
+ * includes early-morning *local* next-day activity (e.g. Jul 31 02:45 Cairo).
+ */
+export function localDayEndToUtcIso(dateStr: string | null | undefined): string | null {
+  const day = getDashboardDateDay(dateStr);
+  if (!day) return null;
+  const [y, m, d] = day.split("-").map(Number);
+  return new Date(y, m - 1, d, 23, 59, 59, 999).toISOString();
+}
+
+/**
+ * Convert dashboard filter start/end (local calendar datetimes in the URL)
+ * to UTC ISO strings for GET messages/v2/all. Leaves other params untouched.
+ */
+export function toDashboardApiDateParams<
+  T extends { start_date?: string; end_date?: string },
+>(params: T): T {
+  const next = { ...params };
+  const startUtc = localDayStartToUtcIso(next.start_date);
+  const endUtc = localDayEndToUtcIso(next.end_date);
+  if (startUtc) next.start_date = startUtc;
+  if (endUtc) next.end_date = endUtc;
+  return next;
+}

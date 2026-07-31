@@ -12,7 +12,8 @@
     "lint:seo": "node scripts/check-seo.js",
     "lint:all": "npm run lint && npm run lint:seo",
     "test:lead-import": "node --test src/utils/__tests__/lead-import-mapping.test.js",
-    "test:total-price": "node --test src/utils/__tests__/total-price-validation.test.js"
+    "test:total-price": "node --test src/utils/__tests__/total-price-validation.test.js",
+    "test:dashboard-date": "node --test --experimental-strip-types src/utils/__tests__/dashboard-date.test.js"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.81.5",

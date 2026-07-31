@@ -34,7 +34,6 @@ import {
   Calendar,
   DollarSign,
   Eye,
-  FileText,
   Home,
   Landmark,
   ListChecks,
@@ -57,16 +56,17 @@ import TagChip from "@/components/ui/tag-chip";
 import { ThreeDotsLoader } from "@/components/ui/loading-spinner";
 import EditRequirementDialog from "./EditRequirementDialog";
 import EditUserInfoDialog from "./EditUserInfoDialog";
-import LeadDetailTabs from "./LeadDetailTabs";
 import BulkLeadActionDialog from "./BulkLeadActionDialog";
+import LeadDetailTabs from "./LeadDetailTabs";
 import { getOwnerTypeLabel, normalizeOwnerType, isListingOwnerType } from "@/constants/owner-type";
 import LeadOwnerUnitsPanel from "./LeadOwnerUnitsPanel";
 import { useLocalizedLocationLabels } from "@/hooks/use-localized-location-labels";
 import { isDashboardAdminRole } from "@/lib/dashboard-lead-access";
 import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 
-const VALID_TABS = new Set(["conversations", "requirements", "actions"]);
-const DEFAULT_TAB = "conversations";
+/** Mobile-only detail sections (desktop keeps chat + actions side-by-side). */
+const VALID_MOBILE_TABS = new Set(["conversations", "actions"]);
+const DEFAULT_MOBILE_TAB = "conversations";
 
 // ---------- Requirement summary helpers (local to this file) ----------
 
@@ -145,13 +145,15 @@ export default function LeadDetailPane({
   const [isAddingTag, setIsAddingTag] = useState(false);
 
   const rawTabParam = searchParams.get("tab");
-  const activeTab = VALID_TABS.has(rawTabParam) ? rawTabParam : DEFAULT_TAB;
+  const mobileTab = VALID_MOBILE_TABS.has(rawTabParam)
+    ? rawTabParam
+    : DEFAULT_MOBILE_TAB;
 
-  const setActiveTab = useCallback(
+  const setMobileTab = useCallback(
     (nextTab) => {
-      if (!VALID_TABS.has(nextTab)) return;
+      if (!VALID_MOBILE_TABS.has(nextTab)) return;
       const usp = new URLSearchParams(searchParams.toString());
-      if (nextTab === DEFAULT_TAB) {
+      if (nextTab === DEFAULT_MOBILE_TAB) {
         usp.delete("tab");
       } else {
         usp.set("tab", nextTab);
@@ -165,18 +167,14 @@ export default function LeadDetailPane({
     [router, searchParams],
   );
 
-  // When switching to a different lead, fall back to the default tab so the
-  // user always lands in Conversations first. We only clean up if the URL is
-  // currently pointing at a non-default tab to avoid an unnecessary replace.
+  // New lead → always land on Conversations on mobile.
   useEffect(() => {
     if (!userId) return;
     const current = searchParams.get("tab");
-    if (current && current !== DEFAULT_TAB && !VALID_TABS.has(current)) {
-      setActiveTab(DEFAULT_TAB);
+    if (current && current !== DEFAULT_MOBILE_TAB) {
+      setMobileTab(DEFAULT_MOBILE_TAB);
     }
-    // Intentionally only react to userId changes — switching tabs within the
-    // same lead must not retrigger this effect.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only on lead change
   }, [userId]);
 
   const { data, error, isLoading } = useQuery({
@@ -297,14 +295,14 @@ export default function LeadDetailPane({
     }
   };
 
-  // Prefetch action history as soon as the Actions tab is opened.
+  // Reset action UI when switching leads; always load history for the sidebar.
   useEffect(() => {
     setRowActions([]);
     setOpenAddAction(false);
   }, [userId]);
 
   useEffect(() => {
-    if (activeTab !== "actions" || !userId) return;
+    if (!userId) return;
 
     let cancelled = false;
     setLoadingActions(true);
@@ -327,7 +325,7 @@ export default function LeadDetailPane({
     return () => {
       cancelled = true;
     };
-  }, [activeTab, userId, common.operationFailed]);
+  }, [userId, common.operationFailed]);
 
   const handleActionSaved = useCallback(
     (createdAction) => {
@@ -919,31 +917,9 @@ export default function LeadDetailPane({
     );
   }
 
-  const tabItems = [
-    {
-      id: "conversations",
-      label: translate("leadDetail.tabs.conversations"),
-      icon: MessageCircle,
-    },
-    {
-      id: "requirements",
-      label: showListedUnits
-        ? translate("leadDetail.tabs.units")
-        : translate("leadDetail.tabs.requirements"),
-      icon: showListedUnits ? Home : FileText,
-    },
-    {
-      id: "actions",
-      label: translate("leadDetail.tabs.actions"),
-      icon: Settings2,
-    },
-  ];
-
   const lastActivityLabel = translate("leadDetail.header.lastActivity");
 
-  // Read-only AI/lead summary card shown on top of the Actions tab so the
-  // user can scan context (not the requirement chips — those live on the
-  // Requirements tab to avoid duplication).
+  // Read-only AI/lead summary card — always visible beside conversation.
   const renderLeadSummaryCard = () => (
     <div className="rounded-lg border border-gray-200 bg-white p-3 sm:p-4">
       <div className="flex items-start gap-3">
@@ -968,9 +944,7 @@ export default function LeadDetailPane({
     </div>
   );
 
-  // Reusable client/requirement summary card rendered on the Requirements tab
-  // and as a context card on top of the Actions tab so the user always has
-  // their lead's needs in view while taking actions.
+  // Requirement chips — shown in the context strip for demand-side leads.
   const renderRequirementSummaryCard = () => (
     <div className="rounded-lg border border-gray-200 bg-white p-3 sm:p-4">
       <div className="flex items-start gap-3">
@@ -1047,9 +1021,169 @@ export default function LeadDetailPane({
     </div>
   );
 
+  const renderActionsMetaColumn = () => (
+    <div className="flex flex-col gap-4 p-3 sm:p-4">
+      <section className="rounded-lg border border-gray-200 bg-white overflow-hidden">
+        <ActionsHistoryPanel
+          actions={rowActions}
+          userId={userId}
+          phoneNumber={phoneE164ForLinks || phoneNumber || ""}
+          name={displayName || ""}
+          ownerType={ownerType}
+          onActionUpdate={handleActionUpdate}
+          onActionsChange={setRowActions}
+          fillHeight={false}
+          className="border-0 bg-transparent"
+          isLoading={loadingActions}
+          headerAction={
+            canCreateAction ? (
+              <button
+                type="button"
+                onClick={() => setOpenAddAction(true)}
+                className={`${DASHBOARD_BUTTON} h-10 w-10 min-h-10 min-w-10 lg:h-8 lg:w-8 lg:min-h-8 lg:min-w-8 shrink-0 !px-0`}
+                title={translate(
+                  "actionForm.addNewAction",
+                  locale === "ar"
+                    ? "إضافة إجراء جديد"
+                    : "Add New Action",
+                )}
+                aria-label={translate(
+                  "actionForm.addNewAction",
+                  locale === "ar"
+                    ? "إضافة إجراء جديد"
+                    : "Add New Action",
+                )}
+              >
+                <Plus className="w-4 h-4" aria-hidden />
+              </button>
+            ) : null
+          }
+        />
+      </section>
+
+      <section className="rounded-lg border border-gray-200 bg-white p-3 sm:p-4">
+        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+          <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400 shrink-0">
+            {translate("leadDetail.actionsTab.authorLabel", "Author")}
+          </span>
+          {leadAuthor ? (
+            <TagChip
+              label={leadAuthor}
+              size="xs"
+              compact
+              removable={false}
+            />
+          ) : (
+            <span className="text-xs text-gray-500 truncate" dir="ltr">
+              {translate(
+                "leadDetail.actionsTab.noAuthor",
+                "No author assigned",
+              )}
+            </span>
+          )}
+        </div>
+      </section>
+
+      {renderLeadSummaryCard()}
+
+      {/* TEMP: tags UI hidden — restore when tags shipping again
+      <section className="rounded-lg border border-gray-200 bg-white p-3 sm:p-4">
+        <h5 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
+          {translate("leadDetail.actionsTab.sections.tags")}
+        </h5>
+        <div className="space-y-3">
+          {leadSummary?.tags && leadSummary.tags.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
+              {leadSummary.tags.map((tag, index) => (
+                <TagChip
+                  key={`${tag}-${index}`}
+                  label={tag}
+                  size="xs"
+                  removable={true}
+                  onRemove={() => handleRemoveTag(tag)}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm lg:text-xs text-gray-500">
+              {translate("leadDetail.actionsTab.noTags")}
+            </p>
+          )}
+          {leadAuthor ? (
+            <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+              <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
+                {translate("leadDetail.actionsTab.authorLabel", "Author")}
+              </span>
+              <TagChip
+                label={leadAuthor}
+                size="xs"
+                compact
+                removable={false}
+              />
+            </div>
+          ) : null}
+          <form onSubmit={handleAddTag} className="flex flex-col sm:flex-row flex-wrap gap-2">
+            <input
+              type="text"
+              value={newTagInput}
+              onChange={(e) => setNewTagInput(e.target.value)}
+              placeholder={translate("clientsTable.tags.addPlaceholder")}
+              className="flex-1 min-w-0 sm:min-w-[140px] px-3 py-2.5 min-h-11 lg:px-2.5 lg:py-1.5 lg:min-h-0 text-base lg:text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+              disabled={isAddingTag}
+            />
+            <button
+              type="submit"
+              disabled={!newTagInput.trim() || isAddingTag}
+              className="w-full sm:w-auto px-4 py-2.5 min-h-11 lg:px-3 lg:py-1.5 lg:min-h-0 text-sm lg:text-xs bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isAddingTag
+                ? "..."
+                : translate("clientsTable.tags.addButton")}
+            </button>
+          </form>
+        </div>
+      </section>
+      */}
+
+      {canShowDeleteLead && (
+        <section className="rounded-lg border border-red-200 bg-red-50/40 p-3 sm:p-4">
+          <h5 className="flex items-center gap-1.5 text-[11px] font-semibold text-red-700 uppercase tracking-wide mb-2">
+            <AlertTriangle className="w-3.5 h-3.5" aria-hidden="true" />
+            {translate("leadDetail.actionsTab.sections.dangerZone")}
+          </h5>
+          <p className="text-xs text-red-700/80 mb-3">
+            {translate("leadDetail.actionsTab.dangerZoneHint")}
+          </p>
+          <button
+            type="button"
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={isDeleting}
+            className="inline-flex items-center justify-center gap-1.5 w-full sm:w-auto px-3 py-2.5 min-h-11 lg:py-1.5 lg:min-h-0 text-sm lg:text-xs border border-red-300 bg-white text-red-700 rounded-md hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            {translate("leadDetail.actionsTab.deleteLead")}
+          </button>
+        </section>
+      )}
+    </div>
+  );
+
+  const mobileTabItems = [
+    {
+      id: "conversations",
+      label: translate("leadDetail.tabs.conversations"),
+      icon: MessageCircle,
+    },
+    {
+      id: "actions",
+      label: translate("leadDetail.tabs.actions"),
+      icon: Settings2,
+    },
+  ];
+
   return (
     <>
-      <div className="flex flex-col min-h-0 min-w-0 flex-1 w-full bg-white lg:border-l border-gray-100 overflow-x-hidden">
+      <div className="flex flex-col min-h-0 min-w-0 flex-1 w-full bg-white lg:border-s border-gray-100 overflow-x-hidden">
         <div
           className={`shrink-0 flex flex-wrap lg:flex-nowrap items-center gap-x-2 gap-y-1 px-3 py-1.5 border-b border-gray-200 bg-white min-w-0 ${
             !showBackButton ? "lg:pe-28" : ""
@@ -1149,21 +1283,49 @@ export default function LeadDetailPane({
           )}
         </div>
 
-        {/* Tab strip */}
-        <LeadDetailTabs
-          value={activeTab}
-          onChange={setActiveTab}
-          tabs={tabItems}
-          ariaLabel={translate("leadDetail.tabs.ariaLabel")}
-        />
+        {/* Units / requirements strip — always visible */}
+        <div className="shrink-0 border-b border-gray-100 bg-gray-50/40 px-3 py-2 sm:px-4">
+          {showListedUnits ? (
+            <LeadOwnerUnitsPanel
+              phone={phoneE164ForLinks || phoneNumber || ""}
+              variant="horizontal"
+            />
+          ) : (
+            renderRequirementSummaryCard()
+          )}
+        </div>
 
-        {/* Active panel */}
-        <div
-          role="tabpanel"
-          aria-labelledby={`tab-${activeTab}`}
-          className="flex-1 min-h-0 flex flex-col overflow-hidden bg-white"
-        >
-          {activeTab === "conversations" && (
+        {/* Mobile: one section at a time (full height) — avoids cramped 42vh stack */}
+        <div className="lg:hidden flex-1 min-h-0 flex flex-col overflow-hidden bg-white">
+          <LeadDetailTabs
+            value={mobileTab}
+            onChange={setMobileTab}
+            tabs={mobileTabItems}
+            ariaLabel={translate("leadDetail.tabs.ariaLabel")}
+          />
+          <div
+            role="tabpanel"
+            className="flex-1 min-h-0 flex flex-col overflow-hidden"
+          >
+            {mobileTab === "conversations" ? (
+              <ChatConversation
+                userId={userId}
+                chatId={chatId}
+                clientId={clientId}
+                messageLimit={LEAD_CONVERSATION_MESSAGE_LIMIT}
+                className="flex-1 min-h-0"
+              />
+            ) : (
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain bg-gray-50/40">
+                {renderActionsMetaColumn()}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Desktop: chat first, actions at inline-end (EN: right, AR: left) */}
+        <div className="hidden lg:flex flex-1 min-h-0 flex-row overflow-hidden bg-white">
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
             <ChatConversation
               userId={userId}
               chatId={chatId}
@@ -1171,142 +1333,17 @@ export default function LeadDetailPane({
               messageLimit={LEAD_CONVERSATION_MESSAGE_LIMIT}
               className="flex-1 min-h-0"
             />
-          )}
+          </div>
 
-          {activeTab === "requirements" && (
-            <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 bg-gray-50/40">
-              {showListedUnits ? (
-                <LeadOwnerUnitsPanel
-                  phone={phoneE164ForLinks || phoneNumber || ""}
-                />
-              ) : (
-                renderRequirementSummaryCard()
-              )}
-            </div>
-          )}
-
-          {activeTab === "actions" && (
-            <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-3 bg-gray-50/40">
-              {/* Actions history — always visible; Add Action opens form overlay only */}
-              <section className="rounded-lg border border-gray-200 bg-white overflow-hidden">
-                <ActionsHistoryPanel
-                  actions={rowActions}
-                  userId={userId}
-                  phoneNumber={phoneE164ForLinks || phoneNumber || ""}
-                  name={displayName || ""}
-                  ownerType={ownerType}
-                  onActionUpdate={handleActionUpdate}
-                  onActionsChange={setRowActions}
-                  fillHeight={false}
-                  className="border-0 bg-transparent"
-                  isLoading={loadingActions}
-                  headerAction={
-                    canCreateAction ? (
-                      <button
-                        type="button"
-                        onClick={() => setOpenAddAction(true)}
-                        className={`${DASHBOARD_BUTTON} h-8 min-h-[32px] text-xs shrink-0`}
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        {translate(
-                          "actionForm.addNewAction",
-                          locale === "ar"
-                            ? "إضافة إجراء جديد"
-                            : "Add New Action"
-                        )}
-                      </button>
-                    ) : null
-                  }
-                />
-              </section>
-
-              {/* Lead summary — read-only AI/lead summary text for context */}
-              {renderLeadSummaryCard()}
-
-              {/* Tags */}
-              <section className="rounded-lg border border-gray-200 bg-white p-3">
-                <h5 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                  {translate("leadDetail.actionsTab.sections.tags")}
-                </h5>
-                <div className="space-y-2">
-                  {leadSummary?.tags && leadSummary.tags.length > 0 ? (
-                    <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto">
-                      {leadSummary.tags.map((tag, index) => (
-                        <TagChip
-                          key={`${tag}-${index}`}
-                          label={tag}
-                          size="xs"
-                          removable={true}
-                          onRemove={() => handleRemoveTag(tag)}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-gray-500">
-                      {translate("leadDetail.actionsTab.noTags")}
-                    </p>
-                  )}
-                  {leadAuthor ? (
-                    <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                      <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
-                        {translate("leadDetail.actionsTab.authorLabel", "Author")}
-                      </span>
-                      <TagChip
-                        label={leadAuthor}
-                        size="xs"
-                        compact
-                        removable={false}
-                      />
-                    </div>
-                  ) : null}
-                  <form
-                    onSubmit={handleAddTag}
-                    className="flex flex-wrap gap-2"
-                  >
-                    <input
-                      type="text"
-                      value={newTagInput}
-                      onChange={(e) => setNewTagInput(e.target.value)}
-                      placeholder={translate("clientsTable.tags.addPlaceholder")}
-                      className="flex-1 min-w-[140px] px-2.5 py-2 min-h-10 lg:py-1.5 lg:min-h-0 text-base lg:text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
-                      disabled={isAddingTag}
-                    />
-                    <button
-                      type="submit"
-                      disabled={!newTagInput.trim() || isAddingTag}
-                      className="px-3 py-2 min-h-10 lg:py-1.5 lg:min-h-0 text-sm lg:text-xs bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isAddingTag
-                        ? "..."
-                        : translate("clientsTable.tags.addButton")}
-                    </button>
-                  </form>
-                </div>
-              </section>
-
-              {/* Danger zone — admin/owner only */}
-              {canShowDeleteLead && (
-                <section className="rounded-lg border border-red-200 bg-red-50/40 p-3">
-                  <h5 className="flex items-center gap-1.5 text-[11px] font-semibold text-red-700 uppercase tracking-wide mb-2">
-                    <AlertTriangle className="w-3.5 h-3.5" aria-hidden="true" />
-                    {translate("leadDetail.actionsTab.sections.dangerZone")}
-                  </h5>
-                  <p className="text-[11px] text-red-700/80 mb-2">
-                    {translate("leadDetail.actionsTab.dangerZoneHint")}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setShowDeleteConfirm(true)}
-                    disabled={isDeleting}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs border border-red-300 bg-white text-red-700 rounded-md hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    {translate("leadDetail.actionsTab.deleteLead")}
-                  </button>
-                </section>
-              )}
-            </div>
-          )}
+          <aside
+            className="shrink-0 w-[min(300px,36%)] xl:w-[300px] border-s border-gray-100 overflow-y-auto overscroll-contain bg-gray-50/40"
+            aria-label={translate(
+              "leadDetail.tabs.actions",
+              "Actions",
+            )}
+          >
+            {renderActionsMetaColumn()}
+          </aside>
         </div>
       </div>
 
