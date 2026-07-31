@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/hooks/useI18n";
-import { getActionLabel } from "@/utils/actions";
+import { getLocalizedActionLabel } from "@/components/actions/action-label-utils";
 import { formatDateForDisplay } from "@/utils/formateDate";
 import { getClientActions, updateUserAction } from "@/utils/api";
 import { userKeys } from "@/utils/query-utils";
@@ -34,6 +34,7 @@ function ActivityTimelineItem({
   translate,
   locale,
   catalog,
+  messages,
 }) {
   const [notesExpanded, setNotesExpanded] = useState(false);
   const isAI = !item?.author?.trim();
@@ -48,7 +49,8 @@ function ActivityTimelineItem({
       : `${comment.slice(0, NOTES_COLLAPSE_LENGTH).trimEnd()}…`;
 
   const actionLabel = item?.action
-    ? getActionLabel(item.action, translate) || item.action
+    ? getLocalizedActionLabel(item.action, translate, catalog, messages) ||
+      item.action
     : "";
 
   const showMeetingTime =
@@ -250,7 +252,7 @@ export default function ActionsHistoryPanel({
   headerAction = null,
   isLoading = false,
 }) {
-  const { locale, translate } = useI18n();
+  const { locale, translate, t } = useI18n();
   const queryClient = useQueryClient();
   const [actionItems, setActionItems] = useState(() =>
     Array.isArray(actions) ? actions : []
@@ -464,6 +466,7 @@ export default function ActionsHistoryPanel({
                   isSavingEdit={isSavingEdit}
                   translate={translate}
                   locale={locale}
+                  messages={t}
                 />
               ))}
             </ul>

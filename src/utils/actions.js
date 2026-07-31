@@ -34,7 +34,11 @@ export {
  */
 export const getActionLabel = (value, languageOrTranslate = "en") => {
   if (typeof languageOrTranslate === "function") {
-    return getLocalizedActionLabel(value, languageOrTranslate);
+    return getLocalizedActionLabel(
+      value,
+      languageOrTranslate,
+      actionCatalogService.getCatalogSync(),
+    );
   }
 
   const catalog = actionCatalogService.getCatalogSync();

@@ -1401,6 +1401,7 @@ export default {
       OFFICE_VISIT: "Office visit",
       FOLLOW_UP_LATER: "Follow up later",
       DID_NOT_REPLY: "Did not reply",
+      QUALIFIED: "Qualified lead",
       QUALIFIED_LEAD: "Qualified lead",
       NOT_QUALIFIED: "Not qualified",
       INTERESTED: "Interested",

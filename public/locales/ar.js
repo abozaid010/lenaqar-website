@@ -1235,6 +1235,7 @@ export default {
       OFFICE_VISIT: "زيارة المكتب",
       FOLLOW_UP_LATER: "متابعة لاحقاً",
       DID_NOT_REPLY: "مردّش",
+      QUALIFIED: "عميل مؤهل",
       QUALIFIED_LEAD: "عميل مؤهل",
       NOT_QUALIFIED: "مش مؤهل",
       INTERESTED: "مهتم",

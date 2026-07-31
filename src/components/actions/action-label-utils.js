@@ -92,7 +92,10 @@ export function lookupActionValueInLocaleMessages(messages, value) {
 
 /**
  * Resolve a localized label for an action API value.
- * Order: labels.KEY via translate → grouped actions[value] → API label/value.
+ * Order: catalog key → static value→key map → grouped actions[value] → API label.
+ *
+ * Catalog keys can differ from locale keys (e.g. API `QUALIFIED` vs locale
+ * `QUALIFIED_LEAD`); always try the static map before falling back to English.
  *
  * @param {string|null|undefined} value
  * @param {(key: string, fallback?: string) => string} translate
@@ -107,11 +110,21 @@ export function getLocalizedActionLabel(
 ) {
   const normalized = normalizeLastAction(value);
   const { key, apiLabel } = resolveKeyForValue(normalized, catalog);
+  const mappedKey = ACTION_VALUE_TO_KEY[normalized] || null;
+  const keysToTry = [...new Set([key, mappedKey].filter(Boolean))];
 
-  if (key && typeof translate === "function") {
-    const path = actionKeyToLocalePath(key);
-    const translated = translate(path, apiLabel);
-    if (translated) return translated;
+  for (const labelKey of keysToTry) {
+    const fromMessages = messages?.actionCatalog?.labels?.[labelKey];
+    if (typeof fromMessages === "string" && fromMessages.trim()) {
+      return fromMessages;
+    }
+
+    if (typeof translate === "function") {
+      const path = actionKeyToLocalePath(labelKey);
+      const sentinel = `\0missing:${labelKey}`;
+      const translated = translate(path, sentinel);
+      if (translated && translated !== sentinel) return translated;
+    }
   }
 
   const fromGroups = lookupActionValueInLocaleMessages(messages, normalized);
