@@ -62,7 +62,7 @@ function getUnitImages(unit) {
     .filter((img) => Boolean(img.url));
 }
 
-function OwnerUnitCard({ unit, onPreview, translate, t, clientId }) {
+function getOwnerUnitCardModel(unit, t, clientId, translate) {
   const code = resolveUnitCodeFromListItem(unit);
   const images = getUnitImages(unit);
   const thumb = images[0]?.url;
@@ -87,6 +87,33 @@ function OwnerUnitCard({ unit, onPreview, translate, t, clientId }) {
   const editHref = code
     ? buildAdminUnitEditPath(code, listingClientId)
     : null;
+  return {
+    code,
+    thumb,
+    price,
+    area,
+    bedrooms,
+    furnishing,
+    project,
+    district,
+    priceLabel,
+    editHref,
+  };
+}
+
+function OwnerUnitCard({ unit, onPreview, translate, t, clientId }) {
+  const {
+    code,
+    thumb,
+    price,
+    area,
+    bedrooms,
+    furnishing,
+    project,
+    district,
+    priceLabel,
+    editHref,
+  } = getOwnerUnitCardModel(unit, t, clientId, translate);
 
   return (
     <div className="flex w-full items-stretch gap-3 rounded-lg border border-gray-200 bg-white p-2.5 transition-colors hover:border-primary/40 hover:bg-primary/[0.02]">
@@ -166,6 +193,82 @@ function OwnerUnitCard({ unit, onPreview, translate, t, clientId }) {
           </Link>
         ) : null}
       </div>
+    </div>
+  );
+}
+
+/** Compact card for horizontal scroll strip in the unified lead detail. */
+function OwnerUnitCardHorizontal({ unit, onPreview, translate, t, clientId }) {
+  const {
+    code,
+    thumb,
+    price,
+    area,
+    bedrooms,
+    project,
+    district,
+    editHref,
+  } = getOwnerUnitCardModel(unit, t, clientId, translate);
+
+  return (
+    <div className="flex w-[168px] shrink-0 flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-colors hover:border-primary/40">
+      <button
+        type="button"
+        onClick={() => onPreview(unit)}
+        className="flex min-w-0 flex-1 flex-col text-start focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/30"
+      >
+        <div className="relative h-20 w-full overflow-hidden bg-gray-100">
+          {thumb ? (
+            <ImageWithLoader
+              src={thumb}
+              alt={code || "unit"}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-[10px] text-gray-400">
+              {translate("matchPage.noImages", "No images")}
+            </div>
+          )}
+        </div>
+        <div className="space-y-0.5 p-2">
+          <p className="truncate text-xs font-semibold text-primary">
+            {code || getUnitKey(unit) || "—"}
+          </p>
+          <p className="truncate text-[10px] text-gray-500">
+            {[project, district].filter(Boolean).join(" · ") || "—"}
+          </p>
+          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10px] text-gray-600">
+            {price != null && (
+              <span className="font-semibold text-gray-900">
+                {formatCurrency(price)}
+              </span>
+            )}
+            {bedrooms != null && bedrooms !== "" && (
+              <span className="inline-flex items-center gap-0.5">
+                <Bed className="h-2.5 w-2.5" aria-hidden />
+                {bedrooms}
+              </span>
+            )}
+            {area != null && (
+              <span className="inline-flex items-center gap-0.5">
+                <Square className="h-2.5 w-2.5" aria-hidden />
+                {area} m²
+              </span>
+            )}
+          </div>
+        </div>
+      </button>
+      {editHref ? (
+        <Link
+          href={editHref}
+          className="flex items-center justify-center gap-1 border-t border-gray-100 px-2 py-1.5 text-[10px] font-medium text-gray-600 hover:bg-gray-50 hover:text-primary"
+          title={translate("leadDetail.ownerUnits.edit", "Edit")}
+          aria-label={translate("leadDetail.ownerUnits.edit", "Edit")}
+        >
+          <Pencil className="h-2.5 w-2.5" aria-hidden />
+          {translate("leadDetail.ownerUnits.edit", "Edit")}
+        </Link>
+      ) : null}
     </div>
   );
 }
@@ -307,16 +410,23 @@ function OwnerUnitPreviewDialog({ unit, isOpen, onClose, translate, t, clientId 
 /**
  * Listed units for supply-side leads (owner / seller / renter).
  * Uses existing GET /units/by-owner-phone via useUnitsByOwnerPhone.
+ *
+ * @param {"stack"|"horizontal"} variant — stack = full list; horizontal = compact scroll strip
  */
-export default function LeadOwnerUnitsPanel({ phone }) {
+export default function LeadOwnerUnitsPanel({ phone, variant = "stack" }) {
   const { translate, t } = useI18n();
   const clientId = LenaCookiesManager.getClientId();
   const { units, isLoading, isError, refetch } = useUnitsByOwnerPhone(phone);
   const [previewUnit, setPreviewUnit] = useState(null);
+  const isHorizontal = variant === "horizontal";
 
   if (!phone) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-4 text-center">
+      <div
+        className={`rounded-lg border border-gray-200 bg-white text-center ${
+          isHorizontal ? "px-3 py-2" : "p-4"
+        }`}
+      >
         <p className="text-sm text-gray-500">
           {translate(
             "leadDetail.ownerUnits.noPhone",
@@ -329,7 +439,11 @@ export default function LeadOwnerUnitsPanel({ phone }) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center rounded-lg border border-gray-200 bg-white py-12">
+      <div
+        className={`flex items-center justify-center rounded-lg border border-gray-200 bg-white ${
+          isHorizontal ? "py-6" : "py-12"
+        }`}
+      >
         <LoadingSpinner />
       </div>
     );
@@ -356,8 +470,12 @@ export default function LeadOwnerUnitsPanel({ phone }) {
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-3 sm:p-4 space-y-3">
-      <div className="flex items-center justify-between gap-2">
+    <div
+      className={`rounded-lg border border-gray-200 bg-white ${
+        isHorizontal ? "p-2 sm:p-2.5 space-y-2" : "p-3 sm:p-4 space-y-3"
+      }`}
+    >
+      <div className="flex items-center justify-between gap-2 px-0.5">
         <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
           {translate("leadDetail.ownerUnits.title", "Listed units")}
         </h4>
@@ -370,12 +488,29 @@ export default function LeadOwnerUnitsPanel({ phone }) {
       </div>
 
       {units.length === 0 ? (
-        <p className="text-sm text-gray-500 py-4 text-center">
+        <p
+          className={`text-sm text-gray-500 text-center ${
+            isHorizontal ? "py-2" : "py-4"
+          }`}
+        >
           {translate(
             "leadDetail.ownerUnits.empty",
             "No units found for this owner phone.",
           )}
         </p>
+      ) : isHorizontal ? (
+        <div className="-mx-0.5 flex gap-2 overflow-x-auto overscroll-x-contain px-0.5 pb-0.5 [scrollbar-width:thin]">
+          {units.map((unit) => (
+            <OwnerUnitCardHorizontal
+              key={getUnitKey(unit) || JSON.stringify(unit?.code)}
+              unit={unit}
+              onPreview={setPreviewUnit}
+              translate={translate}
+              t={t}
+              clientId={clientId}
+            />
+          ))}
+        </div>
       ) : (
         <div className="space-y-2">
           {units.map((unit) => (

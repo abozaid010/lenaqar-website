@@ -3,7 +3,7 @@
 import { useId, useRef, useCallback } from "react";
 
 /**
- * Accessible 3-tab strip used by LeadDetailPane.
+ * Accessible tab strip (e.g. ScheduleUserDetailsDialog).
  *
  * Props:
  *  - value: active tab id
