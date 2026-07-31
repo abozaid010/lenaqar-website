@@ -1,10 +1,6 @@
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { applyDashboardLeadAccessDefaults } from "@/lib/dashboard-lead-access";
-import {
-  getDefaultDashboardEndDate,
-  getDefaultDashboardStartDate,
-  isDashboardDateBeforeToday,
-} from "@/utils/dashboardDate";
+import { fillMissingDashboardDateFilters } from "@/utils/dashboardDate";
 import {
   DASHBOARD_SORT,
   DASHBOARD_SORT_PARAM,
@@ -64,6 +60,7 @@ function normalizePersistedSortParams(filters) {
  *   (all tenants). Admins/owners stay unrestricted.
  * - Status: optional default `action=new` on first visit / Reset.
  * - Sort: Homey only — Oldest First when sort was never set.
+ * - Dates: fill missing start/end only; never overwrite a chosen historical end_date.
  *
  * @param {Record<string, string> | null | undefined} filters
  * @param {{
@@ -99,17 +96,9 @@ export function withDashboardFilterDefaults(
     }
   }
 
-  // Rolling date window: start = 7 days ago, end = today EOD (last week).
-  // Refresh a stale end_date that ended before today so reloads still include
-  // current leads.
-  if (!withAccess.start_date) {
-    withAccess.start_date = getDefaultDashboardStartDate();
-  }
-  if (!withAccess.end_date || isDashboardDateBeforeToday(withAccess.end_date)) {
-    withAccess.end_date = getDefaultDashboardEndDate();
-  }
-
-  return withAccess;
+  // Default missing dates only. Do not bump a user-chosen end_date that ends
+  // before today — that silently expanded historical ranges to include today.
+  return fillMissingDashboardDateFilters(withAccess);
 }
 
 /**

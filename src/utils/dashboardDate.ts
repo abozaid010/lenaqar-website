@@ -109,3 +109,21 @@ export function isDashboardDateBeforeToday(
   if (!day) return false;
   return day < toLocalYmd(now);
 }
+
+/**
+ * Fill missing dashboard start/end dates with defaults.
+ * Never overwrites an explicit end_date — even when it ends before today —
+ * so a user-chosen historical range stays intact for the leads API.
+ */
+export function fillMissingDashboardDateFilters<
+  T extends { start_date?: string; end_date?: string },
+>(filters: T, now: Date = new Date()): T {
+  const next = { ...filters };
+  if (!next.start_date) {
+    next.start_date = getDefaultDashboardStartDate(now);
+  }
+  if (!next.end_date) {
+    next.end_date = getDefaultDashboardEndDate(now);
+  }
+  return next;
+}
