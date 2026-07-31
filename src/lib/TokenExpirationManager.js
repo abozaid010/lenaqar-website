@@ -15,7 +15,9 @@ export class TokenExpirationManager {
   static needsProactiveRefresh(thresholdMs = this.DEFAULT_REFRESH_THRESHOLD) {
     if (!this.shouldRunProactiveRefresh()) return false;
     const expirationTime = this.getTokenExpirationTime();
-    if (!expirationTime) return true;
+    // Missing exp mirror: do not force-refresh (that caused unnecessary churn).
+    // Interval + visibility checks still run; login/refresh should set the cookie.
+    if (!expirationTime) return false;
     return expirationTime - Date.now() <= thresholdMs;
   }
 
@@ -29,11 +31,18 @@ export class TokenExpirationManager {
     }
   }
 
-  static getNextRefreshTime() {
+  /**
+   * Ideal wall-clock time to run the next proactive refresh (exp - threshold).
+   * May be in the past when the token is already inside the refresh window.
+   * Callers must not treat "past" as delay=0 busy-loop — await refresh, then
+   * reschedule from the updated cookie (with a minimum backoff if still due).
+   * @param {number} [thresholdMs]
+   * @returns {number | null}
+   */
+  static getNextRefreshTime(thresholdMs = this.DEFAULT_REFRESH_THRESHOLD) {
     const expirationTime = this.getTokenExpirationTime();
     if (!expirationTime) return null;
-    const refreshTime = expirationTime - this.DEFAULT_REFRESH_THRESHOLD;
-    return refreshTime <= Date.now() ? Date.now() : refreshTime;
+    return expirationTime - thresholdMs;
   }
 
   // Use CLIENT_ID (non-httpOnly) as the presence signal — cleared on logout.
