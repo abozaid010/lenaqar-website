@@ -342,6 +342,54 @@ select:disabled {
   background-color: var(--primary);
 }
 
+/* Brief “handled” cue as the row layout-animates to its new sort position. */
+@keyframes chat-list-row-handled {
+  0% {
+    background-color: color-mix(in srgb, #16a34a 28%, var(--chat-panel-bg));
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.chat-list-row--handled {
+  animation: chat-list-row-handled 0.7s ease-out;
+}
+
+/* Soft green fade on the lead that becomes selected after an action. */
+@keyframes chat-list-row-advance {
+  0% {
+    background-color: color-mix(in srgb, #16a34a 22%, var(--chat-panel-alt));
+  }
+  100% {
+    background-color: color-mix(in srgb, var(--primary) 8%, var(--chat-panel-alt));
+  }
+}
+
+.chat-list-row--advance {
+  animation: chat-list-row-advance 0.65s ease-out;
+}
+
+/* Durable tint for leads the agent moved to bottom this tab session. */
+.chat-list-row--session-handled {
+  background-color: color-mix(in srgb, #16a34a 10%, var(--chat-panel-bg));
+}
+
+.chat-list-row--session-handled:hover {
+  background-color: color-mix(in srgb, #16a34a 14%, var(--chat-hover));
+}
+
+.chat-list-row--session-handled.chat-list-row--selected {
+  background-color: color-mix(in srgb, #16a34a 10%, color-mix(in srgb, var(--primary) 8%, var(--chat-panel-alt)));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-list-row--handled,
+  .chat-list-row--advance {
+    animation: none;
+  }
+}
+
 .chat-messages-shell {
   position: relative;
   flex: 1;

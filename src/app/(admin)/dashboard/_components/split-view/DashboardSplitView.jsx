@@ -2,10 +2,14 @@
 
 import { useAverageScore } from "@/context/average-score";
 import { useUsersInfiniteData } from "@/hooks/use-users-infinite-data";
-import { removeUserFromInfiniteUsersCache, userKeys } from "@/utils/query-utils";
+import {
+  patchUserInInfiniteUsersCaches,
+  removeUserFromInfiniteUsersCache,
+  userKeys,
+} from "@/utils/query-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useCallback, useState } from "react";
+import { useEffect, useMemo, useCallback, useRef, useState } from "react";
 import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
 import { useSearchParams } from "next/navigation";
 import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
@@ -14,12 +18,19 @@ import {
   buildDashboardLeadHref,
   buildDashboardListHref,
 } from "@/utils/dashboard-navigation";
-import { sortDashboardLeads } from "@/utils/dashboard-lead-sort";
+import { sortDashboardLeads, DASHBOARD_SORT } from "@/utils/dashboard-lead-sort";
 import { leadMatchesSearchQuery } from "@/utils/lead-list-search";
 import { useLgViewport } from "@/hooks/use-lg-viewport";
 import { useDashboardFilterPersistence } from "@/hooks/useDashboardFilterPersistence";
 import { ThreeDotsLoader } from "@/components/ui/loading-spinner";
 import { useI18n } from "@/hooks/useI18n";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import {
+  clearSessionHandledLeads,
+  getSessionHandledLeadsKey,
+  readSessionHandledLeads,
+  writeSessionHandledLeads,
+} from "@/lib/dashboard-session-handled-leads";
 import LeadDetailPane from "./LeadDetailPane";
 import LeadsListPane from "./LeadsListPane";
 
@@ -124,6 +135,35 @@ function DashboardSplitViewComponent() {
   // Keep the clicked lead's dashboard fields (incl. ai_reply_enabled) even if the
   // row is temporarily missing from loaded/filtered pages.
   const [selectedLeadSnapshot, setSelectedLeadSnapshot] = useState(null);
+  /** Brief green cue on the lead that just got an action (slides away). */
+  const [handledFlashId, setHandledFlashId] = useState(null);
+  /** Brief cue on the lead that becomes selected after an action. */
+  const [advanceFlashId, setAdvanceFlashId] = useState(null);
+  /** Durable tint for leads moved to bottom this tab session. */
+  const [sessionHandledIds, setSessionHandledIds] = useState(() => new Set());
+  const skipListScrollRef = useRef(false);
+  const flashTimersRef = useRef({ handled: null, advance: null });
+  const prevFilterKeyRef = useRef(null);
+  const sessionHandledKey = useMemo(
+    () => getSessionHandledLeadsKey(LenaCookiesManager.getClientId()),
+    [],
+  );
+
+  useEffect(() => {
+    setSessionHandledIds(readSessionHandledLeads(sessionHandledKey));
+  }, [sessionHandledKey]);
+
+  // Clear session marks when applied dashboard filters change (not on first mount).
+  useEffect(() => {
+    if (prevFilterKeyRef.current === null) {
+      prevFilterKeyRef.current = filterKey;
+      return;
+    }
+    if (prevFilterKeyRef.current === filterKey) return;
+    prevFilterKeyRef.current = filterKey;
+    clearSessionHandledLeads(sessionHandledKey);
+    setSessionHandledIds(new Set());
+  }, [filterKey, sessionHandledKey]);
 
   const selectedLead = useMemo(() => {
     if (!selectedUserId) return null;
@@ -166,6 +206,80 @@ function DashboardSplitViewComponent() {
     [isLg, router, searchParams]
   );
 
+  /**
+   * Move to bottom button only: flash, select next, reorder, session green tint.
+   * Saving an action does none of this.
+   */
+  const onMoveLeadToBottom = useCallback(
+    (user) => {
+      const handledUserId = user?.user_id;
+      if (!handledUserId) return;
+
+      const idx = filteredUsers.findIndex((u) => u.user_id === handledUserId);
+      const nextLead = idx >= 0 ? filteredUsers[idx + 1] ?? null : null;
+
+      if (flashTimersRef.current.handled) {
+        clearTimeout(flashTimersRef.current.handled);
+      }
+      if (flashTimersRef.current.advance) {
+        clearTimeout(flashTimersRef.current.advance);
+      }
+
+      setHandledFlashId(handledUserId);
+      flashTimersRef.current.handled = setTimeout(() => {
+        setHandledFlashId(null);
+        flashTimersRef.current.handled = null;
+      }, 700);
+
+      if (nextLead && nextLead.user_id !== selectedUserId) {
+        setAdvanceFlashId(nextLead.user_id);
+        flashTimersRef.current.advance = setTimeout(() => {
+          setAdvanceFlashId(null);
+          flashTimersRef.current.advance = null;
+        }, 650);
+
+        skipListScrollRef.current = true;
+        onSelectLead(nextLead);
+      }
+
+      const updated_at =
+        leadSort === DASHBOARD_SORT.OLDEST
+          ? new Date().toISOString()
+          : new Date(0).toISOString();
+
+      patchUserInInfiniteUsersCaches(queryClient, handledUserId, {
+        updated_at,
+      });
+
+      setSessionHandledIds((prev) => {
+        if (prev.has(handledUserId)) return prev;
+        const next = new Set(prev);
+        next.add(handledUserId);
+        writeSessionHandledLeads(sessionHandledKey, next);
+        return next;
+      });
+    },
+    [
+      filteredUsers,
+      leadSort,
+      onSelectLead,
+      queryClient,
+      selectedUserId,
+      sessionHandledKey,
+    ],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (flashTimersRef.current.handled) {
+        clearTimeout(flashTimersRef.current.handled);
+      }
+      if (flashTimersRef.current.advance) {
+        clearTimeout(flashTimersRef.current.advance);
+      }
+    };
+  }, []);
+
   // Tapping Call initiates the phone call (the tel: link on the button) and also
   // opens the lead's detail view, so the user lands on the right customer after
   // the call instead of hunting for the row again.
@@ -204,13 +318,19 @@ function DashboardSplitViewComponent() {
     fetchNextPage,
   ]);
 
+  // Only scroll on selection identity change — never when the same lead's
+  // fields update (e.g. last_action / updated_at) and the row re-sorts away.
   useEffect(() => {
-    if (!selectedUserId || !selectedLead) return;
+    if (!selectedUserId) return;
+    if (skipListScrollRef.current) {
+      skipListScrollRef.current = false;
+      return;
+    }
     const el = document.querySelector(
       `[data-user-id="${CSS.escape(selectedUserId)}"]`
     );
     el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  }, [selectedUserId, selectedLead]);
+  }, [selectedUserId]);
 
   const showMobileDetail = !isLg && Boolean(selectedUserId);
 
@@ -238,6 +358,10 @@ function DashboardSplitViewComponent() {
             selectedUserId={isLg ? selectedUserId : undefined}
             onSelectLead={onSelectLead}
             onCallLead={onCallLead}
+            onMoveLeadToBottom={onMoveLeadToBottom}
+            handledFlashId={handledFlashId}
+            advanceFlashId={advanceFlashId}
+            sessionHandledIds={sessionHandledIds}
             data={data}
             isLeadSelected={isLeadSelected}
             onToggleLeadSelection={toggleLeadSelection}

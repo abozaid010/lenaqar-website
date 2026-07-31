@@ -983,6 +983,7 @@ export default {
       oldest: "Oldest First",
       score: "Highest Score",
     },
+    moveLeadToBottom: "Move to bottom and select next",
     onlyMyLeads: "Only my leads",
     author: {
       placeholder: "Author",

@@ -824,6 +824,7 @@ export default {
       oldest: "الأقدم أولاً",
       score: "أعلى جدية",
     },
+    moveLeadToBottom: "نقل إلى أسفل القائمة واختيار التالي",
     onlyMyLeads: "عملائي فقط",
     author: {
       placeholder: "المؤلف",

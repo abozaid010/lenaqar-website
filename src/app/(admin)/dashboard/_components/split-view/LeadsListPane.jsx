@@ -56,6 +56,14 @@ export default function LeadsListPane({
   selectedUserId,
   onSelectLead,
   onCallLead,
+  /** Client-only: slide row to end and select next (same as after action). */
+  onMoveLeadToBottom,
+  /** Lead that just got an action — green slide-away cue. */
+  handledFlashId = null,
+  /** Newly selected lead after advancing from an action. */
+  advanceFlashId = null,
+  /** user_ids marked via Move to bottom this tab session. */
+  sessionHandledIds = null,
   data,
   isLeadSelected,
   onToggleLeadSelection,
@@ -426,8 +434,16 @@ export default function LeadsListPane({
                     user={user}
                     index={index + 1}
                     selected={selectedUserId === user.user_id}
+                    handledFlash={handledFlashId === user.user_id}
+                    advanceFlash={advanceFlashId === user.user_id}
+                    sessionHandled={sessionHandledIds?.has(user.user_id)}
                     onSelect={onSelectLead}
                     onCall={onCallLead}
+                    onMoveToBottom={
+                      index < displayUsers.length - 1
+                        ? onMoveLeadToBottom
+                        : undefined
+                    }
                     showBulkCheckbox={showBulkCheckbox}
                     bulkSelected={isLeadSelected?.(user.user_id)}
                     onToggleBulkSelection={onToggleLeadSelection}
