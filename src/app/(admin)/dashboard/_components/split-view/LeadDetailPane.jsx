@@ -340,17 +340,14 @@ export default function LeadDetailPane({
     [],
   );
 
-  // Optimistic last-action update — no refetch. Client caches stay the single
-  // source of truth until the next normal refresh, so every place that reads
-  // `last_action` (Actions button, list, sort) reflects the new action at once.
+  // Optimistic last-action update — no refetch. Do not bump `updated_at` here:
+  // that would re-sort the row (often to the end). User moves it via Move to bottom.
   const handleActionUpdate = useCallback(
     (uid, newAction, createdAction) => {
       if (!uid) return;
       const lastActionValue = createdAction?.action ?? newAction;
-      const updatedAt = createdAction?.created_at ?? new Date().toISOString();
       patchUserInInfiniteUsersCaches(queryClient, uid, {
         last_action: normalizeLastAction(lastActionValue),
-        updated_at: updatedAt,
       });
       queryClient.setQueryData(
         ["chatHistory", uid, LEAD_CONVERSATION_MESSAGE_LIMIT],

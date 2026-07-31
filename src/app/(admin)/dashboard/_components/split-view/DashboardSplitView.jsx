@@ -207,9 +207,8 @@ function DashboardSplitViewComponent() {
   );
 
   /**
-   * After logging an action the handled lead re-sorts (often to the end).
-   * Select the next lead first — while list order is still pre-patch — so the
-   * viewport stays put and layout animation shows the handled row sliding away.
+   * After logging an action: select the next lead and flash green.
+   * Does not reorder — Move to bottom is the only client reorder path.
    */
   const onAdvanceAfterAction = useCallback(
     (handledUserId) => {

@@ -11,7 +11,6 @@ import { addNewAction } from "../_actions/actions";
 import { updateUserAction } from "@/utils/api";
 import { userKeys } from "@/utils/query-utils";
 import ActionSelect from "@/components/actions/ActionSelect";
-import TerminalActionDialog from "@/components/actions/TerminalActionDialog";
 import {
   validateActionSubmission,
   actionRequiresMeetingTime,
@@ -78,7 +77,6 @@ export default function NewActionForm({
   const [scheduleTouched, setScheduleTouched] = useState(
     Boolean(defaultMeetingDate || defaultMeetingTime)
   );
-  const [terminalOpen, setTerminalOpen] = useState(false);
   const notesRef = useRef(null);
   const formRef = useRef(null);
   const skipValidateRef = useRef(false);
@@ -265,8 +263,7 @@ export default function NewActionForm({
             author,
           };
 
-    // Advance selection before the list patch so the viewport does not chase
-    // the handled row to its new sort position (often the end of the list).
+    // Select next + green flash; leave list order alone — user moves via Move to bottom.
     if (userId) {
       onAdvanceAfterAction?.(userId);
     }
@@ -437,11 +434,6 @@ export default function NewActionForm({
     const validation = runPreSubmitValidation();
     if (!validation) return;
 
-    if (validation.actionSpec.terminal) {
-      setTerminalOpen(true);
-      return;
-    }
-
     await performUpdate();
   };
 
@@ -498,21 +490,6 @@ export default function NewActionForm({
     const validation = runPreSubmitValidation();
     if (!validation) return;
 
-    if (validation.actionSpec.terminal) {
-      setTerminalOpen(true);
-      return;
-    }
-
-    skipValidateRef.current = true;
-    formRef.current?.requestSubmit();
-  };
-
-  const handleTerminalConfirm = async () => {
-    setTerminalOpen(false);
-    if (useUpdateApi) {
-      await performUpdate();
-      return;
-    }
     skipValidateRef.current = true;
     formRef.current?.requestSubmit();
   };
@@ -855,15 +832,6 @@ export default function NewActionForm({
         {submitButton}
       </div>
     </form>
-    <TerminalActionDialog
-      isOpen={terminalOpen}
-      onClose={() => setTerminalOpen(false)}
-      onConfirm={handleTerminalConfirm}
-      actionLabel={
-        actionOptions.find((o) => o.value === formData.action)?.label ||
-        formData.action
-      }
-    />
     </>
   );
 }
