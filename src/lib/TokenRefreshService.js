@@ -2,10 +2,30 @@
 
 import { LenaCookiesManager } from "./LenaCookiesManager";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
+import { getClientCookieOptions } from "./CookieConfig";
+import { decodeJwtExp, extractAuthTokens } from "./jwtCookieUtils";
 
 const LOGIN_PATH = "/login";
 
 const REFRESH_LOCK_NAME = "lena-token-refresh";
+
+/**
+ * Keep the non-httpOnly exp mirror in sync with the new access token.
+ * Server Set-Cookie alone is not enough for scheduling: if the browser misses
+ * that cookie (or a stale value remains), TokenRefreshProvider delay=0-loops
+ * and floods /client/refresh-token.
+ * @param {unknown} body
+ */
+function syncAccessTokenExpFromRefreshBody(body) {
+  const { accessToken } = extractAuthTokens(body);
+  const exp = decodeJwtExp(accessToken);
+  if (exp == null) return;
+  LenaCookiesManager.set(
+    COOKIE_KEYS.ACCESS_TOKEN_EXP,
+    String(exp),
+    getClientCookieOptions("ACCESS_TOKEN_EXP")
+  );
+}
 
 /**
  * Service for handling token refresh operations
@@ -79,18 +99,20 @@ export class TokenRefreshService {
       throw error;
     }
 
+    const body = await refreshResponse.json().catch(() => ({}));
+
     if (!refreshResponse.ok) {
-      const errorData = await refreshResponse.json().catch(() => ({}));
       const errorMessage =
         process.env.NODE_ENV === "development"
-          ? errorData.error || "Failed to refresh token: " + refreshResponse.status
+          ? body.error || "Failed to refresh token: " + refreshResponse.status
           : "Token refresh failed";
       const error = new Error(errorMessage);
       // 503 = server marked this as a transient/retryable failure (see route.js).
-      error.transient = refreshResponse.status === 503 || !!errorData.transient;
+      error.transient = refreshResponse.status === 503 || !!body.transient;
       throw error;
     }
 
+    syncAccessTokenExpFromRefreshBody(body);
     return true;
   }
 

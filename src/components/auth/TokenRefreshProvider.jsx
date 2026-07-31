@@ -4,11 +4,14 @@ import { useEffect, useRef, useCallback } from "react";
 import { TokenExpirationManager } from "@/lib/TokenExpirationManager";
 import { useTokenRefresh } from "@/hooks/useTokenRefresh";
 
+/** Safety floor when exp is still inside the refresh window after a refresh attempt. */
+const MIN_RESCHEDULE_MS = 30_000;
+
 /**
  * Provider component for proactive token refresh
  * Monitors token expiration and refreshes tokens before they expire
  * Handles edge cases like tab visibility and network errors
- * 
+ *
  * @param {Object} props
  * @param {React.ReactNode} props.children - Child components to wrap
  * @param {number} props.checkInterval - Interval in milliseconds to check token expiration (default: 60000 = 1 minute)
@@ -28,17 +31,14 @@ export function TokenRefreshProvider({
    * Performs proactive token refresh if needed
    */
   const checkAndRefreshToken = useCallback(async () => {
-    // Don't refresh if already refreshing
     if (isRefreshingRef.current) {
       return;
     }
 
-    // Check if we should run proactive refresh (have access token; refresh token is httpOnly and sent by browser)
     if (!TokenExpirationManager.shouldRunProactiveRefresh()) {
       return;
     }
 
-    // Check if token is expiring soon
     if (TokenExpirationManager.needsProactiveRefresh(refreshThreshold)) {
       isRefreshingRef.current = true;
 
@@ -53,29 +53,46 @@ export function TokenRefreshProvider({
   }, [refreshToken, refreshThreshold]);
 
   /**
-   * Schedules the next proactive refresh based on token expiration
+   * Schedules the next proactive refresh based on token expiration.
+   * Always awaits the refresh attempt before reading the (updated) exp cookie
+   * so we never tight-loop on delay=0 with a stale expiry.
    */
   const scheduleNextRefresh = useCallback(() => {
-    // Clear existing timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
 
-    const nextRefreshTime = TokenExpirationManager.getNextRefreshTime();
-    if (!nextRefreshTime) {
+    const nextRefreshTime =
+      TokenExpirationManager.getNextRefreshTime(refreshThreshold);
+    if (nextRefreshTime == null) {
       return;
     }
 
-    const now = Date.now();
-    const delay = Math.max(0, nextRefreshTime - now);
+    const delay = Math.max(0, nextRefreshTime - Date.now());
 
-    // Schedule refresh
-    timeoutRef.current = setTimeout(() => {
-      checkAndRefreshToken();
-      // After refresh, schedule the next one
+    timeoutRef.current = setTimeout(async () => {
+      await checkAndRefreshToken();
+
+      const following =
+        TokenExpirationManager.getNextRefreshTime(refreshThreshold);
+      if (following == null) {
+        return;
+      }
+
+      const remaining = following - Date.now();
+      if (remaining <= 0) {
+        // Still due after refresh (stale exp mirror / short TTL / clock skew).
+        // Back off instead of delay=0 busy-loop that floods /client/refresh-token.
+        timeoutRef.current = setTimeout(() => {
+          scheduleNextRefresh();
+        }, MIN_RESCHEDULE_MS);
+        return;
+      }
+
       scheduleNextRefresh();
     }, delay);
-  }, [checkAndRefreshToken]);
+  }, [checkAndRefreshToken, refreshThreshold]);
 
   /**
    * Handles visibility change (tab focus/blur)
@@ -83,31 +100,25 @@ export function TokenRefreshProvider({
    */
   const handleVisibilityChange = useCallback(() => {
     if (document.visibilityState === "visible") {
-      // Tab became visible, check if refresh is needed
       if (TokenExpirationManager.needsProactiveRefresh(refreshThreshold)) {
-        checkAndRefreshToken();
+        void checkAndRefreshToken().then(() => scheduleNextRefresh());
+        return;
       }
-      // Reschedule next refresh
       scheduleNextRefresh();
     }
   }, [checkAndRefreshToken, scheduleNextRefresh, refreshThreshold]);
 
   useEffect(() => {
-    // Initial check
-    checkAndRefreshToken();
+    void checkAndRefreshToken();
 
-    // Set up interval to check token expiration periodically
     intervalRef.current = setInterval(() => {
-      checkAndRefreshToken();
+      void checkAndRefreshToken();
     }, checkInterval);
 
-    // Schedule proactive refresh based on token expiration
     scheduleNextRefresh();
 
-    // Listen for visibility changes
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    // Cleanup
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
