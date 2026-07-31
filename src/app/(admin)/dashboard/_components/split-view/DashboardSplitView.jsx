@@ -207,11 +207,12 @@ function DashboardSplitViewComponent() {
   );
 
   /**
-   * After logging an action: select the next lead and flash green.
-   * Does not reorder — Move to bottom is the only client reorder path.
+   * Move to bottom button only: flash, select next, reorder, session green tint.
+   * Saving an action does none of this.
    */
-  const onAdvanceAfterAction = useCallback(
-    (handledUserId) => {
+  const onMoveLeadToBottom = useCallback(
+    (user) => {
+      const handledUserId = user?.user_id;
       if (!handledUserId) return;
 
       const idx = filteredUsers.findIndex((u) => u.user_id === handledUserId);
@@ -230,36 +231,17 @@ function DashboardSplitViewComponent() {
         flashTimersRef.current.handled = null;
       }, 700);
 
-      if (!nextLead || nextLead.user_id === selectedUserId) return;
+      if (nextLead && nextLead.user_id !== selectedUserId) {
+        setAdvanceFlashId(nextLead.user_id);
+        flashTimersRef.current.advance = setTimeout(() => {
+          setAdvanceFlashId(null);
+          flashTimersRef.current.advance = null;
+        }, 650);
 
-      setAdvanceFlashId(nextLead.user_id);
-      flashTimersRef.current.advance = setTimeout(() => {
-        setAdvanceFlashId(null);
-        flashTimersRef.current.advance = null;
-      }, 650);
+        skipListScrollRef.current = true;
+        onSelectLead(nextLead);
+      }
 
-      skipListScrollRef.current = true;
-      onSelectLead(nextLead);
-    },
-    [filteredUsers, onSelectLead, selectedUserId],
-  );
-
-  /**
-   * Manual "done / skip" — same local reorder as after logging an action
-   * (bump updated_at so client sort slides the row to the end), then select
-   * the next lead. No API call, no refetch, no list reload.
-   */
-  const onMoveLeadToBottom = useCallback(
-    (user) => {
-      const handledUserId = user?.user_id;
-      if (!handledUserId) return;
-
-      // Select next first (pre-patch order), then bump sort time so the row
-      // layout-animates to the end — identical to the post-action path.
-      onAdvanceAfterAction(handledUserId);
-
-      // Oldest-first: newest timestamp → end (matches action save).
-      // Recent / score: oldest timestamp → end of list / score ties.
       const updated_at =
         leadSort === DASHBOARD_SORT.OLDEST
           ? new Date().toISOString()
@@ -277,7 +259,14 @@ function DashboardSplitViewComponent() {
         return next;
       });
     },
-    [leadSort, onAdvanceAfterAction, queryClient, sessionHandledKey],
+    [
+      filteredUsers,
+      leadSort,
+      onSelectLead,
+      queryClient,
+      selectedUserId,
+      sessionHandledKey,
+    ],
   );
 
   useEffect(() => {
@@ -393,7 +382,6 @@ function DashboardSplitViewComponent() {
             leadSummary={selectedLead}
             onInvalidateList={onInvalidateList}
             onLeadRemoved={onLeadRemoved}
-            onAdvanceAfterAction={onAdvanceAfterAction}
             showBackButton={showMobileDetail}
             onBack={showMobileDetail ? onMobileBack : undefined}
             isListLoading={isLeadsLoading}

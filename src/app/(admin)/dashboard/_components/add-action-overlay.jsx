@@ -16,7 +16,6 @@ export default function AddActionOverlay({
   onClose,
   onSuccess,
   onActionUpdate,
-  onAdvanceAfterAction,
   overlayClassName = "z-50",
 }) {
   const { locale, translate } = useI18n();
@@ -80,7 +79,6 @@ export default function AddActionOverlay({
             ownerType={ownerType}
             onSuccess={handleSuccess}
             onActionUpdate={onActionUpdate}
-            onAdvanceAfterAction={onAdvanceAfterAction}
             stickySubmit
             fieldPriority="action"
             composerLayout

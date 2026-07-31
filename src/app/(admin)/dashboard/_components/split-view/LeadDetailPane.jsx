@@ -113,8 +113,6 @@ export default function LeadDetailPane({
   leadSummary,
   onInvalidateList,
   onLeadRemoved,
-  /** Select next list lead before the handled row re-sorts away. */
-  onAdvanceAfterAction,
   showBackButton = false,
   onBack,
   isListLoading = false,
@@ -1330,7 +1328,6 @@ export default function LeadDetailPane({
           onClose={() => setOpenAddAction(false)}
           onSuccess={handleActionSaved}
           onActionUpdate={handleActionUpdate}
-          onAdvanceAfterAction={onAdvanceAfterAction}
           ownerType={ownerType}
         />
       )}

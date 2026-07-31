@@ -32,11 +32,6 @@ export default function NewActionForm({
   ownerType = null,
   onSuccess,
   onActionUpdate,
-  /**
-   * Called before the optimistic list patch so the parent can select the next
-   * lead while order is still pre-sort.
-   */
-  onAdvanceAfterAction,
   /** Pre-fill when opening from schedule (or similar); creates a new action on submit. */
   defaultAction = null,
   defaultComment = null,
@@ -262,11 +257,6 @@ export default function NewActionForm({
             meeting_time: getFullMeetingDateTime(),
             author,
           };
-
-    // Select next + green flash; leave list order alone — user moves via Move to bottom.
-    if (userId) {
-      onAdvanceAfterAction?.(userId);
-    }
 
     if (onActionUpdate && userId) {
       onActionUpdate(userId, createdAction.action, createdAction);
