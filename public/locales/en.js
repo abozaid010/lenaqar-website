@@ -367,6 +367,8 @@ export default {
         dailyRentFrom: "Daily rent from",
         dealBreakers: "Deal Breakers (comma-separated)",
         additionalFeatures: "Additional Features (comma-separated)",
+        notes: "Notes",
+        notesPlaceholder: "Add more notes about this requirement…",
         notSpecified: "Not specified",
       },
       pricing: {
@@ -380,6 +382,8 @@ export default {
         loadFailed: "Failed to load requirements",
         saveFailed: "Save failed",
         missingRequirementId: "Could not find a requirement id for this lead",
+        notesNotPersisted:
+          "Requirements saved, but notes were not stored by the API. Confirm the requirement `notes` field is supported.",
       },
     },
     title: {
@@ -839,6 +843,7 @@ export default {
       replyModeHint: "Choose how new messages from this lead are answered.",
       noTags: "No tags yet.",
       authorLabel: "Author",
+      noAuthor: "No author assigned",
       tagExists: "Tag already exists",
       tagAdded: "Tag added successfully",
       tagRemoved: "Tag removed successfully",

@@ -1061,23 +1061,30 @@ export default function LeadDetailPane({
         />
       </section>
 
-      {renderLeadSummaryCard()}
-
-      {leadAuthor ? (
-        <section className="rounded-lg border border-gray-200 bg-white p-3 sm:p-4">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
-              {translate("leadDetail.actionsTab.authorLabel", "Author")}
-            </span>
+      <section className="rounded-lg border border-gray-200 bg-white p-3 sm:p-4">
+        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+          <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400 shrink-0">
+            {translate("leadDetail.actionsTab.authorLabel", "Author")}
+          </span>
+          {leadAuthor ? (
             <TagChip
               label={leadAuthor}
               size="xs"
               compact
               removable={false}
             />
-          </div>
-        </section>
-      ) : null}
+          ) : (
+            <span className="text-xs text-gray-500 truncate" dir="ltr">
+              {translate(
+                "leadDetail.actionsTab.noAuthor",
+                "No author assigned",
+              )}
+            </span>
+          )}
+        </div>
+      </section>
+
+      {renderLeadSummaryCard()}
 
       {/* TEMP: tags UI hidden — restore when tags shipping again
       <section className="rounded-lg border border-gray-200 bg-white p-3 sm:p-4">

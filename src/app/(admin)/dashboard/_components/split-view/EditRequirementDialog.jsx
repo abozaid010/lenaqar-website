@@ -12,6 +12,7 @@ import {
   updateUserRequirements,
 } from "@/utils/api";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
+import LenaTextarea from "@/components/ui/inputs/lena-textarea";
 import UnitsLocationSearch from "@/components/ui/inputs/units-location-search";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import { useProjectsNames } from "@/hooks/use-admin-shared-data";
@@ -99,6 +100,7 @@ function createEmptyForm(userId = "") {
     min_price: "",
     max_price: "",
     downPayment: "",
+    notes: "",
   };
 }
 
@@ -150,6 +152,10 @@ export default function EditRequirementDialog({
           min_price: numberToFieldValue(raw.min_price),
           max_price: numberToFieldValue(raw.max_price),
           downPayment: numberToFieldValue(raw.downPayment),
+          notes:
+            raw.notes == null || raw.notes === ""
+              ? ""
+              : String(raw.notes),
         });
       } catch (e) {
         if (!cancelled) {
@@ -279,9 +285,33 @@ export default function EditRequirementDialog({
         roomsCount: toNum(form.roomsCount),
         bathroomCount: toNum(form.bathroomCount),
         ...buildPriceFieldsForPayload(form),
+        notes: typeof form.notes === "string" ? form.notes.trim() : "",
         score: {},
       };
       await updateUserRequirements(requirementId, payload);
+
+      // Confirm notes persist — some backends accept PUT but omit unsupported fields.
+      const wantedNotes = payload.notes;
+      if (wantedNotes) {
+        const refreshed = await getClientRequirements(userId);
+        const savedNotes =
+          refreshed && !refreshed.error && refreshed.notes != null
+            ? String(refreshed.notes).trim()
+            : "";
+        if (savedNotes !== wantedNotes) {
+          toast.error(
+            tr(
+              "dashboard.requirementsDialog.messages.notesNotPersisted",
+              locale === "ar"
+                ? "تم حفظ المتطلبات، لكن الملاحظات لم تُحفظ من الـ API. تحقق من دعم حقل notes في المتطلب."
+                : "Requirements saved, but notes were not stored by the API. Confirm the requirement `notes` field is supported.",
+            ),
+          );
+          onSuccess?.();
+          return;
+        }
+      }
+
       toast.success(
         tr(
           "common.requirementsSaved",
@@ -617,6 +647,32 @@ export default function EditRequirementDialog({
                     />
                   </div>
                 )}
+              </section>
+
+              <section className="space-y-3">
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  {tr(
+                    "dashboard.requirementsDialog.sections.notes",
+                    locale === "ar" ? "ملاحظات إضافية" : "Additional Notes",
+                  )}
+                </h4>
+                <LenaTextarea
+                  name="notes"
+                  label={tr(
+                    "dashboard.requirementsDialog.fields.notes",
+                    locale === "ar" ? "ملاحظات" : "Notes",
+                  )}
+                  value={form.notes}
+                  onChange={(e) => set("notes", e.target.value)}
+                  placeholder={tr(
+                    "dashboard.requirementsDialog.fields.notesPlaceholder",
+                    locale === "ar"
+                      ? "أضف ملاحظات إضافية عن المتطلب..."
+                      : "Add more notes about this requirement…",
+                  )}
+                  rows={4}
+                  className="text-sm"
+                />
               </section>
             </div>
 

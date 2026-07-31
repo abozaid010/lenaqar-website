@@ -367,6 +367,8 @@ export default {
         dailyRentFrom: "إيجار يومي من",
         dealBreakers: "العوامل الحاسمة (مفصولة بفاصلة)",
         additionalFeatures: "مميزات إضافية (مفصولة بفاصلة)",
+        notes: "ملاحظات",
+        notesPlaceholder: "أضف ملاحظات إضافية عن المتطلب...",
         notSpecified: "غير محدد",
       },
       pricing: {
@@ -380,6 +382,8 @@ export default {
         loadFailed: "فشل تحميل المتطلبات",
         saveFailed: "فشل الحفظ",
         missingRequirementId: "لا يمكن العثور على معرّف المتطلب لهذا العميل",
+        notesNotPersisted:
+          "تم حفظ المتطلبات، لكن الملاحظات لم تُحفظ من الـ API. تحقق من دعم حقل notes في المتطلب.",
       },
     },
     title: {
@@ -2580,6 +2584,7 @@ export default {
       replyModeHint: "اختر طريقة الرد على رسائل هذا العميل.",
       noTags: "لا توجد وسوم بعد.",
       authorLabel: "المسؤول",
+      noAuthor: "لا يوجد مسؤول معيّن",
       tagExists: "الوسم موجود بالفعل",
       tagAdded: "تمت إضافة الوسم بنجاح",
       tagRemoved: "تمت إزالة الوسم بنجاح",
