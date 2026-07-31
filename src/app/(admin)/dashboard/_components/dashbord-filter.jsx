@@ -320,6 +320,28 @@ export default function DashbordFilter({
   }, [filters.source, translate]);
 
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+
+  // Keep the closed chip in sync with applied URL dates (draft edits only
+  // live while the picker is open).
+  useEffect(() => {
+    if (isDatePickerOpen) return;
+    const urlStart = searchParams.get("start_date");
+    const urlEnd = searchParams.get("end_date");
+    if (!urlStart && !urlEnd) return;
+    setFilters((prev) => {
+      const nextStart = urlStart
+        ? normalizeDashboardStartDate(urlStart) || urlStart
+        : prev.start_date;
+      const nextEnd = urlEnd
+        ? normalizeDashboardEndDate(urlEnd) || urlEnd
+        : prev.end_date;
+      if (nextStart === prev.start_date && nextEnd === prev.end_date) {
+        return prev;
+      }
+      return { ...prev, start_date: nextStart, end_date: nextEnd };
+    });
+  }, [searchParams, isDatePickerOpen]);
+
   const [isOwnerTypeDropdownOpen, setIsOwnerTypeDropdownOpen] = useState(false);
   const [isCampaignDropdownOpen, setIsCampaignDropdownOpen] = useState(false);
   const [isSourceDropdownOpen, setIsSourceDropdownOpen] = useState(false);
