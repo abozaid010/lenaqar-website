@@ -1811,6 +1811,7 @@ export default {
       condo: "كوندو",
     },
     purposes: {
+      buy: "شراء",
       sell: "بيع",
       rent: "إيجار",
     },

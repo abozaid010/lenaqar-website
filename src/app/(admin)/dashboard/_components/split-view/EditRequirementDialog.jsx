@@ -45,20 +45,6 @@ function withDefaultLocation(clientId, location = {}) {
   return { city: "", district: "", sub_district: "" };
 }
 
-// The PUT /requirements/{requirement_id} endpoint is keyed by the
-// requirement's own id (not the user id). The GET response may expose it
-// under any of these keys depending on the backend layer.
-function pickRequirementId(raw) {
-  if (!raw || typeof raw !== "object") return null;
-  return (
-    raw.requirement_id ||
-    raw.requirementId ||
-    raw._id ||
-    raw.id ||
-    null
-  );
-}
-
 function toNum(v) {
   if (v === "" || v == null) return null;
   const n = Number(v);
@@ -75,6 +61,23 @@ function pickSingleValue(v) {
   }
   if (v == null || v === "") return "";
   return String(v);
+}
+
+/** API stores free-text notes in `additionalFeatures` (string[] | null). */
+function additionalFeaturesToNotes(value) {
+  if (Array.isArray(value)) {
+    return value
+      .filter((item) => item != null && String(item).trim() !== "")
+      .map((item) => String(item).trim())
+      .join(", ");
+  }
+  if (value == null || value === "") return "";
+  return String(value).trim();
+}
+
+function notesToAdditionalFeatures(notes) {
+  const trimmed = typeof notes === "string" ? notes.trim() : "";
+  return trimmed ? [trimmed] : null;
 }
 
 /** Map API/display values onto the canonical English enum sent to the API. */
@@ -169,7 +172,6 @@ export default function EditRequirementDialog({
   const { data: projectsData, isLoading: projectsLoading } = useProjectsNames(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [requirementId, setRequirementId] = useState(null);
   const [form, setForm] = useState(() => createEmptyForm());
   const [locationError, setLocationError] = useState("");
 
@@ -177,7 +179,6 @@ export default function EditRequirementDialog({
 
   useEffect(() => {
     if (!open) {
-      setRequirementId(null);
       setLocationError("");
       return undefined;
     }
@@ -189,13 +190,12 @@ export default function EditRequirementDialog({
         const raw = await getClientRequirements(userId);
         if (cancelled) return;
         // API returns response.data.data — can be null when the lead has no requirement.
+        // Save still works: PATCH /requirements/{user_id} upserts (create or update).
         if (raw?.error || !raw || typeof raw !== "object") {
           if (raw?.error) toast.error(String(raw.error));
-          setRequirementId(null);
           setForm(createEmptyForm(userId));
           return;
         }
-        setRequirementId(pickRequirementId(raw));
         const client_id =
           String(raw.client_id || LenaCookiesManager.getClientId() || "").trim();
         setForm({
@@ -230,9 +230,10 @@ export default function EditRequirementDialog({
           max_price: numberToFieldValue(raw.max_price),
           downPayment: numberToFieldValue(raw.downPayment),
           notes:
-            raw.notes == null || raw.notes === ""
+            additionalFeaturesToNotes(raw.additionalFeatures) ||
+            (raw.notes == null || raw.notes === ""
               ? ""
-              : String(raw.notes),
+              : String(raw.notes)),
         });
       } catch (e) {
         if (!cancelled) {
@@ -343,17 +344,6 @@ export default function EditRequirementDialog({
   const handleSubmit = async (e) => {
     e?.preventDefault?.();
     if (!userId) return;
-    if (!requirementId) {
-      toast.error(
-        tr(
-          "dashboard.requirementsDialog.messages.missingRequirementId",
-          locale === "ar"
-            ? "لا يمكن العثور على معرّف المتطلب لهذا العميل"
-            : "Could not find a requirement id for this lead",
-        ),
-      );
-      return;
-    }
 
     const locationResult = await validateLocationLeaf(
       {
@@ -396,26 +386,26 @@ export default function EditRequirementDialog({
         roomsCount: toNum(form.roomsCount),
         bathroomCount: toNum(form.bathroomCount),
         ...buildPriceFieldsForPayload({ ...form, purpose: purpose || "" }),
-        notes: typeof form.notes === "string" ? form.notes.trim() : "",
+        additionalFeatures: notesToAdditionalFeatures(form.notes),
         score: {},
       };
-      await updateUserRequirements(requirementId, payload);
+      await updateUserRequirements(userId, payload);
 
-      // Confirm notes persist — some backends accept PUT but omit unsupported fields.
-      const wantedNotes = payload.notes;
+      // Confirm notes persist via additionalFeatures (API has no `notes` field).
+      const wantedNotes = additionalFeaturesToNotes(payload.additionalFeatures);
       if (wantedNotes) {
         const refreshed = await getClientRequirements(userId);
         const savedNotes =
-          refreshed && !refreshed.error && refreshed.notes != null
-            ? String(refreshed.notes).trim()
+          refreshed && !refreshed.error
+            ? additionalFeaturesToNotes(refreshed.additionalFeatures)
             : "";
         if (savedNotes !== wantedNotes) {
           toast.error(
             tr(
               "dashboard.requirementsDialog.messages.notesNotPersisted",
               locale === "ar"
-                ? "تم حفظ المتطلبات، لكن الملاحظات لم تُحفظ من الـ API. تحقق من دعم حقل notes في المتطلب."
-                : "Requirements saved, but notes were not stored by the API. Confirm the requirement `notes` field is supported.",
+                ? "تم حفظ المتطلبات، لكن الملاحظات لم تُحفظ من الـ API. تحقق من دعم حقل additionalFeatures في المتطلب."
+                : "Requirements saved, but notes were not stored by the API. Confirm the requirement `additionalFeatures` field is supported.",
             ),
           );
           onSuccess?.();
@@ -463,7 +453,7 @@ export default function EditRequirementDialog({
           : tr("common.save", locale === "ar" ? "حفظ" : "Save")
       }
       onSubmit={handleSubmit}
-      submitDisabled={loading || saving || !requirementId}
+      submitDisabled={loading || saving || !userId}
       submitLoading={saving}
       closeOnEscape
       dialogClassName="sm:max-w-xl"

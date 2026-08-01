@@ -2439,20 +2439,20 @@ export async function runDailyEngagement(clientId, dryRun = false) {
 }
 
 /**
- * Update a requirement (PUT /requirements/:requirementId).
+ * Upsert a requirement (PATCH /requirements/:userId).
  *
- * NOTE: This endpoint is keyed by the requirement's own id, NOT by the user's
- * id. The caller is responsible for extracting the requirement id from the
- * GET /requirements/:userId response (any of `id`, `_id`, `requirement_id`).
+ * Path is the lead's user_id (same key as GET). Backend creates the document
+ * when missing and updates when it exists. Prefer PATCH over PUT — PUT only
+ * updates an existing document and fails when the lead has no requirement yet.
  */
-export async function updateUserRequirements(requirementId, payload) {
-  if (!requirementId) {
-    throw new Error("requirementId is required");
+export async function updateUserRequirements(userId, payload) {
+  if (!userId) {
+    throw new Error("userId is required");
   }
   const cleanedBody = cleanRequirementsPayload(payload);
   try {
-    const response = await axiosInstance.put(
-      `requirements/${requirementId}`,
+    const response = await axiosInstance.patch(
+      `requirements/${userId}`,
       cleanedBody,
     );
     return response.data;
