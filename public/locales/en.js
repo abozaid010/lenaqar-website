@@ -1999,6 +1999,7 @@ export default {
     code: "Unit Code",
     model: "Unit Model",
     purposes: {
+      buy: "Buy",
       sell: "Sell",
       rent: "Rent",
     },
