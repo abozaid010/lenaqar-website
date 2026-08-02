@@ -819,7 +819,6 @@ export default function DashbordFilter({
       source: "",
       author: defaultAuthor,
     });
-    setIsActionDropdownOpen(false);
     setIsOwnerTypeDropdownOpen(false);
     setIsCampaignDropdownOpen(false);
     setIsSourceDropdownOpen(false);

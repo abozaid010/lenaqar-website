@@ -3,10 +3,12 @@
  * Always scopes by client_id (tenant workspace) and visibility (pending_approval | hidden).
  */
 
+import { applyRentSearchEligibleToApiParams } from "@/lib/units/favorite-searches";
+
 /**
  * @param {Record<string, unknown>} raw - Parsed search/filter payload
  * @param {string|null|undefined} clientId - Tenant workspace from CLIENT_ID cookie
- * @returns {Record<string, string | number>}
+ * @returns {Record<string, string | number | boolean>}
  */
 export function buildPendingApprovalSlimListParams(raw, clientId) {
   const base = { ...(raw ?? {}) };
@@ -98,6 +100,11 @@ export function buildPendingApprovalSlimListParams(raw, clientId) {
   if (clientId) {
     params.client_id = clientId;
   }
+
+  applyRentSearchEligibleToApiParams(
+    params,
+    base.rentSearchEligible ?? base.rent_search_eligible
+  );
 
   Object.keys(params).forEach((k) => {
     const v = params[k];

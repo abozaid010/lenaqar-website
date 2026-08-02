@@ -35,6 +35,35 @@ import {
   resolvePresentValue,
   resolvePricePerMeter,
 } from "@/lib/units/present-value";
+import { isRentPurpose } from "@/lib/units/unit-price";
+import { formatDate } from "@/lib/units/unit-formatters";
+
+function isRentSearchIneligible(unit) {
+  const v = unit?.rentSearchEligible ?? unit?.rent_search_eligible;
+  return v === false || v === "false" || v === 0 || v === "0";
+}
+
+function resolveUnitAvailabilityDate(unit) {
+  return unit?.availabilityDate ?? unit?.availability_date ?? null;
+}
+
+/** Yellow rent-start chip: ineligible rent units, prefer availability date. */
+function resolveRentStartBadgeLabel(unit, locale, translate) {
+  if (!isRentPurpose(unit?.purpose) || !isRentSearchIneligible(unit)) {
+    return null;
+  }
+  const dateLabel = formatDate(resolveUnitAvailabilityDate(unit), locale);
+  if (dateLabel) {
+    return translate(
+      "unitsFilter.rentStart",
+      "Available start: {date}"
+    ).replace("{date}", dateLabel);
+  }
+  return translate(
+    "unitsFilter.rentStartUnavailable",
+    "Not available yet"
+  );
+}
 
 export default function UnitsGrid({
   units,
@@ -176,6 +205,11 @@ export default function UnitsGrid({
               Boolean(brokerUnitIds) &&
               Boolean(unitSelectionId) &&
               brokerUnitIds.has(String(unitSelectionId));
+            const rentStartBadgeLabel = resolveRentStartBadgeLabel(
+              u,
+              locale,
+              translate
+            );
 
             const cardBody = (
               <>
@@ -239,20 +273,31 @@ export default function UnitsGrid({
                   )}
 
                   {!readonly ? (
-                    <div>
-                      <p
-                        style={{ fontWeight: "500" }}
-                        className="absolute text-[14px] top-3 rounded-sm start-5 cursor-pointer bg-primary text-white px-2 capitalize"
-                      >
-                        {t.for}
-                        {u.purpose === "rent" || u.purpose === "Rent"
-                          ? t.rent
-                          : u.purpose === "sell" || u.purpose === "Sell"
-                            ? t.sell
-                            : allowMissingFields
-                              ? "—"
-                              : t.sell}
-                      </p>
+                    <>
+                      <div className="absolute top-3 start-5 z-10 max-w-[min(100%,14rem)] sm:max-w-[calc(100%-5rem)]">
+                        {rentStartBadgeLabel ? (
+                          <p
+                            className="text-[7.5px] leading-tight rounded-sm bg-yellow-300 text-yellow-950 px-1.5 py-0.5 font-medium truncate"
+                            title={rentStartBadgeLabel}
+                          >
+                            {rentStartBadgeLabel}
+                          </p>
+                        ) : (
+                          <p
+                            style={{ fontWeight: "500" }}
+                            className="text-[14px] rounded-sm bg-primary text-white px-2 capitalize"
+                          >
+                            {t.for}
+                            {u.purpose === "rent" || u.purpose === "Rent"
+                              ? t.rent
+                              : u.purpose === "sell" || u.purpose === "Sell"
+                                ? t.sell
+                                : allowMissingFields
+                                  ? "—"
+                                  : t.sell}
+                          </p>
+                        )}
+                      </div>
                       {showBrokerBadge ? (
                         <p
                           style={{ fontWeight: "600" }}
@@ -262,7 +307,7 @@ export default function UnitsGrid({
                           {translate("ownerType.broker", "Broker")}
                         </p>
                       ) : null}
-                    </div>
+                    </>
                   ) : null}
                 </div>
 

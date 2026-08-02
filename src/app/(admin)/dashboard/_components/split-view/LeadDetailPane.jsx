@@ -23,7 +23,7 @@ import { normalizeLastAction } from "@/utils/actions";
 import { formatDateTimeAmPmShort, formatDateForDisplay } from "@/utils/formateDate";
 import { formatCurrency } from "@/utils/formatters";
 import { appendRequirementPriceChips } from "@/lib/match/requirement-to-units-filter";
-import { userKeys, patchUserInInfiniteUsersCaches } from "@/utils/query-utils";
+import { userKeys, patchUserInInfiniteUsersCaches, findUserInInfiniteUsersCaches } from "@/utils/query-utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ChevronLeft,
@@ -186,11 +186,44 @@ export default function LeadDetailPane({
     refetchOnWindowFocus: false,
   });
 
+  // Mobile `/dashboard/[userId]` has no leadSummary prop; conversation payload
+  // also omits owner_type / name / notes. Recover from detail seed (set on
+  // list select) or any cached infinite list page. Overlay chat fields when
+  // present (e.g. after Edit contact patches chatHistory).
+  const resolvedLeadSummary = useMemo(() => {
+    const base =
+      leadSummary ||
+      queryClient.getQueryData(userKeys.detail(userId)) ||
+      findUserInInfiniteUsersCaches(queryClient, userId) ||
+      null;
+    const chat = data?.data;
+    if (!base && !chat) return null;
+    if (!chat) return base;
+    if (!base) return chat;
+    return {
+      ...base,
+      name: chat.name || base.name,
+      owner_type: chat.owner_type ?? base.owner_type,
+      company_name: chat.company_name ?? base.company_name,
+      notes: chat.notes ?? base.notes,
+      phone_number:
+        chat.phone_number || chat.phoneNumber || base.phone_number,
+      author: chat.author ?? base.author,
+      tags: chat.tags ?? base.tags,
+      updated_at: chat.updated_at ?? base.updated_at,
+      requirement_name: base.requirement_name,
+      summary: chat.summary ?? base.summary,
+      conversation_summary:
+        chat.conversation_summary ?? base.conversation_summary,
+      summary_text: chat.summary_text ?? base.summary_text,
+    };
+  }, [data, leadSummary, queryClient, userId]);
+
   const { data: requirements } = useQuery({
     queryKey: ["requirements", userId],
     queryFn: () => getClientRequirements(userId),
     enabled:
-      !!userId && !isListingOwnerType(leadSummary?.owner_type),
+      !!userId && !isListingOwnerType(resolvedLeadSummary?.owner_type),
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
   });
@@ -203,13 +236,13 @@ export default function LeadDetailPane({
   });
 
   const phoneNumber =
-    leadSummary?.phone_number ||
+    resolvedLeadSummary?.phone_number ||
     data?.data?.phoneNumber ||
     data?.data?.phone_number ||
     null;
 
   const chatId =
-    leadSummary?.chat_id || data?.data?.chat_id || null;
+    resolvedLeadSummary?.chat_id || data?.data?.chat_id || null;
 
   const phoneE164ForLinks = phoneNumber
     ? phoneToE164(phoneNumber, "EG") || phoneNumber
@@ -220,15 +253,15 @@ export default function LeadDetailPane({
     : null;
 
   // Prefer dashboard list client_id so AI reply can render before chat history loads.
-  const clientId = leadSummary?.client_id ?? data?.data?.client_id;
+  const clientId = resolvedLeadSummary?.client_id ?? data?.data?.client_id;
 
   // Prefer list/chat boolean when present; missing → treat as off for UI only
   // (button must still render — do not gate visibility on this field).
   const aiReplyEnabled =
-    typeof leadSummary?.ai_reply_enabled === "boolean"
-      ? leadSummary.ai_reply_enabled
-      : typeof leadSummary?.toggle_ai_auto_reply === "boolean"
-        ? leadSummary.toggle_ai_auto_reply
+    typeof resolvedLeadSummary?.ai_reply_enabled === "boolean"
+      ? resolvedLeadSummary.ai_reply_enabled
+      : typeof resolvedLeadSummary?.toggle_ai_auto_reply === "boolean"
+        ? resolvedLeadSummary.toggle_ai_auto_reply
         : typeof data?.data?.ai_reply_enabled === "boolean"
           ? data.data.ai_reply_enabled
           : typeof data?.data?.toggle_ai_auto_reply === "boolean"
@@ -257,17 +290,17 @@ export default function LeadDetailPane({
     },
     [queryClient, userId],
   );
-  const displayName = leadSummary?.name || data?.data?.name || "";
+  const displayName = resolvedLeadSummary?.name || data?.data?.name || "";
   const ownerType = normalizeOwnerType(
-    leadSummary?.owner_type ?? data?.data?.owner_type,
+    resolvedLeadSummary?.owner_type ?? data?.data?.owner_type,
   );
   const showListedUnits = isListingOwnerType(ownerType);
   const ownerTypeLabel = ownerType ? getOwnerTypeLabel(ownerType, translate) : "";
   const companyName =
-    leadSummary?.company_name ?? data?.data?.company_name ?? "";
-  const leadNotes = leadSummary?.notes ?? data?.data?.notes ?? "";
+    resolvedLeadSummary?.company_name ?? data?.data?.company_name ?? "";
+  const leadNotes = resolvedLeadSummary?.notes ?? data?.data?.notes ?? "";
   const leadAuthor = String(
-    leadSummary?.author ?? data?.data?.author ?? "",
+    resolvedLeadSummary?.author ?? data?.data?.author ?? "",
   ).trim();
 
   const clearSelection = useCallback(() => {
@@ -403,6 +436,11 @@ export default function LeadDetailPane({
 
       if (Object.keys(patch).length > 0) {
         patchUserInInfiniteUsersCaches(queryClient, userId, patch);
+        queryClient.setQueryData(userKeys.detail(userId), (old) =>
+          old && typeof old === "object"
+            ? { ...old, ...patch }
+            : { user_id: userId, ...patch },
+        );
         queryClient.setQueryData(
           ["chatHistory", userId, LEAD_CONVERSATION_MESSAGE_LIMIT],
           (old) => {
@@ -727,7 +765,7 @@ export default function LeadDetailPane({
     if (!tagValue) return;
     
     // Check for duplicates (case-insensitive) - use tags from leadSummary
-    const currentTags = leadSummary?.tags || [];
+    const currentTags = resolvedLeadSummary?.tags || [];
     const isDuplicate = currentTags.some(tag => 
       tag.toLowerCase() === tagValue.toLowerCase()
     );
@@ -838,14 +876,14 @@ export default function LeadDetailPane({
   // Falls back to legacy summary* fields on conversation payload if present.
   const leadSummaryText = useMemo(() => {
     const company =
-      leadSummary?.company_name != null &&
-      String(leadSummary.company_name).trim() !== ""
-        ? String(leadSummary.company_name).trim()
+      resolvedLeadSummary?.company_name != null &&
+      String(resolvedLeadSummary.company_name).trim() !== ""
+        ? String(resolvedLeadSummary.company_name).trim()
         : "";
 
     const reqRaw =
-      leadSummary?.requirement_name != null
-        ? String(leadSummary.requirement_name).trim()
+      resolvedLeadSummary?.requirement_name != null
+        ? String(resolvedLeadSummary.requirement_name).trim()
         : "";
     const reqInvalid =
       !reqRaw || reqRaw.toLowerCase() === "not defined";
@@ -867,15 +905,15 @@ export default function LeadDetailPane({
       data?.data?.conversation_summary,
       data?.data?.lead_summary,
       data?.data?.summary_text,
-      leadSummary?.summary,
-      leadSummary?.conversation_summary,
-      leadSummary?.summary_text,
+      resolvedLeadSummary?.summary,
+      resolvedLeadSummary?.conversation_summary,
+      resolvedLeadSummary?.summary_text,
     ];
     for (const value of candidates) {
       if (typeof value === "string" && value.trim()) return value.trim();
     }
     return "";
-  }, [data, leadSummary, translate, translateEnum]);
+  }, [data, resolvedLeadSummary, translate, translateEnum]);
 
   if (!userId) {
     if (isListLoading) {
@@ -1272,13 +1310,13 @@ export default function LeadDetailPane({
                 </span>
               </button>
             )}
-          {leadSummary?.updated_at && (
+          {resolvedLeadSummary?.updated_at && (
             <span
               dir="ltr"
               title={lastActivityLabel}
               className="hidden sm:inline shrink-0 text-[11px] text-gray-400 tabular-nums"
             >
-              {formatDateTimeAmPmShort(leadSummary.updated_at, locale)}
+              {formatDateTimeAmPmShort(resolvedLeadSummary.updated_at, locale)}
             </span>
           )}
         </div>
@@ -1381,7 +1419,7 @@ export default function LeadDetailPane({
         onClose={() => setEditContactOpen(false)}
         userId={userId}
         initialName={displayName}
-        initialPhone={phoneNumber || ""}
+        initialPhone={phoneE164ForLinks || phoneNumber || ""}
         initialCompany={companyName}
         initialOwnerType={ownerType}
         initialNotes={leadNotes}

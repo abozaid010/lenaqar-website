@@ -32,7 +32,9 @@ export function removeUserFromInfiniteUsersCache(queryClient, filterKey, userId)
       ...old,
       pages: old.pages.map((page) => ({
         ...page,
-        users: (page.users || []).filter((u) => u?.user_id !== userId),
+        users: (page.users || []).filter(
+          (u) => u?.user_id == null || String(u.user_id) !== String(userId),
+        ),
       })),
     };
   });
@@ -56,12 +58,40 @@ export function patchUserInInfiniteUsersCaches(queryClient, userId, patch) {
         pages: old.pages.map((page) => ({
           ...page,
           users: (page.users || []).map((user) =>
-            user?.user_id === userId ? { ...user, ...patch } : user,
+            user?.user_id != null && String(user.user_id) === String(userId)
+              ? { ...user, ...patch }
+              : user,
           ),
         })),
       };
     },
   );
+}
+
+/**
+ * Find a lead in any cached dashboard infinite-users list.
+ * Used when mobile detail opens without `leadSummary` (conversation API
+ * omits owner_type / name / notes).
+ * @param {import("@tanstack/react-query").QueryClient} queryClient
+ * @param {string} userId
+ * @returns {Record<string, unknown> | null}
+ */
+export function findUserInInfiniteUsersCaches(queryClient, userId) {
+  if (!queryClient || !userId) return null;
+  const id = String(userId);
+  const queries = queryClient.getQueriesData({
+    queryKey: [...userKeys.all, "infinite"],
+  });
+  for (const [, data] of queries) {
+    if (!data?.pages) continue;
+    for (const page of data.pages) {
+      const match = (page.users || []).find(
+        (user) => user?.user_id != null && String(user.user_id) === id,
+      );
+      if (match) return match;
+    }
+  }
+  return null;
 }
 
 // Query key factory for units

@@ -9,8 +9,11 @@ import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-co
 import { enforceDashboardAuthorOnParams } from "@/lib/dashboard-lead-access";
 import {
   applyResaleFilterToApiParams,
+  normalizeRentSearchEligibleFilter,
+  RENT_SEARCH_ELIGIBLE_DEFAULT,
   UNITS_UI_ONLY_FILTER_KEYS,
 } from "@/lib/units/favorite-searches";
+import { isRentPurpose } from "@/lib/units/unit-price";
 import { useEffect, useMemo } from "react";
 
 export default function UnitsPageQueryOptimized({
@@ -29,10 +32,18 @@ export default function UnitsPageQueryOptimized({
     delete base.clientId;
     delete base.visibility;
 
+    const resaleRaw = base.resale ?? raw?.resale;
+    const rentEligibleRaw =
+      base.rentSearchEligible ??
+      base.rent_search_eligible ??
+      raw?.rentSearchEligible ??
+      raw?.rent_search_eligible;
+
     // UI-only toggles (e.g. show_present_value, resale) must not hit the API
     UNITS_UI_ONLY_FILTER_KEYS.forEach((key) => {
       delete base[key];
     });
+    delete base.rent_search_eligible;
 
     const params = {
       ...base,
@@ -40,8 +51,20 @@ export default function UnitsPageQueryOptimized({
       visibility: "visible",
     };
 
-    // primary → is_primary=true; resale → is_primary=false; both → omit is_primary
-    applyResaleFilterToApiParams(params, raw?.resale);
+    // primary → is_primary=true; resale → is_primary=false; both → omit (sell only)
+    applyResaleFilterToApiParams(params, resaleRaw);
+
+    // Keep UI token (true|false|both) for fetchUnitsFilter to map onto the API.
+    // Default available when purpose=rent and value omitted.
+    if (isRentPurpose(params.purpose)) {
+      params.rentSearchEligible = normalizeRentSearchEligibleFilter(
+        rentEligibleRaw == null || rentEligibleRaw === ""
+          ? RENT_SEARCH_ELIGIBLE_DEFAULT
+          : rentEligibleRaw
+      );
+    } else {
+      delete params.rentSearchEligible;
+    }
 
     // ONLY send client_id when My Inventory is ON
     if (
