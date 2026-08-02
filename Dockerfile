@@ -32,9 +32,8 @@ ENV NEXT_PUBLIC_META_PIXEL_ID=$NEXT_PUBLIC_META_PIXEL_ID
 # shipping an image that silently 401/403s on every send.
 RUN test -n "$NEXT_PUBLIC_X_API_KEY" || (echo "ERROR: NEXT_PUBLIC_X_API_KEY build-arg is required (see README)" && exit 1)
 
-# Build the project with increased memory limit
-# Next.js builds can be memory-intensive, especially with large apps
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+# Cap Node heap for e2-medium (4Gi) shared with backend; package.json build must match
+ENV NODE_OPTIONS="--max-old-space-size=1536"
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build with verbose output to help debug issues
