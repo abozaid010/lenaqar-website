@@ -8,7 +8,9 @@ import {
   filtersFromSearchParams,
   filtersToSearchParamsResettingPagination,
   hasActiveFilters,
+  RENT_SEARCH_ELIGIBLE_DEFAULT,
 } from "@/lib/units/favorite-searches";
+import { isRentPurpose } from "@/lib/units/unit-price";
 import {
   clearSessionFilters,
   getSessionFiltersStorageKey,
@@ -355,6 +357,13 @@ export function useUnitsFilterDraft({
         next = { ...next, [key]: false };
       } else if (key === "resale") {
         next = { ...next, resale: "" };
+      } else if (key === "rentSearchEligible") {
+        next = {
+          ...next,
+          rentSearchEligible: isRentPurpose(next.purpose)
+            ? RENT_SEARCH_ELIGIBLE_DEFAULT
+            : "",
+        };
       } else {
         next = { ...next, [key]: "" };
       }

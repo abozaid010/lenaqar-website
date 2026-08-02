@@ -9,7 +9,11 @@ import { getRestrictedDashboardAuthorEmailFromToken, getRoleFromToken } from '@/
 import { getCachedClientProfile } from '@/lib/getCachedClientProfile.server';
 import { extractModuleActionsFromProfile } from '@/lib/whatsapp-bulk-access';
 import { getRestrictedResaleAuthorEmailForRole } from '@/lib/resale-author-access';
-import { applyResaleFilterToApiParams } from '@/lib/units/favorite-searches';
+import { applyResaleFilterToApiParams, applyRentSearchEligibleToApiParams } from '@/lib/units/favorite-searches';
+import {
+  mergeRentAvailabilityMeta,
+  needsRentAvailabilityMeta,
+} from '@/lib/units/rent-availability-meta';
 import { COOKIE_KEYS } from '@/constants/cookieKeys';
 import { cookies } from 'next/headers';
 import { safeMergeParams } from '@/utils/safeJsonParser';
@@ -125,6 +129,9 @@ export async function fetchUnitsFilterServer(
 
     const resaleRaw = base.resale;
     delete base.resale;
+    const rentEligibleRaw = base.rentSearchEligible ?? base.rent_search_eligible;
+    delete base.rentSearchEligible;
+    delete base.rent_search_eligible;
 
     const params: Record<string, unknown> = {
       ...base,
@@ -132,8 +139,10 @@ export async function fetchUnitsFilterServer(
       visibility: 'visible',
     };
 
-    // primary → is_primary=true; resale → is_primary=false; both → omit is_primary
+    // primary → is_primary=true; resale → is_primary=false; both → omit (sell only)
     applyResaleFilterToApiParams(params, resaleRaw);
+    // rent: default rentSearchEligible=true; both omits; ignored when not rent
+    applyRentSearchEligibleToApiParams(params, rentEligibleRaw);
 
     if (base.my_inventory === 'true' && clientId) {
       params.client_id = clientId;
@@ -162,7 +171,34 @@ export async function fetchUnitsFilterServer(
       return null;
     }
 
-    return mapSlimUnitsListResponse(response.data) as Record<string, unknown>;
+    const mapped = mapSlimUnitsListResponse(response.data) as Record<string, unknown>;
+    const mappedData = mapped?.data as
+      | { units?: Record<string, unknown>[] }
+      | undefined;
+
+    // Slim-list omits availabilityDate / rentSearchEligible — merge from /units/all
+    // when the rent list may include ineligible (future) units.
+    if (
+      needsRentAvailabilityMeta(params) &&
+      Array.isArray(mappedData?.units) &&
+      mappedData.units.length > 0
+    ) {
+      try {
+        const allUrl = `/units/all${qs ? `?${qs}` : ''}`;
+        const allRes = await axiosInstance.get(allUrl);
+        const fullerUnits = allRes?.data?.data?.units;
+        if (Array.isArray(fullerUnits) && fullerUnits.length > 0) {
+          mappedData.units = mergeRentAvailabilityMeta(
+            mappedData.units,
+            fullerUnits
+          );
+        }
+      } catch {
+        // Keep slim rows if meta merge fails — cards still render.
+      }
+    }
+
+    return mapped;
   } catch {
     // On server-fetch failure, return null — the client hook will retry transparently.
     return null;

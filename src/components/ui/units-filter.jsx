@@ -37,7 +37,17 @@ import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-co
 import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
 import { BULK_AVAILABILITY_DEFAULT_MESSAGE_AR } from "@/lib/units/unit-whatsapp-recipient";
 import { detectBrokerUnitIds } from "@/lib/units/detect-broker-units";
-import { createEmptyFilters, normalizeResaleFilter } from "@/lib/units/favorite-searches";
+import {
+  createEmptyFilters,
+  normalizeResaleFilter,
+  normalizeRentSearchEligibleFilter,
+  RENT_SEARCH_ELIGIBLE_AVAILABLE,
+  RENT_SEARCH_ELIGIBLE_BOTH,
+  RENT_SEARCH_ELIGIBLE_DEFAULT,
+  RENT_SEARCH_ELIGIBLE_INELIGIBLE,
+  RESALE_FILTER_BOTH,
+} from "@/lib/units/favorite-searches";
+import { isRentPurpose } from "@/lib/units/unit-price";
 import { canViewAllDashboardLeads } from "@/lib/dashboard-lead-access";
 import { isHomeyClientId } from "@/lib/dashboard-filters-storage";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
@@ -561,16 +571,46 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     }
     {
       const resaleValue = normalizeResaleFilter(nextFilters.resale);
-      if (resaleValue === "primary") {
+      if (
+        String(nextFilters.purpose || "").toLowerCase() === "sell" &&
+        resaleValue === "primary"
+      ) {
         list.push({
           key: "resale",
           value: translate("unitsFilter.inventoryTypes.primary", "Primary"),
         });
-      } else if (resaleValue === "resale") {
+      } else if (
+        String(nextFilters.purpose || "").toLowerCase() === "sell" &&
+        resaleValue === "resale"
+      ) {
         list.push({
           key: "resale",
           value: translate("unitsFilter.inventoryTypes.resale", "Resale"),
         });
+      }
+    }
+    {
+      if (isRentPurpose(nextFilters.purpose)) {
+        const eligible = normalizeRentSearchEligibleFilter(
+          nextFilters.rentSearchEligible || RENT_SEARCH_ELIGIBLE_DEFAULT
+        );
+        if (eligible === RENT_SEARCH_ELIGIBLE_INELIGIBLE) {
+          list.push({
+            key: "rentSearchEligible",
+            value: translate(
+              "unitsFilter.rentSearchEligibleOptions.notAvailable",
+              "Not available"
+            ),
+          });
+        } else if (eligible === RENT_SEARCH_ELIGIBLE_BOTH) {
+          list.push({
+            key: "rentSearchEligible",
+            value: translate(
+              "unitsFilter.rentSearchEligibleOptions.both",
+              "Both"
+            ),
+          });
+        }
       }
     }
     if (nextFilters.show_present_value) {
@@ -693,6 +733,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         next[key] = Boolean(value);
       } else if (key === "resale") {
         next.resale = normalizeResaleFilter(value);
+      } else if (key === "rentSearchEligible") {
+        next.rentSearchEligible = normalizeRentSearchEligibleFilter(value);
       } else if (
         key === "min_area" ||
         key === "max_area" ||
@@ -704,6 +746,21 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         const nextPurpose =
           value && value !== "" && value !== "all" ? value : "";
         next.purpose = nextPurpose;
+        if (isRentPurpose(nextPurpose)) {
+          next.rentSearchEligible =
+            next.rentSearchEligible &&
+            [RENT_SEARCH_ELIGIBLE_AVAILABLE, RENT_SEARCH_ELIGIBLE_INELIGIBLE, RENT_SEARCH_ELIGIBLE_BOTH].includes(
+              String(next.rentSearchEligible)
+            )
+              ? normalizeRentSearchEligibleFilter(next.rentSearchEligible)
+              : RENT_SEARCH_ELIGIBLE_DEFAULT;
+          next.resale = RESALE_FILTER_BOTH;
+        } else if (String(nextPurpose).toLowerCase() === "sell") {
+          next.rentSearchEligible = "";
+        } else {
+          next.rentSearchEligible = "";
+          next.resale = RESALE_FILTER_BOTH;
+        }
         // Drop PV sorts when switching to rent — API nulls PV for rent.
         if (
           !shouldShowPresentValueSortOptions(nextPurpose) &&
@@ -911,6 +968,27 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         }
         return translate("unitsFilter.inventoryTypes.both", "Both");
       }
+      case "rentSearchEligible": {
+        const eligible = normalizeRentSearchEligibleFilter(
+          value || filters.rentSearchEligible || RENT_SEARCH_ELIGIBLE_DEFAULT
+        );
+        if (eligible === RENT_SEARCH_ELIGIBLE_INELIGIBLE) {
+          return translate(
+            "unitsFilter.rentSearchEligibleOptions.notAvailable",
+            "Not available"
+          );
+        }
+        if (eligible === RENT_SEARCH_ELIGIBLE_BOTH) {
+          return translate(
+            "unitsFilter.rentSearchEligibleOptions.both",
+            "Both"
+          );
+        }
+        return translate(
+          "unitsFilter.rentSearchEligibleOptions.available",
+          "Available"
+        );
+      }
       case "show_present_value":
         return translate(
           "unitsFilter.showPresentValue",
@@ -975,10 +1053,29 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       if (filterValues.my_inventory) labels.push(t.unitsFilter.myInventory);
       {
         const resaleValue = normalizeResaleFilter(filterValues.resale);
-        if (resaleValue === "primary") {
-          labels.push(translate("unitsFilter.inventoryTypes.primary", "Primary"));
-        } else if (resaleValue === "resale") {
-          labels.push(translate("unitsFilter.inventoryTypes.resale", "Resale"));
+        if (String(filterValues.purpose || "").toLowerCase() === "sell") {
+          if (resaleValue === "primary") {
+            labels.push(translate("unitsFilter.inventoryTypes.primary", "Primary"));
+          } else if (resaleValue === "resale") {
+            labels.push(translate("unitsFilter.inventoryTypes.resale", "Resale"));
+          }
+        }
+      }
+      if (isRentPurpose(filterValues.purpose)) {
+        const eligible = normalizeRentSearchEligibleFilter(
+          filterValues.rentSearchEligible || RENT_SEARCH_ELIGIBLE_DEFAULT
+        );
+        if (eligible === RENT_SEARCH_ELIGIBLE_INELIGIBLE) {
+          labels.push(
+            translate(
+              "unitsFilter.rentSearchEligibleOptions.notAvailable",
+              "Not available"
+            )
+          );
+        } else if (eligible === RENT_SEARCH_ELIGIBLE_BOTH) {
+          labels.push(
+            translate("unitsFilter.rentSearchEligibleOptions.both", "Both")
+          );
         }
       }
       if (filterValues.show_present_value) {
@@ -1452,58 +1549,131 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           </label>
         </div>
 
-        <div className="w-full min-w-0">
-          <p className="text-xs font-medium text-[#494A4B] mb-1.5">
-            {translate("unitsFilter.inventoryType", "Inventory")}
-          </p>
-          <div
-            className="flex flex-wrap items-center gap-2"
-            role="group"
-            aria-label={translate("unitsFilter.inventoryType", "Inventory")}
-          >
-            {[
-              {
-                value: "primary",
-                label: translate("unitsFilter.inventoryTypes.primary", "Primary"),
-              },
-              {
-                value: "resale",
-                label: translate("unitsFilter.inventoryTypes.resale", "Resale"),
-              },
-              {
-                value: "",
-                label: translate("unitsFilter.inventoryTypes.both", "Both"),
-              },
-            ].map((option) => {
-              const current = normalizeResaleFilter(draftFilters.resale);
-              const isSelected =
-                option.value === ""
-                  ? current === ""
-                  : current === option.value;
+        {String(draftFilters.purpose || "").toLowerCase() === "sell" && (
+          <div className="w-full min-w-0">
+            <p className="text-xs font-medium text-[#494A4B] mb-1.5">
+              {translate("unitsFilter.inventoryType", "Inventory")}
+            </p>
+            <div
+              className="flex flex-wrap items-center gap-2"
+              role="group"
+              aria-label={translate("unitsFilter.inventoryType", "Inventory")}
+            >
+              {[
+                {
+                  value: "primary",
+                  label: translate("unitsFilter.inventoryTypes.primary", "Primary"),
+                },
+                {
+                  value: "resale",
+                  label: translate("unitsFilter.inventoryTypes.resale", "Resale"),
+                },
+                {
+                  value: "",
+                  label: translate("unitsFilter.inventoryTypes.both", "Both"),
+                },
+              ].map((option) => {
+                const current = normalizeResaleFilter(draftFilters.resale);
+                const isSelected =
+                  option.value === ""
+                    ? current === ""
+                    : current === option.value;
 
-              return (
-                <label
-                  key={option.value || "both"}
-                  className={`flex flex-1 min-w-0 items-center gap-2 h-10 px-3 rounded-md border text-xs font-medium cursor-pointer select-none transition-colors ${
-                    isSelected
-                      ? "bg-primary/10 border-primary/40 text-primary"
-                      : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="resale"
-                    value={option.value || "both"}
-                    checked={isSelected}
-                    onChange={() => handleFilterChange("resale", option.value)}
-                    className="h-4 w-4 accent-primary shrink-0"
-                  />
-                  <span className="truncate">{option.label}</span>
-                </label>
-              );
-            })}
+                return (
+                  <label
+                    key={option.value || "both"}
+                    className={`flex flex-1 min-w-0 items-center gap-2 h-10 px-3 rounded-md border text-xs font-medium cursor-pointer select-none transition-colors ${
+                      isSelected
+                        ? "bg-primary/10 border-primary/40 text-primary"
+                        : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="resale"
+                      value={option.value || "both"}
+                      checked={isSelected}
+                      onChange={() => handleFilterChange("resale", option.value)}
+                      className="h-4 w-4 accent-primary shrink-0"
+                    />
+                    <span className="truncate">{option.label}</span>
+                  </label>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
+
+        {isRentPurpose(draftFilters.purpose) && (
+          <div className="w-full min-w-0">
+            <p className="text-xs font-medium text-[#494A4B] mb-1.5">
+              {translate(
+                "unitsFilter.rentSearchEligible",
+                "Rent availability"
+              )}
+            </p>
+            <div
+              className="flex flex-wrap items-center gap-2"
+              role="group"
+              aria-label={translate(
+                "unitsFilter.rentSearchEligible",
+                "Rent availability"
+              )}
+            >
+              {[
+                {
+                  value: RENT_SEARCH_ELIGIBLE_AVAILABLE,
+                  label: translate(
+                    "unitsFilter.rentSearchEligibleOptions.available",
+                    "Available"
+                  ),
+                },
+                {
+                  value: RENT_SEARCH_ELIGIBLE_INELIGIBLE,
+                  label: translate(
+                    "unitsFilter.rentSearchEligibleOptions.notAvailable",
+                    "Not available"
+                  ),
+                },
+                {
+                  value: RENT_SEARCH_ELIGIBLE_BOTH,
+                  label: translate(
+                    "unitsFilter.rentSearchEligibleOptions.both",
+                    "Both"
+                  ),
+                },
+              ].map((option) => {
+                const current = normalizeRentSearchEligibleFilter(
+                  draftFilters.rentSearchEligible || RENT_SEARCH_ELIGIBLE_DEFAULT
+                );
+                const isSelected = current === option.value;
+
+                return (
+                  <label
+                    key={option.value}
+                    className={`flex flex-1 min-w-0 items-center gap-2 h-10 px-3 rounded-md border text-xs font-medium cursor-pointer select-none transition-colors ${
+                      isSelected
+                        ? "bg-primary/10 border-primary/40 text-primary"
+                        : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="rentSearchEligible"
+                      value={option.value}
+                      checked={isSelected}
+                      onChange={() =>
+                        handleFilterChange("rentSearchEligible", option.value)
+                      }
+                      className="h-4 w-4 accent-primary shrink-0"
+                    />
+                    <span className="truncate">{option.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="w-full min-w-0 grid grid-cols-2 gap-2">
           <LenaTextField

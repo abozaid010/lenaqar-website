@@ -2,7 +2,11 @@ import {
   createEmptyFilters,
   hasActiveFilters,
   normalizeResaleFilter,
+  normalizeRentSearchEligibleFilter,
+  RENT_SEARCH_ELIGIBLE_DEFAULT,
+  RESALE_FILTER_BOTH,
 } from "@/lib/units/favorite-searches";
+import { isRentPurpose } from "@/lib/units/unit-price";
 
 const STORAGE_KEY_PREFIX = "lena_units_session_filters";
 
@@ -18,7 +22,16 @@ function parseStoredFilters(raw) {
       return createEmptyFilters();
     }
     const merged = { ...createEmptyFilters(), ...parsed };
-    merged.resale = normalizeResaleFilter(merged.resale);
+    const purpose = merged.purpose;
+    merged.resale =
+      String(purpose || "").toLowerCase() === "sell"
+        ? normalizeResaleFilter(merged.resale)
+        : RESALE_FILTER_BOTH;
+    merged.rentSearchEligible = isRentPurpose(purpose)
+      ? normalizeRentSearchEligibleFilter(
+          merged.rentSearchEligible || RENT_SEARCH_ELIGIBLE_DEFAULT
+        )
+      : "";
     return merged;
   } catch {
     return createEmptyFilters();

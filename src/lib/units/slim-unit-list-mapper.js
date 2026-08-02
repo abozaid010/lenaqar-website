@@ -4,7 +4,8 @@
  *
  * Slim API shape (verified):
  * { id, code, purpose, totalPrice, monthlyRentPrice, district, project,
- *   property_type, city, area, bedrooms, image, owner_mobile? }
+ *   property_type, city, area, bedrooms, image, owner_mobile?,
+ *   rentSearchEligible?, availabilityDate? }
  */
 
 import {
@@ -57,6 +58,21 @@ export function mapSlimUnitToListItem(slim) {
       ? null
       : toNullableFiniteNumber(slim.pricePerMeter);
 
+  const rentSearchEligibleRaw =
+    slim.rentSearchEligible ?? slim.rent_search_eligible;
+  const rentSearchEligible =
+    rentSearchEligibleRaw === false ||
+    rentSearchEligibleRaw === "false" ||
+    rentSearchEligibleRaw === 0 ||
+    rentSearchEligibleRaw === "0"
+      ? false
+      : rentSearchEligibleRaw === true ||
+          rentSearchEligibleRaw === "true" ||
+          rentSearchEligibleRaw === 1 ||
+          rentSearchEligibleRaw === "1"
+        ? true
+        : null;
+
   return {
     ...slim,
     unitId: slim.unitId ?? slim.unit_id ?? slim.id ?? null,
@@ -84,6 +100,9 @@ export function mapSlimUnitToListItem(slim) {
     isPrimary,
     presentValue,
     pricePerMeter,
+    rentSearchEligible,
+    availabilityDate:
+      slim.availabilityDate ?? slim.availability_date ?? null,
   };
 }
 

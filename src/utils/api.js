@@ -10,6 +10,13 @@ import {
   buildPendingApprovalSlimListParams,
   buildPendingApprovalSlimListUrl,
 } from "@/lib/units/pending-approval-list-params";
+import {
+  applyRentSearchEligibleToApiParams,
+} from "@/lib/units/favorite-searches";
+import {
+  mergeRentAvailabilityMeta,
+  needsRentAvailabilityMeta,
+} from "@/lib/units/rent-availability-meta";
 import { parseExistingProjectData, parseValidationErrors } from "./error-parser";
 import CityManager from "./city_manager";
 import { CAMPAIGN_CHAT_CLIENT_ID, CAMPAIGN_CHAT_ENDPOINTS, CAMPAIGN_CHAT_PAGINATION } from "@/constants/campaign-chat";
@@ -166,6 +173,12 @@ const fetchUnitsFilterBase = async (searchParams, { usePublicEndpoint = false } 
     const merged = safeMergeParams(searchParams, { page_size: 16 });
     // Slim-list is the visible-inventory grid; always scope to published units.
     merged.visibility = "visible";
+
+    // Rent inventory: default rentSearchEligible=true; "both" omits; ignored when not rent.
+    const rentEligibleRaw =
+      merged.rentSearchEligible ?? merged.rent_search_eligible;
+    applyRentSearchEligibleToApiParams(merged, rentEligibleRaw);
+
     // Same author ACL as Leads: non-admin/non-owner always scoped to own email.
     const params = usePublicEndpoint
       ? merged
@@ -190,7 +203,37 @@ const fetchUnitsFilterBase = async (searchParams, { usePublicEndpoint = false } 
       console.warn("Pagination data missing in response");
     }
 
-    return mapSlimUnitsListResponse(response.data);
+    const mapped = mapSlimUnitsListResponse(response.data);
+
+    // Slim-list omits availabilityDate / rentSearchEligible — merge from /units/all
+    // only when the rent list may include ineligible (future) units.
+    if (
+      !usePublicEndpoint &&
+      needsRentAvailabilityMeta(params) &&
+      Array.isArray(mapped?.data?.units) &&
+      mapped.data.units.length > 0
+    ) {
+      try {
+        const allQs = new URLSearchParams(params).toString();
+        const allRes = await axiosInstance.get(
+          allQs ? `/units/all?${allQs}` : "/units/all"
+        );
+        const fullerUnits = allRes?.data?.data?.units;
+        if (Array.isArray(fullerUnits) && fullerUnits.length > 0) {
+          mapped.data.units = mergeRentAvailabilityMeta(
+            mapped.data.units,
+            fullerUnits
+          );
+        }
+      } catch (metaError) {
+        console.warn(
+          "Rent availability meta merge skipped:",
+          metaError?.message ?? metaError
+        );
+      }
+    }
+
+    return mapped;
   } catch (error) {
     console.error("Failed to fetch units:", error.message);
     // Re-throw the error so TanStack Query can handle it properly
