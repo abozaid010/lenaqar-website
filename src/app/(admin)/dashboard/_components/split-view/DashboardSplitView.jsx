@@ -191,6 +191,9 @@ function DashboardSplitViewComponent() {
     (user) => {
       if (user?.user_id) {
         setSelectedLeadSnapshot(user);
+        // Seed detail cache so mobile `/dashboard/[userId]` (no leadSummary prop)
+        // can hydrate owner_type / name / notes without waiting on conversation API.
+        queryClient.setQueryData(userKeys.detail(user.user_id), user);
       }
       if (!isLg) {
         router.push(buildDashboardLeadHref(user.user_id, searchParams));
@@ -203,7 +206,7 @@ function DashboardSplitViewComponent() {
         scroll: false,
       });
     },
-    [isLg, router, searchParams]
+    [isLg, queryClient, router, searchParams]
   );
 
   /**
