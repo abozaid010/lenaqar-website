@@ -36,7 +36,7 @@ echo "🌐 Ensuring shared network exists..."
 docker network inspect lenaai-network >/dev/null 2>&1 || \
   docker network create lenaai-network
 
-# ─── 2. Build latest image ────────────────────────────────────────
+# ─── Prepare build args ───────────────────────────────────────────
 # NEXT_PUBLIC_* must be passed at build time (inlined by Next.js, not read at runtime).
 ENV_FILE="$REPO_PATH/.env"
 DOCKER_BUILD_ARGS=()
@@ -85,12 +85,13 @@ if ! printf '%s\n' "${DOCKER_BUILD_ARGS[@]}" | grep -q 'NEXT_PUBLIC_X_API_KEY=';
   exit 1
 fi
 
+# ─── 2. Stop old container before build (free RAM on e2-medium) ───
+echo "🧹 Stopping old container if exists (free RAM for build)..."
+docker rm -f lenaai_website || true
+
+# ─── 3. Build latest image ────────────────────────────────────────
 echo "🔨 Building Docker image..."
 docker build "${DOCKER_BUILD_ARGS[@]}" -t lenaai_website:latest .
-
-# ─── 3. Stop old container if exists ──────────────────────────────
-echo "🧹 Stopping old container if exists..."
-docker rm -f lenaai_website || true
 
 # ─── 4. Start new container ───────────────────────────────────────
 echo "🚀 Starting new container..."

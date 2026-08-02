@@ -8,6 +8,8 @@ loadEnvConfig(process.cwd());
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
+    // Limit build/static workers on small VMs (e2-medium: 2 vCPU / 4Gi)
+    cpus: 1,
     serverActions: {
       // Body size limit for server actions (matches max image upload size in src/config/imageUpload.js)
       bodySizeLimit: '10mb',
