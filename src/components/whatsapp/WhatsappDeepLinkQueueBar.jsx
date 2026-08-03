@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import {
   clearWhatsappDeepLinkQueue,
@@ -9,50 +9,109 @@ import {
   skipNextQueuedWhatsappDeepLink,
   subscribeWhatsappDeepLinkQueue,
 } from "@/lib/whatsapp-deeplink-queue";
+import { WHATSAPP_DEEPLINK_DELAY_MS } from "@/lib/whatsapp-deeplink-send";
 import toast from "react-hot-toast";
 
 /**
  * Sticky bottom bar for sequential WhatsApp sends on phones / tablets / iPad.
  * Each “Open next” tap is a fresh user gesture (required by iOS/Android).
+ * After returning from WhatsApp, a short countdown prevents accidental mash-taps.
  */
 export default function WhatsappDeepLinkQueueBar() {
   const { translate, locale } = useI18n();
   const isRTL = locale === "ar";
   const [queue, setQueue] = useState(null);
   const [highlight, setHighlight] = useState(false);
+  const [cooldownSec, setCooldownSec] = useState(0);
+  const cooldownTimerRef = useRef(null);
+  const highlightTimerRef = useRef(null);
 
   useEffect(() => {
     setQueue(getWhatsappDeepLinkQueue());
     return subscribeWhatsappDeepLinkQueue(setQueue);
   }, []);
 
-  // When the user returns from WhatsApp, draw attention to “Open next”.
+  const clearCooldown = () => {
+    if (cooldownTimerRef.current) {
+      window.clearInterval(cooldownTimerRef.current);
+      cooldownTimerRef.current = null;
+    }
+    setCooldownSec(0);
+  };
+
+  const startCooldown = () => {
+    clearCooldown();
+    const totalSec = Math.max(
+      1,
+      Math.round(WHATSAPP_DEEPLINK_DELAY_MS / 1000),
+    );
+    setCooldownSec(totalSec);
+    setHighlight(false);
+
+    cooldownTimerRef.current = window.setInterval(() => {
+      setCooldownSec((prev) => {
+        if (prev <= 1) {
+          if (cooldownTimerRef.current) {
+            window.clearInterval(cooldownTimerRef.current);
+            cooldownTimerRef.current = null;
+          }
+          setHighlight(true);
+          window.clearTimeout(highlightTimerRef.current);
+          highlightTimerRef.current = window.setTimeout(
+            () => setHighlight(false),
+            1800,
+          );
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  // When the user returns from WhatsApp, start the 5s ready countdown.
   useEffect(() => {
-    if (!queue?.remaining?.length) return undefined;
+    if (!queue?.remaining?.length) {
+      clearCooldown();
+      return undefined;
+    }
 
-    let highlightTimer;
+    let wasHidden = document.visibilityState === "hidden";
 
-    const pulse = () => {
+    const onReturnFromBackground = () => {
       setQueue(getWhatsappDeepLinkQueue());
-      setHighlight(true);
-      window.clearTimeout(highlightTimer);
-      highlightTimer = window.setTimeout(() => setHighlight(false), 1800);
+      startCooldown();
     };
 
     const onVisible = () => {
-      if (document.visibilityState === "visible") pulse();
+      if (document.visibilityState === "hidden") {
+        wasHidden = true;
+        return;
+      }
+      if (wasHidden) {
+        wasHidden = false;
+        onReturnFromBackground();
+      }
+    };
+
+    const onPageShow = (event) => {
+      // bfcache restore after OS suspended the tab during app handoff
+      if (event?.persisted) {
+        wasHidden = false;
+        onReturnFromBackground();
+      }
     };
 
     document.addEventListener("visibilitychange", onVisible);
-    window.addEventListener("pageshow", pulse);
-    window.addEventListener("focus", pulse);
+    window.addEventListener("pageshow", onPageShow);
 
     return () => {
-      window.clearTimeout(highlightTimer);
       document.removeEventListener("visibilitychange", onVisible);
-      window.removeEventListener("pageshow", pulse);
-      window.removeEventListener("focus", pulse);
+      window.removeEventListener("pageshow", onPageShow);
+      clearCooldown();
+      window.clearTimeout(highlightTimerRef.current);
     };
+    // Only rebind when queue presence changes — not every cooldown tick.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queue?.remaining?.length]);
 
   if (!queue?.remaining?.length) return null;
@@ -62,10 +121,12 @@ export default function WhatsappDeepLinkQueueBar() {
   const nextPhone = queue.remaining[0]?.phone
     ? `+${queue.remaining[0].phone}`
     : "";
+  const openNextDisabled = cooldownSec > 0;
 
   const handleOpenNext = (e) => {
     e?.preventDefault?.();
     e?.stopPropagation?.();
+    if (openNextDisabled) return;
     const result = openNextQueuedWhatsappDeepLink();
     if (!result) return;
     if (result.done) {
@@ -81,6 +142,7 @@ export default function WhatsappDeepLinkQueueBar() {
   const handleSkip = (e) => {
     e?.preventDefault?.();
     e?.stopPropagation?.();
+    clearCooldown();
     const result = skipNextQueuedWhatsappDeepLink();
     if (!result || result.done) {
       toast.success(
@@ -95,8 +157,16 @@ export default function WhatsappDeepLinkQueueBar() {
   const handleDismiss = (e) => {
     e?.preventDefault?.();
     e?.stopPropagation?.();
+    clearCooldown();
     clearWhatsappDeepLinkQueue();
   };
+
+  const openNextLabel = openNextDisabled
+    ? translate(
+        "whatsappSend.deeplinkQueueCooldown",
+        "Ready in {seconds}…",
+      ).replace("{seconds}", String(cooldownSec))
+    : translate("whatsappSend.deeplinkQueueOpenNext", "Open next");
 
   return (
     <div
@@ -163,9 +233,11 @@ export default function WhatsappDeepLinkQueueBar() {
             <button
               type="button"
               onClick={handleOpenNext}
-              className="flex-1 min-w-[8.5rem] px-3 py-2.5 min-h-11 rounded-md bg-primary text-white text-sm font-semibold hover:opacity-90 inline-flex items-center justify-center"
+              disabled={openNextDisabled}
+              aria-disabled={openNextDisabled}
+              className="flex-1 min-w-[8.5rem] px-3 py-2.5 min-h-11 rounded-md bg-primary text-white text-sm font-semibold hover:opacity-90 inline-flex items-center justify-center disabled:opacity-70 disabled:pointer-events-none"
             >
-              {translate("whatsappSend.deeplinkQueueOpenNext", "Open next")}
+              {openNextLabel}
             </button>
           </div>
         </div>

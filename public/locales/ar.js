@@ -1147,6 +1147,7 @@ export default {
       "أرسل المحادثة المفتوحة في واتساب، ثم ارجع واضغط «فتح التالي». كل محادثة تحتاج ضغطة منفصلة على الهاتف والتابلت.",
     deeplinkQueueNext: "التالي: {phone}",
     deeplinkQueueOpenNext: "فتح التالي",
+    deeplinkQueueCooldown: "جاهز خلال {seconds}…",
     deeplinkQueueSkip: "تخطي",
     deeplinkQueueDismiss: "تم",
   },
