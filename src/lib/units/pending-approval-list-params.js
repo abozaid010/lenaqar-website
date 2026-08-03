@@ -115,7 +115,7 @@ export function buildPendingApprovalSlimListParams(raw, clientId) {
 }
 
 /**
- * @param {Record<string, string | number>} params
+ * @param {Record<string, string | number | boolean>} params
  * @returns {string}
  */
 export function buildPendingApprovalSlimListUrl(params) {
