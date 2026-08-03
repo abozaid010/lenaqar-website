@@ -1310,6 +1310,7 @@ export default {
       "Send the open chat in WhatsApp, then come back and tap Open next. Each chat needs its own tap on phone and tablet.",
     deeplinkQueueNext: "Next: {phone}",
     deeplinkQueueOpenNext: "Open next",
+    deeplinkQueueCooldown: "Ready in {seconds}…",
     deeplinkQueueSkip: "Skip",
     deeplinkQueueDismiss: "Done",
   },
