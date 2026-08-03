@@ -367,6 +367,8 @@ export function resolveWhatsappSendContext(messagingData, selectedAccountKey) {
     };
   }
 
+  // Empty selection with multiple accounts → caller should deep-link (WhatsApp Web).
+  // Keep PLATFORM_REQUIRED only when an explicit API send is forced without a pick.
   if (messagingData.hasMultipleAccounts && !selectedAccountKey) {
     return {
       ok: false,
@@ -538,12 +540,6 @@ export function toTransportPlatform(internalPlatform) {
   if (!internalPlatform) return null;
   const raw = String(internalPlatform).trim().toLowerCase();
   if (
-    raw === WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE ||
-    raw === WHATSAPP_TRANSPORT_PLATFORMS.ULTRAMSG
-  ) {
-    return WHATSAPP_TRANSPORT_PLATFORMS.ULTRAMSG;
-  }
-  if (
     raw === WHATSAPP_MESSAGING_PROVIDERS.OPENWA ||
     raw === WHATSAPP_TRANSPORT_PLATFORMS.OPENWA
   ) {
@@ -555,6 +551,7 @@ export function toTransportPlatform(internalPlatform) {
   ) {
     return WHATSAPP_TRANSPORT_PLATFORMS.WHATSAPP;
   }
+  // Ultramsg removed — do not map to a transport.
   return null;
 }
 
@@ -562,10 +559,9 @@ export function toTransportPlatform(internalPlatform) {
 export function isMessagingConfigReady(config) {
   if (!config) return false;
 
+  // Ultramsg removed — never treat as send-ready.
   if (isUltramessageProvider(config.platform)) {
-    return Boolean(
-      config.whatsapp_instance_id?.trim() && config.whatsapp_number?.trim()
-    );
+    return false;
   }
 
   if (isWhatsappCloudApiProvider(config.platform)) {
@@ -573,9 +569,9 @@ export function isMessagingConfigReady(config) {
   }
 
   if (isOpenwaProvider(config.platform)) {
-    return Boolean(
-      config.openwa_session_id?.trim() && config.whatsapp_number?.trim()
-    );
+    // Session id is often stripped from profile responses; phone + platform is enough
+    // for the backend to resolve credentials.
+    return Boolean(config.whatsapp_number?.trim());
   }
 
   return false;

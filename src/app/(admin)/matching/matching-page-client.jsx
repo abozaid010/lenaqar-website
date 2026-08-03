@@ -86,22 +86,27 @@ export default function MatchingPageClient() {
     setPreviewOpen(true);
   };
 
-  const handleSend = async ({ selectedAccount, draftMessages }) => {
+  const handleSend = async ({ selectedAccount, useDeepLink, draftMessages }) => {
     const result = await session.sendRecommendations({
       selectedAccount,
+      useDeepLink,
       draftMessages,
+      translate,
     });
     setPreviewOpen(false);
 
-    const successKey =
-      result.failed > 0
-        ? "matching.send.successWithErrors"
-        : "matching.send.success";
-    toast.success(
-      translate(successKey)
-        .replace("{count}", String(result.sent))
-        .replace("{errors}", String(result.failed)),
-    );
+    // Deep-link path already toasts via reportWhatsappDeepLinkResult.
+    if (result.method !== "deeplink") {
+      const successKey =
+        result.failed > 0
+          ? "matching.send.successWithErrors"
+          : "matching.send.success";
+      toast.success(
+        translate(successKey)
+          .replace("{count}", String(result.sent))
+          .replace("{errors}", String(result.failed)),
+      );
+    }
 
     if (result.successfulLeads?.length > 0) {
       setSuccessfulLeads(result.successfulLeads);

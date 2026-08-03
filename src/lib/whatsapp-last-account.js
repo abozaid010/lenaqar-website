@@ -1,4 +1,8 @@
-import { getWhatsappAccountKey } from "@/lib/whatsapp-messaging-provider";
+import {
+  getWhatsappAccountKey,
+  isOpenwaProvider,
+} from "@/lib/whatsapp-messaging-provider";
+import { filterOutboundWhatsappAccounts } from "@/lib/whatsapp-deeplink-send";
 
 const STORAGE_PREFIX = "lena:whatsapp:lastAccount";
 
@@ -42,21 +46,23 @@ export function writeLastWhatsappAccountKey(clientId, userEmail, accountKey) {
 
 /**
  * Resolve account selection when messaging config loads:
- * - 0 accounts → ""
- * - 1 account → that account
- * - multiple → last saved if still linked, else ""
+ * - 0 accounts → "" (WhatsApp Web deep link)
+ * - exactly 1 OpenWA → auto-select OpenWA
+ * - otherwise → last saved if still linked, else "" (empty = WhatsApp Web)
+ * Cloud API is never auto-selected when alone.
  */
 export function resolveInitialWhatsappAccountKey(accounts, clientId, userEmail) {
-  if (!Array.isArray(accounts) || accounts.length === 0) return "";
+  const outbound = filterOutboundWhatsappAccounts(accounts);
+  if (outbound.length === 0) return "";
 
-  if (accounts.length === 1) {
-    return getWhatsappAccountKey(accounts[0]) || "";
+  if (outbound.length === 1 && isOpenwaProvider(outbound[0].platform)) {
+    return getWhatsappAccountKey(outbound[0]) || "";
   }
 
   const saved = readLastWhatsappAccountKey(clientId, userEmail);
   if (
     saved &&
-    accounts.some((account) => getWhatsappAccountKey(account) === saved)
+    outbound.some((account) => getWhatsappAccountKey(account) === saved)
   ) {
     return saved;
   }

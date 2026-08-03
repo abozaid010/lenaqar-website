@@ -1274,7 +1274,12 @@ export default {
   whatsappSend: {
     selectPlatform: "Send from account",
     selectPlatformPlaceholder: "Choose an account…",
+    whatsappWebOption: "WhatsApp Web (manual)",
+    webOrAccountHint:
+      "Leave empty to open WhatsApp Web and send manually. Choose an account to send via automation.",
     platformRequired: "Please choose which WhatsApp account to send from.",
+    apiNeedsAccount:
+      "Choose a linked WhatsApp account to send API templates. WhatsApp Web cannot send templates.",
     multipleAccountsHint:
       "This client has multiple WhatsApp accounts. Choose which one to send from.",
     configLoading: "Loading WhatsApp accounts…",
@@ -1288,6 +1293,13 @@ export default {
       "Your account does not have a WhatsApp number assigned. Please contact your administrator.",
     noLinkedAccountForAssignedPhone:
       "No WhatsApp account is linked to your assigned phone number.",
+    deeplinkOpened:
+      "Opened WhatsApp for {count} recipient(s). Send each message manually.",
+    deeplinkBlocked:
+      "Your browser blocked WhatsApp tabs. Allow pop-ups for this site (address bar → pop-ups → Allow), then try again. Links were copied to your clipboard.",
+    deeplinkPartialBlocked:
+      "Opened {opened} tab(s). {blocked} were blocked by the browser. Allow pop-ups for this site, then try again — blocked links were copied.",
+    deeplinkNoRecipients: "No valid phone numbers to open in WhatsApp.",
   },
   openwaConnection: {
     title: "Connect WhatsApp",

@@ -15,6 +15,12 @@ import { useI18n } from "@/hooks/useI18n";
 import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
 import { buildUnifiedReplyProviderPayload, getEffectiveMessagingAccount } from "@/lib/whatsapp-messaging-provider";
 import {
+  openSingleWhatsappDeepLink,
+  reportWhatsappDeepLinkResult,
+  resolveWhatsappApiSendAccount,
+  shouldUseWhatsappDeepLink,
+} from "@/lib/whatsapp-deeplink-send";
+import {
   assertWhatsappSenderAllowedForUser,
   getWhatsappAccountRestrictionMessage,
 } from "@/lib/whatsapp-account-restriction";
@@ -294,17 +300,24 @@ const CampaignChat = () => {
   };
 
   const handleSendReply = async (phoneNumber, message, selectedPlatform) => {
-    if (messagingConfig?.hasMultipleAccounts && !selectedPlatform) {
-      toast.error(
-        translate(
-          "whatsappSend.platformRequired",
-          "Please choose which WhatsApp account to send from."
-        )
+    if (shouldUseWhatsappDeepLink(messagingConfig, selectedPlatform)) {
+      const result = openSingleWhatsappDeepLink(phoneNumber, message);
+      reportWhatsappDeepLinkResult(
+        {
+          opened: result.ok ? 1 : 0,
+          blocked: result.blocked ? 1 : 0,
+          total: 1,
+          blockedUrls: result.blocked && result.url ? [result.url] : [],
+        },
+        translate,
+        { toastSuccess: toast.success, toastError: toast.error },
       );
       return;
     }
 
-    const account = getEffectiveMessagingAccount(messagingConfig, selectedPlatform);
+    const account =
+      resolveWhatsappApiSendAccount(messagingConfig, selectedPlatform) ||
+      getEffectiveMessagingAccount(messagingConfig, selectedPlatform);
     const senderGuard = assertWhatsappSenderAllowedForUser({
       account,
       accounts: messagingConfig?.accounts,

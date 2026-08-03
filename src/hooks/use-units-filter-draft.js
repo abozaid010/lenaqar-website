@@ -49,6 +49,19 @@ function filtersSignature(filters) {
 }
 
 /**
+ * Prefer the browser pathname so /{clientId}/units rewrites stay on the
+ * visible URL. usePathname() can return the internal /units destination,
+ * and proxy then redirects bare /units → /{clientId}/units while dropping
+ * the query string.
+ */
+function resolveFilterPathname(pathname) {
+  if (typeof window !== "undefined" && window.location?.pathname) {
+    return window.location.pathname;
+  }
+  return pathname;
+}
+
+/**
  * Draft filter state for the units listing.
  * URL remains the source of truth for applied filters / API fetches.
  * Draft changes apply on: Apply click, Enter, or 5s after last change.
@@ -164,9 +177,13 @@ export function useUnitsFilterDraft({
         currentParams
       );
       const qs = params.toString();
-      const nextUrl = qs ? `${pathname}?${qs}` : pathname;
-      const currentQs = currentParams.toString();
-      const currentUrl = currentQs ? `${pathname}?${currentQs}` : pathname;
+      const navPathname = resolveFilterPathname(pathname);
+      const nextUrl = qs ? `${navPathname}?${qs}` : navPathname;
+      const currentQs =
+        typeof window !== "undefined"
+          ? window.location.search.replace(/^\?/, "")
+          : currentParams.toString();
+      const currentUrl = currentQs ? `${navPathname}?${currentQs}` : navPathname;
 
       if (hasActiveFilters(normalized)) {
         writeSessionFilters(storageKey, normalized);
@@ -225,7 +242,10 @@ export function useUnitsFilterDraft({
           searchParams
         );
         const qs = params.toString();
-        router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+        const navPathname = resolveFilterPathname(pathname);
+        router.replace(qs ? `${navPathname}?${qs}` : navPathname, {
+          scroll: false,
+        });
       }
       return;
     }
@@ -240,7 +260,10 @@ export function useUnitsFilterDraft({
           searchParams
         );
         const qs = params.toString();
-        router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+        const navPathname = resolveFilterPathname(pathname);
+        router.replace(qs ? `${navPathname}?${qs}` : navPathname, {
+          scroll: false,
+        });
       }
       return;
     }
@@ -250,7 +273,8 @@ export function useUnitsFilterDraft({
     setDraftFilters(stored);
     const params = filtersToSearchParamsResettingPagination(stored, searchParams);
     const qs = params.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    const navPathname = resolveFilterPathname(pathname);
+    router.replace(qs ? `${navPathname}?${qs}` : navPathname, { scroll: false });
   }, [isPublic, pathname, router, searchParams, storageKey]);
 
   // Keep session in sync whenever applied URL filters change (back/forward, deep links).
@@ -337,7 +361,8 @@ export function useUnitsFilterDraft({
       new URLSearchParams()
     );
     const qs = params.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    const navPathname = resolveFilterPathname(pathname);
+    router.replace(qs ? `${navPathname}?${qs}` : navPathname, { scroll: false });
   }, [clearApplyDebounce, isPublic, pathname, router, storageKey]);
 
   const removeFilterKey = useCallback(

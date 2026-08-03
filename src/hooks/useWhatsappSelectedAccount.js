@@ -109,7 +109,8 @@ export function useWhatsappSelectedAccount(messagingData, clientId) {
 
       const next = key ?? "";
       setSelectedPlatformState(next);
-      if (next && clientId) {
+      if (clientId) {
+        // Persist selection; empty = WhatsApp Web (clear last-used account).
         writeLastWhatsappAccountKey(clientId, userEmail, next);
       }
     },

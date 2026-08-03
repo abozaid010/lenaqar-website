@@ -3,9 +3,11 @@
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import {
   isMessagingConfigReady,
+  isOpenwaProvider,
   normalizeLinkedAutomatedWhatsappList,
   resolveSenderPhoneNumber,
 } from "@/lib/whatsapp-messaging-provider";
+import { filterOutboundWhatsappAccounts } from "@/lib/whatsapp-deeplink-send";
 import { getProfileData } from "@/utils/api";
 import { useQuery } from "@tanstack/react-query";
 
@@ -19,18 +21,27 @@ export function buildMessagingProviderConfigFromProfile(profileResponse) {
   if (!profileResponse || profileResponse?.error) return null;
 
   const linked = profileResponse?.data?.linked_automated_whatsapp ?? null;
-  const allAccounts = normalizeLinkedAutomatedWhatsappList(linked);
+  const rawAccounts = normalizeLinkedAutomatedWhatsappList(linked);
+  // Ultramsg removed — never expose for send/platform pickers.
+  const allAccounts = filterOutboundWhatsappAccounts(rawAccounts);
   const readyAccounts = allAccounts.filter(isMessagingConfigReady);
-  const defaultAccount = readyAccounts[0] ?? allAccounts[0] ?? null;
+  const openwaAccounts = allAccounts.filter((account) =>
+    isOpenwaProvider(account.platform),
+  );
+  const defaultAccount =
+    (openwaAccounts.length === 1 ? openwaAccounts[0] : null) ??
+    readyAccounts.find((account) => isOpenwaProvider(account.platform)) ??
+    null;
   const defaultSenderPhone = resolveSenderPhoneNumber(defaultAccount);
 
   return {
     accounts: allAccounts,
     readyAccounts,
     defaultAccount,
+    openwaCount: openwaAccounts.length,
     hasMultipleAccounts: allAccounts.length > 1,
     hasLinkedAccounts: allAccounts.length > 0,
-    canSendWhatsapp: Boolean(defaultAccount && defaultSenderPhone),
+    canSendWhatsapp: true,
     defaultSenderPhone,
   };
 }

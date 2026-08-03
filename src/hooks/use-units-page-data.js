@@ -24,10 +24,9 @@ export function useUnitsPageData(searchParams, { usePublicEndpoint = false } = {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     placeholderData: keepPreviousData,
-    // Server-prefetched data seeds the cache so there is no client fetch on first render.
-    // initialData is only set when no filters are active (matches the server fetch params).
-    // When a filter changes, searchParamsKey changes → new query key → initialData is not passed →
-    // client fetches fresh from the BFF (Phase 3) or backend directly (Phase 1 interim).
+    // Server-prefetched data seeds the cache only when the caller passes it for the
+    // current searchParamsKey. Callers must pass null after filter changes so a new
+    // query key does not reuse stale initialData under the 15m staleTime.
     ...(initialData != null ? { initialData } : {}),
   });
 

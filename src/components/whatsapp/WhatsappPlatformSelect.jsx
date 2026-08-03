@@ -7,9 +7,9 @@ const agentSelectCls =
   "w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary bg-white";
 
 /**
- * Platform picker shown when a client has more than one linked WhatsApp account.
- * Pass `locked` for restricted team roles (editor/viewer/marketing) so the
- * control is hidden — selection is forced by useWhatsappSelectedAccount.
+ * Platform picker for linked WhatsApp accounts.
+ * Empty selection = send via WhatsApp Web (wa.me deep link).
+ * Pass `locked` for restricted team roles so the control is hidden.
  */
 export default function WhatsappPlatformSelect({
   accounts = [],
@@ -30,11 +30,13 @@ export default function WhatsappPlatformSelect({
     return null;
   }
 
-  if (!hasMultipleAccounts) {
+  const list = Array.isArray(accounts) ? accounts : [];
+  // Show whenever there is at least one linked account (incl. single Cloud API)
+  // so the user can opt into API send vs WhatsApp Web.
+  if (list.length < 1 && !hasMultipleAccounts) {
     return null;
   }
-
-  if (!Array.isArray(accounts) || accounts.length <= 1) {
+  if (list.length < 1) {
     return null;
   }
 
@@ -55,9 +57,12 @@ export default function WhatsappPlatformSelect({
         aria-invalid={Boolean(error)}
       >
         <option value="">
-          {translate("whatsappSend.selectPlatformPlaceholder", "Choose an account…")}
+          {translate(
+            "whatsappSend.whatsappWebOption",
+            "WhatsApp Web (manual)",
+          )}
         </option>
-        {accounts.map((account) => {
+        {list.map((account) => {
           const accountKey = getWhatsappAccountKey(account);
           const phone = account.whatsapp_number?.trim() || "";
           return (
@@ -73,8 +78,8 @@ export default function WhatsappPlatformSelect({
       ) : (
         <p className="text-xs text-gray-500">
           {translate(
-            "whatsappSend.multipleAccountsHint",
-            "This client has multiple WhatsApp accounts. Choose which one to send from."
+            "whatsappSend.webOrAccountHint",
+            "Leave empty to open WhatsApp Web and send manually. Choose an account to send via automation.",
           )}
         </p>
       )}

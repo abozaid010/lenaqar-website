@@ -157,20 +157,7 @@ const ChatPanel = ({
 
     if (!message.trim() || isSending) return;
 
-    if (
-      hasMultipleMessagingAccounts &&
-      !selectedPlatform &&
-      !isAccountSelectionLocked
-    ) {
-      const err = translate(
-        "whatsappSend.platformRequired",
-        "Please choose which WhatsApp account to send from."
-      );
-      setPlatformError(err);
-      toast.error(err);
-      return;
-    }
-
+    // Empty platform selection → WhatsApp Web deep link (handled by parent).
     setPlatformError("");
     setIsSending(true);
     try {
@@ -614,7 +601,7 @@ const ChatPanel = ({
         {isWhatsappSendBlocked ? (
           <WhatsappRestrictionNotice code={whatsappRestrictionCode} />
         ) : null}
-        {hasMultipleMessagingAccounts ? (
+        {messagingAccounts.length > 0 ? (
           <WhatsappPlatformSelect
             accounts={messagingAccounts}
             hasMultipleAccounts={hasMultipleMessagingAccounts}
@@ -624,7 +611,7 @@ const ChatPanel = ({
               setPlatformError("");
             }}
             error={platformError}
-            required
+            required={false}
             locked={isAccountSelectionLocked}
             id="campaign_chat_whatsapp_platform"
           />

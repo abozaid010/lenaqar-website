@@ -281,7 +281,13 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
         if (!cancelled && changed) {
           const qs = newParams.toString();
-          router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+          const navPathname =
+            typeof window !== "undefined" && window.location?.pathname
+              ? window.location.pathname
+              : pathname;
+          router.replace(qs ? `${navPathname}?${qs}` : navPathname, {
+            scroll: false,
+          });
         }
       } catch (error) {
         console.error("Failed to normalize filter params:", error?.message ?? error);

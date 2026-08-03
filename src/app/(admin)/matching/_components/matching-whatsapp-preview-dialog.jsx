@@ -13,6 +13,10 @@ import {
   getEffectiveMessagingAccount,
   isMessagingConfigReady,
 } from "@/lib/whatsapp-messaging-provider";
+import {
+  resolveWhatsappApiSendAccount,
+  shouldUseWhatsappDeepLink,
+} from "@/lib/whatsapp-deeplink-send";
 import { getMatchingUnitId } from "@/lib/matching/unit-recommendation-service";
 import { buildRecommendationMessageAr } from "@/lib/matching/build-recommendation-message-ar";
 import { X } from "lucide-react";
@@ -40,10 +44,17 @@ export default function MatchingWhatsappPreviewDialog({
     whatsappRestrictionCode,
   } = useWhatsappSelectedAccount(messagingData, clientId);
   const accounts = messagingData?.accounts ?? [];
-  const selectedAccount = getEffectiveMessagingAccount(
+  const apiAccount = resolveWhatsappApiSendAccount(
     messagingData,
     selectedPlatform,
   );
+  const useDeepLink = shouldUseWhatsappDeepLink(
+    messagingData,
+    selectedPlatform,
+  );
+  const selectedAccount =
+    apiAccount ||
+    getEffectiveMessagingAccount(messagingData, selectedPlatform);
 
   const [draftMessages, setDraftMessages] = useState({});
   const [draftUnitIds, setDraftUnitIds] = useState({});
@@ -70,9 +81,15 @@ export default function MatchingWhatsappPreviewDialog({
   }, [isOpen, eligibleResults, getRecommendedUnits, clientId]);
 
   const canSubmit = useMemo(() => {
-    if (!isMessagingConfigReady(selectedAccount)) return false;
     if (isWhatsappSendBlocked) return false;
     if (!eligibleResults.length) return false;
+    if (
+      !useDeepLink &&
+      !apiAccount &&
+      !isMessagingConfigReady(selectedAccount)
+    ) {
+      return false;
+    }
     return eligibleResults.some((r) => {
       const ids = draftUnitIds[r.leadId] || [];
       const msg = String(draftMessages[r.leadId] || "").trim();
@@ -80,6 +97,8 @@ export default function MatchingWhatsappPreviewDialog({
     });
   }, [
     selectedAccount,
+    apiAccount,
+    useDeepLink,
     isWhatsappSendBlocked,
     eligibleResults,
     draftUnitIds,
@@ -114,7 +133,7 @@ export default function MatchingWhatsappPreviewDialog({
     e?.preventDefault?.();
     setError("");
     if (!canSubmit) return;
-    if (!isMessagingConfigReady(selectedAccount)) {
+    if (!useDeepLink && !apiAccount) {
       setError(
         translate(
           "editClient.whatsapp.notConfigured",
@@ -125,7 +144,8 @@ export default function MatchingWhatsappPreviewDialog({
     }
     try {
       await onSend?.({
-        selectedAccount,
+        selectedAccount: apiAccount,
+        useDeepLink,
         draftMessages,
       });
     } catch (err) {
@@ -151,7 +171,7 @@ export default function MatchingWhatsappPreviewDialog({
       bodyClassName="max-h-[70vh] overflow-y-auto space-y-4"
       closeOnEscape
     >
-      {accounts.length > 1 && (
+      {accounts.length > 0 && (
         <WhatsappPlatformSelect
           accounts={accounts}
           hasMultipleAccounts={accounts.length > 1}
@@ -159,6 +179,7 @@ export default function MatchingWhatsappPreviewDialog({
           onChange={setSelectedPlatform}
           locked={isAccountSelectionLocked}
           disabled={isAccountSelectionLocked || sending}
+          required={false}
         />
       )}
       <WhatsappRestrictionNotice code={whatsappRestrictionCode} />

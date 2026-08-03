@@ -1,4 +1,6 @@
 import {
+  getDefaultTransportPlatform,
+  resolveSenderPhoneNumber,
   resolveWhatsappSendContext,
   sendWhatsappWithClientConfig,
   WHATSAPP_MESSAGING_NOT_LOADED_CODE,
@@ -15,8 +17,10 @@ import {
   WHATSAPP_ACCOUNT_NOT_LINKED_CODE,
   WHATSAPP_USER_PHONE_NOT_ASSIGNED_CODE,
 } from "@/lib/whatsapp-account-restriction";
-import { phoneToE164 } from "@/components/phone/phone-utils";
-import { copyToClipboard, openWhatsApp } from "@/utils/phone-utils";
+import {
+  openSingleWhatsappDeepLink,
+  reportWhatsappDeepLinkResult,
+} from "@/lib/whatsapp-deeplink-send";
 
 export {
   WHATSAPP_MESSAGING_NOT_LOADED_CODE,
@@ -69,7 +73,30 @@ async function resolveSendContextWithRefetch({
   isMessagingFetching,
   isMessagingError,
   refetchMessagingConfig,
+  forceAccount,
 }) {
+  if (forceAccount) {
+    const transportPlatform = getDefaultTransportPlatform(forceAccount);
+    const senderPhoneNumber = resolveSenderPhoneNumber(forceAccount);
+    if (!transportPlatform) {
+      return { ok: false, code: WHATSAPP_NOT_CONFIGURED_CODE, account: forceAccount };
+    }
+    if (!senderPhoneNumber) {
+      return {
+        ok: false,
+        code: WHATSAPP_SENDER_PHONE_REQUIRED_CODE,
+        account: forceAccount,
+      };
+    }
+    return {
+      ok: true,
+      code: null,
+      account: forceAccount,
+      transportPlatform,
+      senderPhoneNumber,
+    };
+  }
+
   if (isMessagingLoading || isMessagingFetching) {
     return {
       ok: false,
@@ -86,13 +113,16 @@ async function resolveSendContextWithRefetch({
 }
 
 function openWhatsappDeepLink(phoneNumber, message, translate) {
-  const e164 = phoneToE164(phoneNumber, "EG") || phoneNumber;
-  copyToClipboard(
-    message,
-    () => {},
-    () => {},
+  const result = openSingleWhatsappDeepLink(phoneNumber, message);
+  reportWhatsappDeepLinkResult(
+    {
+      opened: result.ok ? 1 : 0,
+      blocked: result.blocked ? 1 : 0,
+      total: 1,
+      blockedUrls: result.blocked && result.url ? [result.url] : [],
+    },
+    translate,
   );
-  openWhatsApp(e164, { message, newTab: true, target: "_blank" });
   return {
     method: "deeplink",
     message: translate(
@@ -108,7 +138,7 @@ function isWhatsappApiValidationError(error) {
 }
 
 /**
- * Unified outbound WhatsApp send: API when configured, optional wa.me deep link fallback.
+ * Unified outbound WhatsApp send: API when account selected, optional wa.me fallback.
  *
  * @returns {{ method: 'api' | 'deeplink', message?: string }}
  */
@@ -127,6 +157,7 @@ export async function sendWhatsappOutboundMessage({
   translate,
   onPlatformError,
   fallbackToDeepLink = false,
+  forceAccount = null,
 }) {
   if (!whatsappRecipient) {
     throw new Error("Missing WhatsApp recipient");
@@ -140,6 +171,7 @@ export async function sendWhatsappOutboundMessage({
     isMessagingError,
     refetchMessagingConfig,
     clientId,
+    forceAccount,
   });
 
   if (!context.ok) {
@@ -147,7 +179,8 @@ export async function sendWhatsappOutboundMessage({
       fallbackToDeepLink &&
       phoneNumber?.trim() &&
       (context.code === WHATSAPP_NOT_CONFIGURED_CODE ||
-        context.code === WHATSAPP_SENDER_PHONE_REQUIRED_CODE)
+        context.code === WHATSAPP_SENDER_PHONE_REQUIRED_CODE ||
+        context.code === WHATSAPP_PLATFORM_REQUIRED_CODE)
     ) {
       return openWhatsappDeepLink(phoneNumber, text, translate);
     }
@@ -161,8 +194,6 @@ export async function sendWhatsappOutboundMessage({
     throw error;
   }
 
-  // Action-layer check: restricted roles cannot send from another linked number
-  // when the client has multiple WhatsApp accounts.
   const senderGuard = assertWhatsappSenderAllowedForUser({
     account: context.account,
     accounts: messagingData?.accounts,
