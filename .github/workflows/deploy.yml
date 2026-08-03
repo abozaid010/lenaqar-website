@@ -10,6 +10,8 @@ env:
   GCP_ZONE: ${{ secrets.GCP_ZONE }}
   VM_NAME: ${{ secrets.GCP_VM_NAME }}
   VM_SSH_USER: abozaid
+  # Keep IAP SSH tunnels alive during long Docker/Next.js builds
+  SSH_KEEPALIVE: -o ConnectTimeout=300 -o ServerAliveInterval=30 -o ServerAliveCountMax=10
 
 jobs:
   deploy:
@@ -78,6 +80,7 @@ jobs:
           gcloud compute ssh "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}" \
             --zone="${{ env.GCP_ZONE }}" \
             --tunnel-through-iap \
+            --ssh-flag="${{ env.SSH_KEEPALIVE }}" \
             --command="echo '✅ Connected as:'; whoami; hostname"
 
       - name: Provision GitHub deploy key on VM
@@ -87,6 +90,7 @@ jobs:
           gcloud compute ssh "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}" \
             --zone="${{ env.GCP_ZONE }}" \
             --tunnel-through-iap \
+            --ssh-flag="${{ env.SSH_KEEPALIVE }}" \
             --command="
               mkdir -p ~/.ssh
               chmod 700 ~/.ssh
@@ -95,11 +99,13 @@ jobs:
           gcloud compute scp ~/.ssh/github_deploy_key \
             "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}:~/.ssh/id_ed25519_website" \
             --zone="${{ env.GCP_ZONE }}" \
-            --tunnel-through-iap
+            --tunnel-through-iap \
+            --scp-flag="${{ env.SSH_KEEPALIVE }}"
 
           gcloud compute ssh "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}" \
             --zone="${{ env.GCP_ZONE }}" \
             --tunnel-through-iap \
+            --ssh-flag="${{ env.SSH_KEEPALIVE }}" \
             --command='
               set -Eeuo pipefail
               chmod 600 ~/.ssh/id_ed25519_website
@@ -142,6 +148,7 @@ jobs:
           gcloud compute ssh "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}" \
             --zone="${{ env.GCP_ZONE }}" \
             --tunnel-through-iap \
+            --ssh-flag="${{ env.SSH_KEEPALIVE }}" \
             --command="
               set -Eeuo pipefail
               trap 'echo \"❌ Remote deploy failed on line \$LINENO\"; exit 1' ERR

@@ -90,8 +90,20 @@ echo "🧹 Stopping old container if exists (free RAM for build)..."
 docker rm -f lenaai_website || true
 
 # ─── 3. Build latest image ────────────────────────────────────────
-echo "🔨 Building Docker image..."
-docker build "${DOCKER_BUILD_ARGS[@]}" -t lenaai_website:latest .
+# --progress=plain streams logs continuously (keeps IAP SSH alive).
+# timeout fails hung builds instead of waiting for the tunnel to drop (~2.5h).
+echo "🔨 Building Docker image (max 60 minutes)..."
+set +e
+timeout 3600 docker build --progress=plain "${DOCKER_BUILD_ARGS[@]}" -t lenaai_website:latest .
+BUILD_EXIT=$?
+set -e
+if [ "$BUILD_EXIT" -eq 124 ]; then
+  echo "❌ Docker build timed out after 1 hour"
+  exit 1
+elif [ "$BUILD_EXIT" -ne 0 ]; then
+  echo "❌ Docker build failed with exit code $BUILD_EXIT"
+  exit "$BUILD_EXIT"
+fi
 
 # ─── 4. Start new container ───────────────────────────────────────
 echo "🚀 Starting new container..."
