@@ -85,16 +85,55 @@ if ! printf '%s\n' "${DOCKER_BUILD_ARGS[@]}" | grep -q 'NEXT_PUBLIC_X_API_KEY=';
   exit 1
 fi
 
-# ─── 2. Stop old container before build (free RAM on e2-medium) ───
-echo "🧹 Stopping old container if exists (free RAM for build)..."
+# ─── 2. Protect e2-medium from OOM hangs during Next.js builds ───
+# Without swap, docker build + npm/next can freeze the guest OS. GCP still
+# shows RUNNING, but SSH/IAP dies with 4003 until a hard reset.
+echo "💾 Ensuring swap exists (prevents guest hang on e2-medium)..."
+ensure_swap() {
+  if [ -f /proc/swaps ] && awk 'NR>1 {found=1} END{exit !found}' /proc/swaps; then
+    echo "✅ Swap already active:"
+    cat /proc/swaps
+    return 0
+  fi
+  if [ ! -f /swapfile ]; then
+    echo "📦 Creating 4G /swapfile..."
+    sudo fallocate -l 4G /swapfile 2>/dev/null || \
+      sudo dd if=/dev/zero of=/swapfile bs=1M count=4096 status=none
+    sudo chmod 600 /swapfile
+    sudo mkswap /swapfile >/dev/null
+  fi
+  if ! grep -qE '^/swapfile\s' /etc/fstab 2>/dev/null; then
+    echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab >/dev/null
+  fi
+  sudo swapon /swapfile
+  free -h
+}
+ensure_swap
+
+echo "🧹 Stopping old website container (free RAM for build)..."
 docker rm -f lenaai_website || true
+
+echo "🗑️  Pruning unused Docker build cache (disk is tight on this VM)..."
+docker builder prune -f --filter until=72h >/dev/null 2>&1 || true
+docker image prune -f >/dev/null 2>&1 || true
+
+echo "📊 Memory before build:"
+free -h || true
 
 # ─── 3. Build latest image ────────────────────────────────────────
 # --progress=plain streams logs continuously (keeps IAP SSH alive).
 # timeout fails hung builds instead of waiting for the tunnel to drop (~2.5h).
+# Cap BuildKit parallelism so e2-medium (2 vCPU / 4Gi) stays responsive.
 echo "🔨 Building Docker image (max 60 minutes)..."
+export DOCKER_BUILDKIT=1
+export BUILDKIT_PROGRESS=plain
 set +e
-timeout 3600 docker build --progress=plain "${DOCKER_BUILD_ARGS[@]}" -t lenaai_website:latest .
+timeout 3600 docker build \
+  --progress=plain \
+  --build-arg BUILDKIT_INLINE_CACHE=1 \
+  "${DOCKER_BUILD_ARGS[@]}" \
+  -t lenaai_website:latest \
+  .
 BUILD_EXIT=$?
 set -e
 if [ "$BUILD_EXIT" -eq 124 ]; then
