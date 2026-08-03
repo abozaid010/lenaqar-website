@@ -2,7 +2,11 @@ import { isOpenwaProvider, isUltramessageProvider, getAccountByKey } from "@/lib
 import { formatPhoneForWhatsApp, copyToClipboard } from "@/utils/phone-utils";
 import { phoneToE164 } from "@/components/phone/phone-utils";
 
-export const WHATSAPP_DEEPLINK_DELAY_MS = 1000;
+/**
+ * @deprecated Delay between opens breaks the user-gesture token and causes
+ * browsers to block tabs 2..n. Kept for call-site compatibility; ignored.
+ */
+export const WHATSAPP_DEEPLINK_DELAY_MS = 0;
 
 /** Drop Ultramsg from outbound account lists (provider removed). */
 export function filterOutboundWhatsappAccounts(accounts = []) {
@@ -65,6 +69,26 @@ function resolvePhoneDigits(phone) {
   return String(e164).replace(/\D/g, "");
 }
 
+export function isMobileWhatsappClient() {
+  if (typeof navigator === "undefined") return false;
+  return /Android|webOS|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
+}
+
+/**
+ * Build deep-link URL. On mobile, prefer api.whatsapp.com so the OS hands
+ * off to the WhatsApp app with a pre-filled draft.
+ */
+export function buildWhatsappDeepLinkUrl(phone, message, { mobile = false } = {}) {
+  const digits = String(phone || "").replace(/\D/g, "");
+  const text = String(message ?? "").trim();
+  if (!digits || !text) return "";
+
+  if (mobile) {
+    return `https://api.whatsapp.com/send?phone=${digits}&text=${encodeURIComponent(text)}`;
+  }
+  return formatPhoneForWhatsApp(digits, text);
+}
+
 /**
  * Normalize recipients into { phone, message } for wa.me.
  * Accepts bulk recipient shapes and simple phone/message pairs.
@@ -90,36 +114,77 @@ export function normalizeDeepLinkRecipients(recipients = []) {
 }
 
 /**
- * Open wa.me tabs one-by-one with a delay (reduces popup blocking).
+ * Open a WhatsApp URL without `noopener` in windowFeatures.
+ * Features including noopener make window.open() always return null, which
+ * incorrectly marks successful opens as blocked.
+ */
+function openWhatsappWindow(url, target) {
+  const win = window.open(url, target);
+  if (win) {
+    try {
+      win.opener = null;
+    } catch {
+      // Cross-origin / restricted — ignore.
+    }
+  }
+  return win;
+}
+
+/**
+ * Open one WhatsApp tab/app draft per recipient.
+ *
+ * Desktop: opens N tabs synchronously in the same click gesture (delaying
+ * between opens drops user activation and the browser blocks tabs 2..n).
+ * Mobile: hands off to the WhatsApp app with a pre-filled draft
+ * (location.assign for a single recipient; sync window.open for many).
+ *
  * @returns {{ opened: number, blocked: number, total: number, blockedUrls: string[] }}
  */
 export async function openWhatsappDeepLinks(
   recipients,
-  { delayMs = WHATSAPP_DEEPLINK_DELAY_MS } = {},
+  // delayMs intentionally ignored — see WHATSAPP_DEEPLINK_DELAY_MS.
+  { delayMs: _delayMs } = {},
 ) {
   const items = normalizeDeepLinkRecipients(recipients);
+  const mobile = isMobileWhatsappClient();
   let opened = 0;
   let blocked = 0;
   const blockedUrls = [];
 
-  for (let i = 0; i < items.length; i += 1) {
-    const { phone, message } = items[i];
-    const url = formatPhoneForWhatsApp(phone, message);
-    if (!url) {
-      blocked += 1;
-      continue;
-    }
+  const prepared = items
+    .map(({ phone, message }, index) => {
+      const url = buildWhatsappDeepLinkUrl(phone, message, { mobile });
+      if (!url) return null;
+      return { phone, message, url, index };
+    })
+    .filter(Boolean);
 
-    const win = window.open(url, "_blank", "noopener,noreferrer");
+  if (prepared.length === 0) {
+    return { opened: 0, blocked: items.length, total: items.length, blockedUrls };
+  }
+
+  // Single recipient on mobile: navigate current tab → WhatsApp app draft.
+  if (mobile && prepared.length === 1) {
+    window.location.assign(prepared[0].url);
+    return {
+      opened: 1,
+      blocked: 0,
+      total: items.length,
+      blockedUrls: [],
+    };
+  }
+
+  // Open every tab synchronously in this call stack. Any delay/await between
+  // opens drops the user-gesture token and browsers block tabs 2..n.
+  // Unique targets avoid reusing a single tab for multiple recipients.
+  for (let i = 0; i < prepared.length; i += 1) {
+    const { phone, url, index } = prepared[i];
+    const win = openWhatsappWindow(url, `wa_deeplink_${phone}_${index}`);
     if (win) {
       opened += 1;
     } else {
       blocked += 1;
       blockedUrls.push(url);
-    }
-
-    if (i < items.length - 1 && delayMs > 0) {
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   }
 
@@ -131,7 +196,7 @@ export async function openWhatsappDeepLinks(
   };
 }
 
-/** Single-recipient deep link (copies message, opens one tab). */
+/** Single-recipient deep link (copies message, opens WhatsApp). */
 export function openSingleWhatsappDeepLink(phoneNumber, message) {
   const digits = resolvePhoneDigits(phoneNumber);
   const text = String(message ?? "").trim();
@@ -145,8 +210,15 @@ export function openSingleWhatsappDeepLink(phoneNumber, message) {
     () => {},
   );
 
-  const url = formatPhoneForWhatsApp(digits, text);
-  const win = window.open(url, "_blank", "noopener,noreferrer");
+  const mobile = isMobileWhatsappClient();
+  const url = buildWhatsappDeepLinkUrl(digits, text, { mobile });
+
+  if (mobile) {
+    window.location.assign(url);
+    return { ok: true, blocked: false, url };
+  }
+
+  const win = openWhatsappWindow(url, "_blank");
   return { ok: Boolean(win), blocked: !win, url };
 }
 

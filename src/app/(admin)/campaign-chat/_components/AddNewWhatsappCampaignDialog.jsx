@@ -121,7 +121,6 @@ const AddNewWhatsappCampaignDialog = ({
 
     // Empty selection / no OpenWA → WhatsApp Web deep link (allowed).
     if (useDeepLink) {
-      setPlatformError("");
       return true;
     }
 
@@ -329,8 +328,6 @@ const AddNewWhatsappCampaignDialog = ({
   };
 
   const validateAutomationForm = () => {
-    setError("");
-
     if (recipientsProp.length === 0) {
       setError(
         translate(
@@ -534,18 +531,21 @@ const AddNewWhatsappCampaignDialog = ({
 
     if (!ensureMessagingConfigured()) return;
 
-    setIsSubmitting(true);
-    setError("");
-
     try {
       if (sendMode === SEND_MODE.AUTOMATION || appendUnitLinkPerRecipient) {
-        const result = await submitAutomationMessages();
-        if (result?.data?.method === "deeplink") {
+        // Deep-link: open tabs before any setState so the browser keeps the
+        // user-gesture token for all N recipients.
+        if (useDeepLink) {
+          const result = await submitAutomationMessages();
           setAutomationMessage(defaultAutomationMessage || "");
           onSendSuccess?.();
           handleClose();
           return;
         }
+
+        setIsSubmitting(true);
+        setError("");
+        const result = await submitAutomationMessages();
         const sent = result?.data?.sent ?? 0;
         const failed = result?.data?.failed ?? 0;
         const successKey =
@@ -566,6 +566,9 @@ const AddNewWhatsappCampaignDialog = ({
         handleClose();
         return;
       }
+
+      setIsSubmitting(true);
+      setError("");
 
       const result = await submitApiCampaign();
 
