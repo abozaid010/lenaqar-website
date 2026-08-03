@@ -1300,6 +1300,18 @@ export default {
     deeplinkPartialBlocked:
       "Opened {opened} tab(s). {blocked} were blocked by the browser. Allow pop-ups for this site, then try again — blocked links were copied.",
     deeplinkNoRecipients: "No valid phone numbers to open in WhatsApp.",
+    deeplinkSequentialStarted:
+      "Opened WhatsApp (1 of {total}). Send the message, return here, then tap Open next.",
+    deeplinkSequentialDone:
+      "All WhatsApp chats opened. Send each message manually.",
+    deeplinkQueueRegion: "WhatsApp send queue",
+    deeplinkQueueTitle: "WhatsApp {current} of {total}",
+    deeplinkQueueHint:
+      "Send the open chat in WhatsApp, then come back and tap Open next. Each chat needs its own tap on phone and tablet.",
+    deeplinkQueueNext: "Next: {phone}",
+    deeplinkQueueOpenNext: "Open next",
+    deeplinkQueueSkip: "Skip",
+    deeplinkQueueDismiss: "Done",
   },
   openwaConnection: {
     title: "Connect WhatsApp",

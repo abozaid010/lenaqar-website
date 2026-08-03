@@ -229,7 +229,10 @@ export function useMatchingSession() {
           });
         }
 
-        sent = linkResult.opened;
+        sent =
+          linkResult.mode === "sequential"
+            ? linkResult.opened + (linkResult.remaining || 0)
+            : linkResult.opened;
         failed += linkResult.blocked;
         setProgress({ done: targets.length, total: targets.length });
         setPhase("review");

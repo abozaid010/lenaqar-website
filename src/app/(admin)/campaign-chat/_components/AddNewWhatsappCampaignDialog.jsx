@@ -488,9 +488,13 @@ const AddNewWhatsappCampaignDialog = ({
         toastSuccess: toast.success,
         toastError: toast.error,
       });
+      const sequentialTotal =
+        result.mode === "sequential"
+          ? result.opened + (result.remaining || 0)
+          : result.opened;
       return {
         data: {
-          sent: result.opened,
+          sent: sequentialTotal,
           failed: result.blocked,
           method: "deeplink",
         },

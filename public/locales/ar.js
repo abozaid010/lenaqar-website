@@ -1137,6 +1137,18 @@ export default {
     deeplinkPartialBlocked:
       "تم فتح {opened} نافذة. تم حظر {blocked} بواسطة المتصفح. اسمح بالنوافذ المنبثقة ثم أعد المحاولة — تم نسخ الروابط المحظورة.",
     deeplinkNoRecipients: "لا توجد أرقام هاتف صالحة لفتح واتساب.",
+    deeplinkSequentialStarted:
+      "تم فتح واتساب (1 من {total}). أرسل الرسالة، ثم ارجع هنا واضغط «فتح التالي».",
+    deeplinkSequentialDone:
+      "تم فتح جميع محادثات واتساب. أرسل كل رسالة يدويًا.",
+    deeplinkQueueRegion: "قائمة إرسال واتساب",
+    deeplinkQueueTitle: "واتساب {current} من {total}",
+    deeplinkQueueHint:
+      "أرسل المحادثة المفتوحة في واتساب، ثم ارجع واضغط «فتح التالي». كل محادثة تحتاج ضغطة منفصلة على الهاتف والتابلت.",
+    deeplinkQueueNext: "التالي: {phone}",
+    deeplinkQueueOpenNext: "فتح التالي",
+    deeplinkQueueSkip: "تخطي",
+    deeplinkQueueDismiss: "تم",
   },
   openwaConnection: {
     title: "ربط واتساب",

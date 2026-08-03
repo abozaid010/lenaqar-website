@@ -1,6 +1,10 @@
 import { isOpenwaProvider, isUltramessageProvider, getAccountByKey } from "@/lib/whatsapp-messaging-provider";
 import { formatPhoneForWhatsApp, copyToClipboard } from "@/utils/phone-utils";
 import { phoneToE164 } from "@/components/phone/phone-utils";
+import {
+  clearWhatsappDeepLinkQueue,
+  setWhatsappDeepLinkQueue,
+} from "@/lib/whatsapp-deeplink-queue";
 
 /**
  * @deprecated Delay between opens breaks the user-gesture token and causes
@@ -69,21 +73,55 @@ function resolvePhoneDigits(phone) {
   return String(e164).replace(/\D/g, "");
 }
 
+/**
+ * True on phones/tablets where multi-tab popups fail and WhatsApp must open
+ * via a single app handoff per tap.
+ *
+ * Covers: Android phones/tablets, iPhone, iPod, classic iPad UA, and
+ * iPadOS 13+ “desktop” Safari (Macintosh + multi-touch).
+ */
+export function isTouchWhatsappClient() {
+  if (typeof window === "undefined" || typeof navigator === "undefined") {
+    return false;
+  }
+
+  const ua = navigator.userAgent || "";
+  if (
+    /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|iPad/i.test(ua)
+  ) {
+    return true;
+  }
+
+  // iPadOS 13+ requests a desktop Mac UA; detect via touch points.
+  const touchPoints = Number(navigator.maxTouchPoints) || 0;
+  if (navigator.platform === "MacIntel" && touchPoints > 1) {
+    return true;
+  }
+
+  return false;
+}
+
+/** @deprecated Use isTouchWhatsappClient — kept for existing imports. */
 export function isMobileWhatsappClient() {
-  if (typeof navigator === "undefined") return false;
-  return /Android|webOS|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
+  return isTouchWhatsappClient();
 }
 
 /**
- * Build deep-link URL. On mobile, prefer api.whatsapp.com so the OS hands
- * off to the WhatsApp app with a pre-filled draft.
+ * Build deep-link URL.
+ * Touch devices: api.whatsapp.com → OS hands off to the WhatsApp app with draft.
+ * Desktop: wa.me → WhatsApp Web / Desktop in a new tab.
  */
-export function buildWhatsappDeepLinkUrl(phone, message, { mobile = false } = {}) {
+export function buildWhatsappDeepLinkUrl(
+  phone,
+  message,
+  { touch = false } = {},
+) {
   const digits = String(phone || "").replace(/\D/g, "");
   const text = String(message ?? "").trim();
   if (!digits || !text) return "";
 
-  if (mobile) {
+  if (touch) {
+    // Universal / App Link — opens the installed app on iOS, Android, iPad.
     return `https://api.whatsapp.com/send?phone=${digits}&text=${encodeURIComponent(text)}`;
   }
   return formatPhoneForWhatsApp(digits, text);
@@ -131,14 +169,33 @@ function openWhatsappWindow(url, target) {
 }
 
 /**
+ * Hand off to the WhatsApp app with a pre-filled draft.
+ * Must run inside a user-gesture (click/tap).
+ *
+ * Uses location.assign so Universal/App Links switch to the app while
+ * leaving the CRM page parked in memory (iOS Safari / Android Chrome).
+ */
+export function openWhatsappAppDraft(url) {
+  if (!url || typeof window === "undefined") return false;
+  window.location.assign(url);
+  return true;
+}
+
+/**
  * Open one WhatsApp tab/app draft per recipient.
  *
- * Desktop: opens N tabs synchronously in the same click gesture (delaying
- * between opens drops user activation and the browser blocks tabs 2..n).
- * Mobile: hands off to the WhatsApp app with a pre-filled draft
- * (location.assign for a single recipient; sync window.open for many).
+ * Desktop: opens N tabs synchronously in the same click gesture.
+ * Phones / tablets / iPad: opens the first chat in the WhatsApp app, then
+ * queues the rest for a per-tap “Open next” bar (multi-tab popups are blocked).
  *
- * @returns {{ opened: number, blocked: number, total: number, blockedUrls: string[] }}
+ * @returns {{
+ *   opened: number,
+ *   blocked: number,
+ *   total: number,
+ *   blockedUrls: string[],
+ *   mode: 'desktop' | 'sequential',
+ *   remaining: number,
+ * }}
  */
 export async function openWhatsappDeepLinks(
   recipients,
@@ -146,37 +203,63 @@ export async function openWhatsappDeepLinks(
   { delayMs: _delayMs } = {},
 ) {
   const items = normalizeDeepLinkRecipients(recipients);
-  const mobile = isMobileWhatsappClient();
+  const touch = isTouchWhatsappClient();
   let opened = 0;
   let blocked = 0;
   const blockedUrls = [];
 
   const prepared = items
     .map(({ phone, message }, index) => {
-      const url = buildWhatsappDeepLinkUrl(phone, message, { mobile });
+      const url = buildWhatsappDeepLinkUrl(phone, message, { touch });
       if (!url) return null;
       return { phone, message, url, index };
     })
     .filter(Boolean);
 
   if (prepared.length === 0) {
-    return { opened: 0, blocked: items.length, total: items.length, blockedUrls };
-  }
-
-  // Single recipient on mobile: navigate current tab → WhatsApp app draft.
-  if (mobile && prepared.length === 1) {
-    window.location.assign(prepared[0].url);
+    clearWhatsappDeepLinkQueue();
     return {
-      opened: 1,
-      blocked: 0,
+      opened: 0,
+      blocked: items.length,
       total: items.length,
       blockedUrls: [],
+      mode: touch ? "sequential" : "desktop",
+      remaining: 0,
     };
   }
 
-  // Open every tab synchronously in this call stack. Any delay/await between
-  // opens drops the user-gesture token and browsers block tabs 2..n.
-  // Unique targets avoid reusing a single tab for multiple recipients.
+  // ── Touch (phone / tablet / iPad): one app handoff per tap ──────────────
+  if (touch) {
+    const [first, ...rest] = prepared;
+    openWhatsappAppDraft(first.url);
+    opened = 1;
+
+    if (rest.length > 0) {
+      setWhatsappDeepLinkQueue({
+        total: prepared.length,
+        openedCount: 1,
+        remaining: rest.map(({ phone, message, url }) => ({
+          phone,
+          message,
+          url,
+        })),
+      });
+    } else {
+      clearWhatsappDeepLinkQueue();
+    }
+
+    return {
+      opened,
+      blocked: 0,
+      total: items.length,
+      blockedUrls: [],
+      mode: "sequential",
+      remaining: rest.length,
+    };
+  }
+
+  // ── Desktop: open every tab synchronously while the gesture is valid ───
+  clearWhatsappDeepLinkQueue();
   for (let i = 0; i < prepared.length; i += 1) {
     const { phone, url, index } = prepared[i];
     const win = openWhatsappWindow(url, `wa_deeplink_${phone}_${index}`);
@@ -193,6 +276,8 @@ export async function openWhatsappDeepLinks(
     blocked,
     total: items.length,
     blockedUrls,
+    mode: "desktop",
+    remaining: 0,
   };
 }
 
@@ -210,11 +295,11 @@ export function openSingleWhatsappDeepLink(phoneNumber, message) {
     () => {},
   );
 
-  const mobile = isMobileWhatsappClient();
-  const url = buildWhatsappDeepLinkUrl(digits, text, { mobile });
+  const touch = isTouchWhatsappClient();
+  const url = buildWhatsappDeepLinkUrl(digits, text, { touch });
 
-  if (mobile) {
-    window.location.assign(url);
+  if (touch) {
+    openWhatsappAppDraft(url);
     return { ok: true, blocked: false, url };
   }
 
@@ -223,8 +308,8 @@ export function openSingleWhatsappDeepLink(phoneNumber, message) {
 }
 
 /**
- * Toast/copy guidance when the browser blocks popup tabs.
- * Copies remaining wa.me URLs so the user can open them manually.
+ * Toast/copy guidance when the browser blocks popup tabs, or sequential
+ * mobile/tablet progress messaging.
  */
 export function reportWhatsappDeepLinkResult(
   result,
@@ -240,6 +325,25 @@ export function reportWhatsappDeepLinkResult(
         "whatsappSend.deeplinkNoRecipients",
         "No valid phone numbers to open in WhatsApp.",
       ),
+    );
+    return;
+  }
+
+  if (result.mode === "sequential") {
+    if (result.remaining > 0) {
+      success(
+        translate(
+          "whatsappSend.deeplinkSequentialStarted",
+          "Opened WhatsApp (1 of {total}). Send the message, return here, then tap Open next.",
+        ).replace("{total}", String(result.total)),
+      );
+      return;
+    }
+    success(
+      translate(
+        "whatsappSend.deeplinkOpened",
+        "Opened WhatsApp for {count} recipient(s). Send each message manually.",
+      ).replace("{count}", String(result.opened)),
     );
     return;
   }
