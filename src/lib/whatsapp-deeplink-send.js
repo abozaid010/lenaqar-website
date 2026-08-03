@@ -7,10 +7,11 @@ import {
 } from "@/lib/whatsapp-deeplink-queue";
 
 /**
- * @deprecated Delay between opens breaks the user-gesture token and causes
- * browsers to block tabs 2..n. Kept for call-site compatibility; ignored.
+ * Delay between navigating pre-reserved desktop tabs to wa.me drafts.
+ * Tabs are claimed via about:blank during the click gesture so this delay
+ * does not trigger the popup blocker.
  */
-export const WHATSAPP_DEEPLINK_DELAY_MS = 0;
+export const WHATSAPP_DEEPLINK_DELAY_MS = 5000;
 
 /** Drop Ultramsg from outbound account lists (provider removed). */
 export function filterOutboundWhatsappAccounts(accounts = []) {
@@ -181,10 +182,27 @@ export function openWhatsappAppDraft(url) {
   return true;
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function navigateReservedWindow(win, url) {
+  if (!win || !url) return false;
+  try {
+    win.location.href = url;
+    return true;
+  } catch {
+    // Window may have been closed by the user.
+    return false;
+  }
+}
+
 /**
  * Open one WhatsApp tab/app draft per recipient.
  *
- * Desktop: opens N tabs synchronously in the same click gesture.
+ * Desktop: sync-reserve N about:blank tabs during the click, then navigate
+ * each to wa.me with delayMs pacing (default 5s) so all tabs open without
+ * losing the user-gesture token.
  * Phones / tablets / iPad: opens the first chat in the WhatsApp app, then
  * queues the rest for a per-tap “Open next” bar (multi-tab popups are blocked).
  *
@@ -199,14 +217,14 @@ export function openWhatsappAppDraft(url) {
  */
 export async function openWhatsappDeepLinks(
   recipients,
-  // delayMs intentionally ignored — see WHATSAPP_DEEPLINK_DELAY_MS.
-  { delayMs: _delayMs } = {},
+  { delayMs = WHATSAPP_DEEPLINK_DELAY_MS } = {},
 ) {
   const items = normalizeDeepLinkRecipients(recipients);
   const touch = isTouchWhatsappClient();
   let opened = 0;
   let blocked = 0;
   const blockedUrls = [];
+  const paceMs = Math.max(0, Number(delayMs) || 0);
 
   const prepared = items
     .map(({ phone, message }, index) => {
@@ -258,12 +276,31 @@ export async function openWhatsappDeepLinks(
     };
   }
 
-  // ── Desktop: open every tab synchronously while the gesture is valid ───
+  // ── Desktop: reserve blank tabs sync, then pace wa.me navigation ───────
   clearWhatsappDeepLinkQueue();
-  for (let i = 0; i < prepared.length; i += 1) {
-    const { phone, url, index } = prepared[i];
-    const win = openWhatsappWindow(url, `wa_deeplink_${phone}_${index}`);
-    if (win) {
+
+  /** @type {Array<{ win: Window | null, url: string }>} */
+  const reserved = prepared.map(({ phone, url, index }) => {
+    const win = openWhatsappWindow(
+      "about:blank",
+      `wa_deeplink_${phone}_${index}`,
+    );
+    return { win, url };
+  });
+
+  for (let i = 0; i < reserved.length; i += 1) {
+    if (i > 0 && paceMs > 0) {
+      await sleep(paceMs);
+    }
+
+    const { win, url } = reserved[i];
+    if (!win) {
+      blocked += 1;
+      blockedUrls.push(url);
+      continue;
+    }
+
+    if (navigateReservedWindow(win, url)) {
       opened += 1;
     } else {
       blocked += 1;
