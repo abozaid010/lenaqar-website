@@ -18,12 +18,12 @@ import {
 
 // ── Device detection (mirrors isTouchWhatsappClient) ───────────────────────
 
-function isTouchWhatsappClientFrom(ua, platform, maxTouchPoints) {
+function isTouchWhatsappClientFrom(ua, platform, maxTouchPoints, { coarse = false, hover = true } = {}) {
   if (/Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|iPad/i.test(ua)) {
     return true;
   }
   if (platform === "MacIntel" && (maxTouchPoints || 0) > 1) {
-    return true;
+    return coarse || !hover;
   }
   return false;
 }
@@ -89,8 +89,21 @@ describe("device routing", () => {
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
         "MacIntel",
         5,
+        { coarse: true, hover: false },
       ),
       true,
+    );
+  });
+
+  it("does NOT treat Mac trackpad (fine pointer + hover) as touch", () => {
+    assert.equal(
+      isTouchWhatsappClientFrom(
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/120",
+        "MacIntel",
+        2,
+        { coarse: false, hover: true },
+      ),
+      false,
     );
   });
 
@@ -185,27 +198,60 @@ describe("desktop blank-reserve + paced navigate", () => {
     assert.ok(timestamps[2] - timestamps[1] >= delayMs - 5);
   });
 
-  it("counts blocked when blank open returns null and continues others", async () => {
+  it("counts blocked blanks then sync-opens real wa.me while gesture is live", async () => {
+    const opens = [];
     const prepared = [
-      { url: "https://wa.me/1?text=a", win: { location: { href: "" } } },
-      { url: "https://wa.me/2?text=b", win: null },
-      { url: "https://wa.me/3?text=c", win: { location: { href: "" } } },
+      { phone: "1", url: "https://wa.me/1?text=a", index: 0 },
+      { phone: "2", url: "https://wa.me/2?text=b", index: 1 },
+      { phone: "3", url: "https://wa.me/3?text=c", index: 2 },
     ];
+    // First pass: blank for #0 and #2 succeed; #1 blocked
+    const blankWins = [
+      { location: { href: "about:blank" } },
+      null,
+      { location: { href: "about:blank" } },
+    ];
+    const reserved = prepared.map((item, i) => {
+      opens.push({ url: "about:blank", target: `wa_deeplink_${item.phone}_${i}` });
+      return {
+        win: blankWins[i],
+        url: item.url,
+        phone: item.phone,
+        message: "x",
+        openedDirect: false,
+        index: i,
+      };
+    });
+    // Phase 2: blocked blank → open real URL sync
+    for (const item of reserved) {
+      if (item.win) continue;
+      opens.push({ url: item.url, target: `wa_deeplink_${item.phone}_${item.index}` });
+      item.win = { location: { href: item.url } };
+      item.openedDirect = true;
+    }
+
     let opened = 0;
     let blocked = 0;
-    const blockedUrls = [];
-    for (const item of prepared) {
+    let pacedNavCount = 0;
+    for (const item of reserved) {
       if (!item.win) {
         blocked += 1;
-        blockedUrls.push(item.url);
         continue;
       }
+      if (item.openedDirect) {
+        opened += 1;
+        continue;
+      }
+      pacedNavCount += 1;
       item.win.location.href = item.url;
       opened += 1;
     }
-    assert.equal(opened, 2);
-    assert.equal(blocked, 1);
-    assert.deepEqual(blockedUrls, ["https://wa.me/2?text=b"]);
+
+    assert.equal(opened, 3);
+    assert.equal(blocked, 0);
+    assert.equal(pacedNavCount, 2);
+    assert.equal(opens.filter((o) => o.url === "about:blank").length, 3);
+    assert.equal(opens.filter((o) => o.url.startsWith("https://wa.me/")).length, 1);
   });
 });
 
@@ -338,6 +384,33 @@ describe("source contract: WHATSAPP_DEEPLINK_DELAY_MS and openWhatsappDeepLinks"
     assert.match(src, /openWhatsappAppDraft/);
     assert.match(src, /setWhatsappDeepLinkQueue/);
     assert.match(src, /api\.whatsapp\.com\/send/);
+    assert.match(src, /pointer:\s*coarse/);
+    assert.match(src, /queuedAfterBlock/);
+    assert.match(src, /openedDirect/);
+  });
+
+  it("matching preview starts deep links in the Send click before await", async () => {
+    const fs = await import("node:fs/promises");
+    const path = new URL(
+      "../../app/(admin)/matching/_components/matching-whatsapp-preview-dialog.jsx",
+      import.meta.url,
+    );
+    const src = await fs.readFile(path, "utf8");
+    assert.match(src, /deepLinkPromise\s*=\s*openWhatsappDeepLinks/);
+    assert.match(src, /deepLinkPromise,/);
+  });
+
+  it("lead match card uses green ready surface without Ready badge", async () => {
+    const fs = await import("node:fs/promises");
+    const path = new URL(
+      "../../app/(admin)/matching/_components/lead-match-card.jsx",
+      import.meta.url,
+    );
+    const src = await fs.readFile(path, "utf8");
+    assert.match(src, /bg-emerald-50/);
+    assert.match(src, /!ready &&/);
+    assert.match(src, /matching\.actions\.sendWhatsapp/);
+    assert.match(src, /onSendWhatsapp/);
   });
 
   it("queue bar has 5s cooldown and Open next gating", async () => {
@@ -361,7 +434,7 @@ describe("source contract: WHATSAPP_DEEPLINK_DELAY_MS and openWhatsappDeepLinks"
     assert.match(src, /WhatsappDeepLinkQueueBar/);
   });
 
-  it("EN and AR include cooldown string", async () => {
+  it("EN and AR include cooldown and sendWhatsapp strings", async () => {
     const fs = await import("node:fs/promises");
     const en = await fs.readFile(
       new URL("../../../public/locales/en.js", import.meta.url),
@@ -373,5 +446,7 @@ describe("source contract: WHATSAPP_DEEPLINK_DELAY_MS and openWhatsappDeepLinks"
     );
     assert.match(en, /deeplinkQueueCooldown/);
     assert.match(ar, /deeplinkQueueCooldown/);
+    assert.match(en, /sendWhatsapp:\s*"Send WhatsApp"/);
+    assert.match(ar, /sendWhatsapp:\s*"إرسال واتساب"/);
   });
 });

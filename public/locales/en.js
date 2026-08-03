@@ -593,6 +593,7 @@ export default {
     actions: {
       findMatches: "Find Matches",
       sendRecommendations: "Send WhatsApp Recommendations",
+      sendWhatsapp: "Send WhatsApp",
       loadMore: "Load more",
       dismissUnit: "Remove recommendation",
       removeUnit: "Remove unit",
@@ -1301,7 +1302,7 @@ export default {
       "Opened {opened} tab(s). {blocked} were blocked by the browser. Allow pop-ups for this site, then try again — blocked links were copied.",
     deeplinkNoRecipients: "No valid phone numbers to open in WhatsApp.",
     deeplinkSequentialStarted:
-      "Opened WhatsApp (1 of {total}). Send the message, return here, then tap Open next.",
+      "Opened WhatsApp ({opened} of {total}). Send each message, return here, then tap Open next for the rest.",
     deeplinkSequentialDone:
       "All WhatsApp chats opened. Send each message manually.",
     deeplinkQueueRegion: "WhatsApp send queue",

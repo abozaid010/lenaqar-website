@@ -9,6 +9,7 @@ import {
 } from "@/lib/match/requirement-to-units-filter";
 import {
   MATCHING_STATUS,
+  isSendEligibleStatus,
   matchingStatusTranslateKey,
 } from "@/lib/matching/matching-statuses";
 import { getMatchingUnitId } from "@/lib/matching/unit-recommendation-service";
@@ -33,9 +34,19 @@ function statusBadgeClass(status) {
   }
 }
 
+function isReadyStatus(status) {
+  return (
+    status === MATCHING_STATUS.READY ||
+    status === MATCHING_STATUS.READY_TO_SEND
+  );
+}
+
 export default function LeadMatchCard({
   result,
   onDismissUnit,
+  canSendWhatsapp = false,
+  onSendWhatsapp,
+  sending = false,
 }) {
   const { translate } = useI18n();
   const [expanded, setExpanded] = useState(false);
@@ -55,77 +66,120 @@ export default function LeadMatchCard({
 
   const lead = result?.lead;
   const name = lead?.name || lead?.phone_number || result?.leadId;
+  const ready = isReadyStatus(result?.status);
+  const showSend =
+    canSendWhatsapp &&
+    isSendEligibleStatus(result?.status) &&
+    recommendedUnits.length > 0;
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
-      <button
-        type="button"
-        className="w-full text-start px-4 py-3 flex items-start justify-between gap-3 hover:bg-gray-50"
-        onClick={() => setExpanded((v) => !v)}
-        aria-expanded={expanded}
-      >
-        <div className="min-w-0 space-y-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-sm font-semibold text-gray-900 truncate">
-              {name}
-            </h3>
-            <span className="text-xs text-gray-500">
-              {getOwnerTypeLabel(lead?.owner_type, translate)}
-            </span>
-            <span
-              className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ${statusBadgeClass(result.status)}`}
-            >
-              {translate(matchingStatusTranslateKey(result.status))}
-            </span>
-          </div>
-          {result.status === MATCHING_STATUS.MISSING_PRICE && (
-            <p className="text-xs text-amber-700">
-              {translate("matching.warning.missingPrice")}
-            </p>
-          )}
-          {(result.status === MATCHING_STATUS.REQUIREMENT_ERROR ||
-            result.status === MATCHING_STATUS.UNITS_ERROR) && (
-            <p className="text-xs text-red-700">
-              {translate(
-                result.errorMessage ||
-                  (result.status === MATCHING_STATUS.REQUIREMENT_ERROR
-                    ? "matching.errors.requirementFetch"
-                    : "matching.errors.unitsFetch"),
-              )}
-            </p>
-          )}
-          {requirementChips.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {requirementChips.slice(0, 8).map((chip, index) => (
+    <div
+      className={`rounded-lg border overflow-hidden ${
+        ready
+          ? "border-emerald-200 bg-emerald-50"
+          : "border-gray-200 bg-white"
+      }`}
+    >
+      <div className="flex items-stretch gap-0">
+        <button
+          type="button"
+          className={`min-w-0 flex-1 text-start px-4 py-3 flex items-start justify-between gap-3 ${
+            ready ? "hover:bg-emerald-100/70" : "hover:bg-gray-50"
+          }`}
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+        >
+          <div className="min-w-0 space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-sm font-semibold text-gray-900 truncate">
+                {name}
+              </h3>
+              <span className="text-xs text-gray-500">
+                {getOwnerTypeLabel(lead?.owner_type, translate)}
+              </span>
+              {/* Ready uses the green card background instead of a badge. */}
+              {!ready && (
                 <span
-                  key={`${chip.label}-${chip.value}-${index}`}
-                  className="inline-flex rounded-md bg-gray-100 px-2 py-0.5 text-[11px] text-gray-700"
+                  className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ${statusBadgeClass(result.status)}`}
                 >
-                  {chip.label ? `${chip.label}: ` : ""}
-                  {chip.value ?? chip.label}
+                  {translate(matchingStatusTranslateKey(result.status))}
                 </span>
-              ))}
+              )}
             </div>
-          )}
-          <p className="text-xs text-gray-600">
-            {translate("matching.card.matchingUnits", "{count} Matching Units").replace(
-              "{count}",
-              String(result?.allUnits?.length || 0),
+            {result.status === MATCHING_STATUS.MISSING_PRICE && (
+              <p className="text-xs text-amber-700">
+                {translate("matching.warning.missingPrice")}
+              </p>
             )}
-            {recommendedUnits.length > 0
-              ? ` · ${recommendedUnits.length} ${translate("matching.card.recommended")}`
-              : ""}
-          </p>
-        </div>
-        {expanded ? (
-          <ChevronUp className="h-4 w-4 shrink-0 text-gray-400 mt-1" />
-        ) : (
-          <ChevronDown className="h-4 w-4 shrink-0 text-gray-400 mt-1" />
+            {(result.status === MATCHING_STATUS.REQUIREMENT_ERROR ||
+              result.status === MATCHING_STATUS.UNITS_ERROR) && (
+              <p className="text-xs text-red-700">
+                {translate(
+                  result.errorMessage ||
+                    (result.status === MATCHING_STATUS.REQUIREMENT_ERROR
+                      ? "matching.errors.requirementFetch"
+                      : "matching.errors.unitsFetch"),
+                )}
+              </p>
+            )}
+            {requirementChips.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {requirementChips.slice(0, 8).map((chip, index) => (
+                  <span
+                    key={`${chip.label}-${chip.value}-${index}`}
+                    className="inline-flex rounded-md bg-white/80 px-2 py-0.5 text-[11px] text-gray-700"
+                  >
+                    {chip.label ? `${chip.label}: ` : ""}
+                    {chip.value ?? chip.label}
+                  </span>
+                ))}
+              </div>
+            )}
+            <p className="text-xs text-gray-600">
+              {translate(
+                "matching.card.matchingUnits",
+                "{count} Matching Units",
+              ).replace("{count}", String(result?.allUnits?.length || 0))}
+              {recommendedUnits.length > 0
+                ? ` · ${recommendedUnits.length} ${translate("matching.card.recommended")}`
+                : ""}
+            </p>
+          </div>
+          {expanded ? (
+            <ChevronUp className="h-4 w-4 shrink-0 text-gray-400 mt-1" />
+          ) : (
+            <ChevronDown className="h-4 w-4 shrink-0 text-gray-400 mt-1" />
+          )}
+        </button>
+
+        {showSend && (
+          <div className="flex shrink-0 items-center border-s border-emerald-200/80 px-2 py-2">
+            <button
+              type="button"
+              disabled={sending}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onSendWhatsapp?.(result);
+              }}
+              className="rounded-md bg-primary px-2.5 py-2 min-h-11 text-xs font-medium text-white hover:opacity-90 disabled:opacity-50 whitespace-nowrap"
+              aria-label={translate(
+                "matching.actions.sendWhatsapp",
+                "Send WhatsApp",
+              )}
+            >
+              {translate("matching.actions.sendWhatsapp", "Send WhatsApp")}
+            </button>
+          </div>
         )}
-      </button>
+      </div>
 
       {expanded && (
-        <div className="border-t border-gray-100 px-4 py-3 space-y-4">
+        <div
+          className={`border-t px-4 py-3 space-y-4 ${
+            ready ? "border-emerald-100 bg-white/60" : "border-gray-100"
+          }`}
+        >
           {recommendedUnits.length > 0 && (
             <div className="space-y-2">
               <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
