@@ -28,6 +28,9 @@ export default function MatchingResultsSection({
   progress,
   results = [],
   onDismissUnit,
+  canSendWhatsapp = false,
+  onSendWhatsapp,
+  sending = false,
 }) {
   const { translate } = useI18n();
   const title = translate("matching.sections.results");
@@ -85,6 +88,9 @@ export default function MatchingResultsSection({
           key={result.leadId}
           result={result}
           onDismissUnit={onDismissUnit}
+          canSendWhatsapp={canSendWhatsapp}
+          onSendWhatsapp={onSendWhatsapp}
+          sending={sending}
         />
       ))}
     </ResultsShell>

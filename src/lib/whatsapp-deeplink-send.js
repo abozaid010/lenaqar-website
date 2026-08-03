@@ -79,7 +79,11 @@ function resolvePhoneDigits(phone) {
  * via a single app handoff per tap.
  *
  * Covers: Android phones/tablets, iPhone, iPod, classic iPad UA, and
- * iPadOS 13+ “desktop” Safari (Macintosh + multi-touch).
+ * iPadOS 13+ “desktop” Safari (Macintosh + multi-touch + touch-primary).
+ *
+ * Important: do NOT treat MacIntel + maxTouchPoints alone as iPad — some
+ * Mac trackpads report maxTouchPoints > 1 and would incorrectly force
+ * sequential mode (only the first of N deep links opens).
  */
 export function isTouchWhatsappClient() {
   if (typeof window === "undefined" || typeof navigator === "undefined") {
@@ -93,10 +97,15 @@ export function isTouchWhatsappClient() {
     return true;
   }
 
-  // iPadOS 13+ requests a desktop Mac UA; detect via touch points.
+  // iPadOS 13+ requests a desktop Mac UA; require touch-primary signals.
   const touchPoints = Number(navigator.maxTouchPoints) || 0;
   if (navigator.platform === "MacIntel" && touchPoints > 1) {
-    return true;
+    const coarse = Boolean(
+      window.matchMedia?.("(pointer: coarse)")?.matches,
+    );
+    const canHover = Boolean(window.matchMedia?.("(hover: hover)")?.matches);
+    // Real iPads: coarse pointer and/or no hover. Mac trackpads: fine + hover.
+    return coarse || !canHover;
   }
 
   return false;
@@ -200,20 +209,19 @@ function navigateReservedWindow(win, url) {
 /**
  * Open one WhatsApp tab/app draft per recipient.
  *
- * Desktop: sync-reserve N about:blank tabs during the click, then navigate
- * each to wa.me with delayMs pacing (default 5s) so all tabs open without
- * losing the user-gesture token.
- * Phones / tablets / iPad: opens the first chat in the WhatsApp app, then
- * queues the rest for a per-tap “Open next” bar (multi-tab popups are blocked).
+ * Desktop: ALL window.open calls run synchronously (must be started from the
+ * click handler before any await). Blanks are paced to wa.me with delayMs;
+ * blocked blanks fall back to opening the real wa.me URL in the same gesture.
+ * Phones / tablets / iPad: first chat via app handoff; rest via Open-next bar.
  *
- * @returns {{
+ * @returns {Promise<{
  *   opened: number,
  *   blocked: number,
  *   total: number,
  *   blockedUrls: string[],
  *   mode: 'desktop' | 'sequential',
  *   remaining: number,
- * }}
+ * }>}
  */
 export async function openWhatsappDeepLinks(
   recipients,
@@ -276,36 +284,79 @@ export async function openWhatsappDeepLinks(
     };
   }
 
-  // ── Desktop: reserve blank tabs sync, then pace wa.me navigation ───────
+  // ── Desktop: every window.open must finish before the first await ──────
   clearWhatsappDeepLinkQueue();
 
-  /** @type {Array<{ win: Window | null, url: string }>} */
-  const reserved = prepared.map(({ phone, url, index }) => {
-    const win = openWhatsappWindow(
+  /** @type {Array<{ win: Window | null, url: string, phone: string, message: string, openedDirect: boolean, index: number }>} */
+  const reserved = prepared.map(({ phone, message, url, index }) => ({
+    win: null,
+    url,
+    phone,
+    message,
+    openedDirect: false,
+    index,
+  }));
+
+  // Phase 1 (sync): claim blank tabs so we can pace navigation.
+  for (const item of reserved) {
+    item.win = openWhatsappWindow(
       "about:blank",
-      `wa_deeplink_${phone}_${index}`,
+      `wa_deeplink_${item.phone}_${item.index}`,
     );
-    return { win, url };
-  });
+  }
 
-  for (let i = 0; i < reserved.length; i += 1) {
-    if (i > 0 && paceMs > 0) {
-      await sleep(paceMs);
+  // Phase 2 (sync): blocked blanks → open real wa.me URL while gesture is live.
+  for (const item of reserved) {
+    if (item.win) continue;
+    const direct = openWhatsappWindow(
+      item.url,
+      `wa_deeplink_${item.phone}_${item.index}`,
+    );
+    if (direct) {
+      item.win = direct;
+      item.openedDirect = true;
     }
+  }
 
-    const { win, url } = reserved[i];
+  const queuedAfterBlock = [];
+  let pacedNavCount = 0;
+
+  // Phase 3: navigate blanks with delay; direct opens already show the draft.
+  for (const item of reserved) {
+    const { win, url, phone, message, openedDirect } = item;
+
     if (!win) {
       blocked += 1;
       blockedUrls.push(url);
+      queuedAfterBlock.push({ phone, message, url });
       continue;
     }
+
+    if (openedDirect) {
+      opened += 1;
+      continue;
+    }
+
+    if (pacedNavCount > 0 && paceMs > 0) {
+      await sleep(paceMs);
+    }
+    pacedNavCount += 1;
 
     if (navigateReservedWindow(win, url)) {
       opened += 1;
     } else {
       blocked += 1;
       blockedUrls.push(url);
+      queuedAfterBlock.push({ phone, message, url });
     }
+  }
+
+  if (queuedAfterBlock.length > 0) {
+    setWhatsappDeepLinkQueue({
+      total: prepared.length,
+      openedCount: opened,
+      remaining: queuedAfterBlock,
+    });
   }
 
   return {
@@ -313,8 +364,8 @@ export async function openWhatsappDeepLinks(
     blocked,
     total: items.length,
     blockedUrls,
-    mode: "desktop",
-    remaining: 0,
+    mode: queuedAfterBlock.length > 0 ? "sequential" : "desktop",
+    remaining: queuedAfterBlock.length,
   };
 }
 
@@ -371,8 +422,10 @@ export function reportWhatsappDeepLinkResult(
       success(
         translate(
           "whatsappSend.deeplinkSequentialStarted",
-          "Opened WhatsApp (1 of {total}). Send the message, return here, then tap Open next.",
-        ).replace("{total}", String(result.total)),
+          "Opened WhatsApp ({opened} of {total}). Send each message, return here, then tap Open next for the rest.",
+        )
+          .replace("{opened}", String(result.opened || 0))
+          .replace("{total}", String(result.total)),
       );
       return;
     }

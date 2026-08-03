@@ -14,9 +14,11 @@ import {
   isMessagingConfigReady,
 } from "@/lib/whatsapp-messaging-provider";
 import {
+  openWhatsappDeepLinks,
   resolveWhatsappApiSendAccount,
   shouldUseWhatsappDeepLink,
 } from "@/lib/whatsapp-deeplink-send";
+import { leadToWhatsappRecipient } from "@/lib/whatsapp-recipient";
 import { getMatchingUnitId } from "@/lib/matching/unit-recommendation-service";
 import { buildRecommendationMessageAr } from "@/lib/matching/build-recommendation-message-ar";
 import { X } from "lucide-react";
@@ -141,13 +143,42 @@ export default function MatchingWhatsappPreviewDialog({
       );
       return;
     }
+
+    // Deep-link: start ALL window.open calls in this click stack before any
+    // await. Nested async (onSend → sendRecommendations) can lose the
+    // user-gesture token so browsers open 0 tabs.
+    let deepLinkPromise = null;
+    if (useDeepLink) {
+      const deeplinkRecipients = [];
+      for (const result of eligibleResults) {
+        const recipient = leadToWhatsappRecipient(result.lead);
+        const message = String(draftMessages?.[result.leadId] || "").trim();
+        const phone =
+          recipient?.phone_number ||
+          recipient?.chat_id ||
+          result.lead?.phone_number ||
+          "";
+        if (!phone || !message) continue;
+        deeplinkRecipients.push({ phone_number: phone, message });
+      }
+      if (deeplinkRecipients.length === 0) {
+        setError(
+          translate(
+            "whatsappSend.deeplinkNoRecipients",
+            "No valid phone numbers to open in WhatsApp.",
+          ),
+        );
+        return;
+      }
+      deepLinkPromise = openWhatsappDeepLinks(deeplinkRecipients);
+    }
+
     try {
-      // Do not setState before onSend — deep-link window.open must stay in
-      // the same user-gesture call stack to open all N tabs.
       await onSend?.({
         selectedAccount: apiAccount,
         useDeepLink,
         draftMessages,
+        deepLinkPromise,
       });
     } catch (err) {
       setError(

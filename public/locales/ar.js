@@ -599,6 +599,7 @@ export default {
     actions: {
       findMatches: "ابحث عن مطابقات",
       sendRecommendations: "إرسال توصيات واتساب",
+      sendWhatsapp: "إرسال واتساب",
       loadMore: "تحميل المزيد",
       dismissUnit: "إزالة التوصية",
       removeUnit: "إزالة الوحدة",
@@ -1138,7 +1139,7 @@ export default {
       "تم فتح {opened} نافذة. تم حظر {blocked} بواسطة المتصفح. اسمح بالنوافذ المنبثقة ثم أعد المحاولة — تم نسخ الروابط المحظورة.",
     deeplinkNoRecipients: "لا توجد أرقام هاتف صالحة لفتح واتساب.",
     deeplinkSequentialStarted:
-      "تم فتح واتساب (1 من {total}). أرسل الرسالة، ثم ارجع هنا واضغط «فتح التالي».",
+      "تم فتح واتساب ({opened} من {total}). أرسل كل رسالة، ثم ارجع هنا واضغط «فتح التالي» للباقي.",
     deeplinkSequentialDone:
       "تم فتح جميع محادثات واتساب. أرسل كل رسالة يدويًا.",
     deeplinkQueueRegion: "قائمة إرسال واتساب",

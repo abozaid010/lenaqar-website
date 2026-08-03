@@ -30,6 +30,7 @@ export default function MatchingPageClient() {
 
   const [filters, setFilters] = useState(getDefaultMatchingFilters);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewResults, setPreviewResults] = useState([]);
   const [bulkActionOpen, setBulkActionOpen] = useState(false);
   const [successfulLeads, setSuccessfulLeads] = useState([]);
 
@@ -78,22 +79,50 @@ export default function MatchingPageClient() {
     await session.runMatching(loadedLeads);
   };
 
-  const handleSendClick = () => {
-    if (!session.eligibleForSend.length) {
+  const openPreviewForResults = (results) => {
+    if (!results?.length) {
       toast.error(translate("matching.empty.noRecommendations"));
       return;
     }
+    setPreviewResults(results);
     setPreviewOpen(true);
   };
 
-  const handleSend = async ({ selectedAccount, useDeepLink, draftMessages }) => {
+  const handleSendClick = () => {
+    openPreviewForResults(session.eligibleForSend);
+  };
+
+  const handleCardSendWhatsapp = (result) => {
+    openPreviewForResults(result ? [result] : []);
+  };
+
+  const handleSend = async ({
+    selectedAccount,
+    useDeepLink,
+    draftMessages,
+    deepLinkPromise,
+  }) => {
+    // Snapshot before closing — deep-link closes the dialog immediately so the
+    // UI is not frozen during N×5s paced tab navigation.
+    const targetsSnapshot = previewResults;
+    if (useDeepLink) {
+      setPreviewOpen(false);
+      setPreviewResults([]);
+    }
+
     const result = await session.sendRecommendations({
       selectedAccount,
       useDeepLink,
       draftMessages,
       translate,
+      targetsOverride: targetsSnapshot,
+      deepLinkPromise,
     });
-    setPreviewOpen(false);
+
+    if (!useDeepLink) {
+      setPreviewOpen(false);
+      setPreviewResults([]);
+    }
 
     // Deep-link path already toasts via reportWhatsappDeepLinkResult.
     if (result.method !== "deeplink") {
@@ -185,14 +214,20 @@ export default function MatchingPageClient() {
             progress={session.progress}
             results={session.results}
             onDismissUnit={session.dismissRecommendedUnit}
+            canSendWhatsapp={whatsappReady && canBulkWhatsapp}
+            onSendWhatsapp={handleCardSendWhatsapp}
+            sending={isSending}
           />
         </div>
       </div>
 
       <MatchingWhatsappPreviewDialog
         isOpen={previewOpen}
-        onClose={() => setPreviewOpen(false)}
-        eligibleResults={session.eligibleForSend}
+        onClose={() => {
+          setPreviewOpen(false);
+          setPreviewResults([]);
+        }}
+        eligibleResults={previewResults}
         getRecommendedUnits={session.getRecommendedUnits}
         onDismissUnit={session.dismissRecommendedUnit}
         onSend={handleSend}

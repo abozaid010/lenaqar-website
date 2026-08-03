@@ -144,8 +144,18 @@ export function useMatchingSession() {
   );
 
   const sendRecommendations = useCallback(
-    async ({ selectedAccount, useDeepLink = false, draftMessages, translate }) => {
-      const targets = eligibleForSend.filter((r) => {
+    async ({
+      selectedAccount,
+      useDeepLink = false,
+      draftMessages,
+      translate,
+      targetsOverride,
+      deepLinkPromise = null,
+    }) => {
+      const baseTargets = Array.isArray(targetsOverride)
+        ? targetsOverride
+        : eligibleForSend;
+      const targets = baseTargets.filter((r) => {
         const msg = draftMessages?.[r.leadId] ?? r.messageAr;
         return String(msg || "").trim().length > 0;
       });
@@ -155,8 +165,9 @@ export function useMatchingSession() {
       let failed = 0;
 
       if (useDeepLink || !selectedAccount) {
-        // Collect recipients and open tabs BEFORE any setState so window.open
-        // stays inside the user-gesture token (otherwise only the first tab survives).
+        // Prefer deepLinkPromise started in the preview Send click handler so
+        // window.open stays in the user-gesture stack. Fallback opens here for
+        // callers that skip the preview dialog.
         const deeplinkRecipients = [];
         const leadByIndex = [];
         const failedLeadIds = [];
@@ -181,10 +192,22 @@ export function useMatchingSession() {
           leadByIndex.push(result);
         }
 
-        const linkResult = await openWhatsappDeepLinks(deeplinkRecipients);
+        // When opens already started on click, flip UI to sending before we
+        // await the 5s paced navigations (otherwise the dialog freezes for N×5s).
+        if (deepLinkPromise) {
+          setPhase("sending");
+          setProgress({ done: 0, total: targets.length });
+        }
 
-        setPhase("sending");
-        setProgress({ done: 0, total: targets.length });
+        const linkResult = deepLinkPromise
+          ? await deepLinkPromise
+          : await openWhatsappDeepLinks(deeplinkRecipients);
+
+        if (!deepLinkPromise) {
+          setPhase("sending");
+          setProgress({ done: 0, total: targets.length });
+        }
+
         reportWhatsappDeepLinkResult(linkResult, translate || ((_, fb) => fb), {
           toastSuccess: toast.success,
           toastError: toast.error,
