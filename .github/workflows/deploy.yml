@@ -69,6 +69,26 @@ jobs:
           fi
           echo "✅ DEPLOY_KEY authenticated with GitHub"
 
+      - name: Debug — GCP VM & IAP diagnostics
+        run: |
+          set -euxo pipefail
+          echo "Project: $(gcloud config get-value project)"
+          echo "Auth account:"
+          gcloud auth list --filter=status:ACTIVE --format="value(account)"
+          echo "Instance describe:"
+          gcloud compute instances describe "${{ env.VM_NAME }}" \
+            --zone="${{ env.GCP_ZONE }}" \
+            --format="yaml(name,status,zone,networkInterfaces,tags,metadata.items[].key)"
+          echo "Firewall rules allowing tcp:22:"
+          gcloud compute firewall-rules list \
+            --filter="allowed:tcp:22" \
+            --format="table(name,network,sourceRanges,allowed,targetTags)"
+          echo "Is IAP API enabled?"
+          gcloud services list --enabled --filter="name:iap.googleapis.com" --format="value(name)" || true
+          echo "Serial output (tail):"
+          gcloud compute instances get-serial-port-output "${{ env.VM_NAME }}" \
+            --zone="${{ env.GCP_ZONE }}" 2>/dev/null | tail -c 2000 || true
+
       - name: SSH warmup — verify IAP access before deploy
         run: |
           set -Eeuo pipefail
@@ -80,6 +100,8 @@ jobs:
           gcloud compute ssh "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}" \
             --zone="${{ env.GCP_ZONE }}" \
             --tunnel-through-iap \
+            --troubleshoot \
+            --verbosity=debug \
             --ssh-flag="${{ env.SSH_KEEPALIVE }}" \
             --command="echo '✅ Connected as:'; whoami; hostname"
 
