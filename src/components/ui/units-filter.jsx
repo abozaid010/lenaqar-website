@@ -1273,12 +1273,11 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         <button
           type="button"
           onClick={() => setIsUploadDialogOpen(true)}
-          className="shrink-0 px-3 py-2 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center gap-1.5 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+          className="shrink-0 px-3 py-2 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center transition-colors shadow-sm hover:shadow-md"
+          aria-label={t.uploadExcel?.button || "Upload"}
+          title={t.uploadExcel?.button || "Upload"}
         >
           <FileSpreadsheet size={16} className="shrink-0" />
-          <span className="whitespace-nowrap text-xs">
-            {t.uploadExcel?.button || "Upload"}
-          </span>
         </button>
         <button
           type="button"
