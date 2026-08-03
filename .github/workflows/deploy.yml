@@ -81,7 +81,7 @@ jobs:
             --format="yaml(name,status,zone,networkInterfaces,tags,metadata.items[].key)"
           echo "Firewall rules allowing tcp:22:"
           gcloud compute firewall-rules list \
-            --filter="allowed:tcp:22" \
+            --filter='allowed.IPProtocol=tcp AND allowed.ports=22' \
             --format="table(name,network,sourceRanges,allowed,targetTags)"
           echo "Is IAP API enabled?"
           gcloud services list --enabled --filter="name:iap.googleapis.com" --format="value(name)" || true
@@ -100,8 +100,6 @@ jobs:
           gcloud compute ssh "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}" \
             --zone="${{ env.GCP_ZONE }}" \
             --tunnel-through-iap \
-            --troubleshoot \
-            --verbosity=debug \
             --ssh-flag="${{ env.SSH_KEEPALIVE }}" \
             --command="echo '✅ Connected as:'; whoami; hostname"
 
