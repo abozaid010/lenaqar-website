@@ -14,15 +14,37 @@ import {
   UNITS_UI_ONLY_FILTER_KEYS,
 } from "@/lib/units/favorite-searches";
 import { isRentPurpose } from "@/lib/units/unit-price";
-import { useEffect, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef } from "react";
+
+function searchParamsToObject(searchParams) {
+  if (!searchParams) return {};
+  // Plain object from the server component
+  if (typeof searchParams.forEach !== "function") {
+    return { ...(searchParams || {}) };
+  }
+  // URLSearchParams / ReadonlyURLSearchParams from the client router
+  const obj = {};
+  searchParams.forEach((value, key) => {
+    obj[key] = value;
+  });
+  return obj;
+}
 
 export default function UnitsPageQueryOptimized({
-  searchParams,
+  searchParams: serverSearchParams,
   clientId,
   publicUnits = false,
   initialUnitsData = null,
 }) {
   const currentClientId = clientId || "";
+  // Client URL is the source of truth after Apply Filters (same as UnitsFilter).
+  // Server searchParams only seed the first paint / SSR prefetch match.
+  const urlSearchParams = useSearchParams();
+  const searchParams = useMemo(
+    () => searchParamsToObject(urlSearchParams),
+    [urlSearchParams]
+  );
 
   const buildUnitsListParams = (raw) => {
     const base = { ...(raw || {}) };
@@ -104,17 +126,27 @@ export default function UnitsPageQueryOptimized({
     [searchParamsWithClient]
   );
 
+  // Only seed React Query with SSR data when the current URL still matches the
+  // prefetch. Otherwise a new filter key would reuse stale initialData for 15m.
+  const initialPrefetchKeyRef = useRef(null);
+  if (initialPrefetchKeyRef.current === null && initialUnitsData != null) {
+    initialPrefetchKeyRef.current = JSON.stringify(
+      buildUnitsListParams(searchParamsToObject(serverSearchParams))
+    );
+  }
+  const initialDataForQuery =
+    initialUnitsData != null &&
+    initialPrefetchKeyRef.current === searchParamsKey
+      ? initialUnitsData
+      : null;
+
   const unitsFetchOptions = useMemo(
     () => ({ usePublicEndpoint: publicUnits }),
     [publicUnits]
   );
 
-  // Fetch all required data using the combined hook
-  // When searchParamsKey changes, a new query is created and fetched automatically.
-  // initialUnitsData is the server-prefetched first page — passed here only on the
-  // initial load (no filters applied yet); null on filter changes (client fetches fresh).
   const { isFetching, units, pagination, isLoading, isError, error, refetch } =
-    useUnitsPageData(searchParamsKey, unitsFetchOptions, initialUnitsData);
+    useUnitsPageData(searchParamsKey, unitsFetchOptions, initialDataForQuery);
 
   const bulkSelection = useUnitsBulkSelectionOptional();
   const setVisibleUnitsFromList = bulkSelection?.setVisibleUnitsFromList;
@@ -126,7 +158,7 @@ export default function UnitsPageQueryOptimized({
     }
   }, [units, publicUnits, setVisibleUnitsFromList]);
 
-  if (isLoading | isFetching) {
+  if (isLoading || isFetching) {
     return <LoadingSpinner message="Loading units data..." />;
   }
 

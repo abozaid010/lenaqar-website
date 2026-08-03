@@ -118,7 +118,9 @@ export function proxy(request) {
     const dest = cookieClientId
       ? `/${cookieClientId}/${remainingPath}`
       : '/login';
-    return withProxyDebug(NextResponse.redirect(new URL(dest, SITE_HOME_PAGE)), request);
+    const redirectUrl = new URL(dest, request.url);
+    redirectUrl.search = request.nextUrl.search;
+    return withProxyDebug(NextResponse.redirect(redirectUrl), request);
   }
 
   // Backward compat: bare /{adminPath} → /{clientId}/{adminPath}
@@ -130,7 +132,10 @@ export function proxy(request) {
     const dest = cookieClientId
       ? `/${cookieClientId}/${pathname.slice(1)}`
       : '/login';
-    return withProxyDebug(NextResponse.redirect(new URL(dest, SITE_HOME_PAGE)), request);
+    // Keep filter/query params when rewriting bare /units?… → /{clientId}/units?…
+    const redirectUrl = new URL(dest, request.url);
+    redirectUrl.search = request.nextUrl.search;
+    return withProxyDebug(NextResponse.redirect(redirectUrl), request);
   }
 
   // Detect /{clientId}/{adminPath}[/*] as protected

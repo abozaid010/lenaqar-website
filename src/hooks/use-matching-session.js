@@ -18,6 +18,11 @@ import {
   resolveSenderPhoneNumber,
   WHATSAPP_MESSAGE_SOURCES,
 } from "@/lib/whatsapp-messaging-provider";
+import {
+  openWhatsappDeepLinks,
+  reportWhatsappDeepLinkResult,
+} from "@/lib/whatsapp-deeplink-send";
+import toast from "react-hot-toast";
 
 /**
  * Session-only Matching state: results, dismissals, progress, send.
@@ -139,10 +144,7 @@ export function useMatchingSession() {
   );
 
   const sendRecommendations = useCallback(
-    async ({ selectedAccount, draftMessages }) => {
-      const transportPlatform = toTransportPlatform(selectedAccount.platform);
-      const senderPhoneNumber = resolveSenderPhoneNumber(selectedAccount);
-
+    async ({ selectedAccount, useDeepLink = false, draftMessages, translate }) => {
       const targets = eligibleForSend.filter((r) => {
         const msg = draftMessages?.[r.leadId] ?? r.messageAr;
         return String(msg || "").trim().length > 0;
@@ -154,6 +156,79 @@ export function useMatchingSession() {
       const successfulLeads = [];
       let sent = 0;
       let failed = 0;
+
+      if (useDeepLink || !selectedAccount) {
+        const deeplinkRecipients = [];
+        const leadByIndex = [];
+        for (const result of targets) {
+          const recipient = leadToWhatsappRecipient(result.lead);
+          const message = String(
+            draftMessages?.[result.leadId] ??
+              result.messageAr ??
+              buildDefaultMessage(result),
+          ).trim();
+          const phone =
+            recipient?.phone_number ||
+            recipient?.chat_id ||
+            result.lead?.phone_number ||
+            "";
+          if (!phone || !message) {
+            failed += 1;
+            setResultsByLeadId((prev) => {
+              const nextMap = new Map(prev);
+              const current = nextMap.get(result.leadId);
+              if (current) {
+                nextMap.set(result.leadId, {
+                  ...current,
+                  status: MATCHING_STATUS.FAILED,
+                });
+              }
+              return nextMap;
+            });
+            continue;
+          }
+          deeplinkRecipients.push({ phone_number: phone, message });
+          leadByIndex.push(result);
+        }
+
+        const linkResult = await openWhatsappDeepLinks(deeplinkRecipients);
+        reportWhatsappDeepLinkResult(linkResult, translate || ((_, fb) => fb), {
+          toastSuccess: toast.success,
+          toastError: toast.error,
+        });
+
+        // Mark all prepared recipients as sent when at least the open attempt ran;
+        // blocked tabs still have the message/URL available via clipboard.
+        for (const result of leadByIndex) {
+          const message = String(
+            draftMessages?.[result.leadId] ??
+              result.messageAr ??
+              buildDefaultMessage(result),
+          ).trim();
+          successfulLeads.push(result.lead);
+          setResultsByLeadId((prev) => {
+            const nextMap = new Map(prev);
+            const current = nextMap.get(result.leadId);
+            if (current) {
+              nextMap.set(result.leadId, {
+                ...current,
+                status: MATCHING_STATUS.SENT,
+                messageAr: message,
+              });
+            }
+            return nextMap;
+          });
+        }
+
+        sent = linkResult.opened;
+        failed += linkResult.blocked;
+        setProgress({ done: targets.length, total: targets.length });
+        setPhase("review");
+        return { sent, failed, successfulLeads, method: "deeplink" };
+      }
+
+      const transportPlatform = toTransportPlatform(selectedAccount.platform);
+      const senderPhoneNumber = resolveSenderPhoneNumber(selectedAccount);
 
       for (let i = 0; i < targets.length; i++) {
         const result = targets[i];

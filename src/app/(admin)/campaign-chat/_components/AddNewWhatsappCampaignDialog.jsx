@@ -14,8 +14,6 @@ import WhatsappRestrictionNotice from "@/components/whatsapp/WhatsappRestriction
 import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import {
-  getEffectiveMessagingAccount,
-  isMessagingConfigReady,
   resolveSenderPhoneNumber,
   sendWhatsappWithClientConfig,
   toTransportPlatform,
@@ -23,6 +21,12 @@ import {
   WHATSAPP_NOT_CONFIGURED_CODE,
   WHATSAPP_RATE_LIMIT_EXCEEDED_CODE,
 } from "@/lib/whatsapp-messaging-provider";
+import {
+  openWhatsappDeepLinks,
+  reportWhatsappDeepLinkResult,
+  resolveWhatsappApiSendAccount,
+  shouldUseWhatsappDeepLink,
+} from "@/lib/whatsapp-deeplink-send";
 import {
   assertWhatsappSenderAllowedForUser,
   getWhatsappAccountRestrictionMessage,
@@ -88,9 +92,13 @@ const AddNewWhatsappCampaignDialog = ({
     whatsappRestrictionCode,
   } = useWhatsappSelectedAccount(messagingData, clientId);
   const accounts = messagingData?.accounts ?? [];
-  const selectedAccount = getEffectiveMessagingAccount(
+  const apiAccount = resolveWhatsappApiSendAccount(
     messagingData,
-    selectedPlatform
+    selectedPlatform,
+  );
+  const useDeepLink = shouldUseWhatsappDeepLink(
+    messagingData,
+    selectedPlatform,
   );
   const hasPrefilledRecipients = recipientsProp.length > 0;
 
@@ -110,41 +118,35 @@ const AddNewWhatsappCampaignDialog = ({
       toast.error(err);
       return false;
     }
-    if (
-      messagingData?.hasMultipleAccounts &&
-      !selectedPlatform &&
-      !isAccountSelectionLocked
-    ) {
-      const err = translate(
-        "whatsappSend.platformRequired",
-        "Please choose which WhatsApp account to send from."
+
+    // Empty selection / no OpenWA → WhatsApp Web deep link (allowed).
+    if (useDeepLink) {
+      setPlatformError("");
+      return true;
+    }
+
+    if (!apiAccount) {
+      setError(notConfiguredMessage);
+      toast.error(notConfiguredMessage);
+      return false;
+    }
+
+    const senderGuard = assertWhatsappSenderAllowedForUser({
+      account: apiAccount,
+      accounts,
+    });
+    if (!senderGuard.ok) {
+      const err = getWhatsappAccountRestrictionMessage(
+        senderGuard.code,
+        translate,
       );
       setPlatformError(err);
       setError(err);
       toast.error(err);
       return false;
     }
-    if (isMessagingConfigReady(selectedAccount)) {
-      const senderGuard = assertWhatsappSenderAllowedForUser({
-        account: selectedAccount,
-        accounts,
-      });
-      if (!senderGuard.ok) {
-        const err = getWhatsappAccountRestrictionMessage(
-          senderGuard.code,
-          translate,
-        );
-        setPlatformError(err);
-        setError(err);
-        toast.error(err);
-        return false;
-      }
-      setPlatformError("");
-      return true;
-    }
-    setError(notConfiguredMessage);
-    toast.error(notConfiguredMessage);
-    return false;
+    setPlatformError("");
+    return true;
   };
 
   useEffect(() => {
@@ -403,6 +405,17 @@ const AddNewWhatsappCampaignDialog = ({
   const submitApiCampaign = async () => {
     if (!validateApiForm()) return;
 
+    if (useDeepLink || !apiAccount) {
+      const err = translate(
+        "whatsappSend.apiNeedsAccount",
+        "Choose a linked WhatsApp account to send API templates. WhatsApp Web cannot send templates.",
+      );
+      setPlatformError(err);
+      setError(err);
+      toast.error(err);
+      return;
+    }
+
     const contactList = hasPrefilledRecipients
       ? recipientsProp
       : JSON.parse(contacts).map((c) => ({
@@ -410,8 +423,8 @@ const AddNewWhatsappCampaignDialog = ({
           user_name: c.name,
         }));
 
-    const transportPlatform = toTransportPlatform(selectedAccount.platform);
-    const senderPhoneNumber = resolveSenderPhoneNumber(selectedAccount);
+    const transportPlatform = toTransportPlatform(apiAccount.platform);
+    const senderPhoneNumber = resolveSenderPhoneNumber(apiAccount);
     const messages = contactList
       .map((contact) => {
         const recipient = resolveWhatsappRecipientFields({
@@ -439,7 +452,7 @@ const AddNewWhatsappCampaignDialog = ({
     }
 
     return sendWhatsappWithClientConfig({
-      config: selectedAccount,
+      config: apiAccount,
       messages,
     });
   };
@@ -455,8 +468,40 @@ const AddNewWhatsappCampaignDialog = ({
   const submitAutomationMessages = async () => {
     if (!validateAutomationForm()) return;
 
-    const transportPlatform = toTransportPlatform(selectedAccount.platform);
-    const senderPhoneNumber = resolveSenderPhoneNumber(selectedAccount);
+    if (useDeepLink) {
+      const deeplinkRecipients = recipientsProp
+        .map((recipient) => {
+          const fields = resolveWhatsappRecipientFields(recipient);
+          const phone =
+            fields?.phone_number ||
+            fields?.chat_id ||
+            recipient.phone_number ||
+            recipient.phone ||
+            "";
+          if (!phone) return null;
+          return {
+            phone_number: phone,
+            message: buildAutomationMessageForRecipient(recipient),
+          };
+        })
+        .filter(Boolean);
+
+      const result = await openWhatsappDeepLinks(deeplinkRecipients);
+      reportWhatsappDeepLinkResult(result, translate, {
+        toastSuccess: toast.success,
+        toastError: toast.error,
+      });
+      return {
+        data: {
+          sent: result.opened,
+          failed: result.blocked,
+          method: "deeplink",
+        },
+      };
+    }
+
+    const transportPlatform = toTransportPlatform(apiAccount.platform);
+    const senderPhoneNumber = resolveSenderPhoneNumber(apiAccount);
     const messages = recipientsProp
       .map((recipient) => {
         const fields = resolveWhatsappRecipientFields(recipient);
@@ -479,7 +524,7 @@ const AddNewWhatsappCampaignDialog = ({
     }
 
     return sendWhatsappWithClientConfig({
-      config: selectedAccount,
+      config: apiAccount,
       messages,
     });
   };
@@ -495,6 +540,12 @@ const AddNewWhatsappCampaignDialog = ({
     try {
       if (sendMode === SEND_MODE.AUTOMATION || appendUnitLinkPerRecipient) {
         const result = await submitAutomationMessages();
+        if (result?.data?.method === "deeplink") {
+          setAutomationMessage(defaultAutomationMessage || "");
+          onSendSuccess?.();
+          handleClose();
+          return;
+        }
         const sent = result?.data?.sent ?? 0;
         const failed = result?.data?.failed ?? 0;
         const successKey =
@@ -891,17 +942,17 @@ const AddNewWhatsappCampaignDialog = ({
               className="mb-4"
             />
           ) : null}
-          {messagingData?.hasMultipleAccounts ? (
+          {accounts.length > 0 ? (
             <WhatsappPlatformSelect
               accounts={accounts}
-              hasMultipleAccounts={messagingData.hasMultipleAccounts}
+              hasMultipleAccounts={accounts.length > 1}
               value={selectedPlatform}
               onChange={(next) => {
                 setSelectedPlatform(next ?? "");
                 setPlatformError("");
               }}
               error={platformError}
-              required
+              required={false}
               locked={isAccountSelectionLocked}
               id="bulk_whatsapp_platform"
               className="mb-4"

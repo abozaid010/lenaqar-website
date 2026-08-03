@@ -98,19 +98,6 @@ export default function ChatInput({
   const handleSend = async () => {
     if (!canSend || pending) return;
 
-    // With multiple linked accounts the user must pick a sender. Block the send
-    // (rather than falling through to the wa.me deep-link) until one is chosen —
-    // mirrors ChatPanel and keeps sending on the backend API path.
-    if (messagingData?.hasMultipleAccounts && !selectedPlatform) {
-      const err = translate(
-        "whatsappSend.platformRequired",
-        "Please choose which WhatsApp account to send from.",
-      );
-      setPlatformError(err);
-      toast.error(err);
-      return;
-    }
-
     const baseText = message.trim();
     const text = outgoingUrl
       ? ensureUrlInMessage(baseText, outgoingUrl)
@@ -168,17 +155,17 @@ export default function ChatInput({
         />
       ) : null}
 
-      {messagingData?.hasMultipleAccounts ? (
+      {accounts.length > 0 ? (
         <WhatsappPlatformSelect
           accounts={accounts}
-          hasMultipleAccounts={messagingData.hasMultipleAccounts}
+          hasMultipleAccounts={messagingData?.hasMultipleAccounts}
           value={selectedPlatform}
           onChange={(next) => {
             setSelectedPlatform(next ?? "");
             setPlatformError("");
           }}
           error={platformError}
-          required
+          required={false}
           locked={isAccountSelectionLocked}
           className="px-0"
         />

@@ -186,17 +186,17 @@ export default function SendMessageToOwner({
         <WhatsappRestrictionNotice code={whatsappRestrictionCode} />
       ) : null}
 
-      {messagingData?.hasMultipleAccounts ? (
+      {accounts.length > 0 ? (
         <WhatsappPlatformSelect
           accounts={accounts}
-          hasMultipleAccounts={messagingData.hasMultipleAccounts}
+          hasMultipleAccounts={messagingData?.hasMultipleAccounts}
           value={selectedPlatform}
           onChange={(next) => {
             setSelectedPlatform(next ?? "");
             setPlatformError("");
           }}
           error={platformError}
-          required
+          required={false}
           locked={isAccountSelectionLocked}
           className="px-0"
         />
