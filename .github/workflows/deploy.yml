@@ -10,8 +10,9 @@ env:
   GCP_ZONE: ${{ secrets.GCP_ZONE }}
   VM_NAME: ${{ secrets.GCP_VM_NAME }}
   VM_SSH_USER: abozaid
-  # Keep IAP SSH tunnels alive during long Docker/Next.js builds
-  SSH_KEEPALIVE: -o ConnectTimeout=300 -o ServerAliveInterval=30 -o ServerAliveCountMax=10
+  # NOTE: Do NOT put multiple -o options in one string.
+  # gcloud --ssh-flag/--scp-flag forwards each value as a single argv token;
+  # a combined string breaks OpenSSH ("keyword connecttimeout extra arguments").
 
 jobs:
   deploy:
@@ -81,10 +82,13 @@ jobs:
             --zone="${{ env.GCP_ZONE }}" \
             --format="value(status)" || true
 
+          # Each -o must be its own --ssh-flag token
           gcloud compute ssh "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}" \
             --zone="${{ env.GCP_ZONE }}" \
             --tunnel-through-iap \
-            --ssh-flag="${{ env.SSH_KEEPALIVE }}" \
+            --ssh-flag=-o --ssh-flag=ConnectTimeout=300 \
+            --ssh-flag=-o --ssh-flag=ServerAliveInterval=30 \
+            --ssh-flag=-o --ssh-flag=ServerAliveCountMax=10 \
             --command="echo '✅ Connected as:'; whoami; hostname"
 
       - name: Provision GitHub deploy key on VM
@@ -94,22 +98,26 @@ jobs:
           gcloud compute ssh "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}" \
             --zone="${{ env.GCP_ZONE }}" \
             --tunnel-through-iap \
-            --ssh-flag="${{ env.SSH_KEEPALIVE }}" \
-            --command="
-              mkdir -p ~/.ssh
-              chmod 700 ~/.ssh
-            "
+            --ssh-flag=-o --ssh-flag=ConnectTimeout=300 \
+            --ssh-flag=-o --ssh-flag=ServerAliveInterval=30 \
+            --ssh-flag=-o --ssh-flag=ServerAliveCountMax=10 \
+            --command="mkdir -p ~/.ssh && chmod 700 ~/.ssh"
 
+          # Each -o must be its own --scp-flag token (a single multi -o string breaks scp)
           gcloud compute scp ~/.ssh/github_deploy_key \
             "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}:~/.ssh/id_ed25519_website" \
             --zone="${{ env.GCP_ZONE }}" \
             --tunnel-through-iap \
-            --scp-flag="${{ env.SSH_KEEPALIVE }}"
+            --scp-flag=-o --scp-flag=ConnectTimeout=300 \
+            --scp-flag=-o --scp-flag=ServerAliveInterval=30 \
+            --scp-flag=-o --scp-flag=ServerAliveCountMax=10
 
           gcloud compute ssh "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}" \
             --zone="${{ env.GCP_ZONE }}" \
             --tunnel-through-iap \
-            --ssh-flag="${{ env.SSH_KEEPALIVE }}" \
+            --ssh-flag=-o --ssh-flag=ConnectTimeout=300 \
+            --ssh-flag=-o --ssh-flag=ServerAliveInterval=30 \
+            --ssh-flag=-o --ssh-flag=ServerAliveCountMax=10 \
             --command='
               set -Eeuo pipefail
               chmod 600 ~/.ssh/id_ed25519_website
@@ -152,7 +160,9 @@ jobs:
           gcloud compute ssh "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}" \
             --zone="${{ env.GCP_ZONE }}" \
             --tunnel-through-iap \
-            --ssh-flag="${{ env.SSH_KEEPALIVE }}" \
+            --ssh-flag=-o --ssh-flag=ConnectTimeout=300 \
+            --ssh-flag=-o --ssh-flag=ServerAliveInterval=30 \
+            --ssh-flag=-o --ssh-flag=ServerAliveCountMax=10 \
             --command="
               set -Eeuo pipefail
               trap 'echo \"❌ Remote deploy failed on line \$LINENO\"; exit 1' ERR
