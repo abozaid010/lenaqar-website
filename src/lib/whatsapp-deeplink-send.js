@@ -1,8 +1,16 @@
 import { isOpenwaProvider, isUltramessageProvider, getAccountByKey } from "@/lib/whatsapp-messaging-provider";
 import { formatPhoneForWhatsApp, copyToClipboard } from "@/utils/phone-utils";
 import { phoneToE164 } from "@/components/phone/phone-utils";
+import {
+  clearWhatsappDeepLinkQueue,
+  setWhatsappDeepLinkQueue,
+} from "@/lib/whatsapp-deeplink-queue";
 
-export const WHATSAPP_DEEPLINK_DELAY_MS = 1000;
+/**
+ * @deprecated Delay between opens breaks the user-gesture token and causes
+ * browsers to block tabs 2..n. Kept for call-site compatibility; ignored.
+ */
+export const WHATSAPP_DEEPLINK_DELAY_MS = 0;
 
 /** Drop Ultramsg from outbound account lists (provider removed). */
 export function filterOutboundWhatsappAccounts(accounts = []) {
@@ -66,6 +74,60 @@ function resolvePhoneDigits(phone) {
 }
 
 /**
+ * True on phones/tablets where multi-tab popups fail and WhatsApp must open
+ * via a single app handoff per tap.
+ *
+ * Covers: Android phones/tablets, iPhone, iPod, classic iPad UA, and
+ * iPadOS 13+ “desktop” Safari (Macintosh + multi-touch).
+ */
+export function isTouchWhatsappClient() {
+  if (typeof window === "undefined" || typeof navigator === "undefined") {
+    return false;
+  }
+
+  const ua = navigator.userAgent || "";
+  if (
+    /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|iPad/i.test(ua)
+  ) {
+    return true;
+  }
+
+  // iPadOS 13+ requests a desktop Mac UA; detect via touch points.
+  const touchPoints = Number(navigator.maxTouchPoints) || 0;
+  if (navigator.platform === "MacIntel" && touchPoints > 1) {
+    return true;
+  }
+
+  return false;
+}
+
+/** @deprecated Use isTouchWhatsappClient — kept for existing imports. */
+export function isMobileWhatsappClient() {
+  return isTouchWhatsappClient();
+}
+
+/**
+ * Build deep-link URL.
+ * Touch devices: api.whatsapp.com → OS hands off to the WhatsApp app with draft.
+ * Desktop: wa.me → WhatsApp Web / Desktop in a new tab.
+ */
+export function buildWhatsappDeepLinkUrl(
+  phone,
+  message,
+  { touch = false } = {},
+) {
+  const digits = String(phone || "").replace(/\D/g, "");
+  const text = String(message ?? "").trim();
+  if (!digits || !text) return "";
+
+  if (touch) {
+    // Universal / App Link — opens the installed app on iOS, Android, iPad.
+    return `https://api.whatsapp.com/send?phone=${digits}&text=${encodeURIComponent(text)}`;
+  }
+  return formatPhoneForWhatsApp(digits, text);
+}
+
+/**
  * Normalize recipients into { phone, message } for wa.me.
  * Accepts bulk recipient shapes and simple phone/message pairs.
  */
@@ -90,36 +152,122 @@ export function normalizeDeepLinkRecipients(recipients = []) {
 }
 
 /**
- * Open wa.me tabs one-by-one with a delay (reduces popup blocking).
- * @returns {{ opened: number, blocked: number, total: number, blockedUrls: string[] }}
+ * Open a WhatsApp URL without `noopener` in windowFeatures.
+ * Features including noopener make window.open() always return null, which
+ * incorrectly marks successful opens as blocked.
+ */
+function openWhatsappWindow(url, target) {
+  const win = window.open(url, target);
+  if (win) {
+    try {
+      win.opener = null;
+    } catch {
+      // Cross-origin / restricted — ignore.
+    }
+  }
+  return win;
+}
+
+/**
+ * Hand off to the WhatsApp app with a pre-filled draft.
+ * Must run inside a user-gesture (click/tap).
+ *
+ * Uses location.assign so Universal/App Links switch to the app while
+ * leaving the CRM page parked in memory (iOS Safari / Android Chrome).
+ */
+export function openWhatsappAppDraft(url) {
+  if (!url || typeof window === "undefined") return false;
+  window.location.assign(url);
+  return true;
+}
+
+/**
+ * Open one WhatsApp tab/app draft per recipient.
+ *
+ * Desktop: opens N tabs synchronously in the same click gesture.
+ * Phones / tablets / iPad: opens the first chat in the WhatsApp app, then
+ * queues the rest for a per-tap “Open next” bar (multi-tab popups are blocked).
+ *
+ * @returns {{
+ *   opened: number,
+ *   blocked: number,
+ *   total: number,
+ *   blockedUrls: string[],
+ *   mode: 'desktop' | 'sequential',
+ *   remaining: number,
+ * }}
  */
 export async function openWhatsappDeepLinks(
   recipients,
-  { delayMs = WHATSAPP_DEEPLINK_DELAY_MS } = {},
+  // delayMs intentionally ignored — see WHATSAPP_DEEPLINK_DELAY_MS.
+  { delayMs: _delayMs } = {},
 ) {
   const items = normalizeDeepLinkRecipients(recipients);
+  const touch = isTouchWhatsappClient();
   let opened = 0;
   let blocked = 0;
   const blockedUrls = [];
 
-  for (let i = 0; i < items.length; i += 1) {
-    const { phone, message } = items[i];
-    const url = formatPhoneForWhatsApp(phone, message);
-    if (!url) {
-      blocked += 1;
-      continue;
+  const prepared = items
+    .map(({ phone, message }, index) => {
+      const url = buildWhatsappDeepLinkUrl(phone, message, { touch });
+      if (!url) return null;
+      return { phone, message, url, index };
+    })
+    .filter(Boolean);
+
+  if (prepared.length === 0) {
+    clearWhatsappDeepLinkQueue();
+    return {
+      opened: 0,
+      blocked: items.length,
+      total: items.length,
+      blockedUrls: [],
+      mode: touch ? "sequential" : "desktop",
+      remaining: 0,
+    };
+  }
+
+  // ── Touch (phone / tablet / iPad): one app handoff per tap ──────────────
+  if (touch) {
+    const [first, ...rest] = prepared;
+    openWhatsappAppDraft(first.url);
+    opened = 1;
+
+    if (rest.length > 0) {
+      setWhatsappDeepLinkQueue({
+        total: prepared.length,
+        openedCount: 1,
+        remaining: rest.map(({ phone, message, url }) => ({
+          phone,
+          message,
+          url,
+        })),
+      });
+    } else {
+      clearWhatsappDeepLinkQueue();
     }
 
-    const win = window.open(url, "_blank", "noopener,noreferrer");
+    return {
+      opened,
+      blocked: 0,
+      total: items.length,
+      blockedUrls: [],
+      mode: "sequential",
+      remaining: rest.length,
+    };
+  }
+
+  // ── Desktop: open every tab synchronously while the gesture is valid ───
+  clearWhatsappDeepLinkQueue();
+  for (let i = 0; i < prepared.length; i += 1) {
+    const { phone, url, index } = prepared[i];
+    const win = openWhatsappWindow(url, `wa_deeplink_${phone}_${index}`);
     if (win) {
       opened += 1;
     } else {
       blocked += 1;
       blockedUrls.push(url);
-    }
-
-    if (i < items.length - 1 && delayMs > 0) {
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   }
 
@@ -128,10 +276,12 @@ export async function openWhatsappDeepLinks(
     blocked,
     total: items.length,
     blockedUrls,
+    mode: "desktop",
+    remaining: 0,
   };
 }
 
-/** Single-recipient deep link (copies message, opens one tab). */
+/** Single-recipient deep link (copies message, opens WhatsApp). */
 export function openSingleWhatsappDeepLink(phoneNumber, message) {
   const digits = resolvePhoneDigits(phoneNumber);
   const text = String(message ?? "").trim();
@@ -145,14 +295,21 @@ export function openSingleWhatsappDeepLink(phoneNumber, message) {
     () => {},
   );
 
-  const url = formatPhoneForWhatsApp(digits, text);
-  const win = window.open(url, "_blank", "noopener,noreferrer");
+  const touch = isTouchWhatsappClient();
+  const url = buildWhatsappDeepLinkUrl(digits, text, { touch });
+
+  if (touch) {
+    openWhatsappAppDraft(url);
+    return { ok: true, blocked: false, url };
+  }
+
+  const win = openWhatsappWindow(url, "_blank");
   return { ok: Boolean(win), blocked: !win, url };
 }
 
 /**
- * Toast/copy guidance when the browser blocks popup tabs.
- * Copies remaining wa.me URLs so the user can open them manually.
+ * Toast/copy guidance when the browser blocks popup tabs, or sequential
+ * mobile/tablet progress messaging.
  */
 export function reportWhatsappDeepLinkResult(
   result,
@@ -168,6 +325,25 @@ export function reportWhatsappDeepLinkResult(
         "whatsappSend.deeplinkNoRecipients",
         "No valid phone numbers to open in WhatsApp.",
       ),
+    );
+    return;
+  }
+
+  if (result.mode === "sequential") {
+    if (result.remaining > 0) {
+      success(
+        translate(
+          "whatsappSend.deeplinkSequentialStarted",
+          "Opened WhatsApp (1 of {total}). Send the message, return here, then tap Open next.",
+        ).replace("{total}", String(result.total)),
+      );
+      return;
+    }
+    success(
+      translate(
+        "whatsappSend.deeplinkOpened",
+        "Opened WhatsApp for {count} recipient(s). Send each message manually.",
+      ).replace("{count}", String(result.opened)),
     );
     return;
   }

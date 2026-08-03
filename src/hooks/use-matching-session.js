@@ -150,16 +150,16 @@ export function useMatchingSession() {
         return String(msg || "").trim().length > 0;
       });
 
-      setPhase("sending");
-      setProgress({ done: 0, total: targets.length });
-
       const successfulLeads = [];
       let sent = 0;
       let failed = 0;
 
       if (useDeepLink || !selectedAccount) {
+        // Collect recipients and open tabs BEFORE any setState so window.open
+        // stays inside the user-gesture token (otherwise only the first tab survives).
         const deeplinkRecipients = [];
         const leadByIndex = [];
+        const failedLeadIds = [];
         for (const result of targets) {
           const recipient = leadToWhatsappRecipient(result.lead);
           const message = String(
@@ -174,17 +174,7 @@ export function useMatchingSession() {
             "";
           if (!phone || !message) {
             failed += 1;
-            setResultsByLeadId((prev) => {
-              const nextMap = new Map(prev);
-              const current = nextMap.get(result.leadId);
-              if (current) {
-                nextMap.set(result.leadId, {
-                  ...current,
-                  status: MATCHING_STATUS.FAILED,
-                });
-              }
-              return nextMap;
-            });
+            failedLeadIds.push(result.leadId);
             continue;
           }
           deeplinkRecipients.push({ phone_number: phone, message });
@@ -192,10 +182,29 @@ export function useMatchingSession() {
         }
 
         const linkResult = await openWhatsappDeepLinks(deeplinkRecipients);
+
+        setPhase("sending");
+        setProgress({ done: 0, total: targets.length });
         reportWhatsappDeepLinkResult(linkResult, translate || ((_, fb) => fb), {
           toastSuccess: toast.success,
           toastError: toast.error,
         });
+
+        if (failedLeadIds.length) {
+          setResultsByLeadId((prev) => {
+            const nextMap = new Map(prev);
+            for (const leadId of failedLeadIds) {
+              const current = nextMap.get(leadId);
+              if (current) {
+                nextMap.set(leadId, {
+                  ...current,
+                  status: MATCHING_STATUS.FAILED,
+                });
+              }
+            }
+            return nextMap;
+          });
+        }
 
         // Mark all prepared recipients as sent when at least the open attempt ran;
         // blocked tabs still have the message/URL available via clipboard.
@@ -220,12 +229,18 @@ export function useMatchingSession() {
           });
         }
 
-        sent = linkResult.opened;
+        sent =
+          linkResult.mode === "sequential"
+            ? linkResult.opened + (linkResult.remaining || 0)
+            : linkResult.opened;
         failed += linkResult.blocked;
         setProgress({ done: targets.length, total: targets.length });
         setPhase("review");
         return { sent, failed, successfulLeads, method: "deeplink" };
       }
+
+      setPhase("sending");
+      setProgress({ done: 0, total: targets.length });
 
       const transportPlatform = toTransportPlatform(selectedAccount.platform);
       const senderPhoneNumber = resolveSenderPhoneNumber(selectedAccount);

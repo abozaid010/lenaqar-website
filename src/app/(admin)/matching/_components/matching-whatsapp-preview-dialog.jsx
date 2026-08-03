@@ -131,7 +131,6 @@ export default function MatchingWhatsappPreviewDialog({
 
   const handleSubmit = async (e) => {
     e?.preventDefault?.();
-    setError("");
     if (!canSubmit) return;
     if (!useDeepLink && !apiAccount) {
       setError(
@@ -143,6 +142,8 @@ export default function MatchingWhatsappPreviewDialog({
       return;
     }
     try {
+      // Do not setState before onSend — deep-link window.open must stay in
+      // the same user-gesture call stack to open all N tabs.
       await onSend?.({
         selectedAccount: apiAccount,
         useDeepLink,
