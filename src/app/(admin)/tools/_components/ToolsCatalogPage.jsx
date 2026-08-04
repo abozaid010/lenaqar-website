@@ -29,7 +29,10 @@ export default function ToolsCatalogPage() {
         {TOOLS_REGISTRY.map((tool) => (
           <li key={tool.id}>
             <Link
-              href={`${prefix}${tool.href}`}
+              href={tool.absolute ? tool.href : `${prefix}${tool.href}`}
+              {...(tool.openInNewTab
+                ? { target: "_blank", rel: "noopener noreferrer" }
+                : {})}
               className="flex flex-col h-full rounded-lg border border-gray-200 bg-white p-4 hover:border-primary/40 hover:bg-primary/[0.03] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
             >
               <div className="flex items-start gap-3">
