@@ -45,6 +45,98 @@
     th.sortable.asc .sort-ind, th.sortable.desc .sort-ind { opacity: 1; color: #0f766e; }
     .chart-box { position: relative; height: 320px; }
     @media (max-width: 640px) { .chart-box { height: 260px; } }
+    .schematic-map {
+      position: relative;
+      min-height: 520px;
+      background:
+        radial-gradient(ellipse 80% 60% at 70% 40%, #ecfdf5 0%, transparent 55%),
+        linear-gradient(165deg, #f1f5f9 0%, #e2e8f0 45%, #f8fafc 100%);
+      overflow: hidden;
+    }
+    .schematic-map .zone {
+      position: absolute;
+      border: 1px dashed rgba(15, 118, 110, 0.25);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.45);
+      pointer-events: none;
+    }
+    .schematic-map .zone-label {
+      position: absolute;
+      top: 8px;
+      inset-inline-start: 10px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .map-pin {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      z-index: 2;
+      cursor: pointer;
+      border: 0;
+      background: transparent;
+      padding: 0;
+      text-align: center;
+    }
+    .map-pin .pin-head {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.75rem;
+      height: 2rem;
+      padding: 0 0.4rem;
+      border-radius: 999px;
+      background: #0f766e;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+      white-space: nowrap;
+    }
+    .map-pin .pin-stem {
+      width: 2px;
+      height: 10px;
+      margin: 0 auto;
+      background: #0f766e;
+    }
+    .map-pin .pin-dot {
+      width: 6px;
+      height: 6px;
+      margin: -1px auto 0;
+      border-radius: 999px;
+      background: #0f172a;
+    }
+    .map-pin.active .pin-head,
+    .map-pin:hover .pin-head {
+      background: #0f172a;
+      transform: scale(1.05);
+    }
+    .map-pin.active { z-index: 5; }
+    .pin-overlay {
+      position: absolute;
+      z-index: 10;
+      width: min(300px, calc(100% - 1.5rem));
+      border-radius: 14px;
+      border: 1px solid #e2e8f0;
+      background: #fff;
+      box-shadow: 0 12px 40px rgba(15, 23, 42, 0.14);
+      padding: 0.9rem 1rem;
+    }
+    .pin-overlay[hidden] { display: none; }
+    .score-bar {
+      height: 6px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+    .score-bar > span {
+      display: block;
+      height: 100%;
+      background: #0f766e;
+      border-radius: 999px;
+    }
   </style>
 </head>
 <body class="bg-mist text-ink antialiased">
@@ -60,6 +152,7 @@
         <a href="#summary" class="nav-link border-b-2 border-transparent px-3 py-2 text-sm text-muted transition hover:text-ink">Summary</a>
         <a href="#comparison" class="nav-link border-b-2 border-transparent px-3 py-2 text-sm text-muted transition hover:text-ink">Compare</a>
         <a href="#charts" class="nav-link border-b-2 border-transparent px-3 py-2 text-sm text-muted transition hover:text-ink">Charts</a>
+        <a href="#map" class="nav-link border-b-2 border-transparent px-3 py-2 text-sm text-muted transition hover:text-ink">Map</a>
         <a href="#projects" class="nav-link border-b-2 border-transparent px-3 py-2 text-sm text-muted transition hover:text-ink">Projects</a>
         <a href="#insights" class="nav-link border-b-2 border-transparent px-3 py-2 text-sm text-muted transition hover:text-ink">Insights</a>
         <a href="#excluded" class="nav-link border-b-2 border-transparent px-3 py-2 text-sm text-muted transition hover:text-ink">Excluded</a>
@@ -71,6 +164,7 @@
         <a href="#summary" class="rounded-lg px-3 py-2 text-sm hover:bg-mist">Summary</a>
         <a href="#comparison" class="rounded-lg px-3 py-2 text-sm hover:bg-mist">Compare</a>
         <a href="#charts" class="rounded-lg px-3 py-2 text-sm hover:bg-mist">Charts</a>
+        <a href="#map" class="rounded-lg px-3 py-2 text-sm hover:bg-mist">Map</a>
         <a href="#projects" class="rounded-lg px-3 py-2 text-sm hover:bg-mist">Projects</a>
         <a href="#insights" class="rounded-lg px-3 py-2 text-sm hover:bg-mist">Insights</a>
         <a href="#excluded" class="rounded-lg px-3 py-2 text-sm hover:bg-mist">Excluded</a>
@@ -237,12 +331,56 @@
       </div>
     </section>
 
+
+    <!-- Map & pin overlays -->
+    <section id="map" class="mb-14 scroll-mt-24">
+      <div class="mb-6">
+        <h3 class="font-serif text-2xl font-semibold">Comparison map</h3>
+        <p class="mt-1 text-sm text-muted">
+          Tap a pin for a summary card: avg price/sqm, overall score, and key comparison fields from this report.
+          Pin positions are schematic by reported area group — not surveyed GPS coordinates.
+        </p>
+      </div>
+
+      <div class="overflow-hidden rounded-2xl border border-line bg-white shadow-card">
+        <div class="schematic-map" id="schematic-map" aria-label="Schematic comparison map of analysed projects">
+          <!-- Area zones from report location groups -->
+          <div class="zone" style="inset: 8% 48% 52% 6%;">
+            <span class="zone-label">New Cairo / East Cairo</span>
+          </div>
+          <div class="zone" style="inset: 8% 6% 38% 48%;">
+            <span class="zone-label">5th Settlement / Golden Square</span>
+          </div>
+          <div class="zone" style="inset: 58% 48% 8% 6%;">
+            <span class="zone-label">New Cairo / New Kattameya</span>
+          </div>
+          <div class="zone" style="inset: 58% 6% 8% 48%;">
+            <span class="zone-label">Mostakbal City</span>
+          </div>
+          <div id="schematic-pins"></div>
+          <div id="pin-overlay" class="pin-overlay" hidden role="dialog" aria-live="polite"></div>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-2 border-t border-line px-4 py-3">
+          <p class="text-xs text-muted">Overall score = report score /10 (also shown as %). Avg EGP/sqm from budget-filtered live samples.</p>
+          <button type="button" id="close-pin-overlay" class="rounded-lg border border-line px-2.5 py-1 text-xs font-medium text-muted hover:text-ink">Close card</button>
+        </div>
+      </div>
+
+      <div class="mt-4 rounded-2xl border border-line bg-white shadow-card">
+        <div class="border-b border-line px-4 py-3">
+          <p class="text-sm font-semibold">All pins</p>
+          <p class="text-xs text-muted">Same summaries — also open Google Maps or Nawy</p>
+        </div>
+        <ul id="map-pins" class="grid divide-y divide-line sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-3"></ul>
+      </div>
+    </section>
+
     <!-- 4. Project Cards -->
     <section id="projects" class="mb-14 scroll-mt-24">
       <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h3 class="font-serif text-2xl font-semibold">Project Cards</h3>
-          <p class="mt-1 text-sm text-muted">Compact profiles for the 11 analysed compounds. Expand for pros/cons where stated in the report.</p>
+          <p class="mt-1 text-sm text-muted">Prices, facilities, Google Maps, and Nawy links — expand for pros/cons from the report.</p>
         </div>
         <div class="flex flex-wrap gap-2">
           <label class="text-xs text-muted self-center">Filter by location</label>
@@ -387,6 +525,18 @@
         valueForMoney: 'Moderate',
         score: 8.13,
         medianPsqm: '53,686 EGP/sqm',
+        mapsQuery: "Madinaty New Cairo Egypt",
+        nawyUrl: "https://www.nawy.com/compound/299-madinaty",
+        facilities: [
+            "International schools",
+            "Clinics",
+            "Retail / Open Air Mall",
+            "Transport services",
+            "Clubhouse",
+            "Commercial area",
+            "Parking",
+            "Security"
+          ],
         pros: [
           'By far the deepest resale market researched (huge selection, easy to find a match for almost any 3BR budget/size combination)',
           'Longest operating track record of any project on this list (delivered since 2013) — schools, clinics, retail and transport are all fully functioning, not promises',
@@ -428,6 +578,17 @@
         valueForMoney: 'Moderate',
         score: 8.03,
         medianPsqm: '48,980 EGP/sqm',
+        mapsQuery: "Hyde Park New Cairo 5th Settlement Egypt",
+        nawyUrl: "https://www.nawy.com/compound/38-hyde-park",
+        facilities: [
+            "Central park (600,000 sqm)",
+            "Mature landscaping / greenery",
+            "Clubhouse",
+            "Near schools / AUC",
+            "Near 90th Street retail",
+            "Parking",
+            "Security"
+          ],
         pros: [
           'Reported to have some of the highest-quality finishing and landscaping of any project in the set (large central park, mature trees/greenery vs newer compounds still growing in)',
           'Fully delivered — what you view on resale is what exists today, no construction risk',
@@ -468,6 +629,16 @@
         valueForMoney: 'Good',
         score: 7.53,
         medianPsqm: '54,054 EGP/sqm',
+        mapsQuery: "Palm Hills New Cairo 5th Settlement Egypt",
+        nawyUrl: "https://www.nawy.com/compound/55-palm-hills-katameya-(pk1)",
+        facilities: [
+            "5-star hotel on site",
+            "Completed retail on site",
+            "Clubhouse",
+            "Parking",
+            "Security",
+            "Landscape / outdoor spaces"
+          ],
         pros: [
           'Established, centrally located 5th Settlement address with strong brand recognition',
           "Contemporary architecture with lower-density 'spaced' unit layouts (less cluster-block feel than some rivals)",
@@ -508,6 +679,15 @@
         valueForMoney: 'High',
         score: 7.25,
         medianPsqm: '35,787 EGP/sqm',
+        mapsQuery: "Palm Hills Capital Gardens Mostakbal City Egypt",
+        nawyUrl: "https://www.nawy.com/search?q=Capital%20Gardens%20Palm%20Hills",
+        facilities: [
+            "Clubhouse",
+            "Parking",
+            "Security",
+            "Landscape"
+          ],
+        facilitiesNote: "Report notes fewer mature schools/hospitals/commercial anchors nearby versus Madinaty or Hyde Park.",
         pros: [
           'Best value-for-money in the entire study: largest apartments (median 200 sqm) at the lowest price/sqm',
           'Highest in-budget listing concentration (77% of 3BR listings fall in EGP 5-10M) — easiest project to actually find a matching unit in',
@@ -547,6 +727,15 @@
         valueForMoney: 'Moderate',
         score: 8.06,
         medianPsqm: '40,201 EGP/sqm',
+        mapsQuery: "SODIC Villette New Cairo Golden Square Egypt",
+        nawyUrl: "https://www.nawy.com/compound/23-villette",
+        facilities: [
+            "54% green space",
+            "Clubhouse",
+            "Landscape / walkability focus",
+            "Parking",
+            "Security"
+          ],
         pros: [
           'Highest landscape/design quality score in the study — 54% green space, low 18.6% built-up ratio, mature SODIC execution standards',
           'Prestigious Golden Square address with strong long-term brand/resale cachet',
@@ -586,6 +775,16 @@
         valueForMoney: 'Good',
         score: 8.09,
         medianPsqm: '42,434 EGP/sqm',
+        mapsQuery: "Mountain View iCity New Cairo Egypt",
+        nawyUrl: "https://www.nawy.com/search?q=Mountain%20View%20iCity",
+        facilities: [
+            "iDrive traffic-separated circulation",
+            "Club Park / Lagoon phases",
+            "Clubhouse",
+            "Parking",
+            "Security"
+          ],
+        facilitiesNote: "Report notes retail/school infrastructure still maturing relative to Madinaty.",
         pros: [
           'Traffic-separated masterplan (iDrive) is a genuinely distinctive design feature versus every other project studied',
           'Very deep in-budget resale supply (72% of listings qualify) — easy to shop and negotiate',
@@ -626,6 +825,16 @@
         valueForMoney: 'High',
         score: 7.09,
         medianPsqm: '34,073 EGP/sqm',
+        mapsQuery: "City Gate New Cairo Qatari Diar Egypt",
+        nawyUrl: "https://www.nawy.com/compound/764-city-gate",
+        facilities: [
+            "Integrated masterplan (8.5M sqm)",
+            "Golf-course-facing product (later phases)",
+            "Clubhouse",
+            "Parking",
+            "Security"
+          ],
+        facilitiesNote: "Report notes fewer completed amenities today; community/retail maturity trails established projects.",
         pros: [
           'Lowest resale price/sqm of any project studied (median 34,073 EGP/sqm) — cheapest entry point into a Tier-1-adjacent New Cairo compound',
           'Backed by Qatari Diar, a well-capitalized sovereign-linked developer (lower counterparty/completion risk than smaller local developers)',
@@ -665,6 +874,15 @@
         valueForMoney: 'High',
         score: 7.34,
         medianPsqm: '41,067 EGP/sqm',
+        mapsQuery: "Sarai Mostakbal City Future City Egypt",
+        nawyUrl: "https://www.nawy.com/search?q=Sarai%20Madinet%20Masr",
+        facilities: [
+            "Landscape (18% built-up ratio cited)",
+            "Clubhouse",
+            "Parking",
+            "Security"
+          ],
+        facilitiesNote: "Report notes community/retail infrastructure still maturing as phases deliver through 2026-2027.",
         pros: [
           'Large, well-capitalized developer (Madinet Masr) with a strong recent delivery track record (1,941 units delivered across Sarai+Taj City in FY2025)',
           'Attractive entry-level pricing and flexible 10-year 0%-interest plans available from the developer for new stock',
@@ -704,6 +922,15 @@
         valueForMoney: 'Moderate',
         score: 7.66,
         medianPsqm: '51,053 EGP/sqm',
+        mapsQuery: "ZED East New Cairo Ora Developers Egypt",
+        nawyUrl: "https://www.nawy.com/search?q=ZED%20East",
+        facilities: [
+            "80% green space (reported)",
+            "Clubhouse",
+            "Wide green buffers between buildings",
+            "Parking",
+            "Security"
+          ],
         pros: [
           'High-profile developer (ORA/Naguib Sawiris) and internationally recognized masterplanning (WATG)',
           '80%-green masterplan and generous inter-building spacing reported across multiple sources',
@@ -743,6 +970,16 @@
         valueForMoney: 'Good',
         score: 7.28,
         medianPsqm: '46,853 EGP/sqm',
+        mapsQuery: "Taj City New Cairo Madinet Masr Egypt",
+        nawyUrl: "https://www.nawy.com/compound/186-taj-city",
+        facilities: [
+            "Club Side / Lake Park / Taj Gardens phases",
+            "Tajed commercial district (launched 2024)",
+            "Airport / Ring Road connectivity",
+            "Clubhouse",
+            "Parking",
+            "Security"
+          ],
         pros: [
           'Wide internal price range means a EGP 5-10M budget can land anywhere from a modest Club Side unit to a larger Lake Park/Taj Gardens unit — flexibility for different priorities',
           'Strong airport/Ring Road connectivity (across from Cairo International Airport)',
@@ -783,6 +1020,10 @@
         valueForMoney: 'Moderate',
         score: 6.91,
         medianPsqm: '51,829 EGP/sqm',
+        mapsQuery: "El Patio Oro La Vista New Cairo Egypt",
+        nawyUrl: "https://www.nawy.com/compound/207-el-patio-oro",
+        facilities: [],
+        facilitiesNote: "Not Available — thinnest qualitative facilities detail among projects in the report.",
         pros: [
           'Very consistent unit sizes (164-171 sqm) make it easy to compare listings apples-to-apples',
           'La Vista has an established track record with coastal resorts (Sokhna/North Coast) and other New Cairo compounds'
@@ -852,11 +1093,207 @@
       });
     });
 
+    /* ---------- Helpers for links ---------- */
+    function mapsUrl(p) {
+      return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.mapsQuery || (p.project + ' ' + p.location + ' Egypt'));
+    }
+
+    function linkBtn(href, label, tone) {
+      const cls = tone === 'accent'
+        ? 'inline-flex items-center gap-1.5 rounded-lg bg-accent px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-teal-800'
+        : 'inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-2.5 py-1.5 text-xs font-medium text-ink hover:border-accent/40 hover:text-accent';
+      return '<a href="' + href + '" target="_blank" rel="noopener noreferrer" class="' + cls + '">' + label + '</a>';
+    }
+
+    function facilitiesHtml(p) {
+      const chips = (p.facilities && p.facilities.length)
+        ? '<ul class="mt-2 flex flex-wrap gap-1.5">' + p.facilities.map(f =>
+            '<li class="rounded-md bg-slate-100 px-2 py-1 text-xs text-ink">' + f + '</li>'
+          ).join('') + '</ul>'
+        : '<p class="mt-2 text-sm text-muted">Not Available</p>';
+      const note = p.facilitiesNote
+        ? '<p class="mt-2 text-xs leading-relaxed text-muted">' + p.facilitiesNote + '</p>'
+        : '';
+      return chips + note;
+    }
+
+    /* ---------- Map pins + schematic overlay ---------- */
+    /* Schematic % positions by reported locationGroup only (not GPS). */
+    const PIN_LAYOUT = {
+      madinaty: { left: '22%', top: '28%', short: 'Madinaty' },
+      'hyde-park': { left: '58%', top: '18%', short: 'Hyde' },
+      phnc: { left: '72%', top: '22%', short: 'PH NC' },
+      villette: { left: '86%', top: '28%', short: 'Villette' },
+      icity: { left: '62%', top: '36%', short: 'iCity' },
+      'city-gate': { left: '78%', top: '42%', short: 'City Gate' },
+      'el-patio-oro': { left: '90%', top: '48%', short: 'Patio' },
+      'zed-east': { left: '24%', top: '72%', short: 'ZED' },
+      'capital-gardens': { left: '58%', top: '68%', short: 'Cap. Gdns' },
+      sarai: { left: '74%', top: '74%', short: 'Sarai' },
+      'taj-city': { left: '88%', top: '80%', short: 'Taj' },
+    };
+
+    function scorePercent(score) {
+      return Math.round(score * 100) / 10; // 8.13 → 81.3
+    }
+
+    function pinSummaryHtml(p) {
+      const pct = scorePercent(p.score);
+      const yieldLabel = p.yield === 'N/A' ? 'Not Available' : p.yield;
+      return `
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold leading-snug">${p.project}</p>
+            <p class="mt-0.5 text-xs text-muted">${p.developer}</p>
+          </div>
+          <button type="button" class="pin-overlay-close shrink-0 rounded-md px-1.5 py-0.5 text-xs text-muted hover:bg-mist" aria-label="Close">✕</button>
+        </div>
+        <p class="mt-2 text-[11px] text-muted">${p.locationGroup}</p>
+
+        <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
+          <div class="rounded-lg bg-mist px-2.5 py-2">
+            <p class="text-[10px] font-medium uppercase tracking-wide text-muted">Avg EGP/sqm</p>
+            <p class="mt-0.5 font-semibold tabular-nums">${p.psqmLabel}</p>
+          </div>
+          <div class="rounded-lg bg-mist px-2.5 py-2">
+            <p class="text-[10px] font-medium uppercase tracking-wide text-muted">Overall score</p>
+            <p class="mt-0.5 font-semibold tabular-nums">${p.score}/10 <span class="text-xs font-medium text-accent">(${pct}%)</span></p>
+          </div>
+        </div>
+        <div class="mt-2 score-bar" title="Overall score ${p.score}/10"><span style="width:${pct}%"></span></div>
+
+        <dl class="mt-3 space-y-1.5 text-xs">
+          <div class="flex justify-between gap-3"><dt class="text-muted">Starting price</dt><dd class="font-medium tabular-nums text-end">${p.lowLabel}</dd></div>
+          <div class="flex justify-between gap-3"><dt class="text-muted">Max price</dt><dd class="font-medium tabular-nums text-end">${p.highLabel}</dd></div>
+          <div class="flex justify-between gap-3"><dt class="text-muted">Area range</dt><dd class="font-medium text-end">${p.areaLabel} sqm</dd></div>
+          <div class="flex justify-between gap-3"><dt class="text-muted">Units in budget (n)</dt><dd class="font-medium tabular-nums text-end">${p.n}</dd></div>
+          <div class="flex justify-between gap-3"><dt class="text-muted">Liquidity</dt><dd class="font-medium text-end">${p.liquidity}</dd></div>
+          <div class="flex justify-between gap-3"><dt class="text-muted">Value for money</dt><dd class="font-medium text-end">${p.valueForMoney}</dd></div>
+          <div class="flex justify-between gap-3"><dt class="text-muted">Rental yield</dt><dd class="font-medium text-end">${yieldLabel}</dd></div>
+          <div class="flex justify-between gap-3"><dt class="text-muted">Resale / Developer</dt><dd class="font-medium text-end">${p.resale} / ${p.developerSales}</dd></div>
+        </dl>
+
+        <div class="mt-3 flex flex-wrap gap-2">
+          ${linkBtn(mapsUrl(p), 'Google Maps', 'ghost')}
+          ${linkBtn(p.nawyUrl, 'Nawy', 'accent')}
+          <a href="#card-${p.id}" class="inline-flex items-center rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted hover:text-accent">Full card</a>
+        </div>
+      `;
+    }
+
+    function showPinOverlay(p, anchorEl) {
+      const overlay = document.getElementById('pin-overlay');
+      const mapEl = document.getElementById('schematic-map');
+      overlay.innerHTML = pinSummaryHtml(p);
+      overlay.hidden = false;
+
+      document.querySelectorAll('.map-pin').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.id === p.id);
+      });
+
+      // Position near pin, keep inside map bounds
+      const mapRect = mapEl.getBoundingClientRect();
+      const pinRect = anchorEl.getBoundingClientRect();
+      const overlayW = Math.min(300, mapRect.width - 24);
+      let left = pinRect.left - mapRect.left + pinRect.width / 2 - overlayW / 2;
+      let top = pinRect.top - mapRect.top - 12;
+      left = Math.max(12, Math.min(left, mapRect.width - overlayW - 12));
+      // Prefer above pin; if too high, place below
+      overlay.style.width = overlayW + 'px';
+      overlay.style.left = left + 'px';
+      overlay.style.top = '0px';
+      // measure after paint
+      requestAnimationFrame(() => {
+        const h = overlay.offsetHeight;
+        let topPos = pinRect.top - mapRect.top - h - 8;
+        if (topPos < 12) topPos = pinRect.bottom - mapRect.top + 8;
+        if (topPos + h > mapRect.height - 12) topPos = Math.max(12, mapRect.height - h - 12);
+        overlay.style.top = topPos + 'px';
+      });
+
+      overlay.querySelector('.pin-overlay-close')?.addEventListener('click', hidePinOverlay);
+    }
+
+    function hidePinOverlay() {
+      const overlay = document.getElementById('pin-overlay');
+      overlay.hidden = true;
+      overlay.innerHTML = '';
+      document.querySelectorAll('.map-pin').forEach(btn => btn.classList.remove('active'));
+    }
+
+    function renderSchematicPins() {
+      const host = document.getElementById('schematic-pins');
+      host.innerHTML = projects.map(p => {
+        const layout = PIN_LAYOUT[p.id] || { left: '50%', top: '50%', short: shortName(p.project) };
+        const pct = scorePercent(p.score);
+        return `
+          <button type="button" class="map-pin" data-id="${p.id}"
+            style="left:${layout.left}; top:${layout.top};"
+            aria-label="${p.project}: ${p.psqmLabel} EGP/sqm, score ${p.score}/10">
+            <span class="pin-head">${pct}%</span>
+            <span class="pin-stem" aria-hidden="true"></span>
+            <span class="pin-dot" aria-hidden="true"></span>
+            <span class="mt-1 block max-w-[4.5rem] truncate text-[10px] font-semibold text-ink">${layout.short}</span>
+          </button>
+        `;
+      }).join('');
+
+      host.querySelectorAll('.map-pin').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const p = projects.find(x => x.id === btn.dataset.id);
+          if (p) showPinOverlay(p, btn);
+        });
+      });
+    }
+
+    function renderMapPins() {
+      document.getElementById('map-pins').innerHTML = projects.map(p => {
+        const pct = scorePercent(p.score);
+        return `
+        <li class="border-line px-4 py-3 hover:bg-mist/80 sm:border-e sm:border-b">
+          <button type="button" class="w-full text-start map-list-pin" data-id="${p.id}">
+            <div class="flex items-start gap-3">
+              <span class="mt-0.5 flex h-8 w-8 shrink-0 flex-col items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white">${pct}%</span>
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-semibold leading-snug">${p.project}</p>
+                <p class="mt-0.5 text-xs text-muted">${p.locationGroup}</p>
+                <p class="mt-1 text-xs"><span class="font-medium tabular-nums">${p.psqmLabel}</span> <span class="text-muted">EGP/sqm</span> · <span class="font-medium">${p.score}/10</span></p>
+              </div>
+            </div>
+          </button>
+          <div class="mt-2 flex flex-wrap gap-2 ps-11">
+            ${linkBtn(mapsUrl(p), 'Google Maps', 'ghost')}
+            ${linkBtn(p.nawyUrl, 'Nawy', 'accent')}
+            <a href="#card-${p.id}" class="inline-flex items-center rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted hover:text-accent">Details</a>
+          </div>
+        </li>`;
+      }).join('');
+
+      document.querySelectorAll('.map-list-pin').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const p = projects.find(x => x.id === btn.dataset.id);
+          const pin = document.querySelector(`.map-pin[data-id="${btn.dataset.id}"]`);
+          if (p && pin) {
+            document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            showPinOverlay(p, pin);
+          }
+        });
+      });
+    }
+
+    document.getElementById('close-pin-overlay')?.addEventListener('click', hidePinOverlay);
+    document.getElementById('schematic-map')?.addEventListener('click', (e) => {
+      if (e.target === e.currentTarget || e.target.classList.contains('zone') || e.target.classList.contains('zone-label')) {
+        hidePinOverlay();
+      }
+    });
+
     /* ---------- Project cards ---------- */
     function renderCards(filterLoc = 'all') {
       const list = filterLoc === 'all' ? projects : projects.filter(p => p.locationGroup === filterLoc);
       document.getElementById('project-cards').innerHTML = list.map(p => `
-        <article class="flex flex-col rounded-2xl border border-line bg-white shadow-card">
+        <article id="card-${p.id}" class="flex flex-col scroll-mt-24 rounded-2xl border border-line bg-white shadow-card">
           <div class="border-b border-line px-5 py-4">
             <div class="flex items-start justify-between gap-3">
               <div>
@@ -866,6 +1303,10 @@
               <span class="shrink-0 rounded-md bg-slate-100 px-2 py-1 text-xs font-medium tabular-nums">${p.score}/10</span>
             </div>
             <p class="mt-2 text-xs text-muted">${p.location}</p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              ${linkBtn(mapsUrl(p), 'Google Maps', 'ghost')}
+              ${linkBtn(p.nawyUrl, 'More on Nawy', 'accent')}
+            </div>
           </div>
           <div class="grid grid-cols-2 gap-3 px-5 py-4 text-sm">
             <div>
@@ -900,6 +1341,11 @@
               <p class="text-xs text-muted">Value for money</p>
               <p class="mt-0.5 font-medium">${p.valueForMoney}</p>
             </div>
+          </div>
+          <div class="border-t border-line px-5 py-4">
+            <p class="text-xs font-semibold uppercase tracking-wide text-muted">Services & facilities</p>
+            <p class="mt-0.5 text-[11px] text-muted">Only items explicitly mentioned in the report</p>
+            ${facilitiesHtml(p)}
           </div>
           <details class="mt-auto border-t border-line">
             <summary class="flex items-center justify-between px-5 py-3 text-sm font-medium text-muted hover:text-ink">
@@ -1149,7 +1595,7 @@
       a.addEventListener('click', () => document.getElementById('mobile-menu').classList.add('hidden'));
     });
 
-    const sections = ['summary','comparison','charts','projects','insights','excluded'];
+    const sections = ['summary','comparison','charts','map','projects','insights','excluded'];
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -1166,6 +1612,8 @@
 
     /* Init */
     renderTable();
+    renderSchematicPins();
+    renderMapPins();
     renderCards();
     buildInsights();
   </script>
