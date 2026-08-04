@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cairo Ready-to-Move Apartments — Market Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@500;600&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: '#0f172a',
+            mist: '#f8fafc',
+            line: '#e2e8f0',
+            accent: '#0f766e',
+            muted: '#64748b',
+          },
+          fontFamily: {
+            sans: ['IBM Plex Sans', 'system-ui', 'sans-serif'],
+            serif: ['IBM Plex Serif', 'Georgia', 'serif'],
+          },
+          boxShadow: {
+            card: '0 1px 2px rgba(15,23,42,0.04), 0 4px 16px rgba(15,23,42,0.04)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: 'IBM Plex Sans', system-ui, sans-serif; }
+    .nav-link.active { color: #0f766e; border-bottom-color: #0f766e; }
+    details > summary { list-style: none; cursor: pointer; }
+    details > summary::-webkit-details-marker { display: none; }
+    details[open] .chevron { transform: rotate(180deg); }
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
+    th.sortable:hover { color: #0f766e; }
+    th.sortable .sort-ind { opacity: 0.35; font-size: 0.7em; margin-inline-start: 0.25rem; }
+    th.sortable.asc .sort-ind, th.sortable.desc .sort-ind { opacity: 1; color: #0f766e; }
+    .chart-box { position: relative; height: 320px; }
+    @media (max-width: 640px) { .chart-box { height: 260px; } }
+  </style>
+</head>
+<body class="bg-mist text-ink antialiased">
+
+  <!-- Sticky Nav -->
+  <header class="sticky top-0 z-50 border-b border-line bg-white/90 backdrop-blur-md">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+      <div class="min-w-0">
+        <p class="truncate text-xs font-medium uppercase tracking-wider text-muted">Market Analysis</p>
+        <h1 class="truncate font-serif text-lg font-semibold tracking-tight sm:text-xl">Cairo RTM Dashboard</h1>
+      </div>
+      <nav class="hidden items-center gap-1 md:flex" id="main-nav">
+        <a href="#summary" class="nav-link border-b-2 border-transparent px-3 py-2 text-sm text-muted transition hover:text-ink">Summary</a>
+        <a href="#comparison" class="nav-link border-b-2 border-transparent px-3 py-2 text-sm text-muted transition hover:text-ink">Compare</a>
+        <a href="#charts" class="nav-link border-b-2 border-transparent px-3 py-2 text-sm text-muted transition hover:text-ink">Charts</a>
+        <a href="#projects" class="nav-link border-b-2 border-transparent px-3 py-2 text-sm text-muted transition hover:text-ink">Projects</a>
+        <a href="#insights" class="nav-link border-b-2 border-transparent px-3 py-2 text-sm text-muted transition hover:text-ink">Insights</a>
+        <a href="#excluded" class="nav-link border-b-2 border-transparent px-3 py-2 text-sm text-muted transition hover:text-ink">Excluded</a>
+      </nav>
+      <button id="mobile-menu-btn" class="rounded-lg border border-line px-3 py-1.5 text-sm md:hidden" aria-label="Menu">Menu</button>
+    </div>
+    <div id="mobile-menu" class="hidden border-t border-line bg-white px-4 py-3 md:hidden">
+      <div class="flex flex-col gap-1">
+        <a href="#summary" class="rounded-lg px-3 py-2 text-sm hover:bg-mist">Summary</a>
+        <a href="#comparison" class="rounded-lg px-3 py-2 text-sm hover:bg-mist">Compare</a>
+        <a href="#charts" class="rounded-lg px-3 py-2 text-sm hover:bg-mist">Charts</a>
+        <a href="#projects" class="rounded-lg px-3 py-2 text-sm hover:bg-mist">Projects</a>
+        <a href="#insights" class="rounded-lg px-3 py-2 text-sm hover:bg-mist">Insights</a>
+        <a href="#excluded" class="rounded-lg px-3 py-2 text-sm hover:bg-mist">Excluded</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+
+    <!-- Hero -->
+    <section class="mb-10">
+      <p class="mb-2 text-sm font-medium text-accent">3-Bedroom Resale · EGP 5,000,000 – 10,000,000 Cash</p>
+      <h2 class="font-serif text-3xl font-semibold tracking-tight sm:text-4xl">Cairo Ready-to-Move Apartments</h2>
+      <p class="mt-3 max-w-3xl text-base leading-relaxed text-muted">
+        Greater Cairo (New Cairo / 5th Settlement / Mostakbal City) — Research compiled 4 August 2026.
+        Data collected live from PropertyFinder Egypt and Aqarmap listing pages, supplemented by developer, Nawy, and market-aggregator sources.
+      </p>
+      <p class="mt-2 text-sm text-muted">Every figure is sourced. Where a figure could not be verified it is marked <span class="font-medium text-ink">Not Available</span>.</p>
+    </section>
+
+    <!-- 1. Executive Summary -->
+    <section id="summary" class="mb-14 scroll-mt-24">
+      <div class="mb-6 flex items-end justify-between gap-4">
+        <div>
+          <h3 class="font-serif text-2xl font-semibold">Executive Summary</h3>
+          <p class="mt-1 text-sm text-muted">Snapshot of screened inventory inside the stated budget band</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div class="rounded-2xl border border-line bg-white p-5 shadow-card">
+          <p class="text-xs font-medium uppercase tracking-wide text-muted">Projects analysed</p>
+          <p class="mt-2 text-3xl font-semibold tracking-tight">11</p>
+          <p class="mt-1 text-xs text-muted">of 15 screened</p>
+        </div>
+        <div class="rounded-2xl border border-line bg-white p-5 shadow-card">
+          <p class="text-xs font-medium uppercase tracking-wide text-muted">Developers</p>
+          <p class="mt-2 text-3xl font-semibold tracking-tight">9</p>
+          <p class="mt-1 text-xs text-muted">across analysed set</p>
+        </div>
+        <div class="rounded-2xl border border-line bg-white p-5 shadow-card">
+          <p class="text-xs font-medium uppercase tracking-wide text-muted">Price range</p>
+          <p class="mt-2 text-base font-semibold leading-snug tracking-tight sm:text-lg">EGP 5,000,000 – 10,000,000</p>
+          <p class="mt-1 text-xs text-muted">lowest–highest cash ask</p>
+        </div>
+        <div class="rounded-2xl border border-line bg-white p-5 shadow-card">
+          <p class="text-xs font-medium uppercase tracking-wide text-muted">Area range</p>
+          <p class="mt-2 text-lg font-semibold leading-snug tracking-tight sm:text-xl">96 – 263 sqm</p>
+          <p class="mt-1 text-xs text-muted">typical sizes observed</p>
+        </div>
+        <div class="rounded-2xl border border-line bg-white p-5 shadow-card">
+          <p class="text-xs font-medium uppercase tracking-wide text-muted">Excluded</p>
+          <p class="mt-2 text-3xl font-semibold tracking-tight">4</p>
+          <p class="mt-1 text-xs text-muted">insufficient budget-fit</p>
+        </div>
+        <div class="rounded-2xl border border-line bg-white p-5 shadow-card">
+          <p class="text-xs font-medium uppercase tracking-wide text-muted">Data freshness</p>
+          <p class="mt-2 text-lg font-semibold leading-snug tracking-tight sm:text-xl">4 Aug 2026</p>
+          <p class="mt-1 text-xs text-muted">live listing extraction</p>
+        </div>
+      </div>
+
+      <details class="mt-6 rounded-2xl border border-line bg-white shadow-card" open>
+        <summary class="flex items-center justify-between gap-4 px-5 py-4">
+          <span class="font-medium">Key findings from the report</span>
+          <svg class="chevron h-4 w-4 text-muted transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </summary>
+        <div class="border-t border-line px-5 py-4 text-sm leading-relaxed text-muted space-y-3">
+          <p><span class="font-medium text-ink">Widest, deepest resale market:</span> Madinaty, with roughly 1,930 active apartment listings compound-wide and the broadest range of sizes/prices inside the budget.</p>
+          <p><span class="font-medium text-ink">Best value-for-money</span> (lowest price/sqm for the largest units): Palm Hills Capital Gardens (Mostakbal City) and City Gate (Qatari Diar), both under EGP 36,000/sqm median versus EGP 49,000-55,000/sqm at Madinaty, Palm Hills New Cairo and ZED East.</p>
+          <p><span class="font-medium text-ink">Best computed rental yield:</span> Hyde Park New Cairo (~7.6% gross) and Madinaty (~6.6% gross); weakest: Sarai (~3.3%) and Palm Hills New Cairo (~4.3%).</p>
+          <p><span class="font-medium text-ink">Highest physical/landscape quality</span> on the data gathered: SODIC Villette and ZED East, but both have very thin in-budget supply — a 10M budget buys only the lower end of their inventory.</p>
+          <p><span class="font-medium text-ink">Overall top-ranked projects</span> for a 3BR EGP 5-10M cash buyer: Madinaty, Mountain View iCity, SODIC Villette (with caveats), Hyde Park New Cairo, ZED East, Palm Hills New Cairo, Sarai, and Taj City.</p>
+          <p class="text-xs pt-2 border-t border-line">Quantitative figures are High confidence. Qualitative assessments are Medium confidence. See report Section 8.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- 2. Project Comparison -->
+    <section id="comparison" class="mb-14 scroll-mt-24">
+      <div class="mb-6">
+        <h3 class="font-serif text-2xl font-semibold">Project Comparison</h3>
+        <p class="mt-1 text-sm text-muted">Sortable table of the 11 projects with evaluable 3BR resale supply inside EGP 5–10M. Click column headers to sort.</p>
+      </div>
+
+      <div class="rounded-2xl border border-line bg-white shadow-card">
+        <div class="table-wrap">
+          <table id="comparison-table" class="w-full min-w-[1100px] text-left text-sm">
+            <thead class="border-b border-line bg-slate-50/80 text-xs uppercase tracking-wide text-muted">
+              <tr>
+                <th class="sortable px-4 py-3 font-medium" data-key="project" data-type="string">Project <span class="sort-ind">↕</span></th>
+                <th class="sortable px-4 py-3 font-medium" data-key="developer" data-type="string">Developer <span class="sort-ind">↕</span></th>
+                <th class="sortable px-4 py-3 font-medium" data-key="location" data-type="string">Location <span class="sort-ind">↕</span></th>
+                <th class="sortable px-4 py-3 font-medium" data-key="low" data-type="number">Starting Price <span class="sort-ind">↕</span></th>
+                <th class="sortable px-4 py-3 font-medium" data-key="high" data-type="number">Max Price <span class="sort-ind">↕</span></th>
+                <th class="sortable px-4 py-3 font-medium" data-key="psqm" data-type="number">Price / sqm <span class="sort-ind">↕</span></th>
+                <th class="sortable px-4 py-3 font-medium" data-key="areaMin" data-type="number">Area range <span class="sort-ind">↕</span></th>
+                <th class="px-4 py-3 font-medium">Unit types</th>
+                <th class="sortable px-4 py-3 font-medium" data-key="n" data-type="number">Availability (n) <span class="sort-ind">↕</span></th>
+                <th class="px-4 py-3 font-medium">Resale</th>
+                <th class="px-4 py-3 font-medium">Developer sales</th>
+              </tr>
+            </thead>
+            <tbody id="comparison-body" class="divide-y divide-line"></tbody>
+          </table>
+        </div>
+        <p class="border-t border-line px-4 py-3 text-xs text-muted">Avg EGP/sqm figures are computed from live, budget-filtered (EGP 5–10M) 3BR listing samples — not Aqarmap whole-compound averages. Unit type for this report: 3-bedroom apartments.</p>
+      </div>
+    </section>
+
+    <!-- 3. Charts -->
+    <section id="charts" class="mb-14 scroll-mt-24">
+      <div class="mb-6">
+        <h3 class="font-serif text-2xl font-semibold">Charts</h3>
+        <p class="mt-1 text-sm text-muted">Generated only from figures present in the report. No estimated or interpolated values.</p>
+      </div>
+
+      <div class="grid gap-4 lg:grid-cols-2">
+        <div class="rounded-2xl border border-line bg-white p-5 shadow-card">
+          <h4 class="mb-1 text-sm font-semibold">Average price per sqm by project</h4>
+          <p class="mb-4 text-xs text-muted">Avg EGP/sqm from budget-filtered live samples</p>
+          <div class="chart-box"><canvas id="chart-psqm"></canvas></div>
+        </div>
+        <div class="rounded-2xl border border-line bg-white p-5 shadow-card">
+          <h4 class="mb-1 text-sm font-semibold">Starting price comparison</h4>
+          <p class="mb-4 text-xs text-muted">Lowest cash asking price (EGP)</p>
+          <div class="chart-box"><canvas id="chart-start"></canvas></div>
+        </div>
+        <div class="rounded-2xl border border-line bg-white p-5 shadow-card">
+          <h4 class="mb-1 text-sm font-semibold">Price range by project</h4>
+          <p class="mb-4 text-xs text-muted">Lowest vs highest cash asking price (EGP millions)</p>
+          <div class="chart-box"><canvas id="chart-range"></canvas></div>
+        </div>
+        <div class="rounded-2xl border border-line bg-white p-5 shadow-card">
+          <h4 class="mb-1 text-sm font-semibold">Typical unit size range</h4>
+          <p class="mb-4 text-xs text-muted">Min–max typical size (sqm) from the comparison table</p>
+          <div class="chart-box"><canvas id="chart-size"></canvas></div>
+        </div>
+        <div class="rounded-2xl border border-line bg-white p-5 shadow-card">
+          <h4 class="mb-1 text-sm font-semibold">Units in budget by project</h4>
+          <p class="mb-4 text-xs text-muted">Resale inventory count (n) inside EGP 5–10M</p>
+          <div class="chart-box"><canvas id="chart-n"></canvas></div>
+        </div>
+        <div class="rounded-2xl border border-line bg-white p-5 shadow-card">
+          <h4 class="mb-1 text-sm font-semibold">Projects by developer</h4>
+          <p class="mb-4 text-xs text-muted">Count of analysed projects per developer</p>
+          <div class="chart-box"><canvas id="chart-dev"></canvas></div>
+        </div>
+        <div class="rounded-2xl border border-line bg-white p-5 shadow-card">
+          <h4 class="mb-1 text-sm font-semibold">Projects by location group</h4>
+          <p class="mb-4 text-xs text-muted">Grouped from reported project locations</p>
+          <div class="chart-box"><canvas id="chart-loc"></canvas></div>
+        </div>
+        <div class="rounded-2xl border border-line bg-white p-5 shadow-card">
+          <h4 class="mb-1 text-sm font-semibold">Resale inventory vs developer sales status</h4>
+          <p class="mb-4 text-xs text-muted">All 11 analysed projects: resale units in budget (n) and developer selling today = Yes</p>
+          <div class="chart-box"><canvas id="chart-resale-dev"></canvas></div>
+        </div>
+        <div class="rounded-2xl border border-line bg-white p-5 shadow-card lg:col-span-2">
+          <h4 class="mb-1 text-sm font-semibold">Gross rental yield by project</h4>
+          <p class="mb-4 text-xs text-muted">Only projects with a reported yield. SODIC Villette 12.6% is flagged in the report as unreliable. Projects with N/A omitted.</p>
+          <div class="chart-box"><canvas id="chart-yield"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Project Cards -->
+    <section id="projects" class="mb-14 scroll-mt-24">
+      <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h3 class="font-serif text-2xl font-semibold">Project Cards</h3>
+          <p class="mt-1 text-sm text-muted">Compact profiles for the 11 analysed compounds. Expand for pros/cons where stated in the report.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <label class="text-xs text-muted self-center">Filter by location</label>
+          <select id="loc-filter" class="rounded-lg border border-line bg-white px-3 py-1.5 text-sm">
+            <option value="all">All locations</option>
+          </select>
+        </div>
+      </div>
+      <div id="project-cards" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3"></div>
+    </section>
+
+    <!-- 5. Insights -->
+    <section id="insights" class="mb-14 scroll-mt-24">
+      <div class="mb-6">
+        <h3 class="font-serif text-2xl font-semibold">Insights</h3>
+        <p class="mt-1 text-sm text-muted">Factual observations supported directly by the comparison data. No unsupported recommendations.</p>
+      </div>
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" id="insights-grid"></div>
+    </section>
+
+    <!-- Excluded -->
+    <section id="excluded" class="mb-14 scroll-mt-24">
+      <div class="mb-6">
+        <h3 class="font-serif text-2xl font-semibold">Screened but Excluded</h3>
+        <p class="mt-1 text-sm text-muted">Compounds with insufficient 3BR resale supply inside EGP 5,000,000–10,000,000.</p>
+      </div>
+      <div class="grid gap-3 md:grid-cols-2">
+        <details class="rounded-2xl border border-line bg-white shadow-card">
+          <summary class="flex items-center justify-between gap-3 px-5 py-4">
+            <div>
+              <p class="font-medium">SODIC Eastown</p>
+              <p class="text-xs text-muted">1 of 66 scanned listings in budget</p>
+            </div>
+            <svg class="chevron h-4 w-4 shrink-0 text-muted transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </summary>
+          <div class="border-t border-line px-5 py-4 text-sm leading-relaxed text-muted space-y-2">
+            <p>Live 3BR resale listings (66 cards scanned across 2 PropertyFinder pages) are overwhelmingly priced EGP 10,350,000–25,000,000+ for 130–278 sqm units; only 1 listing (EGP 7,700,000 / 195 sqm) fell inside the EGP 5–10M budget.</p>
+            <p>Aqarmap's compound-wide apartment average is 89,650 EGP/sqm.</p>
+          </div>
+        </details>
+        <details class="rounded-2xl border border-line bg-white shadow-card">
+          <summary class="flex items-center justify-between gap-3 px-5 py-4">
+            <div>
+              <p class="font-medium">Mivida (Emaar)</p>
+              <p class="text-xs text-muted">1 of 31 scanned listings in budget</p>
+            </div>
+            <svg class="chevron h-4 w-4 shrink-0 text-muted transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </summary>
+          <div class="border-t border-line px-5 py-4 text-sm leading-relaxed text-muted space-y-2">
+            <p>3BR apartments run 190–289 sqm; of 31 live listings scanned, only 1 fell inside EGP 5–10M and the median price across all 3BR listings was approximately EGP 19,000,000.</p>
+          </div>
+        </details>
+        <details class="rounded-2xl border border-line bg-white shadow-card">
+          <summary class="flex items-center justify-between gap-3 px-5 py-4">
+            <div>
+              <p class="font-medium">The Waterway View (90th St)</p>
+              <p class="text-xs text-muted">1 of 31 scanned listings in budget</p>
+            </div>
+            <svg class="chevron h-4 w-4 shrink-0 text-muted transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </summary>
+          <div class="border-t border-line px-5 py-4 text-sm leading-relaxed text-muted space-y-2">
+            <p>Only 1 of 31 live 3BR listings fell inside EGP 5–10M (EGP 8,800,000 / 182 sqm); the broader range for the project runs up to EGP 17,000,000.</p>
+          </div>
+        </details>
+        <details class="rounded-2xl border border-line bg-white shadow-card">
+          <summary class="flex items-center justify-between gap-3 px-5 py-4">
+            <div>
+              <p class="font-medium">Swan Lake Residence (Hassan Allam)</p>
+              <p class="text-xs text-muted">1 of 35 scanned listings in budget</p>
+            </div>
+            <svg class="chevron h-4 w-4 shrink-0 text-muted transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </summary>
+          <div class="border-t border-line px-5 py-4 text-sm leading-relaxed text-muted space-y-2">
+            <p>Only 1 of 35 live 3BR listings fell inside EGP 5–10M (EGP 8,700,000 / 155 sqm). Insufficient in-budget sample for a full evaluation.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Ranking (collapsible, from report) -->
+    <section class="mb-14">
+      <details class="rounded-2xl border border-line bg-white shadow-card">
+        <summary class="flex items-center justify-between gap-4 px-5 py-4">
+          <div>
+            <h3 class="font-serif text-xl font-semibold">Final Ranking — Top 8 (from report Section 6)</h3>
+            <p class="mt-1 text-sm text-muted">Simple mean of 16 evaluation-criteria scores. Medium confidence for qualitative components.</p>
+          </div>
+          <svg class="chevron h-4 w-4 shrink-0 text-muted transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </summary>
+        <div class="border-t border-line divide-y divide-line text-sm">
+          <div class="px-5 py-4"><span class="font-semibold text-accent">#1</span> Madinaty — <span class="font-medium">8.13/10</span></div>
+          <div class="px-5 py-4"><span class="font-semibold text-accent">#2</span> Mountain View iCity New Cairo — <span class="font-medium">8.09/10</span></div>
+          <div class="px-5 py-4"><span class="font-semibold text-accent">#3</span> SODIC Villette — <span class="font-medium">8.06/10</span></div>
+          <div class="px-5 py-4"><span class="font-semibold text-accent">#4</span> Hyde Park New Cairo — <span class="font-medium">8.03/10</span></div>
+          <div class="px-5 py-4"><span class="font-semibold text-accent">#5</span> ZED East — <span class="font-medium">7.66/10</span></div>
+          <div class="px-5 py-4"><span class="font-semibold text-accent">#6</span> Palm Hills New Cairo (PK1/PK2) — <span class="font-medium">7.53/10</span></div>
+          <div class="px-5 py-4"><span class="font-semibold text-accent">#7</span> Sarai — <span class="font-medium">7.34/10</span></div>
+          <div class="px-5 py-4"><span class="font-semibold text-accent">#8</span> Taj City — <span class="font-medium">7.28/10</span></div>
+          <div class="px-5 py-4 text-muted">Also considered (#9–11): Palm Hills Capital Gardens (7.25), City Gate (7.09), El Patio Oro / La Vista (6.91).</div>
+        </div>
+      </details>
+    </section>
+
+    <footer class="border-t border-line pt-8 pb-12 text-sm text-muted">
+      <p class="font-medium text-ink">Disclaimer</p>
+      <p class="mt-2 max-w-3xl leading-relaxed">This dashboard presents data from the research report compiled 4 August 2026. Listing prices are asking prices, not confirmed transacted prices. This is a research aid and does not constitute investment, legal, or financial advice. Buyers should conduct standard Egyptian real-estate legal and physical due diligence before purchasing.</p>
+      <p class="mt-4 text-xs">Sources: PropertyFinder Egypt · Aqarmap · Nawy · Bayut Egypt · developer and aggregator sites cited in the report.</p>
+    </footer>
+  </main>
+
+  <script>
+    /* =========================================================
+       DATA — copied exactly from the Markdown report tables.
+       No estimated, inferred, or invented values.
+       ========================================================= */
+    const projects = [
+      {
+        id: 'madinaty',
+        project: 'Madinaty',
+        developer: 'Talaat Moustafa Group (TMG)',
+        location: 'New Cairo (East Cairo, off Suez Road)',
+        locationGroup: 'New Cairo / East Cairo',
+        n: 20,
+        areaMin: 96,
+        areaMax: 181,
+        areaLabel: '96-181',
+        avgPrice: 7337730,
+        avgPriceLabel: 'EGP 7,337,730',
+        psqm: 55069,
+        psqmLabel: '55,069',
+        low: 5450000,
+        lowLabel: 'EGP 5,450,000',
+        high: 9500000,
+        highLabel: 'EGP 9,500,000',
+        unitTypes: '3-bedroom apartments',
+        resale: 'Yes',
+        developerSales: 'Yes',
+        yield: '6.59%',
+        yieldNum: 6.59,
+        yieldFlag: false,
+        liquidity: 'High',
+        valueForMoney: 'Moderate',
+        score: 8.13,
+        medianPsqm: '53,686 EGP/sqm',
+        pros: [
+          'By far the deepest resale market researched (huge selection, easy to find a match for almost any 3BR budget/size combination)',
+          'Longest operating track record of any project on this list (delivered since 2013) — schools, clinics, retail and transport are all fully functioning, not promises',
+          'Strong, liquid rental market with ~6.6% computed gross yield, among the highest of the mainstream (non-thin-sample) projects',
+          "TMG's balance-sheet strength and 20-year delivery record reduce execution risk versus newer developers"
+        ],
+        cons: [
+          'Compound is very large (8,000 acres) — internal distances mean a 10-15 minute drive is common just to reach amenities within Madinaty itself',
+          'Older phases (B1-B7) have visibly dated architecture and finishes versus SODIC/Palm Hills/Ora product',
+          'Middle Ring Road/Suez Road access point sees heavy peak-hour congestion',
+          'Price/sqm is mid-to-high for what is, in older phases, an older building stock'
+        ]
+      },
+      {
+        id: 'hyde-park',
+        project: 'Hyde Park New Cairo',
+        developer: 'Hyde Park Developments',
+        location: 'New Cairo, 5th Settlement (Golden Square)',
+        locationGroup: '5th Settlement / Golden Square',
+        n: 11,
+        areaMin: 136,
+        areaMax: 192,
+        areaLabel: '136-192',
+        avgPrice: 8041918,
+        avgPriceLabel: 'EGP 8,041,918',
+        psqm: 50912,
+        psqmLabel: '50,912',
+        low: 6074100,
+        lowLabel: 'EGP 6,074,100',
+        high: 9970000,
+        highLabel: 'EGP 9,970,000',
+        unitTypes: '3-bedroom apartments',
+        resale: 'Yes',
+        developerSales: 'Yes',
+        yield: '7.59%',
+        yieldNum: 7.59,
+        yieldFlag: false,
+        liquidity: 'Good',
+        valueForMoney: 'Moderate',
+        score: 8.03,
+        medianPsqm: '48,980 EGP/sqm',
+        pros: [
+          'Reported to have some of the highest-quality finishing and landscaping of any project in the set (large central park, mature trees/greenery vs newer compounds still growing in)',
+          'Fully delivered — what you view on resale is what exists today, no construction risk',
+          'Strong computed rental yield (~7.6%), the highest among projects with a reliable rental sample',
+          'Central 5th Settlement / Golden Square location close to schools, AUC, and 90th Street retail'
+        ],
+        cons: [
+          'Budget ceiling of EGP 10M buys a smaller/older unit here than in Madinaty, Sarai, or Taj City — most larger (180m+) units exceed 10M',
+          'Developer no longer sells new units in this specific compound (secondary market only) — no fresh-launch discount/payment-plan option available for this exact product',
+          'Traffic on the 90th Street/Middle Ring Road approaches can be heavy at peak times'
+        ]
+      },
+      {
+        id: 'phnc',
+        project: 'Palm Hills New Cairo (PK1/PK2)',
+        developer: 'Palm Hills Developments',
+        location: 'New Cairo, 5th Settlement',
+        locationGroup: '5th Settlement / Golden Square',
+        n: 13,
+        areaMin: 160,
+        areaMax: 203,
+        areaLabel: '160-203',
+        avgPrice: 8711692,
+        avgPriceLabel: 'EGP 8,711,692',
+        psqm: 49573,
+        psqmLabel: '49,573',
+        low: 6950000,
+        lowLabel: 'EGP 6,950,000',
+        high: 10000000,
+        highLabel: 'EGP 10,000,000',
+        unitTypes: '3-bedroom apartments',
+        resale: 'Yes',
+        developerSales: 'Yes',
+        yield: '4.33%',
+        yieldNum: 4.33,
+        yieldFlag: false,
+        liquidity: 'Good',
+        valueForMoney: 'Good',
+        score: 7.53,
+        medianPsqm: '54,054 EGP/sqm',
+        pros: [
+          'Established, centrally located 5th Settlement address with strong brand recognition',
+          "Contemporary architecture with lower-density 'spaced' unit layouts (less cluster-block feel than some rivals)",
+          'Deep enough resale supply that most budgets/sizes are represented',
+          '5-star hotel and completed retail on site'
+        ],
+        cons: [
+          'Multiple resident/buyer reviews cite poor post-sale customer service and slow issue resolution from the developer',
+          'Weakest computed rental yield among the well-sampled projects (~4.3%) — resale prices may be ahead of rental market',
+          'At the EGP 10M ceiling, unit sizes top out lower (160-180 sqm) than in Sarai/Taj City/Capital Gardens for similar money'
+        ]
+      },
+      {
+        id: 'capital-gardens',
+        project: 'Palm Hills Capital Gardens',
+        developer: 'Palm Hills Developments',
+        location: 'Mostakbal City (New Cairo extension)',
+        locationGroup: 'Mostakbal City',
+        n: 7,
+        areaMin: 160,
+        areaMax: 263,
+        areaLabel: '160-263',
+        avgPrice: 7664009,
+        avgPriceLabel: 'EGP 7,664,009',
+        psqm: 38140,
+        psqmLabel: '38,140',
+        low: 6300000,
+        lowLabel: 'EGP 6,300,000',
+        high: 9225000,
+        highLabel: 'EGP 9,225,000',
+        unitTypes: '3-bedroom apartments',
+        resale: 'Yes',
+        developerSales: 'Yes',
+        yield: 'N/A',
+        yieldNum: null,
+        yieldFlag: false,
+        liquidity: 'Good',
+        valueForMoney: 'High',
+        score: 7.25,
+        medianPsqm: '35,787 EGP/sqm',
+        pros: [
+          'Best value-for-money in the entire study: largest apartments (median 200 sqm) at the lowest price/sqm',
+          'Highest in-budget listing concentration (77% of 3BR listings fall in EGP 5-10M) — easiest project to actually find a matching unit in',
+          'Palm Hills brand and construction standards apply'
+        ],
+        cons: [
+          'Mostakbal City location is further from central New Cairo, AUC and established 90th Street retail than the 5th Settlement projects',
+          'Fewer mature schools/hospitals/commercial anchors currently operating nearby versus Madinaty or Hyde Park',
+          'No reliable rental data found — rental demand/liquidity for this specific compound is Not Available'
+        ]
+      },
+      {
+        id: 'villette',
+        project: 'SODIC Villette',
+        developer: 'SODIC',
+        location: 'New Cairo, 5th Settlement, Golden Square',
+        locationGroup: '5th Settlement / Golden Square',
+        n: 5,
+        areaMin: 198,
+        areaMax: 212,
+        areaLabel: '198-212',
+        avgPrice: 7720000,
+        avgPriceLabel: 'EGP 7,720,000',
+        psqm: 38219,
+        psqmLabel: '38,219',
+        low: 5000000,
+        lowLabel: 'EGP 5,000,000',
+        high: 9300000,
+        highLabel: 'EGP 9,300,000',
+        unitTypes: '3-bedroom apartments',
+        resale: 'Yes',
+        developerSales: 'Yes',
+        yield: '12.6% (flagged)',
+        yieldNum: 12.6,
+        yieldFlag: true,
+        liquidity: 'Low (in-budget)',
+        valueForMoney: 'Moderate',
+        score: 8.06,
+        medianPsqm: '40,201 EGP/sqm',
+        pros: [
+          'Highest landscape/design quality score in the study — 54% green space, low 18.6% built-up ratio, mature SODIC execution standards',
+          'Prestigious Golden Square address with strong long-term brand/resale cachet',
+          "The few units that do fall in-budget are attractively priced relative to the compound's overall reputation"
+        ],
+        cons: [
+          'Very thin in-budget resale supply (5 matching listings found) — a buyer may need to wait or negotiate rather than pick from a wide selection',
+          "The in-budget units are priced far below Villette's compound-wide average, suggesting they are the oldest/least desirable stock (small sample, use caution)",
+          'Rental yield figure is statistically unreliable given the small, mismatched sample — treat as indicative only'
+        ]
+      },
+      {
+        id: 'icity',
+        project: 'Mountain View iCity New Cairo',
+        developer: 'Mountain View (DMG)',
+        location: 'New Cairo, 5th Settlement, Golden Square',
+        locationGroup: '5th Settlement / Golden Square',
+        n: 6,
+        areaMin: 135,
+        areaMax: 230,
+        areaLabel: '135-230',
+        avgPrice: 7353447,
+        avgPriceLabel: 'EGP 7,353,447',
+        psqm: 45431,
+        psqmLabel: '45,431',
+        low: 6378348,
+        lowLabel: 'EGP 6,378,348',
+        high: 8500000,
+        highLabel: 'EGP 8,500,000',
+        unitTypes: '3-bedroom apartments',
+        resale: 'Yes',
+        developerSales: 'Yes',
+        yield: '4.81%',
+        yieldNum: 4.81,
+        yieldFlag: false,
+        liquidity: 'Very high',
+        valueForMoney: 'Good',
+        score: 8.09,
+        medianPsqm: '42,434 EGP/sqm',
+        pros: [
+          'Traffic-separated masterplan (iDrive) is a genuinely distinctive design feature versus every other project studied',
+          'Very deep in-budget resale supply (72% of listings qualify) — easy to shop and negotiate',
+          'Highest reported YoY price appreciation (153%) of any project researched, per Aqarmap',
+          'Strong computed liquidity metrics support a reasonably confident resale exit later'
+        ],
+        cons: [
+          'Rental yield (4.8%) is middling despite strong capital appreciation — better suited to a capital-gains than income thesis',
+          'Some phases still under construction (Core & Shell newer units) — buyer should confirm which specific building/phase a resale unit sits in',
+          'Retail/school infrastructure still maturing relative to Madinaty'
+        ]
+      },
+      {
+        id: 'city-gate',
+        project: 'City Gate',
+        developer: 'Qatari Diar',
+        location: 'New Cairo, 5th Settlement',
+        locationGroup: '5th Settlement / Golden Square',
+        n: 6,
+        areaMin: 176,
+        areaMax: 201,
+        areaLabel: '176-201',
+        avgPrice: 6671970,
+        avgPriceLabel: 'EGP 6,671,970',
+        psqm: 35938,
+        psqmLabel: '35,938',
+        low: 5750000,
+        lowLabel: 'EGP 5,750,000',
+        high: 8453000,
+        highLabel: 'EGP 8,453,000',
+        unitTypes: '3-bedroom apartments',
+        resale: 'Yes',
+        developerSales: 'Yes',
+        yield: 'N/A',
+        yieldNum: null,
+        yieldFlag: false,
+        liquidity: 'Moderate',
+        valueForMoney: 'High',
+        score: 7.09,
+        medianPsqm: '34,073 EGP/sqm',
+        pros: [
+          'Lowest resale price/sqm of any project studied (median 34,073 EGP/sqm) — cheapest entry point into a Tier-1-adjacent New Cairo compound',
+          'Backed by Qatari Diar, a well-capitalized sovereign-linked developer (lower counterparty/completion risk than smaller local developers)',
+          'Large-scale (8.5M sqm) integrated masterplan with golf-course-facing product in later phases'
+        ],
+        cons: [
+          'Newer and less proven than Madinaty/Hyde Park/SODIC — fewer completed amenities today, and community/retail maturity trails the established projects',
+          'No rental market data could be found — income/liquidity-on-exit for this specific product is unverified',
+          'Some resident-review sources flagged maintenance/service responsiveness concerns'
+        ]
+      },
+      {
+        id: 'sarai',
+        project: 'Sarai',
+        developer: 'Madinet Masr',
+        location: 'Mostakbal City / Future City, on Cairo-Suez Road',
+        locationGroup: 'Mostakbal City',
+        n: 8,
+        areaMin: 142,
+        areaMax: 204,
+        areaLabel: '142-204',
+        avgPrice: 6743926,
+        avgPriceLabel: 'EGP 6,743,926',
+        psqm: 41700,
+        psqmLabel: '41,700',
+        low: 5260000,
+        lowLabel: 'EGP 5,260,000',
+        high: 9500000,
+        highLabel: 'EGP 9,500,000',
+        unitTypes: '3-bedroom apartments',
+        resale: 'Yes',
+        developerSales: 'Yes',
+        yield: '3.33%',
+        yieldNum: 3.33,
+        yieldFlag: false,
+        liquidity: 'Good',
+        valueForMoney: 'High',
+        score: 7.34,
+        medianPsqm: '41,067 EGP/sqm',
+        pros: [
+          'Large, well-capitalized developer (Madinet Masr) with a strong recent delivery track record (1,941 units delivered across Sarai+Taj City in FY2025)',
+          'Attractive entry-level pricing and flexible 10-year 0%-interest plans available from the developer for new stock',
+          'Good in-budget resale liquidity (52% of listings qualify)'
+        ],
+        cons: [
+          'Weakest computed rental yield in the study (3.3%) — further-out location commands lower rents relative to purchase price',
+          'Further from central New Cairo/AUC/90th Street than the core 5th Settlement projects, meaning a longer commute for many New Cairo workplaces',
+          'Community/retail infrastructure still maturing as phases continue to deliver through 2026-2027'
+        ]
+      },
+      {
+        id: 'zed-east',
+        project: 'ZED East',
+        developer: 'ORA Developers',
+        location: 'New Cairo, Middle Ring Road / New Kattameya',
+        locationGroup: 'New Cairo / New Kattameya',
+        n: 8,
+        areaMin: 139,
+        areaMax: 192,
+        areaLabel: '139-192',
+        avgPrice: 8682270,
+        avgPriceLabel: 'EGP 8,682,270',
+        psqm: 54216,
+        psqmLabel: '54,216',
+        low: 7400000,
+        lowLabel: 'EGP 7,400,000',
+        high: 9936900,
+        highLabel: 'EGP 9,936,900',
+        unitTypes: '3-bedroom apartments',
+        resale: 'Yes',
+        developerSales: 'Yes',
+        yield: 'N/A',
+        yieldNum: null,
+        yieldFlag: false,
+        liquidity: 'Moderate',
+        valueForMoney: 'Moderate',
+        score: 7.66,
+        medianPsqm: '51,053 EGP/sqm',
+        pros: [
+          'High-profile developer (ORA/Naguib Sawiris) and internationally recognized masterplanning (WATG)',
+          '80%-green masterplan and generous inter-building spacing reported across multiple sources',
+          'Strong evidence of price appreciation versus original launch pricing (a positive signal for prior buyers, though it also means later entrants pay more)'
+        ],
+        cons: [
+          'In-budget units cluster at the very top of the EGP 5-10M range (mostly EGP 8.8-9.9M) — little room to negotiate down within this project without dropping unit size',
+          'No rental data found — income potential and true liquidity on exit are unverified',
+          'Some phases still delivering; delivery-date sources disagree (Jan 2027 vs Q4 2028), so buyers should verify the specific building'
+        ]
+      },
+      {
+        id: 'taj-city',
+        project: 'Taj City',
+        developer: 'Madinet Masr',
+        location: 'New Cairo / Mostakbal City, on Suez Road & Ring Road',
+        locationGroup: 'Mostakbal City',
+        n: 4,
+        areaMin: 132,
+        areaMax: 188,
+        areaLabel: '132-188',
+        avgPrice: 6950000,
+        avgPriceLabel: 'EGP 6,950,000',
+        psqm: 44125,
+        psqmLabel: '44,125',
+        low: 5750000,
+        lowLabel: 'EGP 5,750,000',
+        high: 9000000,
+        highLabel: 'EGP 9,000,000',
+        unitTypes: '3-bedroom apartments',
+        resale: 'Yes',
+        developerSales: 'Yes',
+        yield: '6.2%',
+        yieldNum: 6.2,
+        yieldFlag: false,
+        liquidity: 'Good',
+        valueForMoney: 'Good',
+        score: 7.28,
+        medianPsqm: '46,853 EGP/sqm',
+        pros: [
+          'Wide internal price range means a EGP 5-10M budget can land anywhere from a modest Club Side unit to a larger Lake Park/Taj Gardens unit — flexibility for different priorities',
+          'Strong airport/Ring Road connectivity (across from Cairo International Airport)',
+          'Solid computed rental yield (6.2%)',
+          "Backed by Madinet Masr's 65+ year track record and recent record delivery pace"
+        ],
+        cons: [
+          'Small apartment-only sample size in this budget band (n=4) reduces statistical confidence versus Madinaty/Mountain View — verify current listings directly before relying on these medians',
+          "Sub-phases vary hugely in age/quality/price — a 'Taj City' listing alone does not tell you which product tier you are buying into",
+          'Newer districts still under active construction (Tajed commercial district only launched 2024)'
+        ]
+      },
+      {
+        id: 'el-patio-oro',
+        project: 'El Patio Oro (La Vista)',
+        developer: 'La Vista Developments',
+        location: 'New Cairo, 5th Settlement Compounds',
+        locationGroup: '5th Settlement / Golden Square',
+        n: 7,
+        areaMin: 164,
+        areaMax: 171,
+        areaLabel: '164-171',
+        avgPrice: 8757143,
+        avgPriceLabel: 'EGP 8,757,143',
+        psqm: 52618,
+        psqmLabel: '52,618',
+        low: 8000000,
+        lowLabel: 'EGP 8,000,000',
+        high: 10000000,
+        highLabel: 'EGP 10,000,000',
+        unitTypes: '3-bedroom apartments',
+        resale: 'Yes',
+        developerSales: 'Yes',
+        yield: 'N/A',
+        yieldNum: null,
+        yieldFlag: false,
+        liquidity: 'Moderate',
+        valueForMoney: 'Moderate',
+        score: 6.91,
+        medianPsqm: '51,829 EGP/sqm',
+        pros: [
+          'Very consistent unit sizes (164-171 sqm) make it easy to compare listings apples-to-apples',
+          'La Vista has an established track record with coastal resorts (Sokhna/North Coast) and other New Cairo compounds'
+        ],
+        cons: [
+          'All in-budget listings cluster at the top of the range (EGP 8-10M) — little room for a lower-priced entry',
+          'No rental market data found — cannot verify income potential',
+          'Least differentiated / thinnest qualitative information found among all projects researched'
+        ]
+      }
+    ];
+
+    const fmtEGP = (n) => 'EGP ' + n.toLocaleString('en-US');
+    const shortName = (p) => p
+      .replace('Palm Hills New Cairo (PK1/PK2)', 'PH New Cairo')
+      .replace('Palm Hills Capital Gardens', 'Capital Gardens')
+      .replace('Mountain View iCity New Cairo', 'MV iCity')
+      .replace('Hyde Park New Cairo', 'Hyde Park')
+      .replace('El Patio Oro (La Vista)', 'El Patio Oro')
+      .replace('SODIC Villette', 'Villette');
+
+    /* ---------- Comparison table ---------- */
+    let sortKey = 'psqm';
+    let sortDir = 'asc';
+    let sortType = 'number';
+
+    function renderTable() {
+      const sorted = [...projects].sort((a, b) => {
+        let av = a[sortKey], bv = b[sortKey];
+        if (sortType === 'string') {
+          av = String(av).toLowerCase(); bv = String(bv).toLowerCase();
+          if (av < bv) return sortDir === 'asc' ? -1 : 1;
+          if (av > bv) return sortDir === 'asc' ? 1 : -1;
+          return 0;
+        }
+        return sortDir === 'asc' ? av - bv : bv - av;
+      });
+
+      document.getElementById('comparison-body').innerHTML = sorted.map(p => `
+        <tr class="hover:bg-slate-50/80">
+          <td class="px-4 py-3 font-medium whitespace-nowrap">${p.project}</td>
+          <td class="px-4 py-3 text-muted whitespace-nowrap">${p.developer}</td>
+          <td class="px-4 py-3 text-muted">${p.location}</td>
+          <td class="px-4 py-3 whitespace-nowrap tabular-nums">${p.lowLabel}</td>
+          <td class="px-4 py-3 whitespace-nowrap tabular-nums">${p.highLabel}</td>
+          <td class="px-4 py-3 whitespace-nowrap tabular-nums">${p.psqmLabel}</td>
+          <td class="px-4 py-3 whitespace-nowrap">${p.areaLabel} sqm</td>
+          <td class="px-4 py-3">${p.unitTypes}</td>
+          <td class="px-4 py-3 tabular-nums">${p.n} <span class="text-xs text-muted">(${p.liquidity})</span></td>
+          <td class="px-4 py-3">${p.resale}</td>
+          <td class="px-4 py-3">${p.developerSales}</td>
+        </tr>
+      `).join('');
+
+      document.querySelectorAll('th.sortable').forEach(th => {
+        th.classList.remove('asc', 'desc');
+        if (th.dataset.key === sortKey) th.classList.add(sortDir);
+      });
+    }
+
+    document.querySelectorAll('th.sortable').forEach(th => {
+      th.addEventListener('click', () => {
+        const key = th.dataset.key;
+        if (sortKey === key) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+        else { sortKey = key; sortDir = 'asc'; sortType = th.dataset.type; }
+        renderTable();
+      });
+    });
+
+    /* ---------- Project cards ---------- */
+    function renderCards(filterLoc = 'all') {
+      const list = filterLoc === 'all' ? projects : projects.filter(p => p.locationGroup === filterLoc);
+      document.getElementById('project-cards').innerHTML = list.map(p => `
+        <article class="flex flex-col rounded-2xl border border-line bg-white shadow-card">
+          <div class="border-b border-line px-5 py-4">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h4 class="font-semibold leading-snug">${p.project}</h4>
+                <p class="mt-1 text-sm text-muted">${p.developer}</p>
+              </div>
+              <span class="shrink-0 rounded-md bg-slate-100 px-2 py-1 text-xs font-medium tabular-nums">${p.score}/10</span>
+            </div>
+            <p class="mt-2 text-xs text-muted">${p.location}</p>
+          </div>
+          <div class="grid grid-cols-2 gap-3 px-5 py-4 text-sm">
+            <div>
+              <p class="text-xs text-muted">Price range</p>
+              <p class="mt-0.5 font-medium leading-snug">${p.lowLabel} – ${p.highLabel.replace('EGP ', '')}</p>
+            </div>
+            <div>
+              <p class="text-xs text-muted">Area range</p>
+              <p class="mt-0.5 font-medium">${p.areaLabel} sqm</p>
+            </div>
+            <div>
+              <p class="text-xs text-muted">Avg price / sqm</p>
+              <p class="mt-0.5 font-medium tabular-nums">${p.psqmLabel}</p>
+            </div>
+            <div>
+              <p class="text-xs text-muted">Unit types</p>
+              <p class="mt-0.5 font-medium">${p.unitTypes}</p>
+            </div>
+            <div>
+              <p class="text-xs text-muted">Resale available</p>
+              <p class="mt-0.5 font-medium">${p.resale} <span class="text-xs text-muted">(n=${p.n})</span></p>
+            </div>
+            <div>
+              <p class="text-xs text-muted">Developer sales</p>
+              <p class="mt-0.5 font-medium">${p.developerSales}</p>
+            </div>
+            <div>
+              <p class="text-xs text-muted">Rental yield</p>
+              <p class="mt-0.5 font-medium">${p.yield === 'N/A' ? 'Not Available' : p.yield}</p>
+            </div>
+            <div>
+              <p class="text-xs text-muted">Value for money</p>
+              <p class="mt-0.5 font-medium">${p.valueForMoney}</p>
+            </div>
+          </div>
+          <details class="mt-auto border-t border-line">
+            <summary class="flex items-center justify-between px-5 py-3 text-sm font-medium text-muted hover:text-ink">
+              Pros & Cons
+              <svg class="chevron h-3.5 w-3.5 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </summary>
+            <div class="space-y-4 border-t border-line px-5 py-4 text-sm">
+              <div>
+                <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-accent">Pros</p>
+                <ul class="list-disc space-y-1.5 ps-4 text-muted">${p.pros.map(x => `<li>${x}</li>`).join('')}</ul>
+              </div>
+              <div>
+                <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Cons</p>
+                <ul class="list-disc space-y-1.5 ps-4 text-muted">${p.cons.map(x => `<li>${x}</li>`).join('')}</ul>
+              </div>
+            </div>
+          </details>
+        </article>
+      `).join('');
+    }
+
+    /* Location filter options */
+    const locGroups = [...new Set(projects.map(p => p.locationGroup))].sort();
+    const locFilter = document.getElementById('loc-filter');
+    locGroups.forEach(g => {
+      const opt = document.createElement('option');
+      opt.value = g; opt.textContent = g;
+      locFilter.appendChild(opt);
+    });
+    locFilter.addEventListener('change', e => renderCards(e.target.value));
+
+    /* ---------- Insights (factual only) ---------- */
+    function buildInsights() {
+      const byPsqmAsc = [...projects].sort((a, b) => a.psqm - b.psqm);
+      const byPsqmDesc = [...projects].sort((a, b) => b.psqm - a.psqm);
+      const byLowAsc = [...projects].sort((a, b) => a.low - b.low);
+      const byLowDesc = [...projects].sort((a, b) => b.low - a.low);
+      const byHighDesc = [...projects].sort((a, b) => b.high - a.high);
+      const byNDesc = [...projects].sort((a, b) => b.n - a.n);
+      const bySpanDesc = [...projects].sort((a, b) => (b.areaMax - b.areaMin) - (a.areaMax - a.areaMin));
+      const byAvgAsc = [...projects].sort((a, b) => a.avgPrice - b.avgPrice);
+      const byAvgDesc = [...projects].sort((a, b) => b.avgPrice - a.avgPrice);
+      const withYield = projects.filter(p => p.yieldNum !== null && !p.yieldFlag);
+      const byYieldDesc = [...withYield].sort((a, b) => b.yieldNum - a.yieldNum);
+      const byYieldAsc = [...withYield].sort((a, b) => a.yieldNum - b.yieldNum);
+      const byScoreDesc = [...projects].sort((a, b) => b.score - a.score);
+
+      const items = [
+        { label: 'Lowest avg price / sqm', value: byPsqmAsc[0].project, detail: byPsqmAsc[0].psqmLabel + ' EGP/sqm' },
+        { label: 'Highest avg price / sqm', value: byPsqmDesc[0].project, detail: byPsqmDesc[0].psqmLabel + ' EGP/sqm' },
+        { label: 'Lowest starting price', value: byLowAsc[0].project, detail: byLowAsc[0].lowLabel },
+        { label: 'Highest starting price', value: byLowDesc[0].project, detail: byLowDesc[0].lowLabel },
+        { label: 'Highest max price', value: byHighDesc[0].project, detail: byHighDesc[0].highLabel },
+        { label: 'Widest unit size range', value: bySpanDesc[0].project, detail: bySpanDesc[0].areaLabel + ' sqm (span ' + (bySpanDesc[0].areaMax - bySpanDesc[0].areaMin) + ' sqm)' },
+        { label: 'Most units in budget (n)', value: byNDesc[0].project, detail: 'n = ' + byNDesc[0].n },
+        { label: 'Fewest units in budget (n)', value: byNDesc[byNDesc.length - 1].project, detail: 'n = ' + byNDesc[byNDesc.length - 1].n },
+        { label: 'Lowest avg resale price', value: byAvgAsc[0].project, detail: byAvgAsc[0].avgPriceLabel },
+        { label: 'Highest avg resale price', value: byAvgDesc[0].project, detail: byAvgDesc[0].avgPriceLabel },
+        { label: 'Highest overall score', value: byScoreDesc[0].project, detail: byScoreDesc[0].score + '/10' },
+        { label: 'Lowest overall score', value: byScoreDesc[byScoreDesc.length - 1].project, detail: byScoreDesc[byScoreDesc.length - 1].score + '/10' },
+        { label: 'Highest rental yield (excl. flagged)', value: byYieldDesc[0].project, detail: byYieldDesc[0].yield },
+        { label: 'Lowest rental yield (excl. flagged)', value: byYieldAsc[0].project, detail: byYieldAsc[0].yield },
+        { label: 'Developer sales available', value: '11 of 11 analysed', detail: 'All analysed projects: Developer selling today = Yes' },
+        { label: 'Resale available', value: '11 of 11 analysed', detail: 'All analysed projects have in-budget resale listings' },
+      ];
+
+      document.getElementById('insights-grid').innerHTML = items.map(i => `
+        <div class="rounded-2xl border border-line bg-white p-5 shadow-card">
+          <p class="text-xs font-medium uppercase tracking-wide text-muted">${i.label}</p>
+          <p class="mt-2 text-lg font-semibold leading-snug">${i.value}</p>
+          <p class="mt-1 text-sm text-muted">${i.detail}</p>
+        </div>
+      `).join('');
+    }
+
+    /* ---------- Charts ---------- */
+    const chartDefaults = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0f172a',
+          titleFont: { family: 'IBM Plex Sans', size: 12 },
+          bodyFont: { family: 'IBM Plex Sans', size: 12 },
+          padding: 10,
+          cornerRadius: 8
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { family: 'IBM Plex Sans', size: 10 }, color: '#64748b', maxRotation: 45, minRotation: 45 }
+        },
+        y: {
+          grid: { color: '#f1f5f9' },
+          ticks: { font: { family: 'IBM Plex Sans', size: 11 }, color: '#64748b' },
+          border: { display: false }
+        }
+      }
+    };
+
+    const labels = projects.map(p => shortName(p.project));
+    const teal = '#0f766e';
+    const slate = '#94a3b8';
+    const ink = '#0f172a';
+
+    function makeBar(id, data, label, color = teal) {
+      new Chart(document.getElementById(id), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{ label, data, backgroundColor: color, borderRadius: 6, maxBarThickness: 28 }]
+        },
+        options: chartDefaults
+      });
+    }
+
+    makeBar('chart-psqm', projects.map(p => p.psqm), 'Avg EGP/sqm');
+    makeBar('chart-start', projects.map(p => p.low), 'Lowest cash price');
+    makeBar('chart-n', projects.map(p => p.n), 'Units in budget (n)', ink);
+
+    new Chart(document.getElementById('chart-range'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Lowest (EGP M)', data: projects.map(p => +(p.low / 1e6).toFixed(3)), backgroundColor: slate, borderRadius: 4, maxBarThickness: 22 },
+          { label: 'Highest (EGP M)', data: projects.map(p => +(p.high / 1e6).toFixed(3)), backgroundColor: teal, borderRadius: 4, maxBarThickness: 22 }
+        ]
+      },
+      options: {
+        ...chartDefaults,
+        plugins: { ...chartDefaults.plugins, legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { family: 'IBM Plex Sans', size: 11 } } } }
+      }
+    });
+
+    new Chart(document.getElementById('chart-size'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Min sqm', data: projects.map(p => p.areaMin), backgroundColor: slate, borderRadius: 4, maxBarThickness: 22 },
+          { label: 'Max sqm', data: projects.map(p => p.areaMax), backgroundColor: teal, borderRadius: 4, maxBarThickness: 22 }
+        ]
+      },
+      options: {
+        ...chartDefaults,
+        plugins: { ...chartDefaults.plugins, legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { family: 'IBM Plex Sans', size: 11 } } } }
+      }
+    });
+
+    /* Projects by developer */
+    const devCounts = {};
+    projects.forEach(p => { devCounts[p.developer] = (devCounts[p.developer] || 0) + 1; });
+    new Chart(document.getElementById('chart-dev'), {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(devCounts),
+        datasets: [{
+          data: Object.values(devCounts),
+          backgroundColor: ['#0f766e','#134e4a','#115e59','#0d9488','#14b8a6','#5eead4','#99f6e4','#ccfbf1','#f0fdfa'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'right', labels: { boxWidth: 10, font: { family: 'IBM Plex Sans', size: 10 }, color: '#64748b' } }
+        }
+      }
+    });
+
+    /* Projects by location group */
+    const locCounts = {};
+    projects.forEach(p => { locCounts[p.locationGroup] = (locCounts[p.locationGroup] || 0) + 1; });
+    new Chart(document.getElementById('chart-loc'), {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(locCounts),
+        datasets: [{
+          data: Object.values(locCounts),
+          backgroundColor: ['#0f172a','#334155','#64748b','#94a3b8'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'right', labels: { boxWidth: 10, font: { family: 'IBM Plex Sans', size: 11 }, color: '#64748b' } }
+        }
+      }
+    });
+
+    /* Resale n + developer selling (all Yes = 1) */
+    new Chart(document.getElementById('chart-resale-dev'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Resale units in budget (n)', data: projects.map(p => p.n), backgroundColor: teal, borderRadius: 4, maxBarThickness: 22 },
+          { label: 'Developer selling today (Yes=1)', data: projects.map(() => 1), backgroundColor: slate, borderRadius: 4, maxBarThickness: 22 }
+        ]
+      },
+      options: {
+        ...chartDefaults,
+        plugins: { ...chartDefaults.plugins, legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { family: 'IBM Plex Sans', size: 11 } } } }
+      }
+    });
+
+    /* Yield — only projects with data */
+    const yieldProjects = projects.filter(p => p.yieldNum !== null);
+    new Chart(document.getElementById('chart-yield'), {
+      type: 'bar',
+      data: {
+        labels: yieldProjects.map(p => shortName(p.project) + (p.yieldFlag ? ' *' : '')),
+        datasets: [{
+          label: 'Gross rental yield %',
+          data: yieldProjects.map(p => p.yieldNum),
+          backgroundColor: yieldProjects.map(p => p.yieldFlag ? '#b45309' : teal),
+          borderRadius: 6,
+          maxBarThickness: 36
+        }]
+      },
+      options: {
+        ...chartDefaults,
+        plugins: {
+          ...chartDefaults.plugins,
+          legend: { display: false },
+          tooltip: {
+            ...chartDefaults.plugins.tooltip,
+            callbacks: {
+              afterLabel: (ctx) => yieldProjects[ctx.dataIndex].yieldFlag ? 'Flagged as unreliable in report' : ''
+            }
+          }
+        }
+      }
+    });
+
+    /* ---------- Nav / mobile ---------- */
+    document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+    document.querySelectorAll('#mobile-menu a').forEach(a => {
+      a.addEventListener('click', () => document.getElementById('mobile-menu').classList.add('hidden'));
+    });
+
+    const sections = ['summary','comparison','charts','projects','insights','excluded'];
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+          const link = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+          if (link) link.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-30% 0px -60% 0px' });
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    /* Init */
+    renderTable();
+    renderCards();
+    buildInsights();
+  </script>
+</body>
+</html>

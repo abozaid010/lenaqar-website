@@ -3080,6 +3080,11 @@ export default {
     subtitle: "Helper utilities for pricing and planning",
     open: "Open",
     backToTools: "Back to Tools",
+    cairoRtmDashboard: {
+      title: "Cairo RTM Market Dashboard",
+      description:
+        "Compare Greater Cairo ready-to-move 3BR compounds (EGP 5–10M cash).",
+    },
     presentValue: {
       title: "Present Value Calculator",
       description:
