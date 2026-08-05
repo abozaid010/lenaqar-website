@@ -1616,6 +1616,12 @@ export default {
     },
     rentStart: "Available start: {date}",
     rentStartUnavailable: "Not available yet",
+    deliveryStatus: "Delivery status",
+    deliveryStatusOptions: {
+      any: "Any",
+      delivered: "Delivered",
+      offPlan: "Off-plan",
+    },
     showPresentValue: "Show present value",
     minArea: "Min Area",
     maxArea: "Max Area",

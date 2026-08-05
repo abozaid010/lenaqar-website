@@ -41,6 +41,7 @@ import {
   createEmptyFilters,
   normalizeResaleFilter,
   normalizeRentSearchEligibleFilter,
+  normalizeIsDeliveredFilter,
   RENT_SEARCH_ELIGIBLE_AVAILABLE,
   RENT_SEARCH_ELIGIBLE_BOTH,
   RENT_SEARCH_ELIGIBLE_DEFAULT,
@@ -619,6 +620,26 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         }
       }
     }
+    {
+      const deliveredValue = normalizeIsDeliveredFilter(nextFilters.is_delivered);
+      if (deliveredValue === "true") {
+        list.push({
+          key: "is_delivered",
+          value: translate(
+            "unitsFilter.deliveryStatusOptions.delivered",
+            "Delivered"
+          ),
+        });
+      } else if (deliveredValue === "false") {
+        list.push({
+          key: "is_delivered",
+          value: translate(
+            "unitsFilter.deliveryStatusOptions.offPlan",
+            "Off-plan"
+          ),
+        });
+      }
+    }
     if (nextFilters.show_present_value) {
       list.push({
         key: "show_present_value",
@@ -761,6 +782,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
               ? normalizeRentSearchEligibleFilter(next.rentSearchEligible)
               : RENT_SEARCH_ELIGIBLE_DEFAULT;
           next.resale = RESALE_FILTER_BOTH;
+          // Rent units are always delivered — hide/drop the off-plan filter.
+          next.is_delivered = "";
         } else if (String(nextPurpose).toLowerCase() === "sell") {
           next.rentSearchEligible = "";
         } else {
@@ -1000,6 +1023,16 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           "unitsFilter.showPresentValue",
           "Show present value"
         );
+      case "is_delivered": {
+        const deliveredValue = normalizeIsDeliveredFilter(value ?? filters.is_delivered);
+        if (deliveredValue === "true") {
+          return translate("unitsFilter.deliveryStatusOptions.delivered", "Delivered");
+        }
+        if (deliveredValue === "false") {
+          return translate("unitsFilter.deliveryStatusOptions.offPlan", "Off-plan");
+        }
+        return translate("unitsFilter.deliveryStatusOptions.any", "Any");
+      }
       case "min_area":
         return value || t.unitsFilter.minArea;
       case "max_area":
@@ -1084,6 +1117,19 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           );
         }
       }
+      {
+        const deliveredValue = normalizeIsDeliveredFilter(filterValues.is_delivered);
+        if (deliveredValue === "true") {
+          labels.push(
+            translate("unitsFilter.deliveryStatusOptions.delivered", "Delivered")
+          );
+        } else if (deliveredValue === "false") {
+          labels.push(
+            translate("unitsFilter.deliveryStatusOptions.offPlan", "Off-plan")
+          );
+        }
+      }
+
       if (filterValues.show_present_value) {
         labels.push(
           translate("unitsFilter.showPresentValue", "Show present value")
@@ -1599,6 +1645,64 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
                       value={option.value || "both"}
                       checked={isSelected}
                       onChange={() => handleFilterChange("resale", option.value)}
+                      className="h-4 w-4 accent-primary shrink-0"
+                    />
+                    <span className="truncate">{option.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {!isRentPurpose(draftFilters.purpose) && (
+          <div className="w-full min-w-0">
+            <p className="text-xs font-medium text-[#494A4B] mb-1.5">
+              {translate("unitsFilter.deliveryStatus", "Delivery status")}
+            </p>
+            <div
+              className="flex flex-wrap items-center gap-2"
+              role="group"
+              aria-label={translate("unitsFilter.deliveryStatus", "Delivery status")}
+            >
+              {[
+                {
+                  value: "",
+                  label: translate("unitsFilter.deliveryStatusOptions.any", "Any"),
+                },
+                {
+                  value: "true",
+                  label: translate(
+                    "unitsFilter.deliveryStatusOptions.delivered",
+                    "Delivered"
+                  ),
+                },
+                {
+                  value: "false",
+                  label: translate(
+                    "unitsFilter.deliveryStatusOptions.offPlan",
+                    "Off-plan"
+                  ),
+                },
+              ].map((option) => {
+                const current = normalizeIsDeliveredFilter(draftFilters.is_delivered);
+                const isSelected = current === option.value;
+
+                return (
+                  <label
+                    key={option.value || "any"}
+                    className={`flex flex-1 min-w-0 items-center gap-2 h-10 px-3 rounded-md border text-xs font-medium cursor-pointer select-none transition-colors ${
+                      isSelected
+                        ? "bg-primary/10 border-primary/40 text-primary"
+                        : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="is_delivered"
+                      value={option.value || "any"}
+                      checked={isSelected}
+                      onChange={() => handleFilterChange("is_delivered", option.value)}
                       className="h-4 w-4 accent-primary shrink-0"
                     />
                     <span className="truncate">{option.label}</span>

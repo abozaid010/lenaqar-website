@@ -1459,6 +1459,12 @@ export default {
     },
     rentStart: "متاح من: {date}",
     rentStartUnavailable: "غير متاح بعد",
+    deliveryStatus: "حالة التسليم",
+    deliveryStatusOptions: {
+      any: "الكل",
+      delivered: "تم التسليم",
+      offPlan: "تحت الإنشاء",
+    },
     showPresentValue: "إظهار القيمة الحالية",
     minArea: "الحد الأدنى للمساحة",
     maxArea: "الحد الأقصى للمساحة",
