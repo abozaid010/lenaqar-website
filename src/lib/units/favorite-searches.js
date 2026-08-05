@@ -15,6 +15,7 @@ export const UNITS_FILTER_PARAM_KEYS = [
   "my_inventory",
   "resale",
   "rentSearchEligible",
+  "is_delivered",
   "show_present_value",
   "author",
   "sort_by",
@@ -70,6 +71,13 @@ export function normalizeRentSearchEligibleFilter(value) {
     return RENT_SEARCH_ELIGIBLE_BOTH;
   }
   return RENT_SEARCH_ELIGIBLE_AVAILABLE;
+}
+
+/** Delivery status filter: "" = any; "true" = delivered; "false" = off-plan. */
+export function normalizeIsDeliveredFilter(value) {
+  if (value === true || value === "true") return "true";
+  if (value === false || value === "false") return "false";
+  return "";
 }
 
 /**
@@ -142,6 +150,7 @@ export function createEmptyFilters() {
     my_inventory: false,
     resale: RESALE_FILTER_BOTH,
     rentSearchEligible: "",
+    is_delivered: "",
     show_present_value: false,
     author: "",
     sort_by: "",
@@ -183,6 +192,10 @@ export function filtersFromSearchParams(searchParams) {
             : rentEligibleRaw
         )
       : "",
+    // Rent units are always delivered server-side — ignore stale is_delivered when purpose is rent.
+    is_delivered: isRentPurposeFilter(purpose)
+      ? ""
+      : normalizeIsDeliveredFilter(searchParams.get("is_delivered")),
     show_present_value: searchParams.get("show_present_value") === "true",
     author: searchParams.get("author") || "",
     sort_by: searchParams.get("sort_by") || "",
@@ -221,6 +234,13 @@ export function filtersToSearchParams(filters, baseParams = new URLSearchParams(
       );
       return;
     }
+    if (key === "is_delivered") {
+      // Rent units are always delivered server-side — never persist for rent.
+      if (isRentPurposeFilter(filters.purpose)) return;
+      const normalized = normalizeIsDeliveredFilter(value);
+      if (normalized) params.set(key, normalized);
+      return;
+    }
     if (value && String(value).trim() !== "" && value !== "all") {
       params.set(key, String(value));
     }
@@ -251,6 +271,10 @@ export function hasActiveFilters(filters) {
         RENT_SEARCH_ELIGIBLE_DEFAULT
       );
     }
+    if (key === "is_delivered") {
+      if (isRentPurposeFilter(filters.purpose)) return false;
+      return normalizeIsDeliveredFilter(value) !== "";
+    }
     return value && String(value).trim() !== "" && value !== "all";
   });
 }
@@ -265,6 +289,9 @@ export function normalizeFilterFieldValue(key, value) {
   if (key === "rentSearchEligible") {
     if (value == null || value === "") return "";
     return normalizeRentSearchEligibleFilter(value);
+  }
+  if (key === "is_delivered") {
+    return normalizeIsDeliveredFilter(value);
   }
   if (value == null || value === "all") return "";
   return String(value).trim();
@@ -296,6 +323,11 @@ export function areFiltersEqual(a, b) {
       const bVal = isSellPurpose(b.purpose)
         ? normalizeResaleFilter(b[key])
         : RESALE_FILTER_BOTH;
+      return aVal === bVal;
+    }
+    if (key === "is_delivered") {
+      const aVal = isRentPurposeFilter(a.purpose) ? "" : normalizeIsDeliveredFilter(a[key]);
+      const bVal = isRentPurposeFilter(b.purpose) ? "" : normalizeIsDeliveredFilter(b[key]);
       return aVal === bVal;
     }
     return normalizeFilterFieldValue(key, a[key]) === normalizeFilterFieldValue(key, b[key]);
