@@ -2694,6 +2694,8 @@ export default {
     loadError: "فشل تحميل الجدول",
     dialogClose: "إغلاق",
     dialogCloseAriaLabel: "إغلاق نافذة تفاصيل العميل",
+    actionFilterPlaceholder: "تصفية حسب الإجراء",
+    actionFilterSearch: "بحث في الإجراءات...",
   },
 
   noappointments: "لا توجد مواعيد هذا الأسبوع",
@@ -2824,6 +2826,7 @@ export default {
     pricingAreas: "الأسعار والمساحات",
     type: "النوع",
     startingPrice: "أدنى سعر",
+    startingFrom: "يبدأ من",
     startingArea: "أدنى مساحة",
     overallStartingPrice: "أدنى سعر إجمالي",
     avgPricePerM2: "متوسط السعر / م²",

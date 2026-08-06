@@ -47,14 +47,14 @@ export function resolvePricePerMeter(unit) {
   if (!canShowPresentValue(unit)) return null;
 
   const fromApi = toNullableFiniteNumber(unit.pricePerMeter);
-  if (fromApi != null) return fromApi;
+  if (fromApi != null) return Math.round(fromApi);
 
   const presentValue = toNullableFiniteNumber(unit.presentValue);
   const area = toNullableFiniteNumber(
     unit.landArea ?? unit.area ?? unit.land_area
   );
   if (presentValue == null || area == null || area <= 0) return null;
-  return presentValue / area;
+  return Math.round(presentValue / area);
 }
 
 /**

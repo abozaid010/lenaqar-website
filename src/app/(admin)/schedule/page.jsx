@@ -7,7 +7,10 @@ import ErrorBoundary from "@/components/ui/error-boundary";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
-import { SCHEDULE_VISIBLE_ACTIONS } from "@/utils/action-constants";
+import {
+  DEFAULT_SCHEDULE_ACTION_FILTER,
+  SCHEDULE_VISIBLE_ACTIONS,
+} from "@/utils/action-constants";
 import {
   fetchActionCatalogServer,
   getScheduledActionValuesFromCatalog,
@@ -79,9 +82,12 @@ const page = async () => {
     const scheduledActions =
       fromCatalog.length > 0 ? fromCatalog : SCHEDULE_VISIBLE_ACTIONS;
 
+    // Default view: Property view only. Dropdown options still get full list.
+    const initialFetchActions = [DEFAULT_SCHEDULE_ACTION_FILTER];
+
     // Run both API calls in parallel for better performance
     const [data, dataSales] = await Promise.allSettled([
-      getschedual(formattedBefore, formattedAfter, scheduledActions),
+      getschedual(formattedBefore, formattedAfter, initialFetchActions),
       getSalesData()
     ]);
 

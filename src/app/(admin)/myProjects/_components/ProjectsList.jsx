@@ -1,6 +1,6 @@
 "use client";
 
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import {
   useProjectsPaginated,
   useDeveloperNames,
@@ -27,6 +27,9 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 import ReusableSearchInput from "@/components/ui/reusable-search-input";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
+import SearchablePropertyTypeSelect from "@/components/ui/inputs/searchable-property-type-select";
+import UnitsLocationSearch from "@/components/ui/inputs/units-location-search";
+import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { getBuildingTypes } from "@/data/constants";
 import en from "../../../../../public/locales/en";
 import ar from "../../../../../public/locales/ar";
@@ -36,8 +39,9 @@ import { paginatedProjectKeys } from "@/utils/query-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { filterBySearchQuery } from "@/utils/search-utils";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
-import { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { formatPrice } from "@/utils/parse-amount";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import EmptyStateVideo from "@/components/ui/empty-state-video";
 import QueryErrorState from "@/components/ui/query-error-state";
@@ -165,6 +169,15 @@ function ProjectCard({
 
       <div className="flex flex-1 flex-col gap-2.5 p-4">
         <header className="min-w-0">
+          {project.start_price != null &&
+            project.start_price !== "" &&
+            !isNaN(Number(project.start_price)) &&
+            Number(project.start_price) > 0 && (
+              <p className="mb-1 text-sm font-semibold text-primary">
+                {translate?.("projectPage.startingFrom", "From")}{" "}
+                {formatPrice(project.start_price)} EGP
+              </p>
+            )}
           <h3 className="truncate text-base font-semibold text-gray-900 sm:text-lg">
             {name}
           </h3>
@@ -268,7 +281,6 @@ function ProjectCard({
 export default function ProjectsList({ clientId, initialProjectsData }) {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { t, locale, translate } = useI18n();
   const { isDeveloper } = useBrokerPermission();
   const { canCreate: canCreateProject, has: hasProjectAction } =
@@ -315,14 +327,46 @@ export default function ProjectsList({ clientId, initialProjectsData }) {
   // Use URL-driven filters (URL = Single Source of Truth)
   const {
     city: selectedCity,
+    district: selectedDistrict,
+    subDistrict: selectedSubDistrict,
     developer: selectedDeveloper,
-    setCity: setSelectedCity,
+    propertyType: selectedPropertyType,
+    minStartPrice,
+    maxStartPrice,
     setDeveloper: setSelectedDeveloper,
+    setPropertyType: setSelectedPropertyType,
+    setFilters,
+    hasFilters,
     getFiltersString,
   } = useUrlFilters("projects_filters", {
     validateCity,
     validateDeveloper,
   });
+
+  const [priceDraft, setPriceDraft] = useState({
+    min: minStartPrice,
+    max: maxStartPrice,
+  });
+
+  useEffect(() => {
+    setPriceDraft({ min: minStartPrice, max: maxStartPrice });
+  }, [minStartPrice, maxStartPrice]);
+
+  // Debounce price URL updates so typing doesn't refetch every keystroke
+  useEffect(() => {
+    const nextMin = priceDraft.min || "";
+    const nextMax = priceDraft.max || "";
+    if (nextMin === (minStartPrice || "") && nextMax === (maxStartPrice || "")) {
+      return undefined;
+    }
+    const timer = setTimeout(() => {
+      setFilters({
+        min_start_price: nextMin,
+        max_start_price: nextMax,
+      });
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [priceDraft.min, priceDraft.max, minStartPrice, maxStartPrice, setFilters]);
 
   const cityEnName = useMemo(() => {
     if (selectedCity && selectedCity !== "" && selectedCity !== "all") {
@@ -330,6 +374,46 @@ export default function ProjectsList({ clientId, initialProjectsData }) {
     }
     return undefined;
   }, [selectedCity]);
+
+  const districtFilter = useMemo(() => {
+    if (selectedDistrict && selectedDistrict !== "" && selectedDistrict !== "all") {
+      return selectedDistrict;
+    }
+    return undefined;
+  }, [selectedDistrict]);
+
+  const subDistrictFilter = useMemo(() => {
+    if (
+      selectedSubDistrict &&
+      selectedSubDistrict !== "" &&
+      selectedSubDistrict !== "all"
+    ) {
+      return selectedSubDistrict;
+    }
+    return undefined;
+  }, [selectedSubDistrict]);
+
+  const propertyTypeFilter = useMemo(() => {
+    if (
+      selectedPropertyType &&
+      selectedPropertyType !== "" &&
+      selectedPropertyType !== "all"
+    ) {
+      return selectedPropertyType;
+    }
+    return undefined;
+  }, [selectedPropertyType]);
+
+  const handleLocationChange = useCallback(
+    ({ city, district, sub_district }) => {
+      setFilters({
+        city: city || "",
+        district: district || "",
+        sub_district: sub_district || "",
+      });
+    },
+    [setFilters]
+  );
 
   const {
     data: paginatedData,
@@ -343,12 +427,15 @@ export default function ProjectsList({ clientId, initialProjectsData }) {
     isFetchingNextPage,
   } = useProjectsPaginated({
     cityEnName,
+    district: districtFilter,
+    subDistrict: subDistrictFilter,
     developerId: selectedDeveloper || undefined,
+    propertyType: propertyTypeFilter,
+    minStartPrice: minStartPrice || undefined,
+    maxStartPrice: maxStartPrice || undefined,
     enabled: !translations.isLoading,
     // Seed cache with server-prefetched first page (no filters applied).
-    // Only valid when no URL filters are active — if filters are set, the
-    // query key differs and initialData is ignored anyway.
-    initialData: !cityEnName && !selectedDeveloper ? initialProjectsData : undefined,
+    initialData: !hasFilters ? initialProjectsData : undefined,
   });
 
   const projectsList = useMemo(() => {
@@ -478,16 +565,9 @@ export default function ProjectsList({ clientId, initialProjectsData }) {
   const displayList = useMemo(() => {
     if (!projectsList || !Array.isArray(projectsList)) return [];
 
-    // Apply city filter
     let filtered = projectsList;
-    if (selectedCity && selectedCity !== "" && selectedCity !== "all") {
-      filtered = projectsList.filter((p) => {
-        const projectCity = p.city?.toLowerCase() || "";
-        return projectCity === selectedCity.toLowerCase();
-      });
-    }
 
-    // Apply search filter
+    // Apply search filter (name only — location/price/type come from the API)
     if (searchQuery) {
       filtered = filterBySearchQuery(filtered, searchQuery, ["ar_name", "en_name"]);
     }
@@ -520,7 +600,7 @@ export default function ProjectsList({ clientId, initialProjectsData }) {
       ];
     }
     return merged;
-  }, [projectsList, appendedProjects, pendingProject, locale, selectedCity, searchQuery]);
+  }, [projectsList, appendedProjects, pendingProject, locale, searchQuery]);
 
   const handleProjectSelectStart = useCallback((option) => {
     setPendingProject({
@@ -621,21 +701,8 @@ export default function ProjectsList({ clientId, initialProjectsData }) {
     }
   };
 
-  // City filter handlers
-  // Convert cities to options format for SearchableDropdownSelect
-  const cityOptions = useMemo(() => {
-    return translations.cities.map(city => ({
-      value: city,
-      label: getCityDisplayName(city)
-    }));
-  }, [translations.cities, getCityDisplayName]);
-
-  const getCityFilterDisplayText = () => {
-    if (!selectedCity || selectedCity === "all") {
-      return t?.unitsFilter?.allCities || (locale === "ar" ? "جميع المدن" : "All Cities");
-    }
-    return getCityDisplayName(selectedCity);
-  };
+  const filterButtonClassName =
+    "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors";
 
   return (
     <>
@@ -684,31 +751,21 @@ export default function ProjectsList({ clientId, initialProjectsData }) {
 
       {/* Header Container */}
       <div className="p-4 bg-white rounded-lg shadow-md">
-        <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
-          {/* Cities Dropdown */}
-          {translations.cities.length > 0 && (
-            <div className="w-full md:w-auto md:flex-1 min-w-0">
-              <SearchableDropdownSelect
-                options={cityOptions}
-                value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value)}
-                name="city"
-                placeholder={locale === "ar" ? "جميع المدن" : "All Cities"}
-                showAllOption={true}
-                allOptionLabel={locale === "ar" ? "جميع المدن" : "All Cities"}
-                allOptionValue=""
-                getValue={(option) => option.value}
-                getLabel={(option) => option.label}
-                className="w-full"
-                buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
-                disabled={translations.isLoading}
-                isLoading={translations.isLoading}
-              />
-            </div>
-          )}
+        <div className="flex items-center flex-wrap gap-2">
+          <div className="w-full sm:w-[min(100%,280px)] min-w-0">
+            <UnitsLocationSearch
+              city={selectedCity === "all" ? "" : selectedCity}
+              district={selectedDistrict === "all" ? "" : selectedDistrict}
+              subDistrict={
+                selectedSubDistrict === "all" ? "" : selectedSubDistrict
+              }
+              onChange={handleLocationChange}
+              buttonClassName={filterButtonClassName}
+              disabled={translations.isLoading}
+            />
+          </div>
 
-          {/* Developer Dropdown */}
-          <div className="w-full md:w-auto md:flex-1 min-w-0">
+          <div className="w-full sm:flex-1 min-w-[160px]">
             <SearchableDropdownSelect
               options={developers}
               value={selectedDeveloper}
@@ -716,17 +773,14 @@ export default function ProjectsList({ clientId, initialProjectsData }) {
               name="developer"
               placeholder={
                 developersLoading
-                  ? locale === "ar"
-                    ? "جاري التحميل..."
-                    : "Loading..."
-                  : locale === "ar"
-                    ? "جميع المطورين"
-                    : "All Developers"
+                  ? translate("common.loading", "Loading...")
+                  : translate("unitsFilter.allDevelopers", "All Developers")
               }
               showAllOption={true}
-              allOptionLabel={
-                locale === "ar" ? "جميع المطورين" : "All Developers"
-              }
+              allOptionLabel={translate(
+                "unitsFilter.allDevelopers",
+                "All Developers"
+              )}
               allOptionValue=""
               getValue={(option) => option.id}
               getLabel={(option, loc) =>
@@ -736,35 +790,84 @@ export default function ProjectsList({ clientId, initialProjectsData }) {
               }
               searchFields={["ar_name", "en_name"]}
               className="w-full"
-              buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+              buttonClassName={filterButtonClassName}
               disabled={developersLoading}
               isLoading={developersLoading}
             />
           </div>
 
-          {/* Project Search Dropdown */}
-          <div className="w-full md:w-auto md:flex-1 min-w-0">
+          <div className="w-full sm:flex-1 min-w-[160px]">
+            <SearchablePropertyTypeSelect
+              value={selectedPropertyType === "all" ? "" : selectedPropertyType}
+              onChange={(e) => setSelectedPropertyType(e.target.value)}
+              name="property_type"
+              showAllOption={true}
+              allOptionLabel={translate(
+                "unitsFilter.allPropertyTypes",
+                "All Property Types"
+              )}
+              placeholder={translate(
+                "unitsFilter.allPropertyTypes",
+                "All Property Types"
+              )}
+              className="w-full"
+              buttonClassName={filterButtonClassName}
+            />
+          </div>
+
+          <div className="w-full sm:w-auto grid grid-cols-2 gap-2 min-w-[220px]">
+            <LenaTextField
+              name="min_start_price"
+              type="money"
+              label={translate("unitsFilter.min", "Min Price")}
+              value={priceDraft.min}
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^0-9]/g, "");
+                setPriceDraft((prev) => ({ ...prev, min: value }));
+              }}
+              className="w-full min-w-0"
+              adornment="EGP"
+            />
+            <LenaTextField
+              name="max_start_price"
+              type="money"
+              label={translate("unitsFilter.max", "Max Price")}
+              value={priceDraft.max}
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^0-9]/g, "");
+                setPriceDraft((prev) => ({ ...prev, max: value }));
+              }}
+              className="w-full min-w-0"
+              adornment="EGP"
+            />
+          </div>
+
+          <div className="w-full sm:flex-1 min-w-[160px]">
             <SearchableProjectSelect
               value={addProjectSelectValue}
               onChange={(e) => setAddProjectSelectValue(e.target.value)}
               onProjectSelectStart={handleProjectSelectStart}
               onProjectSelect={handleAppendProject}
               name="add_project"
-              placeholder={
-                locale === "ar" ? "ابحث بالاسم..." : "Search by name..."
-              }
+              city={cityEnName || ""}
+              district={districtFilter || ""}
+              subDistrict={subDistrictFilter || ""}
+              placeholder={translate(
+                "projectPage.searchPlaceholder",
+                "Search by name..."
+              )}
               className="w-full"
-              buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+              buttonClassName={filterButtonClassName}
               isPublic={false}
             />
           </div>
 
           {/* Action buttons */}
-          <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
+          <div className="w-full sm:w-auto flex-shrink-0 flex gap-2 items-center">
             {canCreateProject && (
               <button
                 onClick={handleOpenAdd}
-                className="flex-1 md:flex-initial px-4 py-2 h-10 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+                className="flex-1 sm:flex-initial px-4 py-2 h-10 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
               >
                 <Plus size={18} className="shrink-0" />
                 <span className="hidden sm:inline whitespace-nowrap">
@@ -775,7 +878,7 @@ export default function ProjectsList({ clientId, initialProjectsData }) {
             {!isDeveloper && canImportProjects && (
               <button
                 onClick={() => setIsImportOpen(true)}
-                className="flex-1 md:flex-initial px-4 py-2 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+                className="flex-1 sm:flex-initial px-4 py-2 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
               >
                 <Plus size={18} className="shrink-0" />
                 <span className="hidden sm:inline whitespace-nowrap">

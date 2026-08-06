@@ -30,6 +30,9 @@ export const SCHEDULE_VISIBLE_ACTIONS = [
   "Follow up later",
 ];
 
+/** Default Calendar filter — API `action=Property view`. */
+export const DEFAULT_SCHEDULE_ACTION_FILTER = "Property view";
+
 export function getActionColorClass(value) {
   if (value == null) return ACTIONS_COLORS.null;
   return ACTIONS_COLORS[value] || "text-gray-800";

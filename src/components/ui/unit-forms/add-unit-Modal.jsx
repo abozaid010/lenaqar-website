@@ -27,6 +27,7 @@ import {
   resolveMonthlyRentFromUnit,
   ensureUnitLocationPayload,
   validateUnitLocationLeaf,
+  buildUnitTitle,
 } from "./unit-form-constants";
 import {
   validateSalePricing,
@@ -576,17 +577,6 @@ export default function AddUnitModal({
     setFormData((prev) => ({ ...prev, ...newData }));
   };
 
-  /** Build unit title from area, bedroom, type, project when extracting from text */
-  const buildTitleFromExtracted = (apiUnit) => {
-    const parts = [
-      apiUnit.project != null ? String(apiUnit.project).trim() : null,
-      apiUnit.buildingType != null ? String(apiUnit.buildingType).trim() : null,
-      apiUnit.roomsCount != null ? `${apiUnit.roomsCount} bed` : null,
-      apiUnit.landArea != null ? `${apiUnit.landArea} m²` : null,
-    ].filter(Boolean);
-    return parts.length > 0 ? parts.join(" · ") : null;
-  };
-
   /** Map API extracted unit to formData + SellFormData/rentFormData */
   const mapApiUnitToForm = (apiUnit) => {
     const purpose =
@@ -595,7 +585,7 @@ export default function AddUnitModal({
         : apiUnit.totalPrice != null
           ? "sell"
           : undefined;
-    const builtTitle = buildTitleFromExtracted(apiUnit);
+    const builtTitle = buildUnitTitle({ ...apiUnit, purpose });
     const formDataPartial = {
       ...(apiUnit.country != null && { country: String(apiUnit.country) }),
       ...(apiUnit.city != null && { city: String(apiUnit.city) }),
@@ -1135,6 +1125,12 @@ export default function AddUnitModal({
           locationResult.key
         );
         return;
+      }
+
+      // Title field is hidden; always send a computed title for the backend.
+      const computedTitle = buildUnitTitle(payload);
+      if (computedTitle) {
+        payload = { ...payload, unitTitle: computedTitle };
       }
 
       if (!isEdit) {
