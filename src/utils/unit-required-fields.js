@@ -9,9 +9,8 @@ export function getMissingRequiredFields(unit) {
 
   const missing = [];
 
-  // Step 1 - Basic details
+  // Step 1 - Basic details (unitTitle is auto-computed on save)
   const basicRequired = [
-    "unitTitle",
     "project",
     "buildingType",
     "purpose",

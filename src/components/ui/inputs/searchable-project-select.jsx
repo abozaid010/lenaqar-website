@@ -31,6 +31,7 @@ import SearchableDropdownSelect from "./searchable-dropdown-select";
  * @param {boolean} isLoading - Loading state (used if projects not provided)
  * @param {string} city - Optional city value to scope projects
  * @param {string} district - Optional district value to scope projects
+ * @param {string} subDistrict - Optional sub-district value to scope projects
  */
 export default function SearchableProjectSelect({
   value = "",
@@ -52,6 +53,7 @@ export default function SearchableProjectSelect({
   isLoading: isLoadingProp,
   city = "",
   district = "",
+  subDistrict = "",
   ...rest
 }) {
   const { locale, translate } = useI18n();
@@ -69,8 +71,12 @@ export default function SearchableProjectSelect({
     const normalizedCity = city && city !== "all" ? String(city).toLowerCase().trim() : "";
     const normalizedDistrict =
       district && district !== "all" ? String(district).toLowerCase().trim() : "";
+    const normalizedSubDistrict =
+      subDistrict && subDistrict !== "all"
+        ? String(subDistrict).toLowerCase().trim()
+        : "";
 
-    if (!normalizedCity && !normalizedDistrict) {
+    if (!normalizedCity && !normalizedDistrict && !normalizedSubDistrict) {
       return allProjects;
     }
 
@@ -79,6 +85,9 @@ export default function SearchableProjectSelect({
       const projectDistrict = project.district
         ? String(project.district).toLowerCase().trim()
         : "";
+      const projectSubDistrict = project.sub_district
+        ? String(project.sub_district).toLowerCase().trim()
+        : "";
 
       if (normalizedCity && projectCity !== normalizedCity) {
         return false;
@@ -86,9 +95,12 @@ export default function SearchableProjectSelect({
       if (normalizedDistrict && projectDistrict !== normalizedDistrict) {
         return false;
       }
+      if (normalizedSubDistrict && projectSubDistrict !== normalizedSubDistrict) {
+        return false;
+      }
       return true;
     });
-  }, [allProjects, city, district]);
+  }, [allProjects, city, district, subDistrict]);
 
   const [resolvedLabel, setResolvedLabel] = useState("");
 

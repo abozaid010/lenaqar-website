@@ -112,7 +112,14 @@ export default function UnitsGrid({
   const formatPrice = (price) => {
     const n = parsePrice(price);
     if (n === null) return null;
-    return localeUtils?.formatNumber ? localeUtils.formatNumber(n) : n.toLocaleString();
+    // Money on cards: whole EGP only (e.g. price/m² 5100, not 5100.34).
+    const rounded = Math.round(n);
+    return localeUtils?.formatNumber
+      ? localeUtils.formatNumber(rounded)
+      : rounded.toLocaleString("en-US", {
+          maximumFractionDigits: 0,
+          minimumFractionDigits: 0,
+        });
   };
 
   const getRentPeriodLabel = (period) =>

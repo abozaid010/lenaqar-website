@@ -397,8 +397,8 @@ export default function BasicDetailsStep({
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">
-        {/* Unit Title */}
-        <div className="col-span-1 md:col-span-2">
+        {/* Unit Title — hidden; auto-computed on save from type, bedrooms, price, address */}
+        {/* <div className="col-span-1 md:col-span-2">
           <LenaTextField
             label={translate("basicDetails.unitTitle", t.basicDetails.unitTitle)}
             name="unitTitle"
@@ -411,7 +411,7 @@ export default function BasicDetailsStep({
             )}
             error={invalidFields.includes("unitTitle")}
           />
-        </div>
+        </div> */}
 
         {/* Building Type */}
         <SearchableDropdownSelect

@@ -106,11 +106,30 @@ export function useProjectsNames(isPublic = false) {
 
 // Hook for fetching paginated projects (full project data, cursor-based)
 // OPTIMIZED: 5min cache times for memory stability with 800+ projects
-export function useProjectsPaginated({ cityEnName, developerId, enabled = true, initialData } = {}) {
+export function useProjectsPaginated({
+  cityEnName,
+  district,
+  subDistrict,
+  developerId,
+  propertyType,
+  minStartPrice,
+  maxStartPrice,
+  enabled = true,
+  initialData,
+} = {}) {
+  const filters = {
+    cityEnName,
+    district,
+    subDistrict,
+    developerId,
+    propertyType,
+    minStartPrice,
+    maxStartPrice,
+  };
   return useInfiniteQuery({
-    queryKey: paginatedProjectKeys.list({ cityEnName, developerId }),
+    queryKey: paginatedProjectKeys.list(filters),
     queryFn: ({ pageParam }) =>
-      fetchProjectsPaginated({ limit: 20, lastDocId: pageParam, cityEnName, developerId }),
+      fetchProjectsPaginated({ limit: 20, lastDocId: pageParam, ...filters }),
     initialPageParam: undefined,
     getNextPageParam: (lastPage) =>
       lastPage.has_more ? lastPage.last_doc_id : undefined,

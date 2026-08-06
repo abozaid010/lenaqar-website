@@ -175,9 +175,11 @@ export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string
   if (presentValueNum != null) {
     const apiPpm = (rawUnit as any).pricePerMeter;
     if (isMeaningfulNumber(apiPpm)) {
-      pricePerMeter = formatCurrency(Number(apiPpm));
+      pricePerMeter = formatCurrency(Math.round(Number(apiPpm)));
     } else if (isMeaningfulNumber(rawUnit.landArea) && Number(rawUnit.landArea) > 0) {
-      pricePerMeter = formatCurrency(presentValueNum / Number(rawUnit.landArea));
+      pricePerMeter = formatCurrency(
+        Math.round(presentValueNum / Number(rawUnit.landArea))
+      );
     }
   }
   const monthlyInstallmentEstimate = calculateMonthlyInstallment(rawUnit.installment_amount_yearly);

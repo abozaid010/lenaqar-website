@@ -8,6 +8,7 @@ import {
 } from "@/components/phone/phone-utils";
 import { handleCopyFullPhoneNumber } from "@/utils/phone-utils";
 import { getActionLabel, SCHEDULE_VISIBLE_ACTIONS } from "@/utils/actions";
+import { DEFAULT_SCHEDULE_ACTION_FILTER } from "@/utils/action-constants";
 import { useActionCatalog, getScheduledActionsFromCatalog } from "@/hooks/use-action-catalog";
 import { fetchScheduledActionsByDate } from "@/utils/api";
 import { formatScheduleRowDateTime, formatScheduleWeekDayDate } from "@/utils/formateDate";
@@ -29,9 +30,13 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
+import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import PhoneTelLink from "@/components/phone/PhoneTelLink";
 import NewActionForm from "@/app/(admin)/dashboard/_components/new-action-form";
 import ScheduleUserDetailsDialog from "./ScheduleUserDetailsDialog";
+
+/** Empty string = show all schedule-visible actions (SearchableDropdownSelect All). */
+const ALL_SCHEDULE_ACTIONS_VALUE = "";
 
 /** Lead id for creating a follow-up action from the schedule card. */
 function getScheduledActionUserId(item) {
@@ -103,6 +108,9 @@ const Schedule = ({ data, dataSales, scheduledActionValues }) => {
   const [isWeekLoading, setIsWeekLoading] = useState(false);
   const [editAppointment, setEditAppointment] = useState(null);
   const [detailsAppointment, setDetailsAppointment] = useState(null);
+  const [selectedActionFilter, setSelectedActionFilter] = useState(
+    DEFAULT_SCHEDULE_ACTION_FILTER
+  );
   const { t, translate, locale } = useI18n();
   const isRTL = locale === "ar";
   const { data: catalog } = useActionCatalog();
@@ -116,10 +124,41 @@ const Schedule = ({ data, dataSales, scheduledActionValues }) => {
     return SCHEDULE_VISIBLE_ACTIONS;
   }, [catalog, scheduledActionValues]);
 
+  /** Dropdown options: schedule-visible actions; keep Property view available as default. */
+  const actionFilterOptions = useMemo(() => {
+    const options = [...visibleScheduleActions];
+    const hasDefault = options.some(
+      (item) =>
+        String(item).trim().toLowerCase() ===
+        DEFAULT_SCHEDULE_ACTION_FILTER.toLowerCase()
+    );
+    if (!hasDefault) {
+      options.unshift(DEFAULT_SCHEDULE_ACTION_FILTER);
+    }
+    return options;
+  }, [visibleScheduleActions]);
+
+  const resolveActionsForFetch = (actionFilter) => {
+    if (actionFilter) return [actionFilter];
+    return visibleScheduleActions.length
+      ? visibleScheduleActions
+      : SCHEDULE_VISIBLE_ACTIONS;
+  };
+
   const isVisibleScheduleAction = (action) => {
     const normalized = String(action || "").trim().toLowerCase();
     return visibleScheduleActions.some(
       (item) => String(item).trim().toLowerCase() === normalized
+    );
+  };
+
+  const matchesActionFilter = (action) => {
+    if (!selectedActionFilter) {
+      return isVisibleScheduleAction(action);
+    }
+    return (
+      String(action || "").trim().toLowerCase() ===
+      selectedActionFilter.trim().toLowerCase()
     );
   };
 
@@ -150,11 +189,11 @@ const Schedule = ({ data, dataSales, scheduledActionValues }) => {
     if (!itemDate) return false;
     return (
       getNext7DaysValues().includes(itemDate) &&
-      isVisibleScheduleAction(item?.action)
+      matchesActionFilter(item?.action)
     );
   });
 
-  const loadWeekData = async (weekStartDate) => {
+  const loadWeekData = async (weekStartDate, actionFilter = selectedActionFilter) => {
     const weekStart = new Date(weekStartDate);
     const weekEnd = new Date(weekStartDate);
     weekEnd.setDate(weekEnd.getDate() + 6);
@@ -164,16 +203,27 @@ const Schedule = ({ data, dataSales, scheduledActionValues }) => {
       const nextWeekData = await fetchScheduledActionsByDate(
         formatToISODate(weekStart),
         formatToISODate(weekEnd),
-        visibleScheduleActions
+        resolveActionsForFetch(actionFilter)
       );
       setAppointments(nextWeekData);
     } catch (error) {
       console.error("Failed to load week schedule:", error?.message ?? error);
-      toast.error(t.schaduall?.loadError || "Failed to load schedule");
+      toast.error(
+        translate("schaduall.loadError", "Failed to load schedule")
+      );
       setAppointments([]);
     } finally {
       setIsWeekLoading(false);
     }
+  };
+
+  const handleActionFilterChange = async (event) => {
+    const nextFilter =
+      typeof event?.target?.value === "string"
+        ? event.target.value
+        : ALL_SCHEDULE_ACTIONS_VALUE;
+    setSelectedActionFilter(nextFilter);
+    await loadWeekData(currentDate, nextFilter);
   };
 
   const navigateWeek = async (direction) => {
@@ -184,7 +234,7 @@ const Schedule = ({ data, dataSales, scheduledActionValues }) => {
       newDate.setDate(newDate.getDate() - 7);
     }
     setCurrentDate(newDate);
-    await loadWeekData(newDate);
+    await loadWeekData(newDate, selectedActionFilter);
   };
 
   // Bounds are anchored to the current week's Saturday so navigation works
@@ -275,44 +325,82 @@ const Schedule = ({ data, dataSales, scheduledActionValues }) => {
       <div className={`min-h-screen ${SELECTION_COLORS.BG} p-6`}>
         <div className="max-w-7xl mx-auto ">
           <div className="mb-8">
-            {/* Week Navigation */}
+            {/* Week Navigation + action filter */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-gray-500" />
-                  <span className="text-lg font-semibold text-gray-800">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Calendar className="w-5 h-5 text-gray-500 shrink-0" />
+                  <span className="text-lg font-semibold text-gray-800 truncate">
                     {getWeekRangeDisplay()}
                   </span>
                 </div>
-                <div className="flex gap-2 rtl:flex-row-reverse">
-                  <button
-                    onClick={() => navigateWeek("prev")}
-                    disabled={!canNavigatePrev() || isWeekLoading}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 border ${
-                      canNavigatePrev()
-                        ? "text-gray-600 hover:text-primary hover:bg-primary/10 border-gray-200 hover:border-violet-200"
-                        : "text-gray-400 border-gray-200 cursor-not-allowed"
-                    }`}
-                  >
-                    <ChevronLeft
-                      className={`w-4 h-4  ${isRTL ? "rotate-180" : ""}`}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 min-w-0">
+                  <div className="w-full sm:w-56 min-w-0">
+                    <SearchableDropdownSelect
+                      name="schedule_action_filter"
+                      options={actionFilterOptions}
+                      value={selectedActionFilter}
+                      onChange={handleActionFilterChange}
+                      disabled={isWeekLoading}
+                      showAllOption
+                      allOptionValue={ALL_SCHEDULE_ACTIONS_VALUE}
+                      allOptionLabel={translate(
+                        "dashboardFilter.actions.allActions",
+                        "All Actions"
+                      )}
+                      placeholder={translate(
+                        "schaduall.actionFilterPlaceholder",
+                        "Filter by action"
+                      )}
+                      searchPlaceholder={translate(
+                        "schaduall.actionFilterSearch",
+                        "Search actions..."
+                      )}
+                      getValue={(option) =>
+                        typeof option === "string" ? option : option?.value
+                      }
+                      getLabel={(option) =>
+                        getActionLabel(
+                          typeof option === "string" ? option : option?.value,
+                          translate
+                        ) ||
+                        (typeof option === "string" ? option : option?.value)
+                      }
+                      sortOptions={(options) => options}
+                      className="mb-0"
+                      buttonClassName="py-2 text-sm"
                     />
-                    {t.previous}
-                  </button>
-                  <button
-                    onClick={() => navigateWeek("next")}
-                    disabled={!canNavigateNext() || isWeekLoading}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 border ${
-                      canNavigateNext()
-                        ? "text-gray-600 hover:text-primary hover:bg-primary/10 border-gray-200 hover:border-violet-200"
-                        : "text-gray-400 border-gray-200 cursor-not-allowed"
-                    }`}
-                  >
-                    {t.next}
-                    <ChevronRight
-                      className={`w-4 h-4  ${isRTL ? "rotate-180" : ""}`}
-                    />
-                  </button>
+                  </div>
+                  <div className="flex gap-2 rtl:flex-row-reverse shrink-0">
+                    <button
+                      onClick={() => navigateWeek("prev")}
+                      disabled={!canNavigatePrev() || isWeekLoading}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 border ${
+                        canNavigatePrev()
+                          ? "text-gray-600 hover:text-primary hover:bg-primary/10 border-gray-200 hover:border-violet-200"
+                          : "text-gray-400 border-gray-200 cursor-not-allowed"
+                      }`}
+                    >
+                      <ChevronLeft
+                        className={`w-4 h-4  ${isRTL ? "rotate-180" : ""}`}
+                      />
+                      {translate("previous", "Previous")}
+                    </button>
+                    <button
+                      onClick={() => navigateWeek("next")}
+                      disabled={!canNavigateNext() || isWeekLoading}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 border ${
+                        canNavigateNext()
+                          ? "text-gray-600 hover:text-primary hover:bg-primary/10 border-gray-200 hover:border-violet-200"
+                          : "text-gray-400 border-gray-200 cursor-not-allowed"
+                      }`}
+                    >
+                      {translate("next", "Next")}
+                      <ChevronRight
+                        className={`w-4 h-4  ${isRTL ? "rotate-180" : ""}`}
+                      />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

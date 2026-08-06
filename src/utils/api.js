@@ -685,13 +685,32 @@ const fetchProjectsNamesBase = async (isPublic = false) => {
 
 export const fetchProjectsNames = with2SecondRetry(fetchProjectsNamesBase);
 
-export async function fetchProjectsPaginated({ limit = 10, lastDocId, cityEnName, developerId } = {}) {
+export async function fetchProjectsPaginated({
+  limit = 10,
+  lastDocId,
+  cityEnName,
+  district,
+  subDistrict,
+  developerId,
+  propertyType,
+  minStartPrice,
+  maxStartPrice,
+} = {}) {
   try {
     const params = new URLSearchParams();
     params.append("limit", String(limit));
     if (lastDocId) params.append("last_doc_id", lastDocId);
     if (cityEnName) params.append("city_en_name", cityEnName);
+    if (district) params.append("district", district);
+    if (subDistrict) params.append("sub_district", subDistrict);
     if (developerId) params.append("developer_id", developerId);
+    if (propertyType) params.append("property_type", propertyType);
+    if (minStartPrice !== undefined && minStartPrice !== null && minStartPrice !== "") {
+      params.append("min_start_price", String(minStartPrice));
+    }
+    if (maxStartPrice !== undefined && maxStartPrice !== null && maxStartPrice !== "") {
+      params.append("max_start_price", String(maxStartPrice));
+    }
 
     const response = await axiosInstance.get(`/projectsv2/all?${params.toString()}`);
 

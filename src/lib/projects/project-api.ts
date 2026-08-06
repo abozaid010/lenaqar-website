@@ -339,13 +339,38 @@ export function transformProjectToViewModel(rawProject: RawProject, t?: T, local
  */
 export async function fetchProjectsPaginatedServer(
   limit = 20,
-  cityEnName?: string,
-  developerId?: string
+  filters: {
+    cityEnName?: string;
+    district?: string;
+    subDistrict?: string;
+    developerId?: string;
+    propertyType?: string;
+    minStartPrice?: number | string;
+    maxStartPrice?: number | string;
+  } = {}
 ): Promise<{ pages: unknown[]; pageParams: unknown[] } | null> {
   try {
+    const {
+      cityEnName,
+      district,
+      subDistrict,
+      developerId,
+      propertyType,
+      minStartPrice,
+      maxStartPrice,
+    } = filters;
     const params = new URLSearchParams({ limit: String(limit) });
     if (cityEnName) params.append('city_en_name', cityEnName);
+    if (district) params.append('district', district);
+    if (subDistrict) params.append('sub_district', subDistrict);
     if (developerId) params.append('developer_id', developerId);
+    if (propertyType) params.append('property_type', propertyType);
+    if (minStartPrice !== undefined && minStartPrice !== null && minStartPrice !== '') {
+      params.append('min_start_price', String(minStartPrice));
+    }
+    if (maxStartPrice !== undefined && maxStartPrice !== null && maxStartPrice !== '') {
+      params.append('max_start_price', String(maxStartPrice));
+    }
 
     const response = await axiosInstance.get(`/projectsv2/all?${params.toString()}`);
     const data = response.data?.data ?? response.data;

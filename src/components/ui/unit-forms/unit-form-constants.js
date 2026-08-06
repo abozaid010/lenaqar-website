@@ -27,6 +27,55 @@ function asTrimmedString(value) {
 }
 
 /**
+ * Auto-build unitTitle for the API from type, bedrooms, price, and address.
+ * Used when the title field is hidden from the form.
+ * @param {Record<string, unknown>} unit
+ * @returns {string|null}
+ */
+export function buildUnitTitle(unit) {
+  if (!unit || typeof unit !== "object") return null;
+
+  const parts = [];
+  const buildingType = asTrimmedString(unit.buildingType);
+  if (buildingType) parts.push(buildingType);
+
+  const roomsRaw = unit.roomsCount;
+  if (
+    buildingType.toLowerCase() !== "office" &&
+    roomsRaw != null &&
+    String(roomsRaw).trim() !== ""
+  ) {
+    const rooms = Number(roomsRaw);
+    if (Number.isFinite(rooms) && rooms >= 0) {
+      parts.push(`${rooms} bed`);
+    }
+  }
+
+  const purpose = asTrimmedString(unit.purpose).toLowerCase();
+  const priceRaw =
+    purpose === "rent"
+      ? (unit.monthlyRentPrice ?? unit.totalPrice)
+      : unit.totalPrice;
+  const price = Number(priceRaw);
+  if (Number.isFinite(price) && price > 0) {
+    parts.push(`${Math.floor(price).toLocaleString("en-US")} EGP`);
+  }
+
+  const project = asTrimmedString(unit.project);
+  if (project) {
+    parts.push(project);
+  } else {
+    const address = [unit.district, unit.city]
+      .map(asTrimmedString)
+      .filter(Boolean)
+      .join(", ");
+    if (address) parts.push(address);
+  }
+
+  return parts.length > 0 ? parts.join(" · ") : null;
+}
+
+/**
  * Ensure unit create/update payloads always include location fields and
  * fill missing city/district/sub_district from the selected project when possible.
  */
