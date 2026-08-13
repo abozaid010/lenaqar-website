@@ -1,6 +1,7 @@
 "use client";
 
 import { Phone, MessageCircle, Building2, Mail } from "lucide-react";
+import Link from "next/link";
 import { useI18n } from "@/hooks/useI18n";
 import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { SITE } from "@/config/site";
@@ -67,6 +68,20 @@ export default function LenaqarFooter() {
         </div>
 
         <div className="space-y-3 text-sm">
+          <nav className="flex flex-wrap gap-x-4 gap-y-2" aria-label={translate("lenaqar.footer.nav")}>
+            <Link href="/" className="hover:text-white/80">
+              {translate("lenaqar.header.home")}
+            </Link>
+            <Link href="/opportunities" className="hover:text-white/80">
+              {translate("lenaqar.header.opportunities")}
+            </Link>
+            <Link href="/sell" className="hover:text-white/80">
+              {translate("lenaqar.header.sell")}
+            </Link>
+            <Link href="/calculator" className="hover:text-white/80">
+              {translate("lenaqar.header.calculator")}
+            </Link>
+          </nav>
           <p>{translate("lenaqar.legal.priceSource")}</p>
           <p className="text-white/70">{translate("lenaqar.footer.attribution")}</p>
         </div>

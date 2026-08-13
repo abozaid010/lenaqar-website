@@ -4,19 +4,23 @@ import Image from "next/image";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useI18n } from "@/hooks/useI18n";
 import { sellerCtaHref } from "@/lib/lenaqar/whatsapp";
 import { ANALYTICS } from "@/constants/analytics";
 import WhatsAppCta from "./whatsapp-cta";
+import CoreActions from "./core-actions";
 
 export default function LenaqarHeader() {
   const { translate } = useI18n();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const isHome = pathname === "/" || pathname === "/lenaqar";
 
   const links = [
     { href: "/", label: translate("lenaqar.header.home") },
-    { href: "/sell", label: translate("lenaqar.header.sell") },
     { href: "/opportunities", label: translate("lenaqar.header.opportunities") },
+    { href: "/sell", label: translate("lenaqar.header.sell") },
     { href: "/calculator", label: translate("lenaqar.header.calculator") },
   ];
 
@@ -46,13 +50,17 @@ export default function LenaqarHeader() {
         </nav>
 
         <div className="hidden lg:block">
-          <WhatsAppCta
-            href={sellerCtaHref()}
-            eventName={ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED}
-            className="!py-2 !px-3 !text-xs"
-          >
-            {translate("lenaqar.home.lenaCta")}
-          </WhatsAppCta>
+          {isHome ? (
+            <WhatsAppCta
+              href={sellerCtaHref()}
+              eventName={ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED}
+              className="!py-2 !px-3 !text-xs"
+            >
+              {translate("lenaqar.home.lenaCta")}
+            </WhatsAppCta>
+          ) : (
+            <CoreActions compact tone="onPrimary" className="shrink-0" />
+          )}
         </div>
 
         <button

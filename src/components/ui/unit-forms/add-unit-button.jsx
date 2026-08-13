@@ -12,6 +12,7 @@ import {
   buildUnitDetailHrefFromListItem,
 } from "@/lib/units/unit-share-links";
 import { buildAdminUnitsListPath } from "@/utils/units-navigation-source";
+import { actionButtonClass } from "@/components/ui/action-button-class";
 
 export default function AddUnitButton({
   isEdit = false,
@@ -19,6 +20,10 @@ export default function AddUnitButton({
   disabled = false,
   label,
   className = "",
+  variant = "primary",
+  tone = "default",
+  size = "default",
+  showIcon,
 }) {
   const { t, locale, translate } = useI18n();
   const router = useRouter();
@@ -100,6 +105,15 @@ export default function AddUnitButton({
         savedUnit.unit_id ||
         savedUnit.id)
   );
+  const includeIcon = showIcon ?? !isLabeledCta;
+  const labeledClass = actionButtonClass({
+    variant,
+    tone,
+    size,
+    className: `${t.dir === "rtl" ? "flex-row-reverse" : ""} ${
+      disabled ? "opacity-40 cursor-not-allowed" : ""
+    } ${className}`,
+  });
 
   return (
     <>
@@ -117,9 +131,7 @@ export default function AddUnitButton({
         aria-label={isLabeledCta ? label : undefined}
         className={
           isLabeledCta
-            ? `inline-flex items-center justify-center gap-2 rounded-md bg-primary text-white font-medium px-4 py-3 text-sm shadow-md transition-colors min-h-11 ${
-                t.dir === "rtl" ? "flex-row-reverse" : ""
-              } ${disabled ? "opacity-40 cursor-not-allowed" : "hover:opacity-90"} ${className}`
+            ? labeledClass
             : `flex-shrink-0 sm:w-auto min-h-11 h-11 min-w-11 lg:min-h-[40px] lg:h-[40px] lg:min-w-0 px-3 sm:px-4 bg-primary text-white rounded-[5px] flex items-center justify-center transition duration-300 ${
                 t.dir === "rtl" ? "flex-row-reverse" : ""
               } ${disabled ? "opacity-40 cursor-not-allowed" : "hover:opacity-90"} ${className}`
@@ -132,7 +144,7 @@ export default function AddUnitButton({
           </span>
         ) : isLabeledCta ? (
           <span className="flex items-center gap-2">
-            <Plus width={20} height={20} aria-hidden />
+            {includeIcon ? <Plus width={20} height={20} aria-hidden /> : null}
             <span>{label}</span>
           </span>
         ) : (

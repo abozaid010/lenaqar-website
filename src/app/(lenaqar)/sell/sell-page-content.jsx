@@ -60,7 +60,9 @@ export default function SellPageContent() {
       <section className="container py-10 pb-24 lg:pb-10">
         <div className="flex flex-col gap-2 max-w-md">
           <AddUnitButton
-            label={translate("lenaqar.unit.addDetails", "Add Unit Details")}
+            label={translate("lenaqar.actions.sellUnit", "Sell Unit")}
+            showIcon={false}
+            unitData={{ purpose: "sell" }}
             className="w-full"
           />
           <WhatsAppCta

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import LenaqarHeader from "@/components/lenaqar/lenaqar-header";
 import LenaqarFooter from "@/components/lenaqar/lenaqar-footer";
-import StickyWhatsappBar from "@/components/lenaqar/sticky-whatsapp-bar";
+import StickyActionsBar from "@/components/lenaqar/sticky-whatsapp-bar";
 
 export default function LenaqarLayout({ children }) {
   // Read at request time so a CLI `NEXT_PUBLIC_SITE_BRAND=lenaqar` is honoured
@@ -17,7 +17,7 @@ export default function LenaqarLayout({ children }) {
       <LenaqarHeader />
       <main className="flex-1 pb-20 lg:pb-0">{children}</main>
       <LenaqarFooter />
-      <StickyWhatsappBar />
+      <StickyActionsBar />
     </div>
   );
 }

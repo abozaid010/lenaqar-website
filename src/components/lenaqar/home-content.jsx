@@ -23,30 +23,21 @@ export default function HomeContent({ units = [] }) {
         <p className="mt-4 text-base sm:text-lg text-black/70 max-w-2xl">
           {translate("lenaqar.home.heroSub")}
         </p>
-        <div className="mt-6 flex flex-col sm:flex-row gap-3">
+        <CoreActions className="mt-6" anchor />
+        <p className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm">
           <Link
             href="/calculator"
-            className="inline-flex items-center justify-center rounded-md bg-primary text-white font-medium px-4 py-3 text-sm"
+            className="text-primary font-medium underline-offset-2 hover:underline"
           >
             {translate("lenaqar.home.primaryCta")}
           </Link>
           <Link
             href="/opportunities"
-            className="inline-flex items-center justify-center rounded-md border border-primary text-primary font-medium px-4 py-3 text-sm"
+            className="text-primary font-medium underline-offset-2 hover:underline"
           >
-            {translate("lenaqar.home.secondaryCta")}
+            {translate("lenaqar.home.buyerCta")}
           </Link>
-        </div>
-      </section>
-
-      <section className="container pb-4">
-        <h2 className="text-xl font-bold text-primary mb-2">
-          {translate("lenaqar.actions.title")}
-        </h2>
-        <p className="text-black/70 mb-4 max-w-2xl">
-          {translate("lenaqar.actions.sub")}
         </p>
-        <CoreActions anchor />
       </section>
 
       <ComparisonBlock />
@@ -71,6 +62,14 @@ export default function HomeContent({ units = [] }) {
             </li>
           ))}
         </ol>
+        <div className="mt-6">
+          <Link
+            href="/sell"
+            className="text-sm text-primary font-medium underline-offset-2 hover:underline"
+          >
+            {translate("lenaqar.home.sellLearnMore")}
+          </Link>
+        </div>
       </section>
 
       <NetworkStrip />
@@ -92,7 +91,7 @@ export default function HomeContent({ units = [] }) {
             <div className="mt-6">
               <Link
                 href="/opportunities"
-                className="inline-flex items-center justify-center rounded-md bg-primary text-white font-medium px-4 py-3 text-sm"
+                className="inline-flex items-center justify-center rounded-md bg-primary text-white font-medium px-4 py-3 text-sm min-h-11"
               >
                 {translate("lenaqar.home.buyerCta")}
               </Link>
@@ -100,10 +99,9 @@ export default function HomeContent({ units = [] }) {
           </>
         ) : (
           <div className="rounded-lg border border-black/10 bg-white p-6">
-            <p className="text-black/70 mb-4">
+            <p className="text-black/70">
               {translate("lenaqar.opportunities.empty")}
             </p>
-            <CoreActions />
           </div>
         )}
       </section>

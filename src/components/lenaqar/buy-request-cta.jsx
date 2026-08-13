@@ -12,6 +12,9 @@ import {
   loadPublicBuyRequest,
   savePublicBuyRequest,
 } from "@/app/(lenaqar)/_actions/buy-request";
+import { actionButtonClass } from "@/components/ui/action-button-class";
+
+let buyRequestHashHandled = false;
 
 const STORAGE_KEY = "lenaqar_buy_request_user_id";
 
@@ -55,10 +58,11 @@ function persistUserId(userId) {
 
 export default function BuyRequestCta({
   variant = "primary",
+  tone = "default",
+  size = "default",
   initialValues,
   className = "",
   label,
-  autoOpenHash = false,
 }) {
   const { translate } = useI18n();
   const { trackEvent } = useGoogleAnalytics();
@@ -68,15 +72,12 @@ export default function BuyRequestCta({
 
   useEffect(() => {
     setUserId(readStoredUserId());
-    if (
-      autoOpenHash &&
-      typeof window !== "undefined" &&
-      window.location.hash === "#buy-request"
-    ) {
-      setOpen(true);
-      trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_OPENED);
-    }
-  }, [autoOpenHash, trackEvent]);
+    if (buyRequestHashHandled) return;
+    if (window.location.hash !== "#buy-request") return;
+    buyRequestHashHandled = true;
+    setOpen(true);
+    trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_OPENED);
+  }, [trackEvent]);
 
   const handleUserId = useCallback((nextId) => {
     const id = String(nextId || "").trim();
@@ -117,22 +118,17 @@ export default function BuyRequestCta({
     [translate],
   );
 
-  const buttonClass =
-    variant === "secondary"
-      ? "inline-flex items-center justify-center rounded-md border border-primary text-primary font-medium px-4 py-3 text-sm"
-      : "inline-flex items-center justify-center rounded-md bg-primary text-white font-medium px-4 py-3 text-sm";
-
   return (
     <>
       <button
         type="button"
-        className={`${buttonClass} ${className}`}
+        className={actionButtonClass({ variant, tone, size, className })}
         onClick={() => {
           trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_OPENED);
           setOpen(true);
         }}
       >
-        {label || translate("lenaqar.actions.buyRequest")}
+        {label || translate("lenaqar.actions.buyUnit", "Buy Unit")}
       </button>
       <EditRequirementDialog
         open={open}
