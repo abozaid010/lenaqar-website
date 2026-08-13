@@ -1,9 +1,9 @@
 export const BRAND = (process.env.NEXT_PUBLIC_SITE_BRAND || "lenaai").trim();
 export const IS_LENAQAR = BRAND === "lenaqar";
 
-/** Backend tenant the feed reads from. `public` until the lenaqar tenant has units. */
+/** Backend tenant the feed reads from. Homey holds the resale sell catalog. */
 export const LENAQAR_TENANT_ID = (
-  process.env.NEXT_PUBLIC_LENAQAR_TENANT_ID || "public"
+  process.env.NEXT_PUBLIC_LENAQAR_TENANT_ID || "homey"
 ).trim();
 
 export const SITE = {
@@ -16,8 +16,8 @@ export const SITE = {
   htmlLang: IS_LENAQAR ? "ar-EG" : null, // null = keep existing cookie/Accept-Language behaviour
   dir: IS_LENAQAR ? "rtl" : null,
   ogLocale: IS_LENAQAR ? "ar_EG" : "en_US",
-  /** null = fetch both primary and resale; the only viable TMG unit today is primary. */
-  inventory: { isPrimary: null, purpose: "sell" },
+  /** Resale sell units only (`is_primary=false`, `purpose=sell`, `client_id=homey`). */
+  inventory: { isPrimary: false, purpose: "sell" },
   /**
    * Optional developer/project tokens. Listing uses the public sell catalog;
    * these are not a hard filter (TMG-only matching emptied the feed).
@@ -52,6 +52,18 @@ export const SITE = {
     maxUnits: 40,
   },
 };
+
+/** Query params for the LenaQar public units catalog. */
+export function lenaqarInventoryQuery() {
+  const query = {
+    client_id: SITE.clientId,
+    purpose: SITE.inventory.purpose,
+  };
+  if (SITE.inventory.isPrimary === true || SITE.inventory.isPrimary === false) {
+    query.is_primary = SITE.inventory.isPrimary;
+  }
+  return query;
+}
 
 export const LENAQAR_ROUTES = [
   "/lenaqar",

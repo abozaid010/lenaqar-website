@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
-import { SITE } from "@/config/site";
+import { SITE, lenaqarInventoryQuery } from "@/config/site";
 import { mapSlimUnitToListItem } from "@/lib/units/slim-unit-list-mapper";
 import { getPublicUnitByCode } from "@/lib/units/unit-api";
 import { toPublicOpportunity } from "./to-public-opportunity";
@@ -95,8 +95,7 @@ async function fetchBoundedPages({
 
   for (let page = 0; page < SITE.feed.maxPages; page += 1) {
     const query = {
-      client_id: SITE.clientId,
-      purpose: SITE.inventory.purpose,
+      ...lenaqarInventoryQuery(),
       page_size: SITE.feed.pageSize,
       city,
       district,
@@ -107,12 +106,6 @@ async function fetchBoundedPages({
       bedrooms,
       cursor,
     };
-    if (
-      SITE.inventory.isPrimary === true ||
-      SITE.inventory.isPrimary === false
-    ) {
-      query.is_primary = SITE.inventory.isPrimary;
-    }
 
     const { units, pagination } = await fetchPage(query, {
       required: page === 0,
