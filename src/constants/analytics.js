@@ -1,7 +1,7 @@
 // Analytics configuration (GA + Meta Pixel). Prefer NEXT_PUBLIC_* env vars in production.
 
 export const ANALYTICS = {
-  MEASUREMENT_ID: 'G-L76Z647950',
+  MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-L76Z647950',
   GTM_SCRIPT_URL: 'https://www.googletagmanager.com/gtag/js?id=',
 
   // Event names for consistent tracking
@@ -11,6 +11,11 @@ export const ANALYTICS = {
     DOWNLOAD_PAGE_VIEW: 'download_page_view',
     CAMPAIGN_ARRIVAL: 'campaign_arrival',
     APP_STORE_CLICK: 'app_store_click',
+    CALCULATOR_USED: 'calculator_used',
+    SELLER_WHATSAPP_CLICKED: 'seller_whatsapp_clicked',
+    CASH_ENTERED: 'cash_entered',
+    UNIT_VIEWED: 'unit_viewed',
+    BUYER_WHATSAPP_CLICKED: 'buyer_whatsapp_clicked',
   },
 };
 

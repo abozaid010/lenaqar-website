@@ -1,6 +1,8 @@
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.lenaai.net";
+import { IS_LENAQAR, SITE } from "@/config/site";
 
-export const defaultMetadata = {
+const SITE_URL = SITE.url;
+
+const lenaaiMetadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: "LENAAI | Sell Real Estate by AI - Best AI Agent Tool for Real Estate Chatbot",
@@ -188,6 +190,62 @@ export const defaultMetadata = {
   },
 };
 
-export const SITE_NAME = "LENAAI";
+const LENAQAR_DESCRIPTION =
+  "لينا عقار بتخرجك من أقساط الوحدة أسرع وبفلوس أكتر، باتفاق مكتوب. أسعار من المطور بتاريخها، ومن غير مضايقات.";
+
+const lenaqarMetadata = {
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "لينا عقار | اخرج من وحدتك أسرع وبفلوس أكتر",
+    template: "%s | لينا عقار",
+  },
+  icons: {
+    icon: "/images/logo-5.png",
+    shortcut: "/images/logo-5.png",
+    apple: "/images/logo-5.png",
+  },
+  description: LENAQAR_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    url: SITE_URL,
+    title: "لينا عقار | اخرج من وحدتك أسرع وبفلوس أكتر",
+    description: LENAQAR_DESCRIPTION,
+    siteName: "لينا عقار",
+    locale: "ar_EG",
+    images: [
+      {
+        url: `${SITE_URL}/images/logo.png`,
+        width: 1200,
+        height: 630,
+        alt: "لينا عقار",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "لينا عقار | اخرج من وحدتك أسرع وبفلوس أكتر",
+    description: LENAQAR_DESCRIPTION,
+    images: [`${SITE_URL}/images/logo.png`],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: SITE_URL,
+    languages: {
+      "ar-EG": SITE_URL,
+    },
+  },
+};
+
+export const defaultMetadata = IS_LENAQAR ? lenaqarMetadata : lenaaiMetadata;
+export const SITE_NAME = SITE.name;
 export { SITE_URL };
 

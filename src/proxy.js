@@ -2,6 +2,26 @@ import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { isJwtExpired } from "@/lib/jwtCookieUtils";
 import { NextResponse } from "next/server";
 
+/**
+ * Brand flags are read here — do not import `@/config/site`.
+ * Pulling that module into the proxy entry made Next 16 load the raw
+ * ESM exports (no adapter default), which throws `adapterFn is not a
+ * function` on every request and retriggered Turbopack compiles.
+ */
+const LENAAI_ORIGIN = "https://www.lenaai.net";
+const LENAQAR_ORIGIN = "https://lenaqar.com";
+const LENAQAR_ROUTES = [
+  "/lenaqar",
+  "/sell",
+  "/calculator",
+  "/opportunities",
+];
+
+function isLenaqarBrand() {
+  // Bracket access so this is not compile-time-inlined; CLI env works in `next dev`.
+  return (process.env["NEXT_PUBLIC_SITE_BRAND"] || "lenaai").trim() === "lenaqar";
+}
+
 const SITE_HOME_PAGE =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.lenaai.net";
 
@@ -75,6 +95,50 @@ export function proxy(request) {
     return NextResponse.rewrite(new URL("/contact", request.url));
   }
 
+  const segments = pathname.split("/").filter(Boolean);
+  const isLenaqar = isLenaqarBrand();
+
+  if (isLenaqar) {
+    if (pathname === "/") {
+      const rewriteUrl = request.nextUrl.clone();
+      rewriteUrl.pathname = "/lenaqar";
+      return NextResponse.rewrite(rewriteUrl);
+    }
+
+    const lenaaiOnly =
+      pathname === "/login" ||
+      pathname.startsWith("/login/") ||
+      pathname === "/allProberties" ||
+      pathname.startsWith("/allProberties/") ||
+      pathname === "/privacy" ||
+      pathname.startsWith("/privacy/") ||
+      pathname === "/for-brokers" ||
+      pathname.startsWith("/for-brokers/") ||
+      pathname === "/for-developers" ||
+      pathname.startsWith("/for-developers/") ||
+      pathname === "/for-marketing-agencies" ||
+      pathname.startsWith("/for-marketing-agencies/") ||
+      pathname === "/blog" ||
+      pathname.startsWith("/blog/") ||
+      pathname === "/faq" ||
+      pathname.startsWith("/faq/") ||
+      segments.some((segment) => adminPaths.includes(segment));
+
+    if (lenaaiOnly) {
+      return NextResponse.redirect(new URL(pathname + request.nextUrl.search, LENAAI_ORIGIN), 308);
+    }
+  } else {
+    const isLenaqarPath = LENAQAR_ROUTES.some(
+      (route) => pathname === route || pathname.startsWith(`${route}/`)
+    );
+    if (isLenaqarPath) {
+      return NextResponse.redirect(
+        new URL(pathname + request.nextUrl.search, LENAQAR_ORIGIN),
+        308
+      );
+    }
+  }
+
   // Handle image requests with proper MIME types
   if (pathname.match(/\.(jpg|jpeg|png|gif|webp|avif|svg)$/i)) {
     const response = NextResponse.next();
@@ -108,9 +172,6 @@ export function proxy(request) {
   const accessToken = request.cookies.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
   const refreshToken = request.cookies.get(COOKIE_KEYS.REFRESH_TOKEN)?.value;
   const cookieClientId = request.cookies.get(COOKIE_KEYS.CLIENT_ID)?.value;
-
-  const segments = pathname.split('/').filter(Boolean);
-  // segments[0] = clientId, segments[1] = adminPath
 
   // Backward compat: /admin/* → /{clientId}/*
   if (segments[0] === 'admin') {
@@ -179,7 +240,7 @@ export function proxy(request) {
   }
 
   // Home page: redirect logged-in user to their dashboard
-  if (pathname === "/" && accessToken && cookieClientId) {
+  if (!isLenaqar && pathname === "/" && accessToken && cookieClientId) {
     return withProxyDebug(
       NextResponse.redirect(new URL(`/${cookieClientId}/dashboard`, SITE_HOME_PAGE)),
       request

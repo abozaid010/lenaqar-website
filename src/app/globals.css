@@ -34,6 +34,10 @@
   --chat-active: #f0f2f5;
 }
 
+:root[data-brand="lenaqar"] {
+  --primary: #030250;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

@@ -12,6 +12,7 @@ import { getGAScriptUrl, getGAConfig } from '@/constants/analytics';
 import MetaPixelNoscript from "@/components/analytics/MetaPixelNoscript";
 import MetaPixelProvider from "@/components/analytics/MetaPixelProvider";
 import Script from "next/script";
+import { IS_LENAQAR, SITE } from "@/config/site";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -27,19 +28,18 @@ const cairo = Cairo({
 export const metadata = defaultMetadata;
 
 export default async function RootLayout({ children }) {
-  // Get the initial locale from the cookie on the server
   const cookieStore = await cookies();
   const langCookie = cookieStore.get("lang")?.value;
 
-  // Get Accept-Language header from the request
   const headersStore = await headers();
   const acceptLanguage = headersStore.get("accept-language");
   const supportedLocales = ["en", "ar"];
   const defaultLocale = "ar";
 
-  // Parse the preferred locale from Accept-Language
   let initialLocale = defaultLocale;
-  if (!langCookie && acceptLanguage) {
+  if (SITE.htmlLang) {
+    initialLocale = "ar";
+  } else if (!langCookie && acceptLanguage) {
     const preferredLocales = acceptLanguage
       .split(",")
       .map((lang) => lang.split(";")[0].trim().toLowerCase());
@@ -53,11 +53,15 @@ export default async function RootLayout({ children }) {
       : defaultLocale;
   }
 
+  const htmlLang = SITE.htmlLang || initialLocale;
+  const htmlDir = SITE.dir || (initialLocale === "ar" ? "rtl" : "ltr");
+
   return (
     <html
-      lang={initialLocale}
+      lang={htmlLang}
       className={`${montserrat.variable} ${cairo.className}`}
-      dir={initialLocale === "ar" ? "rtl" : "ltr"}
+      dir={htmlDir}
+      data-brand={SITE.brand}
     >
       <head>
         <Script
@@ -78,9 +82,13 @@ export default async function RootLayout({ children }) {
       </head>
       <body>
         <MetaPixelNoscript />
-        <OrganizationSchema />
-        <LocalBusinessSchema />
-        <WebSiteSchema />
+        {!IS_LENAQAR ? (
+          <>
+            <OrganizationSchema />
+            <LocalBusinessSchema />
+            <WebSiteSchema />
+          </>
+        ) : null}
         <I18nProvider initialLocal={initialLocale}>
           <Toaster position="top-center" reverseOrder={false} />
           <TanStackQueryProvider>

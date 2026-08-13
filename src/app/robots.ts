@@ -1,9 +1,44 @@
 import { MetadataRoute } from 'next';
 import { SITE_URL } from './metadata';
+import { IS_LENAQAR, SITE } from '@/config/site';
 
 export default function robots(): MetadataRoute.Robots {
-  const CHAT_URL = 'https://chat.lenaai.net';
-  
+  if (IS_LENAQAR) {
+    const allow = ['/', '/sell', '/calculator'];
+    if (SITE.feed.enabled) {
+      allow.push('/opportunities', '/opportunities/*');
+    }
+    return {
+      rules: [
+        {
+          userAgent: '*',
+          allow,
+          disallow: [
+            '/api/',
+            '/lenaqar',
+            '/_next/',
+            '/dashboard/',
+            '/dashboard/*',
+            '/units/',
+            '/units/*',
+            '/developers/',
+            '/developers/*',
+            '/projects/',
+            '/projects/*',
+            '/myProjects/',
+            '/team/',
+            '/analytics/',
+            '/schedule/',
+            '/login/',
+            '/admin/',
+            '/*/admin/',
+          ],
+        },
+      ],
+      sitemap: [`${SITE_URL}/sitemap.xml`],
+    };
+  }
+
   return {
     rules: [
       {
@@ -73,4 +108,3 @@ export default function robots(): MetadataRoute.Robots {
     ],
   };
 }
-

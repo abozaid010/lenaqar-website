@@ -5,8 +5,15 @@ import { buildImageRemotePatterns } from "./src/config/imageHosts.js";
 const { loadEnvConfig } = nextEnv;
 loadEnvConfig(process.cwd());
 
+const SITE_BRAND = (process.env.NEXT_PUBLIC_SITE_BRAND || "lenaai").trim();
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: {
+    // Shell/CLI NEXT_PUBLIC_SITE_BRAND must reach the bundle. Turbopack may
+    // otherwise only inline values present in .env files.
+    NEXT_PUBLIC_SITE_BRAND: SITE_BRAND,
+  },
   experimental: {
     // Limit build/static workers on small VMs (e2-medium: 2 vCPU / 4Gi)
     cpus: 1,
@@ -93,10 +100,19 @@ const nextConfig = {
     ];
     // `api` is excluded so `/api/social-media/*` BFF routes are not rewritten to pages.
     const clientIdSegment = "/:clientId((?!api$)[^/]+)";
-    return adminPaths.flatMap((path) => [
+    const adminRewrites = adminPaths.flatMap((path) => [
       { source: `${clientIdSegment}/${path}`, destination: `/${path}` },
       { source: `${clientIdSegment}/${path}/:rest*`, destination: `/${path}/:rest*` },
     ]);
+
+    const isLenaqar = SITE_BRAND === "lenaqar";
+    if (isLenaqar) {
+      return [
+        { source: "/", destination: "/lenaqar" },
+        ...adminRewrites,
+      ];
+    }
+    return adminRewrites;
   },
 };
 
