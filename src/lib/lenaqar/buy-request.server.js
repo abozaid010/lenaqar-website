@@ -1,4 +1,7 @@
+import { cookies } from "next/headers";
 import axiosInstance from "@/utils/axiosInstance";
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
+import { SITE } from "@/config/site";
 import { cleanRequirementsPayload } from "@/utils/cleanRequirements";
 import { NEW_LEAD_ACTION } from "@/utils/action-normalize";
 import {
@@ -28,13 +31,53 @@ function toPublicError(error, fallbackCode) {
   return next;
 }
 
+function inventoryClientId(sessionClientId) {
+  return String(SITE.clientId || sessionClientId || "homey").trim();
+}
+
+function buyRequestAuthConfig(accessToken, clientId) {
+  return {
+    headers: {
+      ...tenantAuthConfig(accessToken).headers,
+      "x-client-id": clientId,
+    },
+  };
+}
+
+async function getBuyRequestAuth() {
+  try {
+    const session = await getLenaqarTenantSession();
+    return {
+      accessToken: session.accessToken,
+      clientId: inventoryClientId(session.clientId),
+    };
+  } catch (error) {
+    if (
+      error?.code !== "tenant_credentials_missing" &&
+      error?.code !== "tenant_login_failed"
+    ) {
+      throw error;
+    }
+  }
+
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
+  if (accessToken) {
+    return { accessToken, clientId: inventoryClientId() };
+  }
+
+  const next = new Error("tenant_credentials_missing");
+  next.code = "tenant_credentials_missing";
+  throw next;
+}
+
 export async function loadBuyRequestRequirement(userId) {
   if (!userId) return null;
   try {
-    const { accessToken } = await getLenaqarTenantSession();
+    const { accessToken, clientId } = await getBuyRequestAuth();
     const response = await axiosInstance.get(
       `requirements/${userId}`,
-      tenantAuthConfig(accessToken),
+      buyRequestAuthConfig(accessToken, clientId),
     );
     const data = response.data?.data;
     if (!data || typeof data !== "object") return null;
@@ -64,7 +107,7 @@ async function createBuyRequestLead({ name, phone, clientId, accessToken }) {
     const response = await axiosInstance.post(
       "/api/leads/addnew",
       payload,
-      tenantAuthConfig(accessToken),
+      buyRequestAuthConfig(accessToken, clientId),
     );
     const body = response?.data;
     if (body?.status === false) {
@@ -75,14 +118,45 @@ async function createBuyRequestLead({ name, phone, clientId, accessToken }) {
   } catch (error) {
     console.error(
       "[lenaqar] create buy-request lead failed",
-      error?.response?.status || error?.message,
+      error?.response?.status || apiMessage(error, error?.message),
     );
     throw toPublicError(error, "save_failed");
   }
 }
 
+async function upsertBuyRequestRequirement({
+  userId,
+  clientId,
+  accessToken,
+  payload,
+}) {
+  const body = cleanRequirementsPayload({
+    ...payload,
+    client_id: clientId,
+    user_id: userId,
+  });
+
+  try {
+    await axiosInstance.patch(
+      `requirements/${userId}`,
+      body,
+      buyRequestAuthConfig(accessToken, clientId),
+    );
+  } catch (error) {
+    console.error(
+      "[lenaqar] save buy request requirement failed",
+      error?.response?.status || apiMessage(error, error?.message),
+    );
+    throw toPublicError(error, "save_failed");
+  }
+}
+
+/**
+ * Persist a public buy request: create the lead (when new), then upsert
+ * the requirement on that lead.
+ */
 export async function saveBuyRequestRequirement({ userId, contact, payload }) {
-  const { accessToken, clientId } = await getLenaqarTenantSession();
+  const { accessToken, clientId } = await getBuyRequestAuth();
 
   let id = typeof userId === "string" ? userId.trim() : "";
   if (!id) {
@@ -101,25 +175,12 @@ export async function saveBuyRequestRequirement({ userId, contact, payload }) {
     });
   }
 
-  const body = cleanRequirementsPayload({
-    ...payload,
-    client_id: clientId,
-    user_id: id,
+  await upsertBuyRequestRequirement({
+    userId: id,
+    clientId,
+    accessToken,
+    payload,
   });
-
-  try {
-    await axiosInstance.patch(
-      `requirements/${id}`,
-      body,
-      tenantAuthConfig(accessToken),
-    );
-  } catch (error) {
-    console.error(
-      "[lenaqar] save buy request failed",
-      error?.response?.status || apiMessage(error, error?.message),
-    );
-    throw toPublicError(error, "save_failed");
-  }
 
   return { userId: id };
 }

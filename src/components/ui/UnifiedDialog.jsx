@@ -1,7 +1,8 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import UnifiedHeader from "@/components/ui/UnifiedHeader";
 import { useI18n } from "@/hooks/useI18n";
 
@@ -43,7 +44,12 @@ export default function UnifiedDialog({
   const { t, locale } = useI18n();
   const isRTL = locale === "ar";
   const dialogRef = useRef(null);
+  const [mounted, setMounted] = useState(false);
   const handleCancel = onCancel ?? onClose;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   // Use translated labels and guard against blank strings.
   const finalCancelLabel =
@@ -78,16 +84,16 @@ export default function UnifiedDialog({
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/50 transition-opacity duration-300 ease-in-out ${overlayClassName}`}
       onClick={handleOutsideClick}
     >
       <div
         ref={dialogRef}
-        className={`rounded-lg shadow-xl overflow-hidden w-[90%] max-h-[90vh] flex flex-col bg-white transform transition-all duration-300 ease-in-out ${dialogClassName}`}
+        className={`rounded-lg shadow-xl overflow-hidden w-[90%] max-h-[90vh] flex flex-col bg-white text-black transform transition-all duration-300 ease-in-out ${dialogClassName}`}
       >
         {/* Header: default = primary bg + white; unified = UnifiedHeader (#E2dbff + primary) */}
         {headerVariant === "unified" ? (
@@ -164,11 +170,12 @@ export default function UnifiedDialog({
           </div>
         )}
         <div
-          className={`p-4 overflow-y-auto bg-white flex-1 min-h-0 ${bodyClassName}`}
+          className={`p-4 overflow-y-auto bg-white text-black flex-1 min-h-0 [&_select]:text-gray-900 [&_select]:[color-scheme:light] [&_input]:text-gray-900 [&_textarea]:text-gray-900 ${bodyClassName}`}
         >
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
