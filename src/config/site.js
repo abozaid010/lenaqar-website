@@ -19,9 +19,9 @@ export const SITE = {
   /** null = fetch both primary and resale; the only viable TMG unit today is primary. */
   inventory: { isPrimary: null, purpose: "sell" },
   /**
-   * One developer, four projects. Applied in-process: the API ignores
-   * project/developer params. Tokens, not substrings — "نور" matches inside
-   * "نورث" and produced 14 false positives in the live scan.
+   * Optional developer/project tokens. Listing uses the public sell catalog;
+   * these are not a hard filter (TMG-only matching emptied the feed).
+   * Tokens, not substrings — "نور" matches inside "نورث".
    */
   network: {
     developerTokens: ["tmg", "talaat", "طلعت"],

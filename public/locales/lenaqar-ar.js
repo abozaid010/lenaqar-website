@@ -94,7 +94,7 @@ export default {
   opportunities: {
     title: "الكاش اللي معاك يشتري إيه النهارده؟",
     sub: "أسعار من المطور نفسه، بتاريخها، وبخطة سداد واضحة.",
-    filterArea: "المنطقة",
+    filterArea: "الموقع / المشروع",
     filterCash: "الكاش",
     filterDelivery: "الاستلام",
     allAreas: "كل المناطق",

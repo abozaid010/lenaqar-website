@@ -9,7 +9,6 @@ import BuyRequestCta from "@/components/lenaqar/buy-request-cta";
 
 export default function OpportunitiesPageContent({
   units,
-  areas,
   years,
   hasActiveFilters = false,
   cash = "",
@@ -39,7 +38,7 @@ export default function OpportunitiesPageContent({
           />
         }
       >
-        <OpportunityFilters areas={areas} years={years} />
+        <OpportunityFilters years={years} />
       </Suspense>
 
       {units.length === 0 ? (

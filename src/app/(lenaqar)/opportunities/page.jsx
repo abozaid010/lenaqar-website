@@ -41,9 +41,6 @@ export default async function OpportunitiesPage({ searchParams }) {
   const catalog = await fetchOpportunityCatalog(filters);
   const units = await fetchOpportunities(filters);
 
-  const areas = uniqueSorted(
-    catalog.flatMap((unit) => [unit.city, unit.district])
-  );
   const years = uniqueSorted(
     catalog.map((unit) => unit.deliveryYear).filter((year) => year != null)
   ).map(String);
@@ -51,7 +48,6 @@ export default async function OpportunitiesPage({ searchParams }) {
   return (
     <OpportunitiesPageContent
       units={units}
-      areas={areas}
       years={years}
       hasActiveFilters={hasActiveFilters}
       cash={filters.maxCash}

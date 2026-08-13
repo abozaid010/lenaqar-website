@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { useI18n } from "@/hooks/useI18n";
 import { useProjectsNames } from "@/hooks/use-admin-shared-data";
@@ -45,10 +46,38 @@ export default function UnitLocationSearch({
   error = false,
   errorMessage = "",
   disabled = false,
+  isPublic = false,
+  showHint = true,
+  showHierarchySummary = true,
+  showAllOption = false,
+  allOptionLabel,
+  label,
+  placeholder,
+  name = "unit_location_search",
+  className = "flex flex-col gap-2 md:col-span-2",
+  buttonClassName = "",
 }) {
   const { locale, translate } = useI18n();
   const cityManager = CityManager.getInstance();
-  const { data: projectsData, isLoading: projectsLoading } = useProjectsNames(false);
+  const { data: authProjects, isLoading: authProjectsLoading } = useProjectsNames(
+    false,
+    { enabled: !isPublic },
+  );
+  const { data: publicProjects, isLoading: publicProjectsLoading } = useQuery({
+    queryKey: ["lenaqar", "project-names"],
+    queryFn: async () => {
+      const response = await fetch("/api/lenaqar/project-names");
+      if (!response.ok) return [];
+      const json = await response.json();
+      const rows = json?.data ?? json;
+      return Array.isArray(rows) ? rows : [];
+    },
+    enabled: isPublic,
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
+  const projectsData = isPublic ? publicProjects : authProjects;
+  const projectsLoading = isPublic ? publicProjectsLoading : authProjectsLoading;
 
   const [geoLoading, setGeoLoading] = useState(true);
   const [cities, setCities] = useState([]);
@@ -278,7 +307,7 @@ export default function UnitLocationSearch({
     if (opt.kind === "project") {
       const proj = opt.payload.project;
       onSelectProject?.(proj);
-      if (proj?.id) {
+      if (!isPublic && proj?.id) {
         setFetchingProject(true);
         try {
           const res = await fetchProjectById(proj.id, false);
@@ -296,15 +325,24 @@ export default function UnitLocationSearch({
   };
 
   const isLoading = geoLoading || projectsLoading || fetchingProject;
+  const resolvedPlaceholder =
+    placeholder ||
+    translate(
+      "basicDetails.locationSearchPlaceholder",
+      "Search project, area, district, or city…",
+    );
 
   return (
-    <div className="flex flex-col gap-2 md:col-span-2">
+    <div className={className}>
       <SearchableDropdownSelect
-        name="unit_location_search"
-        label={translate(
-          "basicDetails.locationSearchLabel",
-          "Location / Project",
-        )}
+        name={name}
+        label={
+          label ||
+          translate(
+            "basicDetails.locationSearchLabel",
+            "Location / Project",
+          )
+        }
         options={options}
         value={selectedKey}
         onChange={handleChange}
@@ -313,18 +351,18 @@ export default function UnitLocationSearch({
         errorMessage={errorMessage}
         disabled={disabled || fetchingProject}
         isLoading={isLoading}
-        placeholder={translate(
-          "basicDetails.locationSearchPlaceholder",
-          "Search project, area, district, or city…",
-        )}
-        searchPlaceholder={translate(
-          "basicDetails.locationSearchPlaceholder",
-          "Search project, area, district, or city…",
-        )}
+        showAllOption={showAllOption}
+        allOptionLabel={allOptionLabel}
+        allOptionValue=""
+        placeholder={
+          showAllOption ? allOptionLabel || resolvedPlaceholder : resolvedPlaceholder
+        }
+        searchPlaceholder={resolvedPlaceholder}
         noResultsText={translate(
           "basicDetails.locationSearchEmpty",
           "No matching locations or projects",
         )}
+        buttonClassName={buttonClassName}
         getValue={(opt) => opt.key}
         getLabel={(opt) => opt.label}
         getKey={(opt) => opt.key}
@@ -349,13 +387,17 @@ export default function UnitLocationSearch({
           </div>
         )}
         resolveSelectedLabel={() => {
+          if (!selectedKey && showAllOption) {
+            return allOptionLabel || resolvedPlaceholder;
+          }
           if (selectedSummary.title && selectedSummary.path) {
             return `${selectedSummary.title} · ${selectedSummary.path}`;
           }
           return selectedSummary.title || "";
         }}
       />
-      {(formData?.city || formData?.district || formData?.sub_district) && (
+      {showHierarchySummary &&
+      (formData?.city || formData?.district || formData?.sub_district) ? (
         <p className="text-xs text-gray-500">
           {translate("basicDetails.city", "City")}:{" "}
           <span className="font-medium text-gray-700">
@@ -372,13 +414,15 @@ export default function UnitLocationSearch({
             {formData.sub_district || "—"}
           </span>
         </p>
-      )}
-      <p className="text-xs text-gray-500">
-        {translate(
-          "basicDetails.locationSearchHint",
-          "Select a leaf location: project, sub-district, or a district with no sub-districts. Choosing a project fills city, district, and area.",
-        )}
-      </p>
+      ) : null}
+      {showHint ? (
+        <p className="text-xs text-gray-500">
+          {translate(
+            "basicDetails.locationSearchHint",
+            "Select a leaf location: project, sub-district, or a district with no sub-districts. Choosing a project fills city, district, and area.",
+          )}
+        </p>
+      ) : null}
     </div>
   );
 }

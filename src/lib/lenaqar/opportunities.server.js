@@ -5,7 +5,6 @@ import { mapSlimUnitToListItem } from "@/lib/units/slim-unit-list-mapper";
 import { getPublicUnitByCode } from "@/lib/units/unit-api";
 import { toPublicOpportunity } from "./to-public-opportunity";
 import { isListableOpportunity, validateUnit } from "./validate-unit";
-import { matchesNetwork } from "./network-filter";
 
 const BFF_SECRET = process.env.BFF_SECRET ?? "";
 
@@ -38,6 +37,10 @@ export function parseOpportunitySearchParams(params = {}) {
     deliveryYear: pickSearchString(params, "delivery"),
     city: pickSearchString(params, "city"),
     district: pickSearchString(params, "district"),
+    subDistrict: pickSearchString(params, "sub_district"),
+    project:
+      pickSearchString(params, "project") ||
+      pickSearchString(params, "project_name"),
     bedrooms: pickPositiveNumber(params, "bedrooms"),
     minPrice: pickPositiveNumber(params, "min_price"),
     maxPrice: pickPositiveNumber(params, "max_price"),
@@ -81,6 +84,8 @@ async function fetchPage(query, { required = false } = {}) {
 async function fetchBoundedPages({
   city,
   district,
+  subDistrict,
+  project,
   minPrice,
   maxPrice,
   bedrooms,
@@ -95,6 +100,8 @@ async function fetchBoundedPages({
       page_size: SITE.feed.pageSize,
       city,
       district,
+      sub_district: subDistrict,
+      project_name: project,
       min_price: minPrice,
       max_price: maxPrice,
       bedrooms,
@@ -119,11 +126,27 @@ async function fetchBoundedPages({
   return collected;
 }
 
+function matchesExact(value, needle) {
+  if (!needle) return true;
+  const want = String(needle).trim().toLowerCase();
+  if (!want) return true;
+  return String(value || "").trim().toLowerCase() === want;
+}
+
 function matchesArea(unit, area) {
   if (!area) return true;
   const needle = String(area).trim().toLowerCase();
   if (!needle) return true;
   return [unit.city, unit.district, unit.subDistrict].some(
+    (value) => String(value || "").trim().toLowerCase() === needle
+  );
+}
+
+function matchesProject(unit, project) {
+  if (!project) return true;
+  const needle = String(project).trim().toLowerCase();
+  if (!needle) return true;
+  return [unit.project, unit.projectAr].some(
     (value) => String(value || "").trim().toLowerCase() === needle
   );
 }
@@ -156,11 +179,24 @@ function matchesPropertyType(unit, propertyType) {
 
 export function applyInProcessFilters(
   units,
-  { area, maxCash, deliveryYear, propertyType } = {}
+  {
+    area,
+    city,
+    district,
+    subDistrict,
+    project,
+    maxCash,
+    deliveryYear,
+    propertyType,
+  } = {}
 ) {
   return units.filter(
     (unit) =>
       matchesArea(unit, area) &&
+      matchesExact(unit.city, city) &&
+      matchesExact(unit.district, district) &&
+      matchesExact(unit.subDistrict, subDistrict) &&
+      matchesProject(unit, project) &&
       matchesMaxCash(unit, maxCash) &&
       matchesDeliveryYear(unit, deliveryYear) &&
       matchesPropertyType(unit, propertyType)
@@ -171,7 +207,6 @@ function toFeedItem(raw) {
   const unit = toPublicOpportunity(mapSlimUnitToListItem(raw));
   if (!unit) return null;
   if (!isListableOpportunity(unit)) return null;
-  if (!matchesNetwork(unit, SITE.network)) return null;
 
   const gate = validateUnit(unit);
   return {
@@ -200,10 +235,20 @@ const loadCatalog = cache(async (apiKey) => {
   return sortFeed(validated).slice(0, SITE.feed.maxUnits);
 });
 
-function catalogApiKey({ city, district, minPrice, maxPrice, bedrooms } = {}) {
+function catalogApiKey({
+  city,
+  district,
+  subDistrict,
+  project,
+  minPrice,
+  maxPrice,
+  bedrooms,
+} = {}) {
   return JSON.stringify({
     city: city || "",
     district: district || "",
+    subDistrict: subDistrict || "",
+    project: project || "",
     minPrice: minPrice || "",
     maxPrice: maxPrice || "",
     bedrooms: bedrooms || "",
@@ -225,6 +270,8 @@ export async function fetchOpportunityCatalog(apiFilters = {}) {
 export async function fetchOpportunities({
   city,
   district,
+  subDistrict,
+  project,
   minPrice,
   maxPrice,
   bedrooms,
@@ -236,12 +283,18 @@ export async function fetchOpportunities({
   const catalog = await fetchOpportunityCatalog({
     city,
     district,
+    subDistrict,
+    project,
     minPrice,
     maxPrice,
     bedrooms,
   });
   return applyInProcessFilters(catalog, {
     area,
+    city,
+    district,
+    subDistrict,
+    project,
     maxCash,
     deliveryYear,
     propertyType,

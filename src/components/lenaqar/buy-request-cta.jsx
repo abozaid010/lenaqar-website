@@ -21,6 +21,7 @@ const STORAGE_KEY = "lenaqar_buy_request_user_id";
 const PUBLIC_OPPORTUNITY_QUERY_KEYS = [
   "city",
   "district",
+  "sub_district",
   "bedrooms",
   "min_price",
   "max_price",
@@ -35,6 +36,7 @@ function opportunityQueryFromRequirement(requirement) {
     if (value == null || value === "") continue;
     params.set(key, String(value));
   }
+  if (filters.project_name) params.set("project", String(filters.project_name));
   return params.toString();
 }
 
