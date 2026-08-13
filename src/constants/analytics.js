@@ -16,6 +16,8 @@ export const ANALYTICS = {
     CASH_ENTERED: 'cash_entered',
     UNIT_VIEWED: 'unit_viewed',
     BUYER_WHATSAPP_CLICKED: 'buyer_whatsapp_clicked',
+    BUY_REQUEST_OPENED: 'buy_request_opened',
+    BUY_REQUEST_SUBMITTED: 'buy_request_submitted',
   },
 };
 

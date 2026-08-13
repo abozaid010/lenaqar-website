@@ -24,6 +24,11 @@ export const metadata = {
 };
 
 export default async function LenaqarHomePage() {
-  const units = SITE.feed.enabled ? await fetchOpportunities() : [];
+  let units = [];
+  try {
+    units = await fetchOpportunities();
+  } catch {
+    units = [];
+  }
   return <HomeContent units={units} />;
 }

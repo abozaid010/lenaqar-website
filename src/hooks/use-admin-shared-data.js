@@ -95,12 +95,14 @@ export function useCompounds(client_id, isPublic = false) {
 }
 
 // Hook for fetching lightweight project names (optimized)
-export function useProjectsNames(isPublic = false) {
+export function useProjectsNames(isPublic = false, options = {}) {
+  const enabled = options.enabled !== false;
   return useQuery({
     queryKey: projectNamesKeys.lists(isPublic),
     queryFn: () => fetchProjectsNames(isPublic),
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
+    enabled,
   });
 }
 

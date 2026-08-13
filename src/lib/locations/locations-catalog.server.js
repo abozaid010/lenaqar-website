@@ -27,9 +27,14 @@ function unwrapLocations(res) {
   return [];
 }
 
-async function fetchChildren(locationId) {
+function authConfig(token) {
+  return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+}
+
+async function fetchChildren(locationId, authToken) {
   const res = await axiosInstance.get(
-    `/market-index/locations/${encodeURIComponent(locationId)}/children`
+    `/market-index/locations/${encodeURIComponent(locationId)}/children`,
+    authConfig(authToken),
   );
   return unwrapLocations(res);
 }
@@ -67,11 +72,11 @@ async function mapPool(items, concurrency, worker) {
  * @param {object} node
  * @returns {Promise<object[]>}
  */
-async function collectSubDistrictsFlat(node) {
+async function collectSubDistrictsFlat(node, authToken) {
   const childCount = node?.children_count ?? 0;
   if (node?.is_leaf === true && childCount <= 0) return [];
 
-  const children = await fetchChildren(node.id);
+  const children = await fetchChildren(node.id, authToken);
   const flat = [];
 
   for (const child of children) {
@@ -82,7 +87,7 @@ async function collectSubDistrictsFlat(node) {
     });
     const nestedCount = child.children_count ?? 0;
     if (child.is_leaf === false || nestedCount > 0) {
-      const nested = await collectSubDistrictsFlat(child);
+      const nested = await collectSubDistrictsFlat(child, authToken);
       flat.push(...nested);
     }
   }
@@ -93,15 +98,18 @@ async function collectSubDistrictsFlat(node) {
 /**
  * @returns {Promise<{ cities: object[], fetchedAt: string, source: string, count: object }>}
  */
-async function buildLocationsCatalog() {
-  const rootsRes = await axiosInstance.get("/market-index/locations/roots");
+async function buildLocationsCatalog(authToken) {
+  const rootsRes = await axiosInstance.get(
+    "/market-index/locations/roots",
+    authConfig(authToken),
+  );
   const cities = unwrapLocations(rootsRes);
 
   const tree = await mapPool(
     cities,
     LOCATIONS_CATALOG_CONCURRENCY,
     async (city) => {
-      const districts = await fetchChildren(city.id);
+      const districts = await fetchChildren(city.id, authToken);
       const districtNodes = await mapPool(
         districts,
         LOCATIONS_CATALOG_CONCURRENCY,
@@ -110,7 +118,7 @@ async function buildLocationsCatalog() {
           const sub_districts =
             district.is_leaf === true && childCount <= 0
               ? []
-              : await collectSubDistrictsFlat(district);
+              : await collectSubDistrictsFlat(district, authToken);
 
           return {
             en_name: district.en_name,
@@ -179,16 +187,17 @@ export function clearLocationsCatalogCache() {
 
 /**
  * Returns the catalog, building once per TTL window (shared across requests/users).
- * Requires an authenticated server request context (Bearer via axios cookies).
+ * Requires an authenticated server request context (Bearer via axios cookies),
+ * or an explicit `authToken` (LenaQar public buy-request location picker).
  */
-export async function getLocationsCatalog({ force = false } = {}) {
+export async function getLocationsCatalog({ force = false, authToken } = {}) {
   if (!force) {
     const hit = peekLocationsCatalogCache();
     if (hit) return hit;
     if (cache.promise) return cache.promise;
   }
 
-  cache.promise = buildLocationsCatalog()
+  cache.promise = buildLocationsCatalog(authToken)
     .then((data) => {
       cache.data = data;
       cache.fetchedAt = Date.now();

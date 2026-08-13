@@ -1,9 +1,9 @@
 export const BRAND = (process.env.NEXT_PUBLIC_SITE_BRAND || "lenaai").trim();
 export const IS_LENAQAR = BRAND === "lenaqar";
 
-/** Backend tenant the feed reads from. Flip to "lenaqar" the moment that tenant has units. */
+/** Backend tenant the feed reads from. `public` until the lenaqar tenant has units. */
 export const LENAQAR_TENANT_ID = (
-  process.env.NEXT_PUBLIC_LENAQAR_TENANT_ID || "lenaqar"
+  process.env.NEXT_PUBLIC_LENAQAR_TENANT_ID || "public"
 ).trim();
 
 export const SITE = {
@@ -42,9 +42,11 @@ export const SITE = {
   showPresentValue: false,
   /** Flip when info@lenaqar.com actually receives mail. */
   showEmail: false,
-  /** Feed sizing: bounded pages in, capped list out. Off until TMG inventory lands. */
+  /** Feed sizing: bounded pages in, capped list out. Set FEED_ENABLED=false to pause fetching. */
   feed: {
-    enabled: process.env.NEXT_PUBLIC_LENAQAR_FEED_ENABLED === "true",
+    enabled:
+      IS_LENAQAR &&
+      process.env.NEXT_PUBLIC_LENAQAR_FEED_ENABLED !== "false",
     maxPages: 4,
     pageSize: 16,
     maxUnits: 40,

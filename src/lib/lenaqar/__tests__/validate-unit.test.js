@@ -5,12 +5,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { validateUnit } from "../validate-unit.js";
+import { validateUnit, isListableOpportunity } from "../validate-unit.js";
 import { matchesNetwork } from "../network-filter.js";
 import { cashMultiple } from "../metrics.js";
 import { SITE } from "../../../config/site.js";
 import { computeExitComparison } from "../exit-comparison.js";
 import { toPublicOpportunity } from "../to-public-opportunity.js";
+import { opportunityToUnitFormPrefill } from "../opportunity-to-unit-form.js";
 
 const network = SITE.network;
 
@@ -112,4 +113,52 @@ test("allowlist mapper drops author and other internal fields", () => {
   assert.equal(mapped.images[0].url, "https://example.com/a.jpg");
   assert.equal(mapped.images[0].fileId, undefined);
   assert.equal(mapped.code, cleanTmgUnit.code);
+});
+
+test("opportunity prefill maps listing fields and drops identity", () => {
+  const prefill = opportunityToUnitFormPrefill({
+    ...cleanTmgUnit,
+    code: "6QKbijY9",
+    unitId: "should-not-copy",
+    unitTitle: "South Med 3BR",
+    projectAr: "ساوث ميد",
+    city: "New Cairo",
+    roomsCount: 3,
+    overPrice: 250000,
+    remainingAmount: 1000000,
+    images: [{ url: "https://example.com/a.jpg", fileId: "x" }],
+  });
+  assert.equal(prefill.purpose, "sell");
+  assert.equal(prefill.project, "south med");
+  assert.equal(prefill.project_ar, "ساوث ميد");
+  assert.equal(prefill.unitTitle, "South Med 3BR");
+  assert.equal(prefill.city, "New Cairo");
+  assert.equal(prefill.roomsCount, 3);
+  assert.equal(prefill.totalPrice, cleanTmgUnit.totalPrice);
+  assert.equal(prefill.installment_years, 11);
+  assert.equal(prefill.over_price, 250000);
+  assert.equal(prefill.remaining_amount, 1000000);
+  assert.equal(prefill.code, undefined);
+  assert.equal(prefill.unitId, undefined);
+  assert.equal(prefill.images[0].url, "https://example.com/a.jpg");
+  assert.equal(prefill.images[0].fileId, undefined);
+});
+
+test("allowlist keeps overPrice and still drops cache_price", () => {
+  const mapped = toPublicOpportunity({
+    ...cleanTmgUnit,
+    over_price: 150000,
+    cache_price: 1,
+  });
+  assert.equal(mapped.overPrice, 150000);
+  assert.equal(mapped.cache_price, undefined);
+});
+
+test("slim listing gate accepts a priced unit without downPayment", () => {
+  assert.equal(
+    isListableOpportunity({ code: "abc", totalPrice: 1_000_000 }),
+    true
+  );
+  assert.equal(isListableOpportunity({ code: "abc", totalPrice: 0 }), false);
+  assert.equal(isListableOpportunity({ totalPrice: 1_000_000 }), false);
 });

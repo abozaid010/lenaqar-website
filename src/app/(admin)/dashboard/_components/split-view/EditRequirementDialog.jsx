@@ -20,6 +20,7 @@ import LenaTextarea from "@/components/ui/inputs/lena-textarea";
 import UnitsLocationSearch from "@/components/ui/inputs/units-location-search";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
+import { PhoneField } from "@/components/phone/PhoneField";
 import { useProjectsNames } from "@/hooks/use-admin-shared-data";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -141,23 +142,33 @@ function buildPriceFieldsForPayload(form) {
   return priceFields;
 }
 
-function createEmptyForm(userId = "") {
-  const client_id = LenaCookiesManager.getClientId() || "";
+function createEmptyForm(userId = "", overrides = {}) {
+  const client_id = String(
+    overrides.clientId || LenaCookiesManager.getClientId() || "",
+  ).trim();
+  const initial =
+    overrides.initialValues && typeof overrides.initialValues === "object"
+      ? overrides.initialValues
+      : {};
   return {
     client_id,
     user_id: userId,
-    ...withDefaultLocation(client_id),
-    project: "",
-    buildingType: "",
+    ...withDefaultLocation(client_id, {
+      city: initial.city,
+      district: initial.district,
+      sub_district: initial.sub_district,
+    }),
+    project: pickSingleValue(initial.project),
+    buildingType: pickSingleValue(initial.buildingType),
     finishingType: "",
     furnishingType: "",
-    purpose: "",
+    purpose: pickSingleValue(initial.purpose) || overrides.defaultPurpose || "",
     land_area: "",
-    roomsCount: "",
+    roomsCount: numberToFieldValue(initial.roomsCount),
     bathroomCount: "",
     min_price: "",
     max_price: "",
-    downPayment: "",
+    downPayment: numberToFieldValue(initial.downPayment),
     notes: "",
   };
 }
@@ -167,13 +178,33 @@ export default function EditRequirementDialog({
   onClose,
   userId,
   onSuccess,
+  onUserId,
+  title,
+  submitLabel,
+  intro,
+  successMessage,
+  clientId,
+  defaultPurpose = "",
+  initialValues,
+  showContactFields = false,
+  fetchProjects = true,
+  overlayClassName,
+  loadRequirement = getClientRequirements,
+  saveRequirement = updateUserRequirements,
 }) {
   const { locale, translate, t } = useI18n();
-  const { data: projectsData, isLoading: projectsLoading } = useProjectsNames(false);
+  const { data: projectsData, isLoading: projectsLoading } = useProjectsNames(
+    false,
+    { enabled: fetchProjects },
+  );
+  const formOptions = { clientId, defaultPurpose, initialValues };
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState(() => createEmptyForm());
+  const [form, setForm] = useState(() => createEmptyForm("", formOptions));
   const [locationError, setLocationError] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phonePayload, setPhonePayload] = useState(null);
 
   const tr = (key, fallback) => translate(key, fallback);
 
@@ -182,26 +213,35 @@ export default function EditRequirementDialog({
       setLocationError("");
       return undefined;
     }
-    if (!userId) return undefined;
+    if (!userId) {
+      setForm(createEmptyForm("", formOptions));
+      setContactName("");
+      setPhoneNumber("");
+      setPhonePayload(null);
+      setLoading(false);
+      return undefined;
+    }
     let cancelled = false;
     (async () => {
       setLoading(true);
       try {
-        const raw = await getClientRequirements(userId);
+        const raw = await loadRequirement(userId);
         if (cancelled) return;
         // API returns response.data.data — can be null when the lead has no requirement.
         // Save still works: PATCH /requirements/{user_id} upserts (create or update).
         if (raw?.error || !raw || typeof raw !== "object") {
           if (raw?.error) toast.error(String(raw.error));
-          setForm(createEmptyForm(userId));
+          setForm(createEmptyForm(userId, formOptions));
           return;
         }
-        const client_id =
-          String(raw.client_id || LenaCookiesManager.getClientId() || "").trim();
+        const resolvedClientId =
+          String(
+            raw.client_id || clientId || LenaCookiesManager.getClientId() || "",
+          ).trim();
         setForm({
-          ...createEmptyForm(userId),
-          client_id,
-          ...withDefaultLocation(client_id, {
+          ...createEmptyForm(userId, formOptions),
+          client_id: resolvedClientId,
+          ...withDefaultLocation(resolvedClientId, {
             city: pickSingleValue(raw.city),
             district: pickSingleValue(raw.district),
             sub_district: pickSingleValue(raw.sub_district),
@@ -343,7 +383,28 @@ export default function EditRequirementDialog({
 
   const handleSubmit = async (e) => {
     e?.preventDefault?.();
-    if (!userId) return;
+    if (!userId && !showContactFields) return;
+
+    if (showContactFields) {
+      if (!contactName.trim()) {
+        toast.error(
+          tr(
+            "lenaqar.buyRequest.nameRequired",
+            locale === "ar" ? "الاسم مطلوب" : "Name is required",
+          ),
+        );
+        return;
+      }
+      if (!phonePayload?.combined) {
+        toast.error(
+          tr(
+            "lenaqar.buyRequest.phoneRequired",
+            locale === "ar" ? "رقم الموبايل مطلوب" : "Phone number is required",
+          ),
+        );
+        return;
+      }
+    }
 
     const locationResult = await validateLocationLeaf(
       {
@@ -364,11 +425,12 @@ export default function EditRequirementDialog({
 
     setSaving(true);
     try {
-      const clientId = form.client_id || LenaCookiesManager.getClientId() || "";
+      const resolvedClientId =
+        form.client_id || clientId || LenaCookiesManager.getClientId() || "";
       const purpose = normalizeEnumValue(form.purpose, PURPOSE_VALUES) || null;
       const payload = {
-        client_id: clientId,
-        user_id: userId,
+        client_id: resolvedClientId,
+        user_id: userId || "",
         city: form.city,
         district: form.district,
         sub_district: form.sub_district,
@@ -389,12 +451,22 @@ export default function EditRequirementDialog({
         additionalFeatures: notesToAdditionalFeatures(form.notes),
         score: {},
       };
-      await updateUserRequirements(userId, payload);
+      const extra = showContactFields
+        ? {
+            contact: {
+              name: contactName.trim(),
+              phone: phonePayload.combined,
+            },
+          }
+        : undefined;
+      const saveResult = await saveRequirement(userId, payload, extra);
+      const savedUserId = String(saveResult?.userId || userId || "").trim();
+      if (savedUserId) onUserId?.(savedUserId);
 
       // Confirm notes persist via additionalFeatures (API has no `notes` field).
       const wantedNotes = additionalFeaturesToNotes(payload.additionalFeatures);
-      if (wantedNotes) {
-        const refreshed = await getClientRequirements(userId);
+      if (wantedNotes && savedUserId) {
+        const refreshed = await loadRequirement(savedUserId);
         const savedNotes =
           refreshed && !refreshed.error
             ? additionalFeaturesToNotes(refreshed.additionalFeatures)
@@ -408,18 +480,19 @@ export default function EditRequirementDialog({
                 : "Requirements saved, but notes were not stored by the API. Confirm the requirement `additionalFeatures` field is supported.",
             ),
           );
-          onSuccess?.();
+          onSuccess?.(payload);
           return;
         }
       }
 
       toast.success(
-        tr(
-          "common.requirementsSaved",
-          locale === "ar" ? "تم حفظ المتطلبات بنجاح" : "Requirements saved",
-        ),
+        successMessage ||
+          tr(
+            "common.requirementsSaved",
+            locale === "ar" ? "تم حفظ المتطلبات بنجاح" : "Requirements saved",
+          ),
       );
-      onSuccess?.();
+      onSuccess?.(payload);
       onClose();
     } catch (err) {
       toast.error(
@@ -438,10 +511,13 @@ export default function EditRequirementDialog({
     <UnifiedDialog
       isOpen={open}
       onClose={onClose}
-      title={tr(
-        "dashboard.requirementsDialog.title",
-        locale === "ar" ? "تعديل المتطلبات" : "Edit Requirements",
-      )}
+      title={
+        title ||
+        tr(
+          "dashboard.requirementsDialog.title",
+          locale === "ar" ? "تعديل المتطلبات" : "Edit Requirements",
+        )
+      }
       cancelLabel={tr("buttons.cancel", locale === "ar" ? "إلغاء" : "Cancel")}
       onCancel={onClose}
       submitLabel={
@@ -450,12 +526,13 @@ export default function EditRequirementDialog({
               "common.saving",
               locale === "ar" ? "جارٍ الحفظ..." : "Saving...",
             )
-          : tr("common.save", locale === "ar" ? "حفظ" : "Save")
+          : submitLabel || tr("common.save", locale === "ar" ? "حفظ" : "Save")
       }
       onSubmit={handleSubmit}
-      submitDisabled={loading || saving || !userId}
+      submitDisabled={loading || saving || (!userId && !showContactFields)}
       submitLoading={saving}
       closeOnEscape
+      overlayClassName={overlayClassName}
       dialogClassName="sm:max-w-xl"
       bodyClassName="space-y-5 text-sm !p-4"
     >
@@ -468,6 +545,44 @@ export default function EditRequirementDialog({
         </div>
       ) : (
         <>
+          {intro ? (
+            <p className="text-sm text-gray-600 -mt-1">{intro}</p>
+          ) : null}
+
+          {showContactFields ? (
+            <section className="space-y-3">
+              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                {tr(
+                  "lenaqar.buyRequest.contactSection",
+                  locale === "ar" ? "بيانات التواصل" : "Contact",
+                )}
+              </h4>
+              <LenaTextField
+                name="contact_name"
+                label={tr(
+                  "lenaqar.buyRequest.name",
+                  locale === "ar" ? "الاسم" : "Name",
+                )}
+                value={contactName}
+                onChange={(e) => setContactName(e.target.value)}
+                required
+              />
+              <PhoneField
+                className="w-full"
+                name="contact_phone"
+                label={tr(
+                  "lenaqar.buyRequest.phone",
+                  locale === "ar" ? "موبايل" : "Phone",
+                )}
+                required
+                defaultCountry="EG"
+                value={phoneNumber}
+                onChange={(next) => setPhoneNumber(next ?? "")}
+                onValueChange={setPhonePayload}
+              />
+            </section>
+          ) : null}
+
           {/* Location */}
           <section className="space-y-3">
             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">

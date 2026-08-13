@@ -1,6 +1,9 @@
-import { notFound } from "next/navigation";
 import { SITE } from "@/config/site";
-import { fetchOpportunities } from "@/lib/lenaqar/opportunities.server";
+import {
+  fetchOpportunityCatalog,
+  fetchOpportunities,
+  parseOpportunitySearchParams,
+} from "@/lib/lenaqar/opportunities.server";
 import OpportunitiesPageContent from "./opportunities-page-content";
 
 export const revalidate = 900;
@@ -31,23 +34,18 @@ function uniqueSorted(values) {
 }
 
 export default async function OpportunitiesPage({ searchParams }) {
-  if (!SITE.feed.enabled) notFound();
-
   const params = await searchParams;
-  const area = typeof params?.area === "string" ? params.area : "";
-  const cash = typeof params?.cash === "string" ? params.cash : "";
-  const delivery = typeof params?.delivery === "string" ? params.delivery : "";
+  const filters = parseOpportunitySearchParams(params);
+  const hasActiveFilters = Object.values(filters).some(Boolean);
 
-  const all = await fetchOpportunities();
-  const units = await fetchOpportunities({
-    area,
-    maxCash: cash,
-    deliveryYear: delivery,
-  });
+  const catalog = await fetchOpportunityCatalog(filters);
+  const units = await fetchOpportunities(filters);
 
-  const areas = uniqueSorted(all.flatMap((unit) => [unit.city, unit.district]));
+  const areas = uniqueSorted(
+    catalog.flatMap((unit) => [unit.city, unit.district])
+  );
   const years = uniqueSorted(
-    all.map((unit) => unit.deliveryYear).filter((year) => year != null)
+    catalog.map((unit) => unit.deliveryYear).filter((year) => year != null)
   ).map(String);
 
   return (
@@ -55,6 +53,8 @@ export default async function OpportunitiesPage({ searchParams }) {
       units={units}
       areas={areas}
       years={years}
+      hasActiveFilters={hasActiveFilters}
+      cash={filters.maxCash}
     />
   );
 }

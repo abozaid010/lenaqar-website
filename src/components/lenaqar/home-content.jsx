@@ -2,17 +2,16 @@
 
 import Link from "next/link";
 import { useI18n } from "@/hooks/useI18n";
-import { SITE } from "@/config/site";
 import { sellerCtaHref } from "@/lib/lenaqar/whatsapp";
 import { ANALYTICS } from "@/constants/analytics";
 import WhatsAppCta from "./whatsapp-cta";
 import ComparisonBlock from "./comparison-block";
 import NetworkStrip from "./network-strip";
 import OpportunityCard from "./opportunity-card";
+import CoreActions from "./core-actions";
 
 export default function HomeContent({ units = [] }) {
   const { translate } = useI18n();
-  const showBuyerDoor = SITE.feed.enabled && units.length > 0;
   const preview = units.slice(0, 6);
 
   return (
@@ -31,15 +30,23 @@ export default function HomeContent({ units = [] }) {
           >
             {translate("lenaqar.home.primaryCta")}
           </Link>
-          {showBuyerDoor ? (
-            <Link
-              href="/opportunities"
-              className="inline-flex items-center justify-center rounded-md border border-primary text-primary font-medium px-4 py-3 text-sm"
-            >
-              {translate("lenaqar.home.secondaryCta")}
-            </Link>
-          ) : null}
+          <Link
+            href="/opportunities"
+            className="inline-flex items-center justify-center rounded-md border border-primary text-primary font-medium px-4 py-3 text-sm"
+          >
+            {translate("lenaqar.home.secondaryCta")}
+          </Link>
         </div>
+      </section>
+
+      <section className="container pb-4">
+        <h2 className="text-xl font-bold text-primary mb-2">
+          {translate("lenaqar.actions.title")}
+        </h2>
+        <p className="text-black/70 mb-4 max-w-2xl">
+          {translate("lenaqar.actions.sub")}
+        </p>
+        <CoreActions anchor />
       </section>
 
       <ComparisonBlock />
@@ -68,29 +75,38 @@ export default function HomeContent({ units = [] }) {
 
       <NetworkStrip />
 
-      {showBuyerDoor ? (
-        <section className="container py-10">
-          <h2 className="text-xl font-bold text-primary">
-            {translate("lenaqar.home.buyerTitle")}
-          </h2>
-          <p className="text-black/70 mt-2 mb-6">
-            {translate("lenaqar.home.buyerSub")}
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {preview.map((unit) => (
-              <OpportunityCard key={unit.code} unit={unit} />
-            ))}
+      <section className="container py-10">
+        <h2 className="text-xl font-bold text-primary">
+          {translate("lenaqar.home.buyerTitle")}
+        </h2>
+        <p className="text-black/70 mt-2 mb-6">
+          {translate("lenaqar.home.buyerSub")}
+        </p>
+        {preview.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {preview.map((unit) => (
+                <OpportunityCard key={unit.code} unit={unit} />
+              ))}
+            </div>
+            <div className="mt-6">
+              <Link
+                href="/opportunities"
+                className="inline-flex items-center justify-center rounded-md bg-primary text-white font-medium px-4 py-3 text-sm"
+              >
+                {translate("lenaqar.home.buyerCta")}
+              </Link>
+            </div>
+          </>
+        ) : (
+          <div className="rounded-lg border border-black/10 bg-white p-6">
+            <p className="text-black/70 mb-4">
+              {translate("lenaqar.opportunities.empty")}
+            </p>
+            <CoreActions />
           </div>
-          <div className="mt-6">
-            <Link
-              href="/opportunities"
-              className="inline-flex items-center justify-center rounded-md bg-primary text-white font-medium px-4 py-3 text-sm"
-            >
-              {translate("lenaqar.home.buyerCta")}
-            </Link>
-          </div>
-        </section>
-      ) : null}
+        )}
+      </section>
 
       <section className="container py-10">
         <h2 className="text-xl font-bold text-primary mb-4">

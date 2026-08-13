@@ -13,7 +13,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const unit = SITE.feed.enabled ? await fetchOpportunityByCode(slug) : null;
+  const unit = await fetchOpportunityByCode(slug);
   const project = unit?.projectAr || unit?.project || slug;
   const title = `${project} | فرصة كاش من لينا عقار`;
   const description = unit
@@ -39,7 +39,6 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function OpportunityDetailPage({ params }) {
-  if (!SITE.feed.enabled) notFound();
   const { slug } = await params;
   const unit = await fetchOpportunityByCode(slug);
   if (!unit) notFound();

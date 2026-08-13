@@ -59,14 +59,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       },
     ];
 
-    if (!SITE.feed.enabled) return staticPages;
-
     staticPages.push({
       url: `${SITE_URL}/opportunities`,
       lastModified: now,
       changeFrequency: 'daily',
       priority: 0.8,
     });
+
+    if (!SITE.feed.enabled) return staticPages;
 
     const units = await fetchOpportunities();
     const unitPages: MetadataRoute.Sitemap = units.map((unit) => ({

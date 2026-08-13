@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
-import { SITE } from "@/config/site";
 import { sellerCtaHref } from "@/lib/lenaqar/whatsapp";
 import { ANALYTICS } from "@/constants/analytics";
 import WhatsAppCta from "./whatsapp-cta";
@@ -17,14 +16,9 @@ export default function LenaqarHeader() {
   const links = [
     { href: "/", label: translate("lenaqar.header.home") },
     { href: "/sell", label: translate("lenaqar.header.sell") },
+    { href: "/opportunities", label: translate("lenaqar.header.opportunities") },
     { href: "/calculator", label: translate("lenaqar.header.calculator") },
   ];
-  if (SITE.feed.enabled) {
-    links.push({
-      href: "/opportunities",
-      label: translate("lenaqar.header.opportunities"),
-    });
-  }
 
   return (
     <header className="sticky top-0 z-40 bg-primary text-white">

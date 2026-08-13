@@ -61,7 +61,8 @@ export default function SearchableProjectSelect({
 
   // Fetch lightweight projects if not provided as prop (all project names for search)
   const { data: fetchedProjects, isLoading: fetchedLoading } = useProjectsNames(
-    isPublic
+    isPublic,
+    { enabled: projectsProp == null },
   );
 
   const allProjects = projectsProp || fetchedProjects || [];

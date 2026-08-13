@@ -6,6 +6,7 @@ import { ANALYTICS } from "@/constants/analytics";
 import ComparisonBlock from "@/components/lenaqar/comparison-block";
 import NetworkStrip from "@/components/lenaqar/network-strip";
 import WhatsAppCta from "@/components/lenaqar/whatsapp-cta";
+import AddUnitButton from "@/components/ui/unit-forms/add-unit-button";
 
 export default function SellPageContent() {
   const { translate } = useI18n();
@@ -57,12 +58,19 @@ export default function SellPageContent() {
       <NetworkStrip />
 
       <section className="container py-10 pb-24 lg:pb-10">
-        <WhatsAppCta
-          href={sellerCtaHref()}
-          eventName={ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED}
-        >
-          {translate("lenaqar.sell.cta")}
-        </WhatsAppCta>
+        <div className="flex flex-col gap-2 max-w-md">
+          <AddUnitButton
+            label={translate("lenaqar.unit.addDetails", "Add Unit Details")}
+            className="w-full"
+          />
+          <WhatsAppCta
+            href={sellerCtaHref()}
+            eventName={ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED}
+            className="w-full"
+          >
+            {translate("lenaqar.sell.cta")}
+          </WhatsAppCta>
+        </div>
       </section>
     </>
   );

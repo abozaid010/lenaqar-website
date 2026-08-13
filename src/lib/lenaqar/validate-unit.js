@@ -17,8 +17,21 @@ function yearFromDate(value) {
 }
 
 /**
- * Strategy §18 gate. Optional fields never fail a unit for being absent —
- * only for being inconsistent. Failure ⇒ excluded from the feed.
+ * Slim listing gate: enough to render a card. Payment-plan fields stay
+ * optional — they surface on the card only when the payload has them.
+ */
+export function isListableOpportunity(unit) {
+  const code = String(unit?.code || "").trim();
+  if (!code) return false;
+  const totalPrice = toNumber(unit?.totalPrice);
+  return totalPrice > 0;
+}
+
+/**
+ * Strategy §18 gate for cash-plan claims. Optional fields never fail a
+ * unit for being absent — only for being inconsistent. Listing uses
+ * `isListableOpportunity`; this gate only decides whether cash-multiple
+ * may be shown.
  */
 export function validateUnit(unit, now = new Date()) {
   const code = unit?.code || "(no-code)";

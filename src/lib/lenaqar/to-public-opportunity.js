@@ -58,8 +58,8 @@ export function toPublicOpportunity(raw) {
     city: pickString(raw.city),
     district: pickString(raw.district),
     subDistrict: pickString(raw.sub_district, raw.subDistrict),
-    buildingType: pickString(raw.buildingType, raw.building_type),
-    roomsCount: pickNumber(raw.roomsCount, raw.rooms_count),
+    buildingType: pickString(raw.buildingType, raw.building_type, raw.property_type),
+    roomsCount: pickNumber(raw.roomsCount, raw.rooms_count, raw.bedrooms),
     bathroomCount: pickNumber(raw.bathroomCount, raw.bathroom_count),
     landArea: pickNumber(raw.landArea, raw.land_area, raw.area),
     floor: pickString(raw.floor) || pickNumber(raw.floor),
@@ -67,6 +67,8 @@ export function toPublicOpportunity(raw) {
     view: pickString(raw.view),
     totalPrice: pickNumber(raw.totalPrice, raw.total_price),
     downPayment: pickNumber(raw.downPayment, raw.down_payment),
+    overPrice: pickNumber(raw.overPrice, raw.over_price),
+    remainingAmount: pickNumber(raw.remainingAmount, raw.remaining_amount),
     installmentYears: pickNumber(
       raw.installment_years,
       raw.installmentYears
@@ -79,7 +81,13 @@ export function toPublicOpportunity(raw) {
     deliveryYear: pickNumber(raw.deliveryYear, raw.delivery_year),
     isDelivered: pickBool(raw.is_delivered, raw.isDelivered),
     isPrimary: pickBool(raw.is_primary, raw.isPrimary),
-    images: mapImages(raw.images),
+    images: mapImages(
+      Array.isArray(raw.images) && raw.images.length > 0
+        ? raw.images
+        : raw.image
+          ? [raw.image]
+          : []
+    ),
     updatedAt: raw.updatedAt || raw.updated_at || null,
   };
 }

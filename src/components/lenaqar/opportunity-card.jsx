@@ -6,10 +6,8 @@ import ImageWithLoader from "@/components/ui/image-with-loader";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { formatDate, formatDeliveryDate } from "@/lib/units/unit-formatters";
 import { formatCashMultiple, pricePerMeter } from "@/lib/lenaqar/metrics";
-import { ANALYTICS } from "@/constants/analytics";
-import { buyerCtaHref } from "@/lib/lenaqar/whatsapp";
 import EgpAmount from "./egp-amount";
-import WhatsAppCta from "./whatsapp-cta";
+import OpportunityUnitActions from "./opportunity-unit-actions";
 
 function firstImageUrl(unit) {
   const url = unit?.images?.[0]?.url;
@@ -30,6 +28,7 @@ export default function OpportunityCard({ unit }) {
   const meterPrice = pricePerMeter(unit.totalPrice, unit.landArea);
   const multipleLabel = formatCashMultiple(unit.cashMultiple);
   const href = `/opportunities/${encodeURIComponent(unit.code)}`;
+  const showOffer = Number(unit.overPrice) > 0;
 
   return (
     <article className="rounded-lg border border-black/10 bg-white overflow-hidden flex flex-col">
@@ -41,9 +40,15 @@ export default function OpportunityCard({ unit }) {
             className="object-cover"
           />
         ) : null}
-        <span className="absolute top-2 end-2 text-xs bg-white/90 text-primary px-2 py-1 rounded">
-          {translate("lenaqar.unit.developerPrice")}
-        </span>
+        {showOffer ? (
+          <span className="absolute top-2 end-2 text-xs bg-white/90 text-primary px-2 py-1 rounded">
+            {translate("lenaqar.unit.offer")}
+          </span>
+        ) : unit.totalPrice != null ? (
+          <span className="absolute top-2 end-2 text-xs bg-white/90 text-primary px-2 py-1 rounded">
+            {translate("lenaqar.unit.developerPrice")}
+          </span>
+        ) : null}
       </Link>
 
       <div className="p-4 flex flex-col gap-3 grow">
@@ -76,14 +81,30 @@ export default function OpportunityCard({ unit }) {
           ) : null}
         </div>
 
-        <div className="border-t border-black/10 pt-3">
-          <p className="text-xs text-black/60 mb-1">
-            {translate("lenaqar.unit.cashRequired")}
-          </p>
-          <p className="text-2xl font-bold text-primary">
+        {unit.totalPrice != null ? (
+          <div className="border-t border-black/10 pt-3">
+            <p className="text-xs text-black/60 mb-1">
+              {translate("lenaqar.unit.totalValue")}
+            </p>
+            <p className="text-2xl font-bold text-primary">
+              <EgpAmount value={unit.totalPrice} translate={translate} />
+            </p>
+          </div>
+        ) : null}
+
+        {unit.downPayment != null ? (
+          <p className="text-sm">
+            {translate("lenaqar.unit.cashRequired")}{" "}
             <EgpAmount value={unit.downPayment} translate={translate} />
           </p>
-        </div>
+        ) : null}
+
+        {showOffer ? (
+          <p className="text-sm font-semibold text-primary">
+            {translate("lenaqar.unit.overPrice")}{" "}
+            <EgpAmount value={unit.overPrice} translate={translate} />
+          </p>
+        ) : null}
 
         <dl className="grid grid-cols-1 gap-1 text-sm">
           {unit.installmentAmountYearly != null ? (
@@ -124,13 +145,6 @@ export default function OpportunityCard({ unit }) {
           ) : null}
         </dl>
 
-        {unit.totalPrice != null ? (
-          <p className="text-sm">
-            {translate("lenaqar.unit.totalValue")}{" "}
-            <EgpAmount value={unit.totalPrice} translate={translate} />
-          </p>
-        ) : null}
-
         {multipleLabel ? (
           <p className="text-sm font-semibold">
             {translate("lenaqar.unit.cashMultiple")}: ×{multipleLabel}
@@ -150,13 +164,7 @@ export default function OpportunityCard({ unit }) {
           </p>
         ) : null}
 
-        <WhatsAppCta
-          href={buyerCtaHref(unit)}
-          eventName={ANALYTICS.EVENTS.BUYER_WHATSAPP_CLICKED}
-          className="w-full mt-auto"
-        >
-          {translate("lenaqar.unit.cta")}
-        </WhatsAppCta>
+        <OpportunityUnitActions unit={unit} className="mt-auto" />
       </div>
     </article>
   );

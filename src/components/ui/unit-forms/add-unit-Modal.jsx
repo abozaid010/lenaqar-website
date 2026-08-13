@@ -1488,6 +1488,7 @@ export default function AddUnitModal({
         closeOnOutsideClick={false}
         closeOnEscape={false}
         bodyClassName="p-0"
+        overlayClassName="!z-[70]"
       >
         {formContent}
       </UnifiedDialog>

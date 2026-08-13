@@ -2,11 +2,22 @@
 
 import { Suspense } from "react";
 import { useI18n } from "@/hooks/useI18n";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 import OpportunityCard from "@/components/lenaqar/opportunity-card";
 import OpportunityFilters from "@/components/lenaqar/opportunity-filters";
+import CoreActions from "@/components/lenaqar/core-actions";
 
-export default function OpportunitiesPageContent({ units, areas, years }) {
+export default function OpportunitiesPageContent({
+  units,
+  areas,
+  years,
+  hasActiveFilters = false,
+  cash = "",
+}) {
   const { translate } = useI18n();
+  const emptyKey = hasActiveFilters
+    ? "lenaqar.opportunities.emptyFiltered"
+    : "lenaqar.opportunities.empty";
 
   return (
     <section className="container py-12 pb-24 lg:pb-12">
@@ -16,16 +27,32 @@ export default function OpportunitiesPageContent({ units, areas, years }) {
       <p className="mt-4 mb-2 text-black/70 max-w-2xl">
         {translate("lenaqar.opportunities.sub")}
       </p>
-      <p className="text-sm text-black/60 mb-8">
+      <p className="text-sm text-black/60 mb-6">
         {translate("lenaqar.opportunities.honesty")}
       </p>
 
-      <Suspense>
+      <CoreActions
+        className="mb-8"
+        anchor
+        initialValues={cash ? { downPayment: cash } : undefined}
+      />
+
+      <Suspense
+        fallback={
+          <LoadingSpinner
+            size={36}
+            containerClassName="flex items-center justify-center min-h-24"
+          />
+        }
+      >
         <OpportunityFilters areas={areas} years={years} />
       </Suspense>
 
       {units.length === 0 ? (
-        <p className="text-black/70">{translate("lenaqar.opportunities.empty")}</p>
+        <div className="rounded-lg border border-black/10 bg-white p-6">
+          <p className="text-black/70 mb-4">{translate(emptyKey)}</p>
+          <CoreActions />
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {units.map((unit) => (

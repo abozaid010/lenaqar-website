@@ -28,6 +28,7 @@ export default function UnifiedDialog({
   closeOnOutsideClick = false,
   closeOnEscape = false,
   showCloseButton = false,
+  overlayClassName = "",
   /** "default" = primary bg + white text; "unified" = UnifiedHeader (#E2dbff + primary) */
   headerVariant = "default",
   /** Optional custom leading content (replaces cancel button when provided) */
@@ -81,7 +82,7 @@ export default function UnifiedDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/50 transition-opacity duration-300 ease-in-out"
+      className={`fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/50 transition-opacity duration-300 ease-in-out ${overlayClassName}`}
       onClick={handleOutsideClick}
     >
       <div

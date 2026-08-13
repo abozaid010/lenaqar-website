@@ -17,10 +17,13 @@ export default function OpportunityFilters({ areas, years }) {
   const delivery = searchParams.get("delivery") || "";
 
   function apply(next) {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(searchParams.toString());
     if (next.area) params.set("area", next.area);
+    else params.delete("area");
     if (next.cash) params.set("cash", next.cash);
+    else params.delete("cash");
     if (next.delivery) params.set("delivery", next.delivery);
+    else params.delete("delivery");
     const qs = params.toString();
     router.push(qs ? `${pathname}?${qs}` : pathname);
   }

@@ -5,12 +5,10 @@ import ImageWithLoader from "@/components/ui/image-with-loader";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { formatDate, formatDeliveryDate } from "@/lib/units/unit-formatters";
 import { formatCashMultiple, pricePerMeter } from "@/lib/lenaqar/metrics";
-import { buyerCtaHref } from "@/lib/lenaqar/whatsapp";
-import { ANALYTICS } from "@/constants/analytics";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import { SITE } from "@/config/site";
 import EgpAmount from "@/components/lenaqar/egp-amount";
-import WhatsAppCta from "@/components/lenaqar/whatsapp-cta";
+import OpportunityUnitActions from "@/components/lenaqar/opportunity-unit-actions";
 import UnitViewTracker from "@/components/lenaqar/unit-view-tracker";
 
 export default function OpportunityDetailContent({ unit }) {
@@ -127,6 +125,24 @@ export default function OpportunityDetailContent({ unit }) {
             </dd>
           </div>
         ) : null}
+        {Number(unit.overPrice) > 0 ? (
+          <div className="flex justify-between gap-3">
+            <dt className="text-black/60">{translate("lenaqar.unit.overPrice")}</dt>
+            <dd>
+              <EgpAmount value={unit.overPrice} translate={translate} />
+            </dd>
+          </div>
+        ) : null}
+        {unit.remainingAmount != null ? (
+          <div className="flex justify-between gap-3">
+            <dt className="text-black/60">
+              {translate("lenaqar.unit.remaining")}
+            </dt>
+            <dd>
+              <EgpAmount value={unit.remainingAmount} translate={translate} />
+            </dd>
+          </div>
+        ) : null}
         {meterPrice != null ? (
           <div className="flex justify-between gap-3">
             <dt className="text-black/60">{translate("lenaqar.unit.pricePerMeter")}</dt>
@@ -151,13 +167,8 @@ export default function OpportunityDetailContent({ unit }) {
         </p>
       ) : null}
 
-      <div className="mt-8">
-        <WhatsAppCta
-          href={buyerCtaHref(unit)}
-          eventName={ANALYTICS.EVENTS.BUYER_WHATSAPP_CLICKED}
-        >
-          {translate("lenaqar.unit.cta")}
-        </WhatsAppCta>
+      <div className="mt-8 max-w-md">
+        <OpportunityUnitActions unit={unit} />
       </div>
     </article>
   );
