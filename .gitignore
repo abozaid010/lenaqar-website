@@ -28,8 +28,17 @@ yarn-error.log*
 .env*.local
 .env
 
+# secrets — never commit service-account keys
+key.json
+github-sa-key.json
+*-sa-key.json
+*.p12
+
 # vercel
 .vercel
+
+# IDE
+.idea/
 
 # typescript
 *.tsbuildinfo

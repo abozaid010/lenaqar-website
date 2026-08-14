@@ -15,8 +15,8 @@ const nextConfig = {
     NEXT_PUBLIC_SITE_BRAND: SITE_BRAND,
   },
   experimental: {
-    // Limit build/static workers on small VMs (e2-medium: 2 vCPU / 4Gi)
-    cpus: 1,
+    // Cap workers on small GCP VMs only. Vercel build machines should use all CPUs.
+    ...(process.env.VERCEL ? {} : { cpus: 1 }),
     serverActions: {
       // Body size limit for server actions (matches max image upload size in src/config/imageUpload.js)
       bodySizeLimit: '10mb',
