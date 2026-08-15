@@ -5,7 +5,6 @@ import { useI18n } from "@/hooks/useI18n";
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { formatDate, formatDeliveryDate } from "@/lib/units/unit-formatters";
-import { formatCashMultiple, pricePerMeter } from "@/lib/lenaqar/metrics";
 import EgpAmount from "./egp-amount";
 import OpportunityUnitActions from "./opportunity-unit-actions";
 
@@ -25,8 +24,6 @@ export default function OpportunityCard({ unit }) {
   const typeLabel = unit.buildingType || null;
   const deliveryLabel = formatDeliveryDate(unit.deliveryDate, "ar");
   const priceDate = formatDate(unit.updatedAt, "ar");
-  const meterPrice = pricePerMeter(unit.totalPrice, unit.landArea);
-  const multipleLabel = formatCashMultiple(unit.cashMultiple);
   const href = `/opportunities/${encodeURIComponent(unit.code)}`;
   const showOffer = Number(unit.overPrice) > 0;
 
@@ -144,19 +141,6 @@ export default function OpportunityCard({ unit }) {
             </div>
           ) : null}
         </dl>
-
-        {multipleLabel ? (
-          <p className="text-sm font-semibold">
-            {translate("lenaqar.unit.cashMultiple")}: ×{multipleLabel}
-          </p>
-        ) : null}
-
-        {meterPrice != null ? (
-          <p className="text-sm text-black/60">
-            {translate("lenaqar.unit.pricePerMeter")}{" "}
-            <EgpAmount value={meterPrice} translate={translate} />
-          </p>
-        ) : null}
 
         {priceDate ? (
           <p className="text-xs text-black/50">
