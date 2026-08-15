@@ -5,10 +5,17 @@ import OpportunityDetailContent from "./opportunity-detail-content";
 
 export const revalidate = 900;
 
+export const dynamicParams = true;
+
 export async function generateStaticParams() {
   if (!SITE.feed.enabled) return [];
-  const units = await fetchOpportunities();
-  return units.map((unit) => ({ slug: unit.code }));
+  try {
+    const units = await fetchOpportunities();
+    return units.map((unit) => ({ slug: unit.code }));
+  } catch (error) {
+    console.error("[lenaqar] generateStaticParams failed", error);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }) {

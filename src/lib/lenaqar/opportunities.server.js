@@ -48,7 +48,7 @@ export function parseOpportunitySearchParams(params = {}) {
   };
 }
 
-async function fetchPage(query, { required = false } = {}) {
+async function fetchPage(query) {
   const qs = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
     if (value == null || value === "") continue;
@@ -66,9 +66,8 @@ async function fetchPage(query, { required = false } = {}) {
 
   if (!response.ok) {
     console.error("[lenaqar] units fetch failed", response.status);
-    if (required) {
-      throw new Error("OPPORTUNITIES_FETCH_FAILED");
-    }
+    // Never throw: a 401/403 at build (sensitive env hidden from Next.js)
+    // must not fail the Vercel production deploy. ISR/runtime retries later.
     return { units: [], pagination: {} };
   }
 
@@ -107,9 +106,7 @@ async function fetchBoundedPages({
       cursor,
     };
 
-    const { units, pagination } = await fetchPage(query, {
-      required: page === 0,
-    });
+    const { units, pagination } = await fetchPage(query);
     collected.push(...units);
 
     if (!pagination?.has_more_next || !pagination?.next_cursor) break;
