@@ -48,7 +48,7 @@ export function parseOpportunitySearchParams(params = {}) {
   };
 }
 
-async function fetchPage(query, { required = false } = {}) {
+async function fetchPage(query) {
   const qs = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
     if (value == null || value === "") continue;
@@ -59,26 +59,28 @@ async function fetchPage(query, { required = false } = {}) {
   if (PUBLIC_X_API_KEY) headers["X-API-Key"] = PUBLIC_X_API_KEY;
   if (BFF_SECRET) headers["X-BFF-Secret"] = BFF_SECRET;
 
-  const response = await fetch(`${API_BASE_URL}/public/v1/units?${qs}`, {
-    headers,
-    next: { revalidate: 900 },
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/public/v1/units?${qs}`, {
+      headers,
+      next: { revalidate: 900 },
+    });
 
-  if (!response.ok) {
-    console.error("[lenaqar] units fetch failed", response.status);
-    if (required) {
-      throw new Error("OPPORTUNITIES_FETCH_FAILED");
+    if (!response.ok) {
+      console.error("[lenaqar] units fetch failed", response.status);
+      return { units: [], pagination: {} };
     }
+
+    const json = await response.json();
+    const units = json?.data?.units ?? json?.units ?? [];
+    const pagination = json?.data?.pagination ?? json?.pagination ?? {};
+    return {
+      units: Array.isArray(units) ? units : [],
+      pagination,
+    };
+  } catch (error) {
+    console.error("[lenaqar] units fetch failed", error);
     return { units: [], pagination: {} };
   }
-
-  const json = await response.json();
-  const units = json?.data?.units ?? json?.units ?? [];
-  const pagination = json?.data?.pagination ?? json?.pagination ?? {};
-  return {
-    units: Array.isArray(units) ? units : [],
-    pagination,
-  };
 }
 
 async function fetchBoundedPages({
@@ -107,9 +109,7 @@ async function fetchBoundedPages({
       cursor,
     };
 
-    const { units, pagination } = await fetchPage(query, {
-      required: page === 0,
-    });
+    const { units, pagination } = await fetchPage(query);
     collected.push(...units);
 
     if (!pagination?.has_more_next || !pagination?.next_cursor) break;

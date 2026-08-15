@@ -35,13 +35,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   if (!SITE.feed.enabled) return staticPages;
 
-  const units = await fetchOpportunities();
-  const unitPages: MetadataRoute.Sitemap = units.map((unit) => ({
-    url: `${SITE_URL}/opportunities/${encodeURIComponent(unit.code)}`,
-    lastModified: unit.updatedAt ? new Date(unit.updatedAt) : now,
-    changeFrequency: 'daily',
-    priority: 0.6,
-  }));
-
-  return [...staticPages, ...unitPages];
+  try {
+    const units = await fetchOpportunities();
+    const unitPages: MetadataRoute.Sitemap = units.map((unit) => ({
+      url: `${SITE_URL}/opportunities/${encodeURIComponent(unit.code)}`,
+      lastModified: unit.updatedAt ? new Date(unit.updatedAt) : now,
+      changeFrequency: 'daily',
+      priority: 0.6,
+    }));
+    return [...staticPages, ...unitPages];
+  } catch (error) {
+    console.error("[lenaqar] sitemap units fetch failed", error);
+    return staticPages;
+  }
 }
