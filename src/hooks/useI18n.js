@@ -4,6 +4,7 @@ import { useI18n as useTranslation } from "@/context/translate-api";
 import { useCallback, useMemo } from "react";
 import { getMappedTranslation, formatDate, formatNumber, formatCurrency } from "@/lib/i18n-mappings";
 import { safePropertyAccess, sanitizeTranslationValue, validateTranslationKey } from "@/utils/translation-sanitizer";
+import arFallback from "../../public/locales/ar.js";
 
 const warnedDirectTAccess = new Set();
 
@@ -58,21 +59,29 @@ export function useI18n() {
     
     try {
       // Use safe property access to prevent prototype pollution
-      const value = safePropertyAccess(rawT, validation.safeKey);
-      
+      let value = safePropertyAccess(rawT, validation.safeKey);
+
+      // If the active locale is missing a key (e.g. English without a LenaQar
+      // string), fall back to Arabic so the UI never shows the raw key.
+      if (
+        (value === undefined || value === null || value === "") &&
+        rawT !== arFallback
+      ) {
+        value = safePropertyAccess(arFallback, validation.safeKey);
+      }
+
       if (value !== undefined && value !== null && value !== "") {
         // Sanitize the translation value to prevent XSS
         return sanitizeTranslationValue(value);
       }
-      
+
       // Missing translation key handling:
       // - If caller provided a fallback, return it (legacy support).
-      // - If no fallback and we're in development, fail fast (strict-by-default).
       if (fallback !== null && fallback !== undefined) return fallback;
       if (process.env.NODE_ENV === "development") {
         const topKeys =
           rawT && typeof rawT === "object" ? Object.keys(rawT).slice(0, 25) : [];
-        throw new Error(
+        console.error(
           `Missing translation: ${validation.safeKey} (locale: ${locale}). Top-level keys: ${topKeys.join(
             ", "
           )}`

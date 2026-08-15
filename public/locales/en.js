@@ -1,4 +1,7 @@
+import lenaqar from "./lenaqar-en.js";
+
 export default {
+  lenaqar,
   common: {
     direction: "ltr",
     loading: "Loading...",
