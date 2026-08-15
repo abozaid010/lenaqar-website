@@ -28,26 +28,22 @@ export async function GET() {
       });
     }
 
-    const isLenaqar =
-      (process.env.NEXT_PUBLIC_SITE_BRAND || "").trim() === "lenaqar";
-    if (isLenaqar) {
-      try {
-        const { getLenaqarTenantSession } = await import(
-          "@/lib/lenaqar/tenant-session.server"
-        );
-        const { accessToken: tenantToken } = await getLenaqarTenantSession();
-        const catalog = await getLocationsCatalog({ authToken: tenantToken });
-        return NextResponse.json(catalog, {
-          headers: {
-            "Cache-Control": "private, max-age=3600, stale-while-revalidate=86400",
-          },
-        });
-      } catch (error) {
-        console.error(
-          "[locations/catalog] lenaqar tenant catalog failed:",
-          error?.code || error?.message,
-        );
-      }
+    try {
+      const { getLenaqarTenantSession } = await import(
+        "@/lib/lenaqar/tenant-session.server"
+      );
+      const { accessToken: tenantToken } = await getLenaqarTenantSession();
+      const catalog = await getLocationsCatalog({ authToken: tenantToken });
+      return NextResponse.json(catalog, {
+        headers: {
+          "Cache-Control": "private, max-age=3600, stale-while-revalidate=86400",
+        },
+      });
+    } catch (error) {
+      console.error(
+        "[locations/catalog] lenaqar tenant catalog failed:",
+        error?.code || error?.message,
+      );
     }
 
     const warm = peekLocationsCatalogCache();

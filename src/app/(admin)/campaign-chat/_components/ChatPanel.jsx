@@ -32,7 +32,7 @@ const DEFAULT_WHATSAPP_MESSAGE = `بعد مكالمتنا، حابب أسيب ل
 • نشر مجاني لحد 50 وحدة ريسيل وتبدأ تجيب عملاء
 
 ابدأ دلوقتي:
-[حمّل التطبيق](https://lenaai.net/download?utm_campaign=spring_offer&utm_source=chatgpt.com)
+https://lenaqar.com
 
 وجرّب بنفسك الفرق من أول يوم.`;
 

@@ -1,21 +1,14 @@
-export const BRAND = (process.env.NEXT_PUBLIC_SITE_BRAND || "lenaai").trim();
-export const IS_LENAQAR = BRAND === "lenaqar";
-
-/** Backend tenant the feed reads from. Homey holds the resale sell catalog. */
 export const LENAQAR_TENANT_ID = (
   process.env.NEXT_PUBLIC_LENAQAR_TENANT_ID || "homey"
 ).trim();
 
 export const SITE = {
-  brand: BRAND,
-  clientId: IS_LENAQAR ? LENAQAR_TENANT_ID : null,
-  name: IS_LENAQAR ? "لينا عقار" : "LENAAI",
-  url:
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (IS_LENAQAR ? "https://lenaqar.com" : "https://www.lenaai.net"),
-  htmlLang: IS_LENAQAR ? "ar-EG" : null, // null = keep existing cookie/Accept-Language behaviour
-  dir: IS_LENAQAR ? "rtl" : null,
-  ogLocale: IS_LENAQAR ? "ar_EG" : "en_US",
+  clientId: LENAQAR_TENANT_ID,
+  name: "لينا عقار",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://lenaqar.com",
+  htmlLang: "ar-EG",
+  dir: "rtl",
+  ogLocale: "ar_EG",
   /** Resale sell units only (`is_primary=false`, `purpose=sell`, `client_id=homey`). */
   inventory: { isPrimary: false, purpose: "sell" },
   /**
@@ -44,9 +37,7 @@ export const SITE = {
   showEmail: false,
   /** Feed sizing: bounded pages in, capped list out. Set FEED_ENABLED=false to pause fetching. */
   feed: {
-    enabled:
-      IS_LENAQAR &&
-      process.env.NEXT_PUBLIC_LENAQAR_FEED_ENABLED !== "false",
+    enabled: process.env.NEXT_PUBLIC_LENAQAR_FEED_ENABLED !== "false",
     maxPages: 4,
     pageSize: 16,
     maxUnits: 40,
@@ -64,13 +55,3 @@ export function lenaqarInventoryQuery() {
   }
   return query;
 }
-
-export const LENAQAR_ROUTES = [
-  "/lenaqar",
-  "/sell",
-  "/calculator",
-  "/opportunities",
-];
-
-export const LENAAI_ORIGIN = "https://www.lenaai.net";
-export const LENAQAR_ORIGIN = "https://lenaqar.com";

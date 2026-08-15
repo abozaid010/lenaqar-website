@@ -1,10 +1,6 @@
-import solutions from "./solutions-ar.js";
-import seo from "./seo-ar.js";
 import lenaqar from "./lenaqar-ar.js";
 
 export default {
-  seo,
-  solutions,
   lenaqar,
   common: {
     direction: "rtl",

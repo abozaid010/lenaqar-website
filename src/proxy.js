@@ -2,28 +2,8 @@ import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { isJwtExpired } from "@/lib/jwtCookieUtils";
 import { NextResponse } from "next/server";
 
-/**
- * Brand flags are read here — do not import `@/config/site`.
- * Pulling that module into the proxy entry made Next 16 load the raw
- * ESM exports (no adapter default), which throws `adapterFn is not a
- * function` on every request and retriggered Turbopack compiles.
- */
-const LENAAI_ORIGIN = "https://www.lenaai.net";
-const LENAQAR_ORIGIN = "https://lenaqar.com";
-const LENAQAR_ROUTES = [
-  "/lenaqar",
-  "/sell",
-  "/calculator",
-  "/opportunities",
-];
-
-function isLenaqarBrand() {
-  // Bracket access so this is not compile-time-inlined; CLI env works in `next dev`.
-  return (process.env["NEXT_PUBLIC_SITE_BRAND"] || "lenaai").trim() === "lenaqar";
-}
-
 const SITE_HOME_PAGE =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://www.lenaai.net";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://lenaqar.com";
 
 const IS_DEV = process.env.NODE_ENV === "development";
 
@@ -89,55 +69,13 @@ function nextWithPathname(request, pathname) {
 export function proxy(request) {
   const { pathname } = request.nextUrl;
 
-  // Subdomain: contact.lenaai.net → serve /contact (CEO digital business card)
-  const host = request.headers.get("host") || "";
-  if (host === "contact.lenaai.net") {
-    return NextResponse.rewrite(new URL("/contact", request.url));
+  if (pathname === "/lenaqar" || pathname === "/lenaqar/") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    return NextResponse.redirect(url, 308);
   }
 
   const segments = pathname.split("/").filter(Boolean);
-  const isLenaqar = isLenaqarBrand();
-
-  if (isLenaqar) {
-    if (pathname === "/") {
-      const rewriteUrl = request.nextUrl.clone();
-      rewriteUrl.pathname = "/lenaqar";
-      return NextResponse.rewrite(rewriteUrl);
-    }
-
-    const lenaaiOnly =
-      pathname === "/login" ||
-      pathname.startsWith("/login/") ||
-      pathname === "/allProberties" ||
-      pathname.startsWith("/allProberties/") ||
-      pathname === "/privacy" ||
-      pathname.startsWith("/privacy/") ||
-      pathname === "/for-brokers" ||
-      pathname.startsWith("/for-brokers/") ||
-      pathname === "/for-developers" ||
-      pathname.startsWith("/for-developers/") ||
-      pathname === "/for-marketing-agencies" ||
-      pathname.startsWith("/for-marketing-agencies/") ||
-      pathname === "/blog" ||
-      pathname.startsWith("/blog/") ||
-      pathname === "/faq" ||
-      pathname.startsWith("/faq/") ||
-      segments.some((segment) => adminPaths.includes(segment));
-
-    if (lenaaiOnly) {
-      return NextResponse.redirect(new URL(pathname + request.nextUrl.search, LENAAI_ORIGIN), 308);
-    }
-  } else {
-    const isLenaqarPath = LENAQAR_ROUTES.some(
-      (route) => pathname === route || pathname.startsWith(`${route}/`)
-    );
-    if (isLenaqarPath) {
-      return NextResponse.redirect(
-        new URL(pathname + request.nextUrl.search, LENAQAR_ORIGIN),
-        308
-      );
-    }
-  }
 
   // Handle image requests with proper MIME types
   if (pathname.match(/\.(jpg|jpeg|png|gif|webp|avif|svg)$/i)) {
@@ -162,7 +100,7 @@ export function proxy(request) {
   // Handle API image requests — restrict CORS to own domain only.
   if (pathname.startsWith('/api/images/') || pathname.startsWith('/images/')) {
     const response = NextResponse.next();
-    const allowedOrigin = process.env.NEXT_PUBLIC_SITE_URL || "https://www.lenaai.net";
+    const allowedOrigin = process.env.NEXT_PUBLIC_SITE_URL || "https://lenaqar.com";
     response.headers.set('Access-Control-Allow-Origin', allowedOrigin);
     response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
     response.headers.set('Vary', 'Origin');
@@ -237,14 +175,6 @@ export function proxy(request) {
     }
     // Authenticated protected route: allow through (logged in dev for visibility)
     return withProxyDebug(nextWithPathname(request, pathname), request);
-  }
-
-  // Home page: redirect logged-in user to their dashboard
-  if (!isLenaqar && pathname === "/" && accessToken && cookieClientId) {
-    return withProxyDebug(
-      NextResponse.redirect(new URL(`/${cookieClientId}/dashboard`, SITE_HOME_PAGE)),
-      request
-    );
   }
 
   return NextResponse.next();

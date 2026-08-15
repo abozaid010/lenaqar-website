@@ -10,7 +10,7 @@ export default function WebSiteSchema() {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: `${SITE_URL}/allProberties?q={search_term_string}`,
+        urlTemplate: `${SITE_URL}/opportunities?q={search_term_string}`,
       },
       "query-input": "required name=search_term_string",
     },
@@ -23,4 +23,3 @@ export default function WebSiteSchema() {
     />
   );
 }
-

@@ -9,52 +9,16 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.lenaai.net';
-const AI_KEYWORDS = [
-  // English Keywords
-  'AI',
-  'ChatGPT',
-  'AI Agent',
-  'AI Sales Agent',
-  'Real Estate AI Sales Agent',
-  'Realstate AI Sales agent',
-  'AI Salesman',
-  'Chatbot',
-  'conversational AI',
-  'AI Chatbot',
-  'GPT for real estate',
-  'GPT for real estate agent',
-  'Real Estate ChatGPT',
-  'Real Estate AI Agent',
-  'Real Estate AI Chatbot',
-  'sell real estate by AI',
-  'AI real estate agent',
-  'real estate AI tool',
-  'AI broker tool',
-  'qualified leads',
-  'lead generation',
-  'marketing automation',
-  'lead filtration',
-  'conversion rate',
-  // Arabic Keywords (transliterated and Arabic script)
-  'ذكاء اصطناعي',
-  'شات جي بي تي',
-  'روبوت محادثة',
-  'مساعد ذكي',
-  'وكيل مبيعات ذكي',
-  'ذكاء اصطناعي للعقارات',
-  'روبوت عقاري',
-  'أداة ذكاء اصطناعي للعقارات',
-  'بيع العقارات بالذكاء الاصطناعي',
-  'توليد العملاء المحتملين',
-  'أتمتة التسويق',
-  'تصفية العملاء',
-  'معدل التحويل',
-  // Arabic transliterated
-  'zaki\' iqtira\'i',
-  'chatbot',
-  'musa\'id zaki',
-  'wakeel mabee\'at zaki',
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://lenaqar.com';
+const VALUE_KEYWORDS = [
+  'لينا عقار',
+  'عقار',
+  'أقساط',
+  'وحدة',
+  'فرص',
+  'حاسبة',
+  'كاش',
+  'بيع',
 ];
 
 const errors = [];
@@ -182,20 +146,19 @@ function checkFile(filePath) {
         pageTitles.set(title, relativePath);
       }
 
-      // Check if title mentions AI value (supports both English and Arabic)
-      const titleLower = title.toLowerCase();
-      const hasAIKeyword = AI_KEYWORDS.some((keyword) => {
-        const keywordLower = keyword.toLowerCase();
-        // Check English keywords
-        if (titleLower.includes(keywordLower)) return true;
-        // Check Arabic keywords (direct match)
-        if (title.includes(keyword)) return true;
-        return false;
-      });
-      if (!hasAIKeyword && !filePath.includes('layout.')) {
-        warnings.push(
-          `⚠️  ${relativePath}: Title should mention AI/ChatGPT value proposition (real estate chatbot, AI agent, lead generation, or AI Sales Agent dashboard)`
-        );
+      if (!isAdminPage) {
+        const titleLower = title.toLowerCase();
+        const hasValueKeyword = VALUE_KEYWORDS.some((keyword) => {
+          const keywordLower = keyword.toLowerCase();
+          if (titleLower.includes(keywordLower)) return true;
+          if (title.includes(keyword)) return true;
+          return false;
+        });
+        if (!hasValueKeyword && !filePath.includes('layout.')) {
+          warnings.push(
+            `⚠️  ${relativePath}: Title should mention LenaQar value (عقار، أقساط، وحدة، فرص)`
+          );
+        }
       }
     }
 

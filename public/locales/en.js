@@ -1,9 +1,4 @@
-import solutions from "./solutions-en.js";
-import seo from "./seo-en.js";
-
 export default {
-  seo,
-  solutions,
   common: {
     direction: "ltr",
     loading: "Loading...",

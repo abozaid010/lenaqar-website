@@ -5,15 +5,8 @@ import { buildImageRemotePatterns } from "./src/config/imageHosts.js";
 const { loadEnvConfig } = nextEnv;
 loadEnvConfig(process.cwd());
 
-const SITE_BRAND = (process.env.NEXT_PUBLIC_SITE_BRAND || "lenaai").trim();
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  env: {
-    // Shell/CLI NEXT_PUBLIC_SITE_BRAND must reach the bundle. Turbopack may
-    // otherwise only inline values present in .env files.
-    NEXT_PUBLIC_SITE_BRAND: SITE_BRAND,
-  },
   experimental: {
     // Cap workers on small GCP VMs only. Vercel build machines should use all CPUs.
     ...(process.env.VERCEL ? {} : { cpus: 1 }),
@@ -69,15 +62,6 @@ const nextConfig = {
         source: "/(.*)",
         headers: securityHeaders,
       },
-      // Cache-Control for contact page (CEO digital business card) – CDN & browser.
-      {
-        source: "/contact",
-        headers: [{ key: "Cache-Control", value: "public, max-age=86400, s-maxage=604800" }],
-      },
-      {
-        source: "/contact/",
-        headers: [{ key: "Cache-Control", value: "public, max-age=86400, s-maxage=604800" }],
-      },
       // API routes: no caching, no CORS from unknown origins.
       {
         source: "/api/:path*",
@@ -105,13 +89,6 @@ const nextConfig = {
       { source: `${clientIdSegment}/${path}/:rest*`, destination: `/${path}/:rest*` },
     ]);
 
-    const isLenaqar = SITE_BRAND === "lenaqar";
-    if (isLenaqar) {
-      return [
-        { source: "/", destination: "/lenaqar" },
-        ...adminRewrites,
-      ];
-    }
     return adminRewrites;
   },
 };

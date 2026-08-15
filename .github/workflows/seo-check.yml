@@ -33,7 +33,6 @@ jobs:
         continue-on-error: false
         env:
           NEXT_PUBLIC_SITE_URL: https://lenaqar.com
-          NEXT_PUBLIC_SITE_BRAND: lenaqar
 
       - name: SEO Check Summary
         if: always()

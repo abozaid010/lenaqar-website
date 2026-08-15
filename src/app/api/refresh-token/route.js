@@ -151,7 +151,7 @@ export async function POST() {
 }
 
 const SITE_HOME_PAGE =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://www.lenaai.net";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://lenaqar.com";
 
 /**
  * GET handler for middleware redirect flow: refresh token, set cookies, redirect back.

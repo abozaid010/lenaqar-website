@@ -1,4 +1,5 @@
 import { SITE_URL, SITE_NAME } from "@/app/metadata";
+import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
 
 export default function OrganizationSchema() {
   const schema = {
@@ -6,17 +7,12 @@ export default function OrganizationSchema() {
     "@type": "Organization",
     "@id": `${SITE_URL}/#organization`,
     name: SITE_NAME,
-    alternateName: ["Lena", "LenaAI", "Lena AI", "lenaai", "Lina AI", "lina ai"],
+    alternateName: ["لينا عقار", "LenaQar", "LenAqar"],
     url: SITE_URL,
     logo: `${SITE_URL}/images/logo.png`,
     description:
-      "LENAAI (LenaAI / Lina AI) is a Real Estate AI Sales Agent for Egypt—like ChatGPT for real estate: chatbot, lead generation, and marketing automation.",
-    sameAs: [
-      // Add social media links when available
-      // "https://www.facebook.com/yourpage",
-      // "https://www.instagram.com/yourpage",
-      // "https://www.linkedin.com/company/yourpage",
-    ],
+      "لينا عقار بتخرجك من أقساط الوحدة أسرع وبفلوس أكتر، باتفاق مكتوب.",
+    sameAs: [LENAQAR_CONTACT.facebook, LENAQAR_CONTACT.linkedin].filter(Boolean),
   };
 
   return (
@@ -26,4 +22,3 @@ export default function OrganizationSchema() {
     />
   );
 }
-

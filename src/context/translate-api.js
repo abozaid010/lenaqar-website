@@ -3,7 +3,7 @@
 import { createContext, useContext, useMemo, useCallback, useState, useEffect } from "react";
 import ar from "../../public/locales/ar.js";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
-import { IS_LENAQAR, SITE } from "@/config/site";
+import { SITE } from "@/config/site";
 import {
   loadLocaleMessages,
   primeLocaleMessagesCache,
@@ -28,24 +28,13 @@ export const I18nProvider = ({ initialLocal = "ar", children }) => {
   // English sessions upgrade after the async chunk loads (no dual-language bundle).
   const [locale, setLocale] = useState("ar");
   const [t, setT] = useState(ar);
-  const [isLocaleLoading, setIsLocaleLoading] = useState(
-    IS_LENAQAR ? false : initialLocal === "en"
-  );
+  const [isLocaleLoading, setIsLocaleLoading] = useState(initialLocal === "en");
 
   // If session starts in English, load that dictionary after mount (cached thereafter).
   useEffect(() => {
     let cancelled = false;
 
     const syncFromCookieOrInitial = async () => {
-      if (IS_LENAQAR) {
-        if (!cancelled) {
-          setT(ar);
-          setLocale("ar");
-          setIsLocaleLoading(false);
-        }
-        return;
-      }
-
       const cookieLang = LenaCookiesManager.get("lang");
       const target =
         cookieLang === "en" || cookieLang === "ar"
@@ -82,7 +71,6 @@ export const I18nProvider = ({ initialLocal = "ar", children }) => {
   }, [initialLocal]);
 
   const changeLanguage = useCallback(async (lang) => {
-    if (IS_LENAQAR) return;
     if (lang !== "en" && lang !== "ar") return;
     setIsLocaleLoading(true);
     try {
@@ -95,8 +83,8 @@ export const I18nProvider = ({ initialLocal = "ar", children }) => {
       setLocale(lang);
       LenaCookiesManager.set("lang", lang, { expires: 365 });
       if (typeof document !== "undefined") {
-        document.documentElement.lang = lang;
-        document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+        document.documentElement.lang = lang === "ar" ? SITE.htmlLang : lang;
+        document.documentElement.dir = lang === "ar" ? SITE.dir : "ltr";
       }
     } finally {
       setIsLocaleLoading(false);
@@ -106,13 +94,8 @@ export const I18nProvider = ({ initialLocal = "ar", children }) => {
   // Ensure <html dir/lang> always matches current locale
   useEffect(() => {
     if (typeof document === "undefined") return;
-    if (IS_LENAQAR) {
-      document.documentElement.lang = SITE.htmlLang || "ar-EG";
-      document.documentElement.dir = SITE.dir || "rtl";
-      return;
-    }
-    document.documentElement.lang = locale;
-    document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
+    document.documentElement.lang = locale === "ar" ? SITE.htmlLang : locale;
+    document.documentElement.dir = locale === "ar" ? SITE.dir : "ltr";
   }, [locale]);
 
   const value = useMemo(
