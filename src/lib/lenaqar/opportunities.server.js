@@ -59,25 +59,28 @@ async function fetchPage(query) {
   if (PUBLIC_X_API_KEY) headers["X-API-Key"] = PUBLIC_X_API_KEY;
   if (BFF_SECRET) headers["X-BFF-Secret"] = BFF_SECRET;
 
-  const response = await fetch(`${API_BASE_URL}/public/v1/units?${qs}`, {
-    headers,
-    next: { revalidate: 900 },
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/public/v1/units?${qs}`, {
+      headers,
+      next: { revalidate: 900 },
+    });
 
-  if (!response.ok) {
-    console.error("[lenaqar] units fetch failed", response.status);
-    // Never throw: a 401/403 at build (sensitive env hidden from Next.js)
-    // must not fail the Vercel production deploy. ISR/runtime retries later.
+    if (!response.ok) {
+      console.error("[lenaqar] units fetch failed", response.status);
+      return { units: [], pagination: {} };
+    }
+
+    const json = await response.json();
+    const units = json?.data?.units ?? json?.units ?? [];
+    const pagination = json?.data?.pagination ?? json?.pagination ?? {};
+    return {
+      units: Array.isArray(units) ? units : [],
+      pagination,
+    };
+  } catch (error) {
+    console.error("[lenaqar] units fetch failed", error);
     return { units: [], pagination: {} };
   }
-
-  const json = await response.json();
-  const units = json?.data?.units ?? json?.units ?? [];
-  const pagination = json?.data?.pagination ?? json?.pagination ?? {};
-  return {
-    units: Array.isArray(units) ? units : [],
-    pagination,
-  };
 }
 
 async function fetchBoundedPages({
