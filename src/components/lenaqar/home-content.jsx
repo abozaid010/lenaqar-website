@@ -6,9 +6,12 @@ import { sellerCtaHref } from "@/lib/lenaqar/whatsapp";
 import { ANALYTICS } from "@/constants/analytics";
 import WhatsAppCta from "./whatsapp-cta";
 import ComparisonBlock from "./comparison-block";
+import WhyUsBlock from "./why-us-block";
+import CommissionBlock from "./commission-block";
 import NetworkStrip from "./network-strip";
 import OpportunityCard from "./opportunity-card";
 import CoreActions from "./core-actions";
+import OpportunitiesEmpty from "./opportunities-empty";
 
 export default function HomeContent({ units = [] }) {
   const { translate } = useI18n();
@@ -16,45 +19,58 @@ export default function HomeContent({ units = [] }) {
 
   return (
     <>
-      <section className="container py-12">
-        <h1 className="text-3xl sm:text-4xl font-bold text-primary leading-snug">
-          {translate("lenaqar.home.heroTitle")}
-        </h1>
-        <p className="mt-4 text-base sm:text-lg text-black/70 max-w-2xl">
-          {translate("lenaqar.home.heroSub")}
-        </p>
-        <CoreActions className="mt-6" anchor />
-        <p className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm">
-          <Link
-            href="/calculator"
-            className="text-primary font-medium underline-offset-2 hover:underline"
-          >
-            {translate("lenaqar.home.primaryCta")}
-          </Link>
-          <Link
-            href="/opportunities"
-            className="text-primary font-medium underline-offset-2 hover:underline"
-          >
-            {translate("lenaqar.home.buyerCta")}
-          </Link>
-        </p>
-      </section>
+      <div className="bg-primary/[0.04] border-b border-black/5">
+        <section className="container pt-14 pb-8 sm:pt-20 sm:pb-10">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-primary leading-[1.15] max-w-4xl">
+            {translate("lenaqar.home.heroTitle")}
+          </h1>
+          <p className="mt-6 text-lg sm:text-xl text-black/75 max-w-3xl leading-relaxed">
+            {translate("lenaqar.home.heroSub")}
+          </p>
+          <p className="mt-4 inline-block max-w-3xl rounded-md border border-red-200 bg-red-50 px-3 py-2 text-base font-bold leading-relaxed text-red-700 shadow-sm sm:text-lg">
+            {translate("lenaqar.home.heroNote")}
+          </p>
+        </section>
+
+        <section className="container pb-14 sm:pb-16">
+          <h2 className="text-2xl sm:text-3xl font-bold text-primary mb-2">
+            {translate("lenaqar.actions.title")}
+          </h2>
+          <p className="text-base sm:text-lg text-black/70 mb-5 max-w-2xl">
+            {translate("lenaqar.actions.sub")}
+          </p>
+          <CoreActions anchor size="large" />
+        </section>
+      </div>
 
       <ComparisonBlock />
+
+      <WhyUsBlock />
+
+      <CommissionBlock />
 
       <section className="container py-10">
         <h2 className="text-xl font-bold text-primary mb-6">
           {translate("lenaqar.home.howTitle")}
         </h2>
-        <ol className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[1, 2, 3].map((step) => (
+        <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((step) => (
             <li
               key={step}
               className="rounded-lg border border-black/10 p-5 bg-white"
             >
               <p className="text-xs text-black/50 mb-2 tabular-nums">{step}</p>
               <h3 className="font-semibold mb-2">
-                {translate(`lenaqar.home.howStep${step}Title`)}
+                {step === 4 ? (
+                  <>
+                    {translate("lenaqar.home.howStep4TitleBefore")}
+                    <span className="font-extrabold text-red-600">
+                      {translate("lenaqar.home.howStep4TitleHighlight")}
+                    </span>
+                  </>
+                ) : (
+                  translate(`lenaqar.home.howStep${step}Title`)
+                )}
               </h3>
               <p className="text-sm text-black/70">
                 {translate(`lenaqar.home.howStep${step}Body`)}
@@ -98,23 +114,8 @@ export default function HomeContent({ units = [] }) {
             </div>
           </>
         ) : (
-          <div className="rounded-lg border border-black/10 bg-white p-6">
-            <p className="text-black/70">
-              {translate("lenaqar.opportunities.empty")}
-            </p>
-          </div>
+          <OpportunitiesEmpty />
         )}
-      </section>
-
-      <section className="container py-10">
-        <h2 className="text-xl font-bold text-primary mb-4">
-          {translate("lenaqar.home.whyTitle")}
-        </h2>
-        <ul className="space-y-3 text-black/80">
-          <li>{translate("lenaqar.home.why1")}</li>
-          <li>{translate("lenaqar.home.why2")}</li>
-          <li>{translate("lenaqar.home.why3")}</li>
-        </ul>
       </section>
 
       <section className="container py-10 pb-24 lg:pb-10">

@@ -8,8 +8,11 @@ loadEnvConfig(process.cwd());
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    // Cap workers on small GCP VMs only. Vercel build machines should use all CPUs.
-    ...(process.env.VERCEL ? {} : { cpus: 1 }),
+    // Cap workers on small GCP VMs only. Local `next dev` and Vercel must
+    // use all CPUs — a single worker holds the whole Turbopack graph and OOMs.
+    ...(process.env.VERCEL || process.env.NODE_ENV === "development"
+      ? {}
+      : { cpus: 1 }),
     serverActions: {
       // Body size limit for server actions (matches max image upload size in src/config/imageUpload.js)
       bodySizeLimit: '10mb',

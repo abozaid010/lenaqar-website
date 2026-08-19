@@ -6,6 +6,12 @@ import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { formatDate, formatDeliveryDate } from "@/lib/units/unit-formatters";
 import { formatCashMultiple, pricePerMeter } from "@/lib/lenaqar/metrics";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
+import ListingSchema from "@/components/schema/ListingSchema";
+import {
+  buildingTypeAr,
+  buildListingHeadline,
+  placeAr,
+} from "@/lib/lenaqar/listing-seo";
 import { SITE } from "@/config/site";
 import EgpAmount from "@/components/lenaqar/egp-amount";
 import OpportunityUnitActions from "@/components/lenaqar/opportunity-unit-actions";
@@ -14,12 +20,14 @@ import UnitViewTracker from "@/components/lenaqar/unit-view-tracker";
 export default function OpportunityDetailContent({ unit }) {
   const { translate } = useI18n();
   const projectName = unit.projectAr || unit.project || unit.code;
+  const headline = buildListingHeadline(unit);
+  const canonicalUrl = `${SITE.url}/opportunities/${encodeURIComponent(unit.code)}`;
   const developerName = unit.developerAr || unit.developer;
   const deliveryLabel = formatDeliveryDate(unit.deliveryDate, "ar");
   const priceDate = formatDate(unit.updatedAt, "ar");
   const meterPrice = pricePerMeter(unit.totalPrice, unit.landArea);
   const multipleLabel = formatCashMultiple(unit.cashMultiple);
-  const typeLabel = unit.buildingType || null;
+  const typeLabel = buildingTypeAr(unit.buildingType) || null;
   const images = (unit.images || [])
     .map((img) => getDisplayImageUrl(img.url))
     .filter(Boolean);
@@ -35,23 +43,30 @@ export default function OpportunityDetailContent({ unit }) {
           },
           {
             name: projectName,
-            url: `${SITE.url}/opportunities/${encodeURIComponent(unit.code)}`,
+            url: canonicalUrl,
           },
         ]}
       />
+      <ListingSchema unit={unit} url={canonicalUrl} />
 
       <h1 className="text-3xl font-bold text-primary leading-snug">
-        {projectName}
+        {headline}
       </h1>
       <p className="mt-2 text-black/70">
-        {[developerName, unit.district, unit.city].filter(Boolean).join(" · ")}
+        {[developerName, placeAr(unit.district), placeAr(unit.city)]
+          .filter(Boolean)
+          .join(" · ")}
       </p>
 
       {images.length > 0 ? (
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {images.map((src) => (
+          {images.map((src, index) => (
             <div key={src} className="relative aspect-[16/10] bg-gray-100 rounded-lg overflow-hidden">
-              <ImageWithLoader src={src} alt={projectName} className="object-cover" />
+              <ImageWithLoader
+                src={src}
+                alt={`${headline} — صورة ${index + 1}`}
+                className="object-cover"
+              />
             </div>
           ))}
         </div>
@@ -72,7 +87,7 @@ export default function OpportunityDetailContent({ unit }) {
             <dt className="text-black/60">{typeLabel}</dt>
           </div>
         ) : null}
-        {unit.roomsCount != null ? (
+        {unit.roomsCount > 0 ? (
           <div className="flex justify-between gap-3">
             <dt className="text-black/60">{translate("lenaqar.unit.rooms")}</dt>
             <dd className="tabular-nums">{unit.roomsCount}</dd>

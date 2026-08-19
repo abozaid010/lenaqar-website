@@ -26,14 +26,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
-      url: `${SITE_URL}/opportunities`,
+      url: `${SITE_URL}/privacy`,
       lastModified: now,
-      changeFrequency: 'daily',
-      priority: 0.8,
+      changeFrequency: 'yearly',
+      priority: 0.3,
     },
   ];
 
+  // robots.ts only allows /opportunities while the feed is on. Listing it here
+  // regardless would advertise a URL the same response tells crawlers to skip.
   if (!SITE.feed.enabled) return staticPages;
+
+  staticPages.push({
+    url: `${SITE_URL}/opportunities`,
+    lastModified: now,
+    changeFrequency: 'daily',
+    priority: 0.8,
+  });
 
   try {
     const units = await fetchOpportunities();

@@ -68,13 +68,6 @@ function applyPriceFilters(filters, requirement, purpose) {
   });
   if (priceRange?.min != null) filters.min_price = priceRange.min;
   if (priceRange?.max != null) filters.max_price = priceRange.max;
-
-  if (p === "rent") {
-    const monthlyInstallment = toPositiveNumber(requirement.monthlyInstallment);
-    if (monthlyInstallment != null) {
-      filters.monthly_installment = monthlyInstallment;
-    }
-  }
 }
 
 /**
@@ -129,6 +122,11 @@ export function requirementToUnitsFilter(requirement, clientId) {
   // The existing API accepts one upper-bound down_payment filter.
   if (downPaymentRange?.max != null) {
     filters.down_payment = downPaymentRange.max;
+  }
+
+  const monthlyInstallment = toPositiveNumber(requirement.monthlyInstallment);
+  if (monthlyInstallment != null) {
+    filters.monthly_installment = monthlyInstallment;
   }
 
   applyPriceFilters(filters, requirement, purpose);

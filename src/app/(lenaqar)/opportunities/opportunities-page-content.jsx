@@ -5,7 +5,7 @@ import { useI18n } from "@/hooks/useI18n";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import OpportunityCard from "@/components/lenaqar/opportunity-card";
 import OpportunityFilters from "@/components/lenaqar/opportunity-filters";
-import BuyRequestCta from "@/components/lenaqar/buy-request-cta";
+import OpportunitiesEmpty from "@/components/lenaqar/opportunities-empty";
 
 export default function OpportunitiesPageContent({
   units,
@@ -14,9 +14,6 @@ export default function OpportunitiesPageContent({
   cash = "",
 }) {
   const { translate } = useI18n();
-  const emptyKey = hasActiveFilters
-    ? "lenaqar.opportunities.emptyFiltered"
-    : "lenaqar.opportunities.empty";
 
   return (
     <section className="container py-12 pb-24 lg:pb-12">
@@ -42,17 +39,7 @@ export default function OpportunitiesPageContent({
       </Suspense>
 
       {units.length === 0 ? (
-        <div className="rounded-lg border border-black/10 bg-white p-6">
-          <p className="text-black/70 mb-2">{translate(emptyKey)}</p>
-          <p className="text-sm text-black/60 mb-4">
-            {translate("lenaqar.opportunities.buyRequestHint")}
-          </p>
-          <BuyRequestCta
-            className="w-full sm:w-auto"
-            initialValues={cash ? { downPayment: cash } : undefined}
-            label={translate("lenaqar.actions.buyUnit", "Buy Unit")}
-          />
-        </div>
+        <OpportunitiesEmpty hasActiveFilters={hasActiveFilters} cash={cash} />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {units.map((unit) => (

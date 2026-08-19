@@ -5,6 +5,11 @@ import { useI18n } from "@/hooks/useI18n";
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { formatDate, formatDeliveryDate } from "@/lib/units/unit-formatters";
+import {
+  buildingTypeAr,
+  buildListingHeadline,
+  placeAr,
+} from "@/lib/lenaqar/listing-seo";
 import EgpAmount from "./egp-amount";
 import OpportunityUnitActions from "./opportunity-unit-actions";
 
@@ -20,8 +25,10 @@ export default function OpportunityCard({ unit }) {
   const imageUrl = firstImageUrl(unit);
   const projectName = unit.projectAr || unit.project;
   const developerName = unit.developerAr || unit.developer;
-  const location = [unit.district, unit.city].filter(Boolean).join(" · ");
-  const typeLabel = unit.buildingType || null;
+  const location = [placeAr(unit.district), placeAr(unit.city)]
+    .filter(Boolean)
+    .join(" · ");
+  const typeLabel = buildingTypeAr(unit.buildingType) || null;
   const deliveryLabel = formatDeliveryDate(unit.deliveryDate, "ar");
   const priceDate = formatDate(unit.updatedAt, "ar");
   const href = `/opportunities/${encodeURIComponent(unit.code)}`;
@@ -33,7 +40,7 @@ export default function OpportunityCard({ unit }) {
         {imageUrl ? (
           <ImageWithLoader
             src={imageUrl}
-            alt={projectName || unit.code}
+            alt={buildListingHeadline(unit) || unit.code}
             className="object-cover"
           />
         ) : null}
@@ -61,7 +68,8 @@ export default function OpportunityCard({ unit }) {
           <p className="text-sm text-black/60">
             {[
               typeLabel,
-              unit.roomsCount != null
+              // A studio reports 0 rooms; "0 غرف" is noise, not information.
+              unit.roomsCount > 0
                 ? `${unit.roomsCount} ${translate("lenaqar.unit.rooms")}`
                 : null,
               unit.landArea != null

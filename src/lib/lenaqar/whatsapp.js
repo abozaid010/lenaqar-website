@@ -1,8 +1,7 @@
 import { formatPhoneForWhatsApp } from "@/utils/phone-utils";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
 
-const SELLER_MESSAGE =
-  "أهلاً، عايز أعرف خروجي من وحدتي — من حاسبة lenaqar.com";
+const SELLER_MESSAGE = "عندى وحده عايز ابيعها من غير اوفر";
 
 export function sellerCtaHref() {
   return formatPhoneForWhatsApp(LENAQAR_CONTACT.whatsappE164, SELLER_MESSAGE);

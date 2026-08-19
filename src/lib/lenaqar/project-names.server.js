@@ -22,21 +22,26 @@ function toSlimProject(row) {
     city: String(row.city || "").trim(),
     district: String(row.district || "").trim(),
     sub_district: String(row.sub_district || row.subDistrict || "").trim(),
+    developer: String(row.developer || row.developer_name || "").trim(),
   };
 }
 
 function uniqueProjects(rows) {
-  const seen = new Set();
-  const projects = [];
+  const seen = new Map();
   for (const row of rows) {
     const project = toSlimProject(row);
     if (!project) continue;
     const key = project.en_name.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    projects.push(project);
+    const existing = seen.get(key);
+    if (!existing) {
+      seen.set(key, project);
+      continue;
+    }
+    if (!existing.developer && project.developer) {
+      existing.developer = project.developer;
+    }
   }
-  return projects;
+  return [...seen.values()];
 }
 
 async function fetchResaleUnitsPage(cursor) {
@@ -108,6 +113,62 @@ export async function fetchLenaqarProjectNames() {
     return await cache.promise;
   } catch (error) {
     cache.promise = null;
+    throw error;
+  }
+}
+
+const catalogCache = {
+  data: null,
+  fetchedAt: 0,
+  promise: null,
+};
+
+function unwrapProjectRows(body) {
+  if (Array.isArray(body)) return body;
+  if (Array.isArray(body?.data)) return body.data;
+  if (Array.isArray(body?.data?.projects)) return body.data.projects;
+  if (Array.isArray(body?.projects)) return body.projects;
+  return [];
+}
+
+async function fetchCatalogJson(path) {
+  const headers = { accept: "application/json" };
+  if (PUBLIC_X_API_KEY) headers["X-API-Key"] = PUBLIC_X_API_KEY;
+  if (BFF_SECRET) headers["X-BFF-Secret"] = BFF_SECRET;
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    headers,
+    next: { revalidate: 3600 },
+  });
+  if (!response.ok) return [];
+  const body = await response.json().catch(() => null);
+  return unwrapProjectRows(body);
+}
+
+/**
+ * Full public compound list — same source add-unit uses (`projects_names`),
+ * not the bounded resale feed. Used by the public sell form.
+ */
+export async function fetchPublicCatalogProjectNames() {
+  const now = Date.now();
+  if (catalogCache.data && now - catalogCache.fetchedAt < TTL_MS) {
+    return catalogCache.data;
+  }
+  if (catalogCache.promise) return catalogCache.promise;
+
+  catalogCache.promise = (async () => {
+    const rows = await fetchCatalogJson(
+      "/projects/v3/projects_names?public=true",
+    );
+    catalogCache.data = uniqueProjects(rows);
+    catalogCache.fetchedAt = Date.now();
+    catalogCache.promise = null;
+    return catalogCache.data;
+  })();
+
+  try {
+    return await catalogCache.promise;
+  } catch (error) {
+    catalogCache.promise = null;
     throw error;
   }
 }

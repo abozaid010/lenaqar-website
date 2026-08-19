@@ -3,6 +3,7 @@
 import axios from "axios";
 import { TokenRefreshService } from "./TokenRefreshService";
 import { isPermissionsUpdatedError } from "@/constants/permissionsAuth";
+import { isPublicSiteRoute } from "@/lib/lenaqar/is-public-site-route";
 
 // All API calls route through the same-origin BFF at /api/crm/*.
 // The BFF server reads the httpOnly access_token cookie directly —
@@ -18,6 +19,17 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    // Public LenaQar site visitors never have a session — a 401 there is a
+    // normal error, not a reason to run refresh/session machinery or
+    // navigate to /login (they were never asked to log in).
+    if (
+      error.response?.status === 401 &&
+      typeof window !== "undefined" &&
+      isPublicSiteRoute(window.location.pathname)
+    ) {
+      return Promise.reject(error);
+    }
 
     if (error.response?.status === 401) {
       const detail = error.response?.data?.detail;

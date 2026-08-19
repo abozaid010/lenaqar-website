@@ -13,6 +13,7 @@ import {
   savePublicBuyRequest,
 } from "@/app/(lenaqar)/_actions/buy-request";
 import { actionButtonClass } from "@/components/ui/action-button-class";
+import ActionButtonArrow from "@/components/ui/action-button-arrow";
 
 let buyRequestHashHandled = false;
 
@@ -131,6 +132,7 @@ export default function BuyRequestCta({
         }}
       >
         {label || translate("lenaqar.actions.buyUnit", "Buy Unit")}
+        <ActionButtonArrow size={size} />
       </button>
       <EditRequirementDialog
         open={open}
@@ -146,12 +148,16 @@ export default function BuyRequestCta({
         initialValues={{ purpose: "buy", ...(initialValues || {}) }}
         showContactFields={!userId}
         fetchProjects={false}
+        compact
         overlayClassName="!z-[70]"
         loadRequirement={loadRequirement}
         saveRequirement={saveRequirement}
         onSuccess={(requirement) => {
           trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_SUBMITTED);
-          const qs = opportunityQueryFromRequirement(requirement);
+          const qs = opportunityQueryFromRequirement({
+            ...requirement,
+            purpose: "buy",
+          });
           router.push(qs ? `/opportunities?${qs}` : "/opportunities");
         }}
       />

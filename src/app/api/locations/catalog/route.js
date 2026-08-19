@@ -11,8 +11,10 @@ export const dynamic = "force-dynamic";
 
 /**
  * GET /api/locations/catalog
- * Auth preferred. If unauthenticated but server cache is warm, serve it
- * (public label pages). Otherwise 401.
+ * Auth preferred. Unauthenticated visitors (LenaQar public site) fall back
+ * to the anonymous, API-key-only /public/v1/market-index/locations/* routes
+ * — no login needed. If that somehow fails and the server cache is warm,
+ * serve it. Otherwise 401.
  */
 export async function GET() {
   const cookieStore = await cookies();
@@ -29,11 +31,7 @@ export async function GET() {
     }
 
     try {
-      const { getLenaqarTenantSession } = await import(
-        "@/lib/lenaqar/tenant-session.server"
-      );
-      const { accessToken: tenantToken } = await getLenaqarTenantSession();
-      const catalog = await getLocationsCatalog({ authToken: tenantToken });
+      const catalog = await getLocationsCatalog({ usePublicEndpoint: true });
       return NextResponse.json(catalog, {
         headers: {
           "Cache-Control": "private, max-age=3600, stale-while-revalidate=86400",
@@ -41,7 +39,7 @@ export async function GET() {
       });
     } catch (error) {
       console.error(
-        "[locations/catalog] lenaqar tenant catalog failed:",
+        "[locations/catalog] public catalog failed:",
         error?.code || error?.message,
       );
     }
