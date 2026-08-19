@@ -11,9 +11,11 @@ export default {
     closeMenu: "Close menu",
   },
   home: {
-    heroTitle: "Can't keep up with the installments? We get you out faster — and with more money.",
+    heroTitle: "Continue someone else's investment — buy at yesterday's price.",
     heroSub:
-      "We list your unit to ready buyers and agree the price in writing. No extra over-price on you, and no harassment.",
+      "We bring you units from owners who want out, units on old contracts, and units straight from developers — and we help you tell whether the deal is actually worth it.",
+    heroNote:
+      "A good opportunity doesn't have to be over-price free. What matters is that the deal is worth it.",
     primaryCta: "Calculate your exit in a minute",
     secondaryCta: "I want to buy an opportunity",
     howTitle: "How we work",

@@ -27,6 +27,9 @@ export default function HomeContent({ units = [] }) {
           <p className="mt-6 text-lg sm:text-xl text-black/75 max-w-3xl leading-relaxed">
             {translate("lenaqar.home.heroSub")}
           </p>
+          <p className="mt-4 inline-block max-w-3xl rounded-md border border-red-200 bg-red-50 px-3 py-2 text-base font-bold leading-relaxed text-red-700 shadow-sm sm:text-lg">
+            {translate("lenaqar.home.heroNote")}
+          </p>
         </section>
 
         <section className="container pb-14 sm:pb-16">
