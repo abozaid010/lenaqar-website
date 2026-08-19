@@ -52,7 +52,16 @@ export default function HomeContent({ units = [] }) {
             >
               <p className="text-xs text-black/50 mb-2 tabular-nums">{step}</p>
               <h3 className="font-semibold mb-2">
-                {translate(`lenaqar.home.howStep${step}Title`)}
+                {step === 4 ? (
+                  <>
+                    {translate("lenaqar.home.howStep4TitleBefore")}
+                    <span className="font-extrabold text-red-600">
+                      {translate("lenaqar.home.howStep4TitleHighlight")}
+                    </span>
+                  </>
+                ) : (
+                  translate(`lenaqar.home.howStep${step}Title`)
+                )}
               </h3>
               <p className="text-sm text-black/70">
                 {translate(`lenaqar.home.howStep${step}Body`)}
@@ -68,17 +77,6 @@ export default function HomeContent({ units = [] }) {
             {translate("lenaqar.home.sellLearnMore")}
           </Link>
         </div>
-      </section>
-
-      <section className="container py-8">
-        <h2 className="text-xl font-bold text-primary mb-4">
-          {translate("lenaqar.home.whyTitle")}
-        </h2>
-        <ul className="space-y-3 text-black/80">
-          <li>{translate("lenaqar.home.why1")}</li>
-          <li>{translate("lenaqar.home.why2")}</li>
-          <li>{translate("lenaqar.home.why3")}</li>
-        </ul>
       </section>
 
       <NetworkStrip />
