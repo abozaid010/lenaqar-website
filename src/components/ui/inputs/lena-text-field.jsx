@@ -121,7 +121,10 @@ const LenaTextField = forwardRef(({
   
   // Determine if label should float (focused or has value)
   const hasValue = value !== null && value !== undefined && value !== "";
-  const shouldFloatLabel = isFocused || hasValue;
+  const isMonth = type === "month";
+  // Native month controls always paint a calendar icon + mm/yyyy; keep the
+  // label above so it never sits under that icon.
+  const shouldFloatLabel = isFocused || hasValue || isMonth;
   
   // Placeholder logic:
   // - When label is floating: show custom placeholder if provided, otherwise empty
@@ -178,7 +181,7 @@ const LenaTextField = forwardRef(({
         {label && (
           <label
             htmlFor={name}
-            className={`absolute transition-all duration-200 pointer-events-none ${
+            className={`absolute z-10 transition-all duration-200 pointer-events-none ${
               layoutDir === "rtl" ? "right-3" : "left-3"
             } ${
               shouldFloatLabel
@@ -201,7 +204,11 @@ const LenaTextField = forwardRef(({
           placeholder={displayPlaceholder}
           required={required}
           disabled={disabled}
-          className={`block w-full min-h-[40px] rounded-md border py-2.5 px-3 focus:outline-none focus:ring-2 bg-white text-gray-900 appearance-none transition-all duration-200 ${textAlignClass} ${
+          className={`block w-full min-h-[40px] rounded-md border py-2.5 px-3 focus:outline-none focus:ring-2 bg-white text-gray-900 transition-all duration-200 ${
+            isMonth
+              ? "pe-10 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+              : "appearance-none"
+          } ${textAlignClass} ${
             shouldFloatLabel && label ? "pt-4" : ""
           } ${
             getBorderColor()

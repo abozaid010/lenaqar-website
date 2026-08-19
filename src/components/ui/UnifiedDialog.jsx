@@ -88,12 +88,12 @@ export default function UnifiedDialog({
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/50 transition-opacity duration-300 ease-in-out ${overlayClassName}`}
+      className={`fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-black/50 transition-opacity duration-300 ease-in-out ${overlayClassName}`}
       onClick={handleOutsideClick}
     >
       <div
         ref={dialogRef}
-        className={`rounded-lg shadow-xl overflow-hidden w-[90%] max-h-[90vh] flex flex-col bg-white text-black transform transition-all duration-300 ease-in-out ${dialogClassName}`}
+        className={`rounded-lg shadow-xl overflow-hidden w-[min(100%,calc(100vw-1.5rem))] max-h-[calc(100dvh-1.5rem)] min-h-0 grid grid-rows-[auto_minmax(0,1fr)] bg-white text-black transform transition-all duration-300 ease-in-out ${dialogClassName}`}
       >
         {/* Header: default = primary bg + white; unified = UnifiedHeader (#E2dbff + primary) */}
         {headerVariant === "unified" ? (
@@ -112,7 +112,7 @@ export default function UnifiedDialog({
           />
         ) : (
           <div
-            className="flex justify-between items-center gap-3 p-3 md:p-4 bg-primary text-white flex-shrink-0 relative"
+            className="flex justify-between items-center gap-3 p-3 md:p-4 bg-primary text-white relative"
             dir={isRTL ? "rtl" : "ltr"}
           >
             <div
@@ -170,7 +170,7 @@ export default function UnifiedDialog({
           </div>
         )}
         <div
-          className={`p-4 overflow-y-auto bg-white text-black flex-1 min-h-0 [&_select]:text-gray-900 [&_select]:[color-scheme:light] [&_input]:text-gray-900 [&_textarea]:text-gray-900 ${bodyClassName}`}
+          className={`p-4 overflow-y-auto overscroll-contain bg-white text-black min-h-0 [-webkit-overflow-scrolling:touch] [&_select]:text-gray-900 [&_select]:[color-scheme:light] [&_input]:text-gray-900 [&_textarea]:text-gray-900 ${bodyClassName}`}
         >
           {children}
         </div>

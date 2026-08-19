@@ -606,8 +606,8 @@ export default function EditRequirementDialog({
       submitLoading={saving}
       closeOnEscape
       overlayClassName={overlayClassName}
-      dialogClassName="sm:max-w-xl"
-      bodyClassName="space-y-5 text-sm !p-4"
+      dialogClassName="w-full sm:max-w-xl"
+      bodyClassName="space-y-5 text-sm !p-4 pb-8"
     >
       {loading ? (
         <div className="p-6 text-center text-sm text-gray-500">
@@ -949,19 +949,6 @@ export default function EditRequirementDialog({
                   adornment="EGP"
                   error={Boolean(compactError("monthlyInstallment"))}
                   errorMessage={compactError("monthlyInstallment")}
-                />
-                <LenaTextField
-                  name="overPrice"
-                  type="money"
-                  label={tr(
-                    "lenaqar.buyRequest.overPrice",
-                    locale === "ar" ? "الأوفر" : "Over-price",
-                  )}
-                  value={form.overPrice}
-                  onChange={handlePriceChange}
-                  adornment="EGP"
-                  error={Boolean(compactError("overPrice"))}
-                  errorMessage={compactError("overPrice")}
                 />
                 <LenaTextField
                   name="deliveryDate"
