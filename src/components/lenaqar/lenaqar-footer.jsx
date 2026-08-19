@@ -22,7 +22,11 @@ export default function LenaqarFooter() {
             <Phone className="mt-0.5 shrink-0" size={18} />
             <div>
               <p className="font-medium">{translate("lenaqar.footer.phone")}</p>
-              <a href={`tel:${LENAQAR_CONTACT.phoneE164}`} className="hover:text-white/80">
+              <a
+                href={`tel:${LENAQAR_CONTACT.phoneE164}`}
+                dir="ltr"
+                className="inline-block hover:text-white/80"
+              >
                 {LENAQAR_CONTACT.phoneDisplay}
               </a>
             </div>
@@ -35,7 +39,8 @@ export default function LenaqarFooter() {
                 href={sellerCtaHref()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-white/80 underline"
+                dir="ltr"
+                className="inline-block hover:text-white/80 underline"
                 onClick={() => {
                   trackEvent(ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED);
                   trackMetaContact();

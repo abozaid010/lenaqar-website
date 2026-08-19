@@ -1,4 +1,5 @@
 import { SITE } from "../../config/site.js";
+import { parseAmount } from "../../utils/parse-amount.js";
 
 /**
  * SITE name / country are LenaQar platform constants, not seller-supplied
@@ -26,6 +27,7 @@ const PUBLIC_UNIT_COUNTRY = "Egypt";
  */
 export function buildSaleUnitPayload({
   developer,
+  project,
   buildingType,
   city,
   district,
@@ -36,20 +38,21 @@ export function buildSaleUnitPayload({
   ownerName,
   ownerPhone,
 }) {
-  const paid = Number(paidAmount) || 0;
+  const paid = parseAmount(paidAmount);
   return {
     clientId: SITE.clientId,
     dataSource: "website",
     clientName: PUBLIC_UNIT_CLIENT_NAME,
     country: PUBLIC_UNIT_COUNTRY,
     purpose: "sell",
-    developer: String(developer || "").trim(),
+    developer: String(developer || "").trim() || undefined,
+    project: String(project || "").trim() || undefined,
     buildingType,
     city: city || undefined,
     district: district || undefined,
     sub_district: subDistrict || undefined,
     landArea: Number(landArea) || 0,
-    totalPrice: Number(totalPrice) || 0,
+    totalPrice: parseAmount(totalPrice),
     downPayment: paid,
     paid_amount: paid,
     images: [],

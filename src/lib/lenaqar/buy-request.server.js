@@ -1,13 +1,5 @@
-import { cookies } from "next/headers";
 import axiosInstance from "@/utils/axiosInstance";
-import { COOKIE_KEYS } from "@/constants/cookieKeys";
-import { SITE } from "@/config/site";
-import { cleanRequirementsPayload } from "@/utils/cleanRequirements";
-import { NEW_LEAD_ACTION } from "@/utils/action-normalize";
-import {
-  getLenaqarTenantSession,
-  tenantAuthConfig,
-} from "./tenant-session.server";
+import { buildPublicBuyRequirement } from "@/lib/lenaqar/buy-request-payload";
 
 function apiMessage(error, fallback) {
   return (
@@ -21,63 +13,19 @@ function apiMessage(error, fallback) {
 function toPublicError(error, fallbackCode) {
   const status = error?.response?.status;
   const next = new Error(fallbackCode);
-  next.code =
-    error?.code === "tenant_credentials_missing" ||
-    error?.code === "tenant_login_failed"
-      ? error.code
-      : status === 429
-        ? "rate_limited"
-        : fallbackCode;
+  next.code = status === 429 ? "rate_limited" : fallbackCode;
   return next;
 }
 
-function inventoryClientId(sessionClientId) {
-  return String(SITE.clientId || sessionClientId || "homey").trim();
-}
-
-function buyRequestAuthConfig(accessToken, clientId) {
-  return {
-    headers: {
-      ...tenantAuthConfig(accessToken).headers,
-      "x-client-id": clientId,
-    },
-  };
-}
-
-async function getBuyRequestAuth() {
-  try {
-    const session = await getLenaqarTenantSession();
-    return {
-      accessToken: session.accessToken,
-      clientId: inventoryClientId(session.clientId),
-    };
-  } catch (error) {
-    if (
-      error?.code !== "tenant_credentials_missing" &&
-      error?.code !== "tenant_login_failed"
-    ) {
-      throw error;
-    }
-  }
-
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
-  if (accessToken) {
-    return { accessToken, clientId: inventoryClientId() };
-  }
-
-  const next = new Error("tenant_credentials_missing");
-  next.code = "tenant_credentials_missing";
-  throw next;
-}
-
+/**
+ * Load a previously-submitted public buy request via the anonymous,
+ * API-key-only /public/v1/buy-request/{user_id} route — no login needed.
+ */
 export async function loadBuyRequestRequirement(userId) {
   if (!userId) return null;
   try {
-    const { accessToken, clientId } = await getBuyRequestAuth();
     const response = await axiosInstance.get(
-      `requirements/${userId}`,
-      buyRequestAuthConfig(accessToken, clientId),
+      `/public/v1/buy-request/${encodeURIComponent(userId)}`,
     );
     const data = response.data?.data;
     if (!data || typeof data !== "object") return null;
@@ -85,63 +33,46 @@ export async function loadBuyRequestRequirement(userId) {
   } catch (error) {
     const status = error?.response?.status;
     if (status === 404) return null;
-    console.error("[lenaqar] load buy request failed", status || error?.message);
+    console.error(
+      "[lenaqar] load buy request failed",
+      status || apiMessage(error, error?.message),
+    );
     throw toPublicError(error, "load_failed");
   }
 }
 
-async function createBuyRequestLead({ name, phone, clientId, accessToken }) {
-  const payload = {
-    user_id: crypto.randomUUID(),
-    phone_number: phone,
-    user_name: name,
-    query: "Buy request from lenaqar.com",
-    client_id: clientId,
-    platform: "website",
-    campaign_id: "lenaqar_buy_request",
-    last_action: NEW_LEAD_ACTION,
-    owner_type: "buyer",
-  };
-
-  try {
-    const response = await axiosInstance.post(
-      "/api/leads/addnew",
-      payload,
-      buyRequestAuthConfig(accessToken, clientId),
-    );
-    const body = response?.data;
-    if (body?.status === false) {
-      throw new Error(body?.error_message || body?.message || "create_failed");
-    }
-    const data = body?.data || {};
-    return String(data.user_id || payload.user_id);
-  } catch (error) {
-    console.error(
-      "[lenaqar] create buy-request lead failed",
-      error?.response?.status || apiMessage(error, error?.message),
-    );
-    throw toPublicError(error, "save_failed");
+/**
+ * Persist a public buy request via the anonymous, API-key-only
+ * /public/v1/buy-request/submit route — no login needed. The backend
+ * creates the lead (when new) and upserts the requirement on it, always
+ * forcing identity server-side (client_id, platform, campaign_id).
+ */
+export async function saveBuyRequestRequirement({ userId, contact, payload }) {
+  const id = typeof userId === "string" ? userId.trim() : "";
+  const name = String(contact?.name || "").trim();
+  const phone = String(contact?.phone || "").trim();
+  if (!id && (!name || !phone)) {
+    const error = new Error("contact_required");
+    error.code = "contact_required";
+    throw error;
   }
-}
 
-async function upsertBuyRequestRequirement({
-  userId,
-  clientId,
-  accessToken,
-  payload,
-}) {
-  const body = cleanRequirementsPayload({
-    ...payload,
-    client_id: clientId,
-    user_id: userId,
-  });
+  const built = buildPublicBuyRequirement(payload);
+  if (!built.ok) {
+    const error = new Error("validation_failed");
+    error.code = "validation_failed";
+    throw error;
+  }
 
   try {
-    await axiosInstance.patch(
-      `requirements/${userId}`,
-      body,
-      buyRequestAuthConfig(accessToken, clientId),
-    );
+    const response = await axiosInstance.post("/public/v1/buy-request/submit", {
+      user_id: id || undefined,
+      name: id ? undefined : name,
+      phone: id ? undefined : phone,
+      requirement: built.requirement,
+    });
+    const savedUserId = String(response.data?.data?.user_id || id || "").trim();
+    return { userId: savedUserId };
   } catch (error) {
     console.error(
       "[lenaqar] save buy request requirement failed",
@@ -149,38 +80,4 @@ async function upsertBuyRequestRequirement({
     );
     throw toPublicError(error, "save_failed");
   }
-}
-
-/**
- * Persist a public buy request: create the lead (when new), then upsert
- * the requirement on that lead.
- */
-export async function saveBuyRequestRequirement({ userId, contact, payload }) {
-  const { accessToken, clientId } = await getBuyRequestAuth();
-
-  let id = typeof userId === "string" ? userId.trim() : "";
-  if (!id) {
-    const name = String(contact?.name || "").trim();
-    const phone = String(contact?.phone || "").trim();
-    if (!name || !phone) {
-      const error = new Error("contact_required");
-      error.code = "contact_required";
-      throw error;
-    }
-    id = await createBuyRequestLead({
-      name,
-      phone,
-      clientId,
-      accessToken,
-    });
-  }
-
-  await upsertBuyRequestRequirement({
-    userId: id,
-    clientId,
-    accessToken,
-    payload,
-  });
-
-  return { userId: id };
 }

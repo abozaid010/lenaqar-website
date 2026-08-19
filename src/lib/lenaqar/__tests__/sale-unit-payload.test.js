@@ -58,14 +58,26 @@ test("numeric fields coerce non-numeric/empty input to 0 rather than NaN", () =>
   assert.equal(payload.paid_amount, 0);
 });
 
-test("developer and owner_name are trimmed", () => {
+test("formatted display prices parse to full amounts, not Number('20,000,000') === 20", () => {
   const payload = buildSaleUnitPayload({
     ...validForm,
-    developer: "  Talaat Moustafa  ",
-    ownerName: "  Ahmed  ",
+    totalPrice: "20,000,000",
+    paidAmount: "1,500,000",
   });
-  assert.equal(payload.developer, "Talaat Moustafa");
-  assert.equal(payload.owner_name, "Ahmed");
+  assert.equal(payload.totalPrice, 20000000);
+  assert.equal(payload.paid_amount, 1500000);
+  assert.equal(payload.downPayment, 1500000);
+});
+
+test("empty developer and project are omitted, not sent as empty strings", () => {
+  const payload = buildSaleUnitPayload({ ...validForm, developer: "  ", project: "" });
+  assert.equal(payload.developer, undefined);
+  assert.equal(payload.project, undefined);
+});
+
+test("project name passes through when provided", () => {
+  const payload = buildSaleUnitPayload({ ...validForm, project: "  Madinaty  " });
+  assert.equal(payload.project, "Madinaty");
 });
 
 test("empty owner_name/owner_mobile are omitted, not sent as empty strings", () => {

@@ -17,47 +17,35 @@ export default function HomeContent({ units = [] }) {
 
   return (
     <>
-      <section className="container py-12">
-        <h1 className="text-3xl sm:text-4xl font-bold text-primary leading-snug">
-          {translate("lenaqar.home.heroTitle")}
-        </h1>
-        <p className="mt-4 text-base sm:text-lg text-black/70 max-w-2xl">
-          {translate("lenaqar.home.heroSub")}
-        </p>
-        <p className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm">
-          <Link
-            href="/calculator"
-            className="text-primary font-medium underline-offset-2 hover:underline"
-          >
-            {translate("lenaqar.home.primaryCta")}
-          </Link>
-          <Link
-            href="/opportunities"
-            className="text-primary font-medium underline-offset-2 hover:underline"
-          >
-            {translate("lenaqar.home.buyerCta")}
-          </Link>
-        </p>
-      </section>
+      <div className="bg-primary/[0.04] border-b border-black/5">
+        <section className="container pt-14 pb-8 sm:pt-20 sm:pb-10">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-primary leading-[1.15] max-w-4xl">
+            {translate("lenaqar.home.heroTitle")}
+          </h1>
+          <p className="mt-6 text-lg sm:text-xl text-black/75 max-w-3xl leading-relaxed">
+            {translate("lenaqar.home.heroSub")}
+          </p>
+        </section>
+
+        <section className="container pb-14 sm:pb-16">
+          <h2 className="text-2xl sm:text-3xl font-bold text-primary mb-2">
+            {translate("lenaqar.actions.title")}
+          </h2>
+          <p className="text-base sm:text-lg text-black/70 mb-5 max-w-2xl">
+            {translate("lenaqar.actions.sub")}
+          </p>
+          <CoreActions anchor size="large" />
+        </section>
+      </div>
 
       <ComparisonBlock />
-
-      <section className="container py-8">
-        <h2 className="text-xl font-bold text-primary mb-2">
-          {translate("lenaqar.actions.title")}
-        </h2>
-        <p className="text-sm text-black/70 mb-4">
-          {translate("lenaqar.actions.sub")}
-        </p>
-        <CoreActions anchor />
-      </section>
 
       <section className="container py-10">
         <h2 className="text-xl font-bold text-primary mb-6">
           {translate("lenaqar.home.howTitle")}
         </h2>
-        <ol className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[1, 2, 3].map((step) => (
+        <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((step) => (
             <li
               key={step}
               className="rounded-lg border border-black/10 p-5 bg-white"

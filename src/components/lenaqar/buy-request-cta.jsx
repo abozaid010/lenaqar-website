@@ -152,7 +152,10 @@ export default function BuyRequestCta({
         saveRequirement={saveRequirement}
         onSuccess={(requirement) => {
           trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_SUBMITTED);
-          const qs = opportunityQueryFromRequirement(requirement);
+          const qs = opportunityQueryFromRequirement({
+            ...requirement,
+            purpose: "buy",
+          });
           router.push(qs ? `/opportunities?${qs}` : "/opportunities");
         }}
       />

@@ -8,14 +8,16 @@ import { ANALYTICS } from "@/constants/analytics";
 import { getBuildingTypeOptions } from "@/lib/enums/buildingTypes";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
-import FormSelect from "@/components/ui/inputs/form-select";
-import UnitsLocationSearch from "@/components/ui/inputs/units-location-search";
+import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
+import UnitLocationSearch from "@/components/ui/unit-forms/unit-location-search";
+import { parseAmount, parseMoneyInput } from "@/utils/parse-amount";
 import { PhoneField } from "@/components/phone/PhoneField";
 import { submitPublicSellUnit } from "@/app/(lenaqar)/_actions/add-sale";
 import { actionButtonClass } from "@/components/ui/action-button-class";
 
 const EMPTY_FORM = {
   ownerName: "",
+  project: "",
   developer: "",
   buildingType: "",
   city: "",
@@ -25,6 +27,18 @@ const EMPTY_FORM = {
   totalPrice: "",
   paidAmount: "",
 };
+
+function developerFromProject(project) {
+  const nested =
+    project?.project && typeof project.project === "object" ? project.project : {};
+  return String(
+    project?.developer ||
+      project?.developer_name ||
+      nested.developer ||
+      nested.developer_name ||
+      "",
+  ).trim();
+}
 
 export default function PublicSellCta({
   variant = "primary",
@@ -48,8 +62,36 @@ export default function PublicSellCta({
   const setField = (key) => (event) =>
     setForm((prev) => ({ ...prev, [key]: event.target.value }));
 
-  const handleLocationChange = ({ city, district, sub_district }) =>
-    setForm((prev) => ({ ...prev, city, district, subDistrict: sub_district }));
+  const setMoneyField = (key) => (event) =>
+    setForm((prev) => ({
+      ...prev,
+      [key]: parseMoneyInput(event.target.value),
+    }));
+
+  const handleLocationChange = ({ city, district, sub_district, project }) =>
+    setForm((prev) => ({
+      ...prev,
+      city: city || "",
+      district: district || "",
+      subDistrict: sub_district || "",
+      project: project || "",
+      developer: "",
+    }));
+
+  const handleProjectSelect = (project) => {
+    const details =
+      project?.project && typeof project.project === "object"
+        ? project.project
+        : project;
+    setForm((prev) => ({
+      ...prev,
+      project: details?.en_name || details?.name || prev.project,
+      developer: developerFromProject(project) || prev.developer,
+      city: details?.city || prev.city,
+      district: details?.district || prev.district,
+      subDistrict: details?.sub_district || details?.subDistrict || prev.subDistrict,
+    }));
+  };
 
   const resetAndClose = () => {
     setForm(EMPTY_FORM);
@@ -61,11 +103,10 @@ export default function PublicSellCta({
   const canSubmit =
     form.ownerName.trim() &&
     phonePayload?.combined &&
-    form.developer.trim() &&
     form.buildingType &&
     Number(form.landArea) > 0 &&
-    Number(form.totalPrice) > 0 &&
-    Number(form.paidAmount) >= 0;
+    parseAmount(form.totalPrice) > 0 &&
+    parseAmount(form.paidAmount) >= 0;
 
   const handleSubmit = async () => {
     if (!canSubmit || saving) return;
@@ -134,41 +175,54 @@ export default function PublicSellCta({
             />
           </section>
 
-          <UnitsLocationSearch
+          <UnitLocationSearch
+            isPublic
+            projectSource="catalog"
+            hydrateSelectedProject
+            showHint
+            showHierarchySummary
             name="sell_unit_location"
-            label={tr("lenaqar.sellRequest.location", locale === "ar" ? "الموقع" : "Location")}
-            city={form.city}
-            district={form.district}
-            subDistrict={form.subDistrict}
-            onChange={handleLocationChange}
-            showAllOption={false}
+            label={tr(
+              "basicDetails.locationSearchLabel",
+              locale === "ar" ? "الموقع / المشروع" : "Location / Project",
+            )}
+            placeholder={tr(
+              "basicDetails.locationSearchPlaceholder",
+              locale === "ar"
+                ? "ابحث عن مشروع أو منطقة أو حي أو مدينة…"
+                : "Search project, area, district, or city…",
+            )}
+            formData={{
+              city: form.city,
+              district: form.district,
+              sub_district: form.subDistrict,
+              project: form.project,
+            }}
+            onSelectLocation={handleLocationChange}
+            onSelectProject={handleProjectSelect}
           />
 
-          <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <LenaTextField
-              name="developer"
-              label={tr("lenaqar.sellRequest.developer", locale === "ar" ? "المطور" : "Developer")}
-              value={form.developer}
-              onChange={setField("developer")}
-              required
-            />
-            <FormSelect
-              name="buildingType"
-              label={tr("lenaqar.sellRequest.buildingType", locale === "ar" ? "نوع الوحدة" : "Property type")}
-              value={form.buildingType}
-              onChange={setField("buildingType")}
-              required
-            >
-              <option value="" disabled>
-                {tr("lenaqar.sellRequest.selectType", locale === "ar" ? "اختر النوع" : "Select type")}
-              </option>
-              {buildingTypeOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </FormSelect>
-          </section>
+          <SearchableDropdownSelect
+            name="buildingType"
+            label={tr(
+              "lenaqar.sellRequest.buildingType",
+              locale === "ar" ? "نوع الوحدة" : "Property type",
+            )}
+            value={form.buildingType}
+            onChange={setField("buildingType")}
+            required
+            options={buildingTypeOptions}
+            getValue={(opt) => opt.value}
+            getLabel={(opt) => opt.label}
+            placeholder={tr(
+              "lenaqar.sellRequest.selectType",
+              locale === "ar" ? "اختر النوع" : "Select type",
+            )}
+            searchPlaceholder={tr(
+              "lenaqar.sellRequest.selectType",
+              locale === "ar" ? "ابحث عن النوع…" : "Search type…",
+            )}
+          />
 
           <section className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <LenaTextField
@@ -181,18 +235,20 @@ export default function PublicSellCta({
             />
             <LenaTextField
               name="totalPrice"
-              type="number"
-              label={tr("lenaqar.calculator.unitPrice")}
+              type="money"
+              label={tr("lenaqar.sellRequest.contractPrice")}
               value={form.totalPrice}
-              onChange={setField("totalPrice")}
+              onChange={setMoneyField("totalPrice")}
+              adornment="EGP"
               required
             />
             <LenaTextField
               name="paidAmount"
-              type="number"
+              type="money"
               label={tr("lenaqar.calculator.amountPaid")}
               value={form.paidAmount}
-              onChange={setField("paidAmount")}
+              onChange={setMoneyField("paidAmount")}
+              adornment="EGP"
               required
             />
           </section>

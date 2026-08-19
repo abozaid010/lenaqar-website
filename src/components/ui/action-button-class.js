@@ -8,7 +8,9 @@ export function actionButtonClass({
   const sizeClass =
     size === "compact"
       ? "px-3 py-2 text-xs min-h-9 whitespace-nowrap"
-      : "px-4 py-3 text-sm min-h-11";
+      : size === "large"
+        ? "px-6 py-4 text-base sm:text-lg min-h-14 font-semibold"
+        : "px-4 py-3 text-sm min-h-11";
   const look =
     tone === "onPrimary"
       ? variant === "secondary"

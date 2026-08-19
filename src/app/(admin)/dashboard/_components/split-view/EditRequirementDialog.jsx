@@ -18,11 +18,18 @@ import CityManager from "@/utils/city_manager";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import LenaTextarea from "@/components/ui/inputs/lena-textarea";
 import UnitsLocationSearch from "@/components/ui/inputs/units-location-search";
+import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import { PhoneField } from "@/components/phone/PhoneField";
 import { useProjectsNames } from "@/hooks/use-admin-shared-data";
-import { useEffect, useState } from "react";
+import {
+  buildPublicBuyRequirement,
+  toYearMonth,
+} from "@/lib/lenaqar/buy-request-payload";
+import { parseMoneyInput } from "@/utils/parse-amount";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
 /** Homey-only UI default when no location is set. User can still change it. */
@@ -121,25 +128,17 @@ const FURNISHING_LABEL_KEYS = {
 };
 
 function buildPriceFieldsForPayload(form) {
-  const purpose = String(form.purpose || "").toLowerCase();
-  const priceFields = {
-    totalPrice: null,
-    min_price: null,
-    max_price: null,
-    monthlyInstallment: null,
+  const totalPrice = toNum(form.totalPrice);
+  const maxPrice = toNum(form.max_price);
+  return {
+    totalPrice,
+    min_price: toNum(form.min_price),
+    // Matching still uses max_price; fall back to contract price when budget is empty.
+    max_price: maxPrice ?? totalPrice,
+    monthlyInstallment: toNum(form.monthlyInstallment),
     downPayment: toNum(form.downPayment),
-    serviceCharges: null,
+    serviceCharges: toNum(form.serviceCharges),
   };
-
-  if (purpose === "rent" || purpose === "buy" || purpose === "sell") {
-    priceFields.min_price = toNum(form.min_price);
-    priceFields.max_price = toNum(form.max_price);
-    return priceFields;
-  }
-
-  priceFields.min_price = toNum(form.min_price);
-  priceFields.max_price = toNum(form.max_price);
-  return priceFields;
 }
 
 function createEmptyForm(userId = "", overrides = {}) {
@@ -167,8 +166,12 @@ function createEmptyForm(userId = "", overrides = {}) {
     roomsCount: numberToFieldValue(initial.roomsCount),
     bathroomCount: "",
     min_price: "",
-    max_price: "",
+    max_price: numberToFieldValue(initial.max_price ?? initial.totalPrice),
+    totalPrice: numberToFieldValue(initial.totalPrice),
     downPayment: numberToFieldValue(initial.downPayment),
+    monthlyInstallment: numberToFieldValue(initial.monthlyInstallment),
+    overPrice: numberToFieldValue(initial.overPrice),
+    deliveryDate: toYearMonth(initial.deliveryDate),
     notes: "",
   };
 }
@@ -188,8 +191,8 @@ export default function EditRequirementDialog({
   initialValues,
   showContactFields = false,
   fetchProjects = true,
-  /** Public LenaQar buy-request only: name, phone, location, budget — no purpose
-   * selector (forced buy), no property/size/notes sections, no project picker. */
+  /** Public LenaQar buy-request only: name, phone, location, optional project,
+   * budget — no purpose selector (forced buy), no property/size/notes sections. */
   compact = false,
   overlayClassName,
   loadRequirement = getClientRequirements,
@@ -198,13 +201,31 @@ export default function EditRequirementDialog({
   const { locale, translate, t } = useI18n();
   const { data: projectsData, isLoading: projectsLoading } = useProjectsNames(
     false,
-    { enabled: fetchProjects },
+    { enabled: fetchProjects && !compact },
   );
+  const { data: catalogProjects, isLoading: catalogProjectsLoading } = useQuery({
+    queryKey: ["lenaqar", "catalog-projects"],
+    queryFn: async () => {
+      const response = await fetch("/api/lenaqar/catalog-projects");
+      if (!response.ok) return [];
+      const json = await response.json();
+      const rows = json?.data ?? json;
+      return Array.isArray(rows) ? rows : [];
+    },
+    enabled: compact,
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
+  const projectOptions = compact ? catalogProjects : projectsData;
+  const projectsListLoading = compact
+    ? catalogProjectsLoading
+    : projectsLoading;
   const formOptions = { clientId, defaultPurpose, initialValues };
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(() => createEmptyForm("", formOptions));
   const [locationError, setLocationError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const [contactName, setContactName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phonePayload, setPhonePayload] = useState(null);
@@ -214,6 +235,7 @@ export default function EditRequirementDialog({
   useEffect(() => {
     if (!open) {
       setLocationError("");
+      setFieldErrors({});
       return undefined;
     }
     if (!userId) {
@@ -270,8 +292,12 @@ export default function EditRequirementDialog({
           roomsCount: numberToFieldValue(raw.roomsCount),
           bathroomCount: numberToFieldValue(raw.bathroomCount),
           min_price: numberToFieldValue(raw.min_price),
-          max_price: numberToFieldValue(raw.max_price),
+          max_price: numberToFieldValue(raw.max_price ?? raw.totalPrice),
+          totalPrice: numberToFieldValue(raw.totalPrice),
           downPayment: numberToFieldValue(raw.downPayment),
+          monthlyInstallment: numberToFieldValue(raw.monthlyInstallment),
+          overPrice: numberToFieldValue(raw.overPrice),
+          deliveryDate: toYearMonth(raw.deliveryDate),
           notes:
             additionalFeaturesToNotes(raw.additionalFeatures) ||
             (raw.notes == null || raw.notes === ""
@@ -299,7 +325,15 @@ export default function EditRequirementDialog({
     };
   }, [open, userId]);
 
-  const set = (k, v) => setForm((prev) => ({ ...prev, [k]: v }));
+  const set = (k, v) => {
+    setFieldErrors((prev) => {
+      if (!prev[k]) return prev;
+      const next = { ...prev };
+      delete next[k];
+      return next;
+    });
+    setForm((prev) => ({ ...prev, [k]: v }));
+  };
 
   const handleFieldChange = (e) => {
     const { name, value } = e.target;
@@ -345,7 +379,7 @@ export default function EditRequirementDialog({
 
   const handlePriceChange = (e) => {
     const { name, value } = e.target;
-    set(name, String(value).replace(/[^0-9.]/g, ""));
+    set(name, parseMoneyInput(value));
   };
 
   const purposeKey = String(form.purpose || "").toLowerCase();
@@ -372,7 +406,19 @@ export default function EditRequirementDialog({
     tr(`basicDetails.purposes.${value}`, toDisplayLabel(value));
 
   const getBuildingTypeLabel = (value) =>
-    tr(`property.buildingTypes.${value}`, toDisplayLabel(value));
+    tr(
+      `buildingTypes.${value}`,
+      tr(`property.buildingTypes.${value}`, toDisplayLabel(value)),
+    );
+
+  const buildingTypeOptions = useMemo(
+    () =>
+      BUILDING_TYPE_VALUES.map((value) => ({
+        value,
+        label: getBuildingTypeLabel(value),
+      })),
+    [locale],
+  );
 
   const getFinishingLabel = (value) => {
     const key = FINISHING_LABEL_KEYS[String(value).toLowerCase()];
@@ -383,6 +429,11 @@ export default function EditRequirementDialog({
     const key = FURNISHING_LABEL_KEYS[String(value).toLowerCase()];
     return key ? tr(key, toDisplayLabel(value)) : toDisplayLabel(value);
   };
+
+  const compactError = (key) =>
+    fieldErrors[key]
+      ? tr(`lenaqar.buyRequest.errors.${fieldErrors[key]}`)
+      : "";
 
   const handleSubmit = async (e) => {
     e?.preventDefault?.();
@@ -426,12 +477,27 @@ export default function EditRequirementDialog({
     }
     setLocationError("");
 
-    setSaving(true);
-    try {
+    let payload;
+    if (compact) {
+      const built = buildPublicBuyRequirement(form);
+      if (!built.ok) {
+        setFieldErrors(built.errors);
+        const first = Object.values(built.errors)[0];
+        toast.error(
+          tr(
+            `lenaqar.buyRequest.errors.${first}`,
+            locale === "ar" ? "راجع البيانات المطلوبة" : "Check the required fields",
+          ),
+        );
+        return;
+      }
+      setFieldErrors({});
+      payload = built.requirement;
+    } else {
       const resolvedClientId =
         form.client_id || clientId || LenaCookiesManager.getClientId() || "";
       const purpose = normalizeEnumValue(form.purpose, PURPOSE_VALUES) || null;
-      const payload = {
+      payload = {
         client_id: resolvedClientId,
         user_id: userId || "",
         city: form.city,
@@ -454,6 +520,10 @@ export default function EditRequirementDialog({
         additionalFeatures: notesToAdditionalFeatures(form.notes),
         score: {},
       };
+    }
+
+    setSaving(true);
+    try {
       const extra = showContactFields
         ? {
             contact: {
@@ -468,7 +538,7 @@ export default function EditRequirementDialog({
 
       // Confirm notes persist via additionalFeatures (API has no `notes` field).
       const wantedNotes = additionalFeaturesToNotes(payload.additionalFeatures);
-      if (wantedNotes && savedUserId) {
+      if (!compact && wantedNotes && savedUserId) {
         const refreshed = await loadRequirement(savedUserId);
         const savedNotes =
           refreshed && !refreshed.error
@@ -618,48 +688,55 @@ export default function EditRequirementDialog({
                 className={dropdownClassName}
               />
               {!compact ? (
-                <>
-                  <p className="text-xs text-gray-500 -mt-1">
-                    {tr(
-                      "basicDetails.locationSearchHint",
-                      locale === "ar"
-                        ? "اختر موقعاً نهائياً: حي فرعي، أو منطقة بلا أحياء فرعية، أو مشروع."
-                        : "Select a leaf location: sub-district, a district with no sub-districts, or a project.",
-                    )}
-                  </p>
-                  <SearchableProjectSelect
-                    name="project"
-                    label={tr(
-                      "dashboard.requirementsDialog.fields.project",
-                      locale === "ar" ? "المشروع" : "Project",
-                    )}
-                    value={form.project}
-                    onChange={handleFieldChange}
-                    projects={projectsData || []}
-                    city={form.city || ""}
-                    district={form.district || ""}
-                    isLoading={projectsLoading}
-                    placeholder={
-                      t?.unitsFilter?.allCompounds ||
-                      (locale === "ar" ? "اختر المشروع" : "Select project")
-                    }
-                    className={dropdownClassName}
-                  />
-                </>
+                <p className="text-xs text-gray-500 -mt-1">
+                  {tr(
+                    "basicDetails.locationSearchHint",
+                    locale === "ar"
+                      ? "اختر موقعاً نهائياً: حي فرعي، أو منطقة بلا أحياء فرعية، أو مشروع."
+                      : "Select a leaf location: sub-district, a district with no sub-districts, or a project.",
+                  )}
+                </p>
               ) : null}
+              <SearchableProjectSelect
+                name="project"
+                label={tr(
+                  compact
+                    ? "lenaqar.buyRequest.project"
+                    : "dashboard.requirementsDialog.fields.project",
+                  locale === "ar" ? "المشروع" : "Project",
+                )}
+                value={form.project}
+                onChange={handleFieldChange}
+                projects={projectOptions || []}
+                city={form.city || ""}
+                district={form.district || ""}
+                isLoading={projectsListLoading}
+                placeholder={
+                  compact
+                    ? tr(
+                        "lenaqar.buyRequest.selectProject",
+                        locale === "ar" ? "اختياري — اختر المشروع" : "Optional — select project",
+                      )
+                    : t?.unitsFilter?.allCompounds ||
+                      (locale === "ar" ? "اختر المشروع" : "Select project")
+                }
+                className={dropdownClassName}
+              />
             </div>
           </section>
 
           {/* Property */}
-          {!compact ? (
           <section className="space-y-3">
             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
               {tr(
-                "dashboard.requirementsDialog.sections.property",
+                compact
+                  ? "lenaqar.buyRequest.propertySection"
+                  : "dashboard.requirementsDialog.sections.property",
                 locale === "ar" ? "العقار" : "Property",
               )}
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {!compact ? (
               <div>
                 <label className="text-xs font-medium text-gray-600">
                   {tr(
@@ -684,26 +761,54 @@ export default function EditRequirementDialog({
                   ))}
                 </select>
               </div>
-              <div>
-                <label className="text-xs font-medium text-gray-600">
-                  {tr(
-                    "dashboard.requirementsDialog.fields.buildingType",
-                    locale === "ar" ? "نوع العقار" : "Building Type",
+              ) : null}
+              <SearchableDropdownSelect
+                name="buildingType"
+                label={tr(
+                  compact
+                    ? "lenaqar.buyRequest.buildingType"
+                    : "dashboard.requirementsDialog.fields.buildingType",
+                  locale === "ar" ? "نوع الوحدة" : "Property type",
+                )}
+                value={form.buildingType}
+                onChange={(e) => set("buildingType", e.target.value)}
+                required={compact}
+                error={Boolean(compact && compactError("buildingType"))}
+                errorMessage={compact ? compactError("buildingType") : ""}
+                options={buildingTypeOptions}
+                getValue={(opt) => opt.value}
+                getLabel={(opt) => opt.label}
+                placeholder={
+                  compact
+                    ? tr(
+                        "lenaqar.sellRequest.selectType",
+                        locale === "ar" ? "اختر النوع" : "Select type",
+                      )
+                    : notSpecifiedLabel
+                }
+                searchPlaceholder={tr(
+                  "lenaqar.sellRequest.selectType",
+                  locale === "ar" ? "ابحث عن النوع…" : "Search type…",
+                )}
+                className={dropdownClassName}
+              />
+              {compact ? (
+                <LenaTextField
+                  name="roomsCount"
+                  type="number"
+                  min="1"
+                  step="1"
+                  label={tr(
+                    "lenaqar.buyRequest.roomsCount",
+                    locale === "ar" ? "عدد الغرف" : "Rooms",
                   )}
-                </label>
-                <select
-                  className={inputClassName}
-                  value={form.buildingType}
-                  onChange={(e) => set("buildingType", e.target.value)}
-                >
-                  <option value="">{notSpecifiedLabel}</option>
-                  {BUILDING_TYPE_VALUES.map((v) => (
-                    <option key={v} value={v}>
-                      {getBuildingTypeLabel(v)}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  value={form.roomsCount}
+                  onChange={(e) => set("roomsCount", e.target.value)}
+                  error={Boolean(compactError("roomsCount"))}
+                  errorMessage={compactError("roomsCount")}
+                />
+              ) : (
+              <>
               <div>
                 <label className="text-xs font-medium text-gray-600">
                   {tr(
@@ -744,9 +849,10 @@ export default function EditRequirementDialog({
                   ))}
                 </select>
               </div>
+              </>
+              )}
             </div>
           </section>
-          ) : null}
 
           {/* Size */}
           {!compact ? (
@@ -803,17 +909,73 @@ export default function EditRequirementDialog({
             </h4>
 
             {compact ? (
-              <LenaTextField
-                name="max_price"
-                type="money"
-                label={tr(
-                  "lenaqar.buyRequest.budgetLabel",
-                  locale === "ar" ? "الميزانية" : "Budget",
-                )}
-                value={form.max_price}
-                onChange={handlePriceChange}
-                adornment="EGP"
-              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <LenaTextField
+                  name="max_price"
+                  type="money"
+                  required
+                  label={tr(
+                    "lenaqar.buyRequest.maxPrice",
+                    locale === "ar" ? "أقصى سعر" : "Max price",
+                  )}
+                  value={form.max_price}
+                  onChange={handlePriceChange}
+                  adornment="EGP"
+                  error={Boolean(compactError("max_price"))}
+                  errorMessage={compactError("max_price")}
+                />
+                <LenaTextField
+                  name="downPayment"
+                  type="money"
+                  label={tr(
+                    "lenaqar.buyRequest.downPayment",
+                    locale === "ar" ? "المقدم" : "Down payment",
+                  )}
+                  value={form.downPayment}
+                  onChange={handlePriceChange}
+                  adornment="EGP"
+                  error={Boolean(compactError("downPayment"))}
+                  errorMessage={compactError("downPayment")}
+                />
+                <LenaTextField
+                  name="monthlyInstallment"
+                  type="money"
+                  label={tr(
+                    "lenaqar.buyRequest.monthlyInstallment",
+                    locale === "ar" ? "القسط الشهري" : "Monthly installment",
+                  )}
+                  value={form.monthlyInstallment}
+                  onChange={handlePriceChange}
+                  adornment="EGP"
+                  error={Boolean(compactError("monthlyInstallment"))}
+                  errorMessage={compactError("monthlyInstallment")}
+                />
+                <LenaTextField
+                  name="overPrice"
+                  type="money"
+                  label={tr(
+                    "lenaqar.buyRequest.overPrice",
+                    locale === "ar" ? "الأوفر" : "Over-price",
+                  )}
+                  value={form.overPrice}
+                  onChange={handlePriceChange}
+                  adornment="EGP"
+                  error={Boolean(compactError("overPrice"))}
+                  errorMessage={compactError("overPrice")}
+                />
+                <LenaTextField
+                  name="deliveryDate"
+                  type="month"
+                  label={tr(
+                    "lenaqar.buyRequest.deliveryDate",
+                    locale === "ar" ? "تاريخ التسليم" : "Delivery date",
+                  )}
+                  value={form.deliveryDate}
+                  onChange={(e) => set("deliveryDate", e.target.value)}
+                  error={Boolean(compactError("deliveryDate"))}
+                  errorMessage={compactError("deliveryDate")}
+                />
+              </div>
             ) : (
               <>
                 {!purposeKey && (
@@ -859,6 +1021,28 @@ export default function EditRequirementDialog({
                         locale === "ar" ? "المقدم" : "Down payment",
                       )}
                       value={form.downPayment}
+                      onChange={handlePriceChange}
+                      adornment="EGP"
+                    />
+                    <LenaTextField
+                      name="totalPrice"
+                      type="money"
+                      label={tr(
+                        "dashboard.requirementsDialog.fields.totalPrice",
+                        locale === "ar" ? "سعر العقد" : "Contract price",
+                      )}
+                      value={form.totalPrice}
+                      onChange={handlePriceChange}
+                      adornment="EGP"
+                    />
+                    <LenaTextField
+                      name="monthlyInstallment"
+                      type="money"
+                      label={tr(
+                        "dashboard.requirementsDialog.fields.monthly",
+                        locale === "ar" ? "القسط الشهري" : "Monthly installment",
+                      )}
+                      value={form.monthlyInstallment}
                       onChange={handlePriceChange}
                       adornment="EGP"
                     />

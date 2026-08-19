@@ -31,10 +31,21 @@ function authConfig(token) {
   return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 }
 
-async function fetchChildren(locationId, authToken) {
+/**
+ * Path prefix for the location tree. The `/public/*` variant needs no bearer
+ * token — axiosInstance's request interceptor attaches X-API-Key to any
+ * `/public/*` URL automatically (see src/utils/axiosInstance.js).
+ */
+function locationsBasePath(usePublicEndpoint) {
+  return usePublicEndpoint
+    ? "/public/v1/market-index/locations"
+    : "/market-index/locations";
+}
+
+async function fetchChildren(locationId, authToken, usePublicEndpoint) {
   const res = await axiosInstance.get(
-    `/market-index/locations/${encodeURIComponent(locationId)}/children`,
-    authConfig(authToken),
+    `${locationsBasePath(usePublicEndpoint)}/${encodeURIComponent(locationId)}/children`,
+    usePublicEndpoint ? {} : authConfig(authToken),
   );
   return unwrapLocations(res);
 }
@@ -72,11 +83,11 @@ async function mapPool(items, concurrency, worker) {
  * @param {object} node
  * @returns {Promise<object[]>}
  */
-async function collectSubDistrictsFlat(node, authToken) {
+async function collectSubDistrictsFlat(node, authToken, usePublicEndpoint) {
   const childCount = node?.children_count ?? 0;
   if (node?.is_leaf === true && childCount <= 0) return [];
 
-  const children = await fetchChildren(node.id, authToken);
+  const children = await fetchChildren(node.id, authToken, usePublicEndpoint);
   const flat = [];
 
   for (const child of children) {
@@ -87,7 +98,7 @@ async function collectSubDistrictsFlat(node, authToken) {
     });
     const nestedCount = child.children_count ?? 0;
     if (child.is_leaf === false || nestedCount > 0) {
-      const nested = await collectSubDistrictsFlat(child, authToken);
+      const nested = await collectSubDistrictsFlat(child, authToken, usePublicEndpoint);
       flat.push(...nested);
     }
   }
@@ -98,10 +109,10 @@ async function collectSubDistrictsFlat(node, authToken) {
 /**
  * @returns {Promise<{ cities: object[], fetchedAt: string, source: string, count: object }>}
  */
-async function buildLocationsCatalog(authToken) {
+async function buildLocationsCatalog(authToken, usePublicEndpoint) {
   const rootsRes = await axiosInstance.get(
-    "/market-index/locations/roots",
-    authConfig(authToken),
+    `${locationsBasePath(usePublicEndpoint)}/roots`,
+    usePublicEndpoint ? {} : authConfig(authToken),
   );
   const cities = unwrapLocations(rootsRes);
 
@@ -109,7 +120,7 @@ async function buildLocationsCatalog(authToken) {
     cities,
     LOCATIONS_CATALOG_CONCURRENCY,
     async (city) => {
-      const districts = await fetchChildren(city.id, authToken);
+      const districts = await fetchChildren(city.id, authToken, usePublicEndpoint);
       const districtNodes = await mapPool(
         districts,
         LOCATIONS_CATALOG_CONCURRENCY,
@@ -118,7 +129,7 @@ async function buildLocationsCatalog(authToken) {
           const sub_districts =
             district.is_leaf === true && childCount <= 0
               ? []
-              : await collectSubDistrictsFlat(district, authToken);
+              : await collectSubDistrictsFlat(district, authToken, usePublicEndpoint);
 
           return {
             en_name: district.en_name,
@@ -186,18 +197,23 @@ export function clearLocationsCatalogCache() {
 }
 
 /**
- * Returns the catalog, building once per TTL window (shared across requests/users).
- * Requires an authenticated server request context (Bearer via axios cookies),
- * or an explicit `authToken` (LenaQar public buy-request location picker).
+ * Returns the catalog, building once per TTL window (shared across requests/users
+ * and reused regardless of which caller warmed it — the underlying data is the
+ * same tree either way).
+ *
+ * Requires either an authenticated server request context (Bearer via axios
+ * cookies), an explicit `authToken`, or `usePublicEndpoint: true` to fetch via
+ * the anonymous, API-key-only `/public/v1/market-index/locations/*` routes
+ * (no login needed — see src/utils/axiosInstance.js's X-API-Key auto-attach).
  */
-export async function getLocationsCatalog({ force = false, authToken } = {}) {
+export async function getLocationsCatalog({ force = false, authToken, usePublicEndpoint = false } = {}) {
   if (!force) {
     const hit = peekLocationsCatalogCache();
     if (hit) return hit;
     if (cache.promise) return cache.promise;
   }
 
-  cache.promise = buildLocationsCatalog(authToken)
+  cache.promise = buildLocationsCatalog(authToken, usePublicEndpoint)
     .then((data) => {
       cache.data = data;
       cache.fetchedAt = Date.now();

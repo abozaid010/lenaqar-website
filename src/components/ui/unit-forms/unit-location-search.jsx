@@ -47,6 +47,9 @@ export default function UnitLocationSearch({
   errorMessage = "",
   disabled = false,
   isPublic = false,
+  /** auth = CRM names, feed = resale inventory, catalog = all public compounds */
+  projectSource,
+  hydrateSelectedProject,
   showHint = true,
   showHierarchySummary = true,
   showAllOption = false,
@@ -59,11 +62,15 @@ export default function UnitLocationSearch({
 }) {
   const { locale, translate } = useI18n();
   const cityManager = CityManager.getInstance();
+  const source = projectSource || (isPublic ? "feed" : "auth");
+  const shouldHydrateProject =
+    hydrateSelectedProject ?? source !== "feed";
+
   const { data: authProjects, isLoading: authProjectsLoading } = useProjectsNames(
     false,
-    { enabled: !isPublic },
+    { enabled: source === "auth" },
   );
-  const { data: publicProjects, isLoading: publicProjectsLoading } = useQuery({
+  const { data: feedProjects, isLoading: feedProjectsLoading } = useQuery({
     queryKey: ["lenaqar", "project-names"],
     queryFn: async () => {
       const response = await fetch("/api/lenaqar/project-names");
@@ -72,12 +79,35 @@ export default function UnitLocationSearch({
       const rows = json?.data ?? json;
       return Array.isArray(rows) ? rows : [];
     },
-    enabled: isPublic,
+    enabled: source === "feed",
     staleTime: 1000 * 60 * 5,
     retry: 1,
   });
-  const projectsData = isPublic ? publicProjects : authProjects;
-  const projectsLoading = isPublic ? publicProjectsLoading : authProjectsLoading;
+  const { data: catalogProjects, isLoading: catalogProjectsLoading } = useQuery({
+    queryKey: ["lenaqar", "catalog-projects"],
+    queryFn: async () => {
+      const response = await fetch("/api/lenaqar/catalog-projects");
+      if (!response.ok) return [];
+      const json = await response.json();
+      const rows = json?.data ?? json;
+      return Array.isArray(rows) ? rows : [];
+    },
+    enabled: source === "catalog",
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
+  const projectsData =
+    source === "catalog"
+      ? catalogProjects
+      : source === "feed"
+        ? feedProjects
+        : authProjects;
+  const projectsLoading =
+    source === "catalog"
+      ? catalogProjectsLoading
+      : source === "feed"
+        ? feedProjectsLoading
+        : authProjectsLoading;
 
   const [geoLoading, setGeoLoading] = useState(true);
   const [cities, setCities] = useState([]);
@@ -219,7 +249,16 @@ export default function UnitLocationSearch({
       const label = labelFor(enName, project.ar_name);
       const path = joinPath([city, district, sub]);
       const searchText = normalizeQuery(
-        [enName, project.ar_name, city, district, sub, project.id]
+        [
+          enName,
+          project.ar_name,
+          city,
+          district,
+          sub,
+          project.id,
+          project.developer,
+          project.developer_name,
+        ]
           .filter(Boolean)
           .join(" "),
       );
@@ -307,10 +346,10 @@ export default function UnitLocationSearch({
     if (opt.kind === "project") {
       const proj = opt.payload.project;
       onSelectProject?.(proj);
-      if (!isPublic && proj?.id) {
+      if (shouldHydrateProject && proj?.id) {
         setFetchingProject(true);
         try {
-          const res = await fetchProjectById(proj.id, false);
+          const res = await fetchProjectById(proj.id, isPublic);
           if (res?.data) onSelectProject?.(res.data, { full: true });
         } catch {
           // Location already applied from list item; developer fill is best-effort.
