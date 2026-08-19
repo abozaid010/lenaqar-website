@@ -6,7 +6,7 @@ export default function BreadcrumbSchema({ items = [] }) {
     {
       "@type": "ListItem",
       position: 1,
-      name: "Home",
+      name: "الرئيسية",
       item: SITE_URL,
     },
     ...items.map((item, index) => ({

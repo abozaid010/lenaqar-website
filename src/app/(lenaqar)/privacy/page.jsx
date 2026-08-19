@@ -2,7 +2,7 @@ import { SITE } from "@/config/site";
 import PrivacyPageContent from "./privacy-page-content";
 
 export const metadata = {
-  title: "سياسة الخصوصية والشروط والأحكام | لينا عقار",
+  title: "سياسة الخصوصية والشروط والأحكام",
   description:
     "شروط الخدمة على لينا عقار: طبيعة الوساطة، العمولة، حدود المسؤولية، التعامل مع الملّاك فقط، وخطة الخروج خلال 45 يوم للوحدات المعتمدة من الفريق.",
   openGraph: {

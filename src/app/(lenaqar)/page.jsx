@@ -5,11 +5,13 @@ import HomeContent from "@/components/lenaqar/home-content";
 export const revalidate = 900;
 
 export const metadata = {
-  title: "لينا عقار | اخرج من وحدتك أسرع وبفلوس أكتر",
+  // `absolute` opts out of the root layout's "%s | لينا عقار" template so the
+  // brand is not repeated on the one title that already leads with it.
+  title: { absolute: "لينا عقار | عقارات ريسيل وتنازل عن وحدات التقسيط في مصر" },
   description:
-    "مش قادر تكمّل أقساطك؟ بنعرض وحدتك على مشترين جاهزين ونتفق معاك على السعر باتفاق مكتوب. من غير مضايقات، ومن غير أوفر مضاف عليك.",
+    "وحدات ريسيل وعقود قديمة وفرص من المطور — اشتري بسعر التعاقد القديم. ولو مش قادر تكمّل أقساطك، بنعرض وحدتك على مشترين جاهزين باتفاق مكتوب.",
   openGraph: {
-    title: "لينا عقار | اخرج من وحدتك أسرع وبفلوس أكتر",
+    title: "لينا عقار | عقارات ريسيل وتنازل عن وحدات التقسيط في مصر",
     description:
       "مش قادر تكمّل أقساطك؟ بنعرض وحدتك على مشترين جاهزين ونتفق معاك على السعر باتفاق مكتوب. من غير مضايقات، ومن غير أوفر مضاف عليك.",
     url: SITE.url,

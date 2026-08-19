@@ -1,19 +1,16 @@
 import { SITE_URL, SITE_NAME } from "@/app/metadata";
 
 export default function WebSiteSchema() {
+  // No sitewide free-text search exists: /opportunities filters on named params
+  // (area, cash, delivery, project, bedrooms...) and ignores `q`. A SearchAction
+  // is only declared once there is a query endpoint that actually answers it.
   const schema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     url: SITE_URL,
     name: SITE_NAME,
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${SITE_URL}/opportunities?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
-    },
+    inLanguage: "ar-EG",
+    publisher: { "@id": `${SITE_URL}/#organization` },
   };
 
   return (

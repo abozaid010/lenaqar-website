@@ -1,6 +1,10 @@
 import { notFound } from "next/navigation";
 import { SITE } from "@/config/site";
 import { fetchOpportunities, fetchOpportunityByCode } from "@/lib/lenaqar/opportunities.server";
+import {
+  buildListingDescription,
+  buildListingHeadline,
+} from "@/lib/lenaqar/listing-seo";
 import OpportunityDetailContent from "./opportunity-detail-content";
 
 export const revalidate = 900;
@@ -21,10 +25,11 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const unit = await fetchOpportunityByCode(slug);
-  const project = unit?.projectAr || unit?.project || slug;
-  const title = `${project} | فرصة كاش من لينا عقار`;
+  const title = unit
+    ? buildListingHeadline(unit)
+    : "الوحدة غير متاحة";
   const description = unit
-    ? `وحدة في ${project} من ${unit.developerAr || unit.developer || "المطور"}. الكاش المطلوب والتفاصيل من سعر المطور بتاريخه — من غير تقدير.`
+    ? buildListingDescription(unit)
     : "تفاصيل الوحدة غير متاحة حالياً على لينا عقار. راجع قائمة الفرص أو تواصل معنا على واتساب.";
 
   return {
