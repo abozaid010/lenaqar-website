@@ -18,15 +18,25 @@ export default function WhatsAppCta({
 }) {
   const { trackEvent } = useGoogleAnalytics();
 
+  function handleClick(event) {
+    if (eventName) trackEvent(eventName);
+    trackMetaContact();
+    if (!href || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      return;
+    }
+    const opened = window.open(href, "_blank", "noopener,noreferrer");
+    if (opened) {
+      event.preventDefault();
+      opened.opener = null;
+    }
+  }
+
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      onClick={() => {
-        if (eventName) trackEvent(eventName);
-        trackMetaContact();
-      }}
+      onClick={handleClick}
       className={`${variant === "primary" ? PRIMARY_CLASS : WHATSAPP_CLASS} ${className}`}
     >
       {children}

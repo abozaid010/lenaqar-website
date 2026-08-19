@@ -188,6 +188,9 @@ export default function EditRequirementDialog({
   initialValues,
   showContactFields = false,
   fetchProjects = true,
+  /** Public LenaQar buy-request only: name, phone, location, budget — no purpose
+   * selector (forced buy), no property/size/notes sections, no project picker. */
+  compact = false,
   overlayClassName,
   loadRequirement = getClientRequirements,
   saveRequirement = updateUserRequirements,
@@ -614,36 +617,41 @@ export default function EditRequirementDialog({
                 )}
                 className={dropdownClassName}
               />
-              <p className="text-xs text-gray-500 -mt-1">
-                {tr(
-                  "basicDetails.locationSearchHint",
-                  locale === "ar"
-                    ? "اختر موقعاً نهائياً: حي فرعي، أو منطقة بلا أحياء فرعية، أو مشروع."
-                    : "Select a leaf location: sub-district, a district with no sub-districts, or a project.",
-                )}
-              </p>
-              <SearchableProjectSelect
-                name="project"
-                label={tr(
-                  "dashboard.requirementsDialog.fields.project",
-                  locale === "ar" ? "المشروع" : "Project",
-                )}
-                value={form.project}
-                onChange={handleFieldChange}
-                projects={projectsData || []}
-                city={form.city || ""}
-                district={form.district || ""}
-                isLoading={projectsLoading}
-                placeholder={
-                  t?.unitsFilter?.allCompounds ||
-                  (locale === "ar" ? "اختر المشروع" : "Select project")
-                }
-                className={dropdownClassName}
-              />
+              {!compact ? (
+                <>
+                  <p className="text-xs text-gray-500 -mt-1">
+                    {tr(
+                      "basicDetails.locationSearchHint",
+                      locale === "ar"
+                        ? "اختر موقعاً نهائياً: حي فرعي، أو منطقة بلا أحياء فرعية، أو مشروع."
+                        : "Select a leaf location: sub-district, a district with no sub-districts, or a project.",
+                    )}
+                  </p>
+                  <SearchableProjectSelect
+                    name="project"
+                    label={tr(
+                      "dashboard.requirementsDialog.fields.project",
+                      locale === "ar" ? "المشروع" : "Project",
+                    )}
+                    value={form.project}
+                    onChange={handleFieldChange}
+                    projects={projectsData || []}
+                    city={form.city || ""}
+                    district={form.district || ""}
+                    isLoading={projectsLoading}
+                    placeholder={
+                      t?.unitsFilter?.allCompounds ||
+                      (locale === "ar" ? "اختر المشروع" : "Select project")
+                    }
+                    className={dropdownClassName}
+                  />
+                </>
+              ) : null}
             </div>
           </section>
 
           {/* Property */}
+          {!compact ? (
           <section className="space-y-3">
             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
               {tr(
@@ -738,8 +746,10 @@ export default function EditRequirementDialog({
               </div>
             </div>
           </section>
+          ) : null}
 
           {/* Size */}
+          {!compact ? (
           <section className="space-y-3">
             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
               {tr(
@@ -781,6 +791,7 @@ export default function EditRequirementDialog({
               />
             </div>
           </section>
+          ) : null}
 
           {/* Budget */}
           <section className="space-y-3">
@@ -791,87 +802,104 @@ export default function EditRequirementDialog({
               )}
             </h4>
 
-            {!purposeKey && (
-              <p className="text-xs text-gray-500">
-                {tr(
-                  "dashboard.requirementsDialog.pricing.selectPurpose",
-                  locale === "ar"
-                    ? "اختر الغرض أولاً لعرض حقول الميزانية"
-                    : "Select purpose first to show budget fields",
+            {compact ? (
+              <LenaTextField
+                name="max_price"
+                type="money"
+                label={tr(
+                  "lenaqar.buyRequest.budgetLabel",
+                  locale === "ar" ? "الميزانية" : "Budget",
                 )}
-              </p>
-            )}
+                value={form.max_price}
+                onChange={handlePriceChange}
+                adornment="EGP"
+              />
+            ) : (
+              <>
+                {!purposeKey && (
+                  <p className="text-xs text-gray-500">
+                    {tr(
+                      "dashboard.requirementsDialog.pricing.selectPurpose",
+                      locale === "ar"
+                        ? "اختر الغرض أولاً لعرض حقول الميزانية"
+                        : "Select purpose first to show budget fields",
+                    )}
+                  </p>
+                )}
 
-            {isBuyOrSell && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <LenaTextField
-                  name="min_price"
-                  type="money"
-                  label={tr(
-                    "dashboard.requirementsDialog.fields.minBudget",
-                    locale === "ar" ? "الحد الأدنى" : "Min budget",
-                  )}
-                  value={form.min_price}
-                  onChange={handlePriceChange}
-                  adornment="EGP"
-                />
-                <LenaTextField
-                  name="max_price"
-                  type="money"
-                  label={tr(
-                    "dashboard.requirementsDialog.fields.maxBudget",
-                    locale === "ar" ? "الحد الأقصى" : "Max budget",
-                  )}
-                  value={form.max_price}
-                  onChange={handlePriceChange}
-                  adornment="EGP"
-                />
-                <LenaTextField
-                  name="downPayment"
-                  type="money"
-                  label={tr(
-                    "dashboard.requirementsDialog.fields.downPayment",
-                    locale === "ar" ? "المقدم" : "Down payment",
-                  )}
-                  value={form.downPayment}
-                  onChange={handlePriceChange}
-                  adornment="EGP"
-                />
-              </div>
-            )}
+                {isBuyOrSell && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <LenaTextField
+                      name="min_price"
+                      type="money"
+                      label={tr(
+                        "dashboard.requirementsDialog.fields.minBudget",
+                        locale === "ar" ? "الحد الأدنى" : "Min budget",
+                      )}
+                      value={form.min_price}
+                      onChange={handlePriceChange}
+                      adornment="EGP"
+                    />
+                    <LenaTextField
+                      name="max_price"
+                      type="money"
+                      label={tr(
+                        "dashboard.requirementsDialog.fields.maxBudget",
+                        locale === "ar" ? "الحد الأقصى" : "Max budget",
+                      )}
+                      value={form.max_price}
+                      onChange={handlePriceChange}
+                      adornment="EGP"
+                    />
+                    <LenaTextField
+                      name="downPayment"
+                      type="money"
+                      label={tr(
+                        "dashboard.requirementsDialog.fields.downPayment",
+                        locale === "ar" ? "المقدم" : "Down payment",
+                      )}
+                      value={form.downPayment}
+                      onChange={handlePriceChange}
+                      adornment="EGP"
+                    />
+                  </div>
+                )}
 
-            {isRent && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <LenaTextField
-                  name="min_price"
-                  type="money"
-                  label={tr(
-                    "dashboard.requirementsDialog.fields.minMonthlyRent",
-                    locale === "ar"
-                      ? "أقل إيجار شهري"
-                      : "Min monthly rent",
-                  )}
-                  value={form.min_price}
-                  onChange={handlePriceChange}
-                  adornment="EGP"
-                />
-                <LenaTextField
-                  name="max_price"
-                  type="money"
-                  label={tr(
-                    "dashboard.requirementsDialog.fields.maxMonthlyRent",
-                    locale === "ar"
-                      ? "أقصى إيجار شهري"
-                      : "Max monthly rent",
-                  )}
-                  value={form.max_price}
-                  onChange={handlePriceChange}
-                  adornment="EGP"
-                />
-              </div>
+                {isRent && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <LenaTextField
+                      name="min_price"
+                      type="money"
+                      label={tr(
+                        "dashboard.requirementsDialog.fields.minMonthlyRent",
+                        locale === "ar"
+                          ? "أقل إيجار شهري"
+                          : "Min monthly rent",
+                      )}
+                      value={form.min_price}
+                      onChange={handlePriceChange}
+                      adornment="EGP"
+                    />
+                    <LenaTextField
+                      name="max_price"
+                      type="money"
+                      label={tr(
+                        "dashboard.requirementsDialog.fields.maxMonthlyRent",
+                        locale === "ar"
+                          ? "أقصى إيجار شهري"
+                          : "Max monthly rent",
+                      )}
+                      value={form.max_price}
+                      onChange={handlePriceChange}
+                      adornment="EGP"
+                    />
+                  </div>
+                )}
+              </>
             )}
           </section>
 
+          {!compact ? (
           <section className="space-y-3">
             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
               {tr(
@@ -897,6 +925,7 @@ export default function EditRequirementDialog({
               className="text-sm"
             />
           </section>
+          ) : null}
         </>
       )}
     </UnifiedDialog>

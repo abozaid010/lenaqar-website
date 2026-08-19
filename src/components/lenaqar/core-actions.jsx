@@ -1,10 +1,8 @@
 "use client";
 
 import { useI18n } from "@/hooks/useI18n";
-import AddUnitButton from "@/components/ui/unit-forms/add-unit-button";
+import PublicSellCta from "./public-sell-cta";
 import BuyRequestCta from "./buy-request-cta";
-
-const SELL_UNIT_PREFILL = { purpose: "sell" };
 
 export default function CoreActions({
   className = "",
@@ -23,14 +21,12 @@ export default function CoreActions({
   const itemClass = compact ? "" : isRow ? "flex-1" : "w-full sm:flex-1";
 
   const sell = showSell ? (
-    <AddUnitButton
+    <PublicSellCta
       key="sell"
       label={translate("lenaqar.actions.sellUnit", "Sell Unit")}
       variant={emphasis === "sell" ? "primary" : "secondary"}
       tone={tone}
       size={size}
-      showIcon={false}
-      unitData={SELL_UNIT_PREFILL}
       className={itemClass}
     />
   ) : null;

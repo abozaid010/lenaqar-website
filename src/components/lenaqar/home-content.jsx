@@ -9,6 +9,7 @@ import ComparisonBlock from "./comparison-block";
 import NetworkStrip from "./network-strip";
 import OpportunityCard from "./opportunity-card";
 import CoreActions from "./core-actions";
+import OpportunitiesEmpty from "./opportunities-empty";
 
 export default function HomeContent({ units = [] }) {
   const { translate } = useI18n();
@@ -23,7 +24,6 @@ export default function HomeContent({ units = [] }) {
         <p className="mt-4 text-base sm:text-lg text-black/70 max-w-2xl">
           {translate("lenaqar.home.heroSub")}
         </p>
-        <CoreActions className="mt-6" anchor />
         <p className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm">
           <Link
             href="/calculator"
@@ -41,6 +41,16 @@ export default function HomeContent({ units = [] }) {
       </section>
 
       <ComparisonBlock />
+
+      <section className="container py-8">
+        <h2 className="text-xl font-bold text-primary mb-2">
+          {translate("lenaqar.actions.title")}
+        </h2>
+        <p className="text-sm text-black/70 mb-4">
+          {translate("lenaqar.actions.sub")}
+        </p>
+        <CoreActions anchor />
+      </section>
 
       <section className="container py-10">
         <h2 className="text-xl font-bold text-primary mb-6">
@@ -72,6 +82,17 @@ export default function HomeContent({ units = [] }) {
         </div>
       </section>
 
+      <section className="container py-8">
+        <h2 className="text-xl font-bold text-primary mb-4">
+          {translate("lenaqar.home.whyTitle")}
+        </h2>
+        <ul className="space-y-3 text-black/80">
+          <li>{translate("lenaqar.home.why1")}</li>
+          <li>{translate("lenaqar.home.why2")}</li>
+          <li>{translate("lenaqar.home.why3")}</li>
+        </ul>
+      </section>
+
       <NetworkStrip />
 
       <section className="container py-10">
@@ -98,23 +119,8 @@ export default function HomeContent({ units = [] }) {
             </div>
           </>
         ) : (
-          <div className="rounded-lg border border-black/10 bg-white p-6">
-            <p className="text-black/70">
-              {translate("lenaqar.opportunities.empty")}
-            </p>
-          </div>
+          <OpportunitiesEmpty />
         )}
-      </section>
-
-      <section className="container py-10">
-        <h2 className="text-xl font-bold text-primary mb-4">
-          {translate("lenaqar.home.whyTitle")}
-        </h2>
-        <ul className="space-y-3 text-black/80">
-          <li>{translate("lenaqar.home.why1")}</li>
-          <li>{translate("lenaqar.home.why2")}</li>
-          <li>{translate("lenaqar.home.why3")}</li>
-        </ul>
       </section>
 
       <section className="container py-10 pb-24 lg:pb-10">

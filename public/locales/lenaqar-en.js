@@ -80,6 +80,7 @@ export default {
   },
   comparison: {
     title: "Illustrative example — not a price offer",
+    unitPrice: "Unit price",
     cancelTitle: "If you cancel with the developer",
     sellTitle: "If you sell through us",
     cancelPenalty: "Cancellation deduction",
@@ -169,6 +170,7 @@ export default {
     phone: "Mobile",
     nameRequired: "Name is required",
     phoneRequired: "Mobile number is required",
+    budgetLabel: "Budget",
     loadFailed: "We can't load your request right now.",
     saveFailed: "We can't save the request right now. Try again.",
     errors: {
@@ -178,6 +180,22 @@ export default {
       tenant_login_failed: "Saving requests is unavailable right now.",
       rate_limited: "Too many requests in a short time. Try again later.",
       contact_required: "Name and mobile number are required.",
+    },
+  },
+  sellRequest: {
+    title: "Your unit details",
+    intro: "Fill in these details — our team will review and reach out.",
+    location: "Location",
+    developer: "Developer",
+    buildingType: "Property type",
+    selectType: "Select type",
+    landArea: "Area (sqm)",
+    submit: "Submit unit",
+    saved: "We received your unit. Our team will review it and reach out.",
+    saveFailed: "We can't save the request right now. Try again.",
+    errors: {
+      save_failed: "We can't save the request right now. Try again.",
+      rate_limited: "Too many requests in a short time. Try again later.",
     },
   },
 };

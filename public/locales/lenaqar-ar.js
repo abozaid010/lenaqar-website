@@ -81,6 +81,7 @@ export default {
   },
   comparison: {
     title: "مثال توضيحي — مش عرض سعر",
+    unitPrice: "سعر الوحدة",
     cancelTitle: "لو ألغيت مع المطور",
     sellTitle: "لو بعت من خلالنا",
     cancelPenalty: "خصم الإلغاء",
@@ -170,6 +171,7 @@ export default {
     phone: "موبايل",
     nameRequired: "الاسم مطلوب",
     phoneRequired: "رقم الموبايل مطلوب",
+    budgetLabel: "الميزانية",
     loadFailed: "مش قادرين نحمّل طلبك دلوقتي.",
     saveFailed: "مش قادرين نحفظ الطلب دلوقتي. جرّب تاني.",
     errors: {
@@ -179,6 +181,22 @@ export default {
       tenant_login_failed: "حفظ الطلب غير متاح حالياً.",
       rate_limited: "طلبات كتير في وقت قصير. حاول بعد شوية.",
       contact_required: "الاسم ورقم الموبايل مطلوبين.",
+    },
+  },
+  sellRequest: {
+    title: "بيانات وحدتك",
+    intro: "املا البيانات دي، وفريقنا يراجع الطلب ويتواصل معاك.",
+    location: "الموقع",
+    developer: "المطور",
+    buildingType: "نوع الوحدة",
+    selectType: "اختر النوع",
+    landArea: "المساحة (م²)",
+    submit: "ابعت الوحدة",
+    saved: "تم استلام بيانات وحدتك. فريقنا هيراجعها ويتواصل معاك.",
+    saveFailed: "مش قادرين نحفظ الطلب دلوقتي. جرّب تاني.",
+    errors: {
+      save_failed: "مش قادرين نحفظ الطلب دلوقتي. جرّب تاني.",
+      rate_limited: "طلبات كتير في وقت قصير. حاول بعد شوية.",
     },
   },
 };

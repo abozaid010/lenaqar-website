@@ -18,9 +18,13 @@ export default function ComparisonBlock() {
 
   return (
     <section className="container py-10">
-      <h2 className="text-xl font-bold text-primary mb-6">
+      <h2 className="text-xl font-bold text-primary mb-2">
         {translate("lenaqar.comparison.title")}
       </h2>
+      <p className="text-sm text-black/60 mb-6">
+        {translate("lenaqar.comparison.unitPrice")}:{" "}
+        <EgpAmount value={result.unitPrice} translate={translate} />
+      </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <article className="rounded-lg border border-black/10 p-5 bg-white">
           <h3 className="font-semibold mb-4">

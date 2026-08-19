@@ -6,7 +6,7 @@ import { ANALYTICS } from "@/constants/analytics";
 import ComparisonBlock from "@/components/lenaqar/comparison-block";
 import NetworkStrip from "@/components/lenaqar/network-strip";
 import WhatsAppCta from "@/components/lenaqar/whatsapp-cta";
-import AddUnitButton from "@/components/ui/unit-forms/add-unit-button";
+import PublicSellCta from "@/components/lenaqar/public-sell-cta";
 
 export default function SellPageContent() {
   const { translate } = useI18n();
@@ -59,10 +59,8 @@ export default function SellPageContent() {
 
       <section className="container py-10 pb-24 lg:pb-10">
         <div className="flex flex-col gap-2 max-w-md">
-          <AddUnitButton
+          <PublicSellCta
             label={translate("lenaqar.actions.sellUnit", "Sell Unit")}
-            showIcon={false}
-            unitData={{ purpose: "sell" }}
             className="w-full"
           />
           <WhatsAppCta

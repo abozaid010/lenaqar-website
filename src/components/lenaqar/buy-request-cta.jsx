@@ -146,6 +146,7 @@ export default function BuyRequestCta({
         initialValues={{ purpose: "buy", ...(initialValues || {}) }}
         showContactFields={!userId}
         fetchProjects={false}
+        compact
         overlayClassName="!z-[70]"
         loadRequirement={loadRequirement}
         saveRequirement={saveRequirement}
