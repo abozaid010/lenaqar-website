@@ -3,7 +3,7 @@ import { SITE_URL } from './metadata';
 import { SITE } from '@/config/site';
 
 export default function robots(): MetadataRoute.Robots {
-  const allow = ['/', '/sell', '/calculator'];
+  const allow = ['/', '/sell', '/calculator', '/privacy'];
   if (SITE.feed.enabled) {
     allow.push('/opportunities', '/opportunities/*');
   }

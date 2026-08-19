@@ -14,6 +14,7 @@ import { parseAmount, parseMoneyInput } from "@/utils/parse-amount";
 import { PhoneField } from "@/components/phone/PhoneField";
 import { submitPublicSellUnit } from "@/app/(lenaqar)/_actions/add-sale";
 import { actionButtonClass } from "@/components/ui/action-button-class";
+import ActionButtonArrow from "@/components/ui/action-button-arrow";
 
 const EMPTY_FORM = {
   ownerName: "",
@@ -141,6 +142,7 @@ export default function PublicSellCta({
         onClick={() => setOpen(true)}
       >
         {label || translate("lenaqar.actions.sellUnit", "Sell Unit")}
+        <ActionButtonArrow size={size} />
       </button>
       <UnifiedDialog
         isOpen={open}

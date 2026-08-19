@@ -6,6 +6,8 @@ import { sellerCtaHref } from "@/lib/lenaqar/whatsapp";
 import { ANALYTICS } from "@/constants/analytics";
 import WhatsAppCta from "./whatsapp-cta";
 import ComparisonBlock from "./comparison-block";
+import WhyUsBlock from "./why-us-block";
+import CommissionBlock from "./commission-block";
 import NetworkStrip from "./network-strip";
 import OpportunityCard from "./opportunity-card";
 import CoreActions from "./core-actions";
@@ -39,6 +41,10 @@ export default function HomeContent({ units = [] }) {
       </div>
 
       <ComparisonBlock />
+
+      <WhyUsBlock />
+
+      <CommissionBlock />
 
       <section className="container py-10">
         <h2 className="text-xl font-bold text-primary mb-6">

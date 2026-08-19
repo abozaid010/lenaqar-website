@@ -26,7 +26,7 @@ export default {
     howStep4TitleBefore: "If it doesn't sell in ",
     howStep4TitleHighlight: "45 days, our lawyers take over",
     howStep4Body:
-      "We negotiate with the developer in your place. If we fail to sell, we work to get you the best value from the developer — you lose up to 7% only.",
+      "After written team approval: we negotiate in your place. If we fail to sell, we work to get you the best value from the developer — you lose up to 7% only. This guarantee does not cover every listed unit.",
     lenaTitle: "Lena replies in seconds, 24 hours, in Arabic",
     lenaCta: "Message Lena on WhatsApp",
     buyerTitle: "What can the cash you have buy today?",
@@ -91,6 +91,40 @@ export default {
     disclaimer:
       "This example is for illustration only. Deduction rates and refund schedules vary by contract and developer. Not a price offer, and not a timing promise.",
   },
+  whyUs: {
+    title: "What's the difference between us and ordinary resale?",
+    sub: "The market is full of listings and brokers — we work in a completely different way.",
+    ordinaryColumn: "Ordinary resale",
+    lenaqarColumn: "LenaQar",
+    priceLabel: "Price",
+    priceOrdinary: "Over-price on top, inflated to leave room for haggling",
+    priceLenaqar: "No over-price — the price is what was actually paid, backed by receipts",
+    numbersLabel: "The numbers",
+    numbersOrdinary: "Whatever the seller and the broker say, with no proof",
+    numbersLenaqar: "Contract, paid amount and remaining balance verified against official documents",
+    processLabel: "The process",
+    processOrdinary: "The broker introduces you, then you're on your own",
+    processLenaqar: "We walk every assignment step with you, through signing and payment",
+    commissionLabel: "Commission",
+    commissionOrdinary: "A cut from both sides at every step, with surprises",
+    commissionLenaqar: "Just 0.75% from each side — and only once the assignment completes",
+    exitLabel: "The exit",
+    exitOrdinary: "No known timeline — you can wait for months",
+    exitLenaqar: "A 45-day exit plan for team-approved units only — terms and conditions apply",
+    terms: "Terms and conditions apply.",
+  },
+  commission: {
+    title: "Our commission is clear — just 0.75% from each side",
+    sub: "No hidden over-price, and no commission before you get paid.",
+    sellerLabel: "On the seller",
+    buyerLabel: "On the buyer",
+    rate: "0.75%",
+    ofSalePrice: "of the sale price",
+    point1: "No upfront commission — not a pound before the assignment completes.",
+    point2: "No over-price added on top. The price you see is the price.",
+    point3: "The commission is written into the agreement before any step.",
+    note: "Commission is calculated on the final sale price and is due only once the assignment completes.",
+  },
   opportunities: {
     title: "What can the cash you have buy today?",
     sub: "Developer prices, dated, with a clear payment plan.",
@@ -150,7 +184,36 @@ export default {
     email: "Email",
     attribution: "From the Lena family",
     privacy: "Privacy policy",
+    terms: "Terms and conditions",
     nav: "Quick links",
+  },
+  privacy: {
+    title: "Terms and conditions",
+    draftNote:
+      "This wording is a draft and will be approved by legal counsel before official launch.",
+    natureTitle: "Nature of the service",
+    natureBody:
+      "LenaQar is a brokerage and transaction platform for assigning installment real-estate unit contracts. The platform is not a developer and is not a party to the original unit contract.",
+    estimatesTitle: "Estimates and figures",
+    estimatesBody:
+      "All figures and estimates shown before documents are verified are indicative, based on common market patterns, and are not a promise of outcome or legal advice. The final result depends on your actual contract and the developer's approval.",
+    commissionTitle: "Commission",
+    commissionBody:
+      "Platform commission is zero for the seller and 1.25% for the buyer, calculated on the assigned contract value. It is due only when the transfer completes successfully, and is disclosed before any commitment.",
+    liabilityTitle: "Limits of liability",
+    liabilityBody:
+      "The platform exercises due care in verifying documents and data, but developer approval of the transfer and the parties' decisions remain outside its control. The platform is not liable for decisions the parties take outside the scope of the service.",
+    ownersTitle: "Owners only — no real-estate brokers",
+    ownersBody:
+      "The platform deals exclusively with the unit owner. Real-estate brokers and agents may not register, list, or advertise units on the platform. By submitting a unit, the sender confirms they are the owner, not a broker. Any unit found to be submitted by a broker — or any breach of this policy — may be refused, removed, or permanently deleted without prior notice.",
+    guaranteeTitle: "45-day exit plan",
+    guaranteeBody:
+      "The 45-day exit plan applies only to units approved in writing by the LenaQar team after reviewing the contract and documents. The 45-day period starts from the date of that approval. Units listed on the platform without team approval — including units still under review — are not covered by this guarantee.",
+    dataTitle: "Privacy policy",
+    dataBody:
+      "We collect your name, mobile number, and unit or request details when you use our forms or contact us on WhatsApp, and we use them to process your request and reach you. We do not sell your data. We share only what is needed to complete the assignment with the relevant parties. You can ask us to delete your data via WhatsApp.",
+    appendNote:
+      "Figures and estimates shown on the platform are indicative and depend on the terms of each contract. They are not legal advice or a promise of a specific outcome. Final review is done on your actual contract with our team and qualified legal advisors.",
   },
   legal: {
     priceSource:
