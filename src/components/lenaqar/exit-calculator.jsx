@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { CheckCircle2 } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { ANALYTICS } from "@/constants/analytics";
@@ -119,7 +120,7 @@ export default function ExitCalculator() {
               <p className="text-xs text-black/60 mb-1">
                 {translate("lenaqar.calculator.penalty")} ({penaltyPct}%)
               </p>
-              <p className="mb-3">
+              <p className="mb-3 text-red-600 font-semibold">
                 <EgpAmount value={result.cancelPenalty} translate={translate} />
               </p>
               <p className="text-xs text-black/60 mb-1">
@@ -142,7 +143,8 @@ export default function ExitCalculator() {
               <p className="text-xs text-black/60 mb-1">
                 {translate("lenaqar.calculator.youGet")}
               </p>
-              <p className="text-2xl font-bold text-primary">
+              <p className="text-2xl font-bold text-emerald-700 flex items-center gap-1.5">
+                <CheckCircle2 className="size-6 shrink-0" aria-hidden="true" />
                 <EgpAmount value={result.sellThroughUs} translate={translate} />
               </p>
             </article>
