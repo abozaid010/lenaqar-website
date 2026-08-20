@@ -4,6 +4,7 @@ import { useCallback, useMemo } from "react";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { useI18n } from "@/hooks/useI18n";
 import { useLocationsGeo } from "@/hooks/use-locations-geo";
+import { placeAr } from "@/lib/lenaqar/listing-seo";
 
 function normalizeQuery(value) {
   return String(value || "")
@@ -67,8 +68,22 @@ export default function UnitsLocationSearch({
   const districts = geo?.districts ?? [];
   const subDistricts = geo?.subDistricts ?? [];
 
-  const labelFor = useCallback(
-    (en, ar) => (locale === "ar" ? ar || en : en || ar) || "",
+  const placeLabel = useCallback(
+    (en, ar, token) => {
+      if (locale === "ar") {
+        return (
+          (typeof ar === "string" && ar.trim()) ||
+          placeAr(token || en) ||
+          (typeof en === "string" && en.trim()) ||
+          ""
+        );
+      }
+      return (
+        (typeof en === "string" && en.trim()) ||
+        (typeof ar === "string" && ar.trim()) ||
+        ""
+      );
+    },
     [locale],
   );
 
@@ -76,7 +91,7 @@ export default function UnitsLocationSearch({
     const rows = [];
 
     for (const cityRow of cities) {
-      const optLabel = labelFor(cityRow.en_name, cityRow.ar_name);
+      const optLabel = placeLabel(cityRow.en_name, cityRow.ar_name, cityRow.value);
       const searchText = normalizeQuery(
         [cityRow.en_name, cityRow.ar_name, cityRow.value].filter(Boolean).join(" "),
       );
@@ -94,8 +109,16 @@ export default function UnitsLocationSearch({
 
     for (const districtRow of districts) {
       const cityValue = normalizeQuery(districtRow.city_en_name);
-      const optLabel = labelFor(districtRow.en_name, districtRow.ar_name);
-      const path = labelFor(districtRow.city_en_name, districtRow.city_ar_name);
+      const optLabel = placeLabel(
+        districtRow.en_name,
+        districtRow.ar_name,
+        districtRow.value,
+      );
+      const path = placeLabel(
+        districtRow.city_en_name,
+        districtRow.city_ar_name,
+        cityValue,
+      );
       const aliases = Array.isArray(districtRow.aliases) ? districtRow.aliases : [];
       const searchText = normalizeQuery(
         [districtRow.en_name, districtRow.ar_name, districtRow.value, path, ...aliases]
@@ -126,12 +149,13 @@ export default function UnitsLocationSearch({
           normalizeQuery(d.city_en_name) === cityValue &&
           normalizeQuery(d.value) === districtValue,
       );
-      const optLabel = labelFor(sub.en_name, sub.ar_name);
+      const optLabel = placeLabel(sub.en_name, sub.ar_name, sub.value);
       const path = joinPath([
-        labelFor(sub.city_en_name, sub.city_ar_name),
-        labelFor(
+        placeLabel(sub.city_en_name, sub.city_ar_name, cityValue),
+        placeLabel(
           districtMeta?.en_name || sub.district_value,
-          districtMeta?.ar_name || sub.district_value,
+          districtMeta?.ar_name,
+          districtValue,
         ),
       ]);
       const aliases = Array.isArray(sub.aliases) ? sub.aliases : [];
@@ -171,7 +195,7 @@ export default function UnitsLocationSearch({
       if (rank !== 0) return rank;
       return a.label.localeCompare(b.label, locale, { sensitivity: "base" });
     });
-  }, [cities, districts, subDistricts, labelFor, locale, translate]);
+  }, [cities, districts, subDistricts, placeLabel, locale, translate]);
 
   const selectedKey = useMemo(() => {
     const c = normalizeQuery(city);
@@ -186,7 +210,11 @@ export default function UnitsLocationSearch({
   const selectedSummary = useMemo(() => {
     const opt = options.find((row) => row.key === selectedKey);
     if (!opt) {
-      const fallback = joinPath([city, district, subDistrict].map(normalizeQuery));
+      const fallback = joinPath([
+        placeAr(city),
+        placeAr(district),
+        placeAr(subDistrict),
+      ]);
       return { title: fallback, path: "" };
     }
     return { title: opt.label, path: opt.path, kindLabel: opt.kindLabel };
@@ -246,48 +274,48 @@ export default function UnitsLocationSearch({
           "unitsFilter.locationSearchEmpty",
           locale === "ar" ? "مفيش مواقع مطابقة" : "No matching locations",
         )}
-      className={className}
-      buttonClassName={buttonClassName}
-      getValue={(opt) => opt.key}
-      getLabel={(opt) => opt.label}
-      getKey={(opt) => opt.key}
-      searchFields={(opt, query) => matchesBlob(opt.searchText, query)}
-      renderOption={(opt, _index, isSelected) => (
-        <div className="flex flex-col gap-0.5 min-w-0 text-start">
-          <div className="flex items-center gap-2 min-w-0">
-            <span
-              className={`text-sm font-medium truncate ${
-                isSelected ? "text-primary" : "text-gray-900"
-              }`}
-            >
-              {opt.label}
-            </span>
-            <span className="shrink-0 text-[10px] uppercase tracking-wide text-gray-400">
-              {opt.kindLabel}
-            </span>
+        className={className}
+        buttonClassName={buttonClassName}
+        getValue={(opt) => opt.key}
+        getLabel={(opt) => opt.label}
+        getKey={(opt) => opt.key}
+        searchFields={(opt, query) => matchesBlob(opt.searchText, query)}
+        renderOption={(opt, _index, isSelected) => (
+          <div className="flex flex-col gap-0.5 min-w-0 text-start">
+            <div className="flex items-center gap-2 min-w-0">
+              <span
+                className={`text-sm font-medium truncate ${
+                  isSelected ? "text-primary" : "text-gray-900"
+                }`}
+              >
+                {opt.label}
+              </span>
+              <span className="shrink-0 text-[10px] uppercase tracking-wide text-gray-400">
+                {opt.kindLabel}
+              </span>
+            </div>
+            {opt.path ? (
+              <span className="text-xs text-gray-500 truncate">{opt.path}</span>
+            ) : null}
           </div>
-          {opt.path ? (
-            <span className="text-xs text-gray-500 truncate">{opt.path}</span>
-          ) : null}
-        </div>
-      )}
-      resolveSelectedLabel={() => {
-        if (!selectedKey) return resolvedAllLabel;
-        if (selectedSummary.title && selectedSummary.path) {
-          return `${selectedSummary.title} · ${selectedSummary.path}`;
-        }
-        return selectedSummary.title || resolvedAllLabel;
-      }}
-    />
-    {geoError ? (
-      <button
-        type="button"
-        onClick={() => refetchGeo()}
-        className="text-xs font-medium text-primary underline underline-offset-2"
-      >
-        {retryLabel}
-      </button>
-    ) : null}
+        )}
+        resolveSelectedLabel={() => {
+          if (!selectedKey) return resolvedAllLabel;
+          if (selectedSummary.title && selectedSummary.path) {
+            return `${selectedSummary.title} · ${selectedSummary.path}`;
+          }
+          return selectedSummary.title || resolvedAllLabel;
+        }}
+      />
+      {geoError ? (
+        <button
+          type="button"
+          onClick={() => refetchGeo()}
+          className="text-xs font-medium text-primary underline underline-offset-2"
+        >
+          {retryLabel}
+        </button>
+      ) : null}
     </div>
   );
 }

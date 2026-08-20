@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { useI18n } from "@/hooks/useI18n";
 import { useLocationsGeo } from "@/hooks/use-locations-geo";
+import { placeAr } from "@/lib/lenaqar/listing-seo";
 
 function normalizeQuery(value) {
   return String(value || "")
@@ -116,11 +117,31 @@ export default function UnitLocationSearch({
     [locale],
   );
 
+  /** Prefer catalog AR name, then shared place map, then English token. */
+  const placeLabel = useCallback(
+    (en, ar, token) => {
+      if (locale === "ar") {
+        return (
+          (typeof ar === "string" && ar.trim()) ||
+          placeAr(token || en) ||
+          (typeof en === "string" && en.trim()) ||
+          ""
+        );
+      }
+      return (
+        (typeof en === "string" && en.trim()) ||
+        (typeof ar === "string" && ar.trim()) ||
+        ""
+      );
+    },
+    [locale],
+  );
+
   const options = useMemo(() => {
     const rows = [];
 
     for (const city of cities) {
-      const label = labelFor(city.en_name, city.ar_name);
+      const label = placeLabel(city.en_name, city.ar_name, city.value);
       const searchText = normalizeQuery(
         [city.en_name, city.ar_name, city.value].filter(Boolean).join(" "),
       );
@@ -138,8 +159,12 @@ export default function UnitLocationSearch({
 
     for (const district of districts) {
       const cityValue = normalizeQuery(district.city_en_name);
-      const label = labelFor(district.en_name, district.ar_name);
-      const path = labelFor(district.city_en_name, district.city_ar_name);
+      const label = placeLabel(district.en_name, district.ar_name, district.value);
+      const path = placeLabel(
+        district.city_en_name,
+        district.city_ar_name,
+        cityValue,
+      );
       const aliases = Array.isArray(district.aliases) ? district.aliases : [];
       const searchText = normalizeQuery(
         [district.en_name, district.ar_name, district.value, path, ...aliases]
@@ -166,12 +191,13 @@ export default function UnitLocationSearch({
           normalizeQuery(d.city_en_name) === cityValue &&
           normalizeQuery(d.value) === districtValue,
       );
-      const label = labelFor(sub.en_name, sub.ar_name);
+      const label = placeLabel(sub.en_name, sub.ar_name, sub.value);
       const path = joinPath([
-        labelFor(sub.city_en_name, sub.city_ar_name),
-        labelFor(
+        placeLabel(sub.city_en_name, sub.city_ar_name, cityValue),
+        placeLabel(
           districtMeta?.en_name || sub.district_value,
-          districtMeta?.ar_name || sub.district_value,
+          districtMeta?.ar_name,
+          districtValue,
         ),
       ]);
       const aliases = Array.isArray(sub.aliases) ? sub.aliases : [];
@@ -212,7 +238,11 @@ export default function UnitLocationSearch({
       const district = normalizeQuery(project.district);
       const sub = normalizeQuery(project.sub_district);
       const label = labelFor(enName, project.ar_name);
-      const path = joinPath([city, district, sub]);
+      const path = joinPath([
+        placeAr(city),
+        placeAr(district),
+        placeAr(sub),
+      ]);
       const searchText = normalizeQuery(
         [
           enName,
@@ -246,7 +276,16 @@ export default function UnitLocationSearch({
       if (rank !== 0) return rank;
       return a.label.localeCompare(b.label, locale, { sensitivity: "base" });
     });
-  }, [cities, districts, subDistricts, allProjects, labelFor, locale, translate]);
+  }, [
+    cities,
+    districts,
+    subDistricts,
+    allProjects,
+    labelFor,
+    placeLabel,
+    locale,
+    translate,
+  ]);
 
   const selectedKey = useMemo(() => {
     if (formData?.project) {
@@ -275,22 +314,29 @@ export default function UnitLocationSearch({
   }, [formData, allProjects]);
 
   const selectedSummary = useMemo(() => {
-    const parts = [];
-    if (formData?.project) {
-      const proj = allProjects.find(
-        (p) => p.en_name === formData.project || p.name === formData.project,
-      );
-      parts.push(
-        labelFor(formData.project, proj?.ar_name || formData.project_ar),
-      );
+    const opt = options.find((row) => row.key === selectedKey);
+    if (opt) {
+      return { title: opt.label, path: opt.path };
     }
+
+    // Soft fallback while catalogs load or when URL tokens are unmatched.
+    if (formData?.project) {
+      const title = labelFor(formData.project, formData.project_ar);
+      const path = joinPath([
+        placeAr(formData.city),
+        placeAr(formData.district),
+        placeAr(formData.sub_district),
+      ]);
+      return { title: title || path, path: title ? path : "" };
+    }
+
     const path = joinPath([
-      formData?.city,
-      formData?.district,
-      formData?.sub_district,
+      placeAr(formData?.city),
+      placeAr(formData?.district),
+      placeAr(formData?.sub_district),
     ]);
-    return { title: parts[0] || path, path: parts[0] ? path : "" };
-  }, [formData, allProjects, labelFor]);
+    return { title: path, path: "" };
+  }, [options, selectedKey, formData, labelFor]);
 
   const handleChange = async (e) => {
     const key = e?.target?.value ?? "";
@@ -331,6 +377,12 @@ export default function UnitLocationSearch({
       "basicDetails.locationSearchPlaceholder",
       "Search project, area, district, or city…",
     );
+
+  const hierarchyCity = placeAr(formData?.city) || formData?.city || "—";
+  const hierarchyDistrict =
+    placeAr(formData?.district) || formData?.district || "—";
+  const hierarchySub =
+    placeAr(formData?.sub_district) || formData?.sub_district || "—";
 
   return (
     <div className={className}>
@@ -412,19 +464,13 @@ export default function UnitLocationSearch({
       (formData?.city || formData?.district || formData?.sub_district) ? (
         <p className="text-xs text-gray-500">
           {translate("basicDetails.city", "City")}:{" "}
-          <span className="font-medium text-gray-700">
-            {formData.city || "—"}
-          </span>
+          <span className="font-medium text-gray-700">{hierarchyCity}</span>
           {" · "}
           {translate("basicDetails.district", "District")}:{" "}
-          <span className="font-medium text-gray-700">
-            {formData.district || "—"}
-          </span>
+          <span className="font-medium text-gray-700">{hierarchyDistrict}</span>
           {" · "}
           {translate("basicDetails.subDistrict", "Sub-district")}:{" "}
-          <span className="font-medium text-gray-700">
-            {formData.sub_district || "—"}
-          </span>
+          <span className="font-medium text-gray-700">{hierarchySub}</span>
         </p>
       ) : null}
       {showHint ? (
