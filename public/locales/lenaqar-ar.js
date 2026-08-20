@@ -253,6 +253,16 @@ export default {
     propertySection: "العقار",
     loadFailed: "مش قادرين نحمّل طلبك دلوقتي.",
     saveFailed: "مش قادرين نحفظ الطلب دلوقتي. جرّب تاني.",
+    saveFailedTitle: "حصل خطأ في إرسال الطلب",
+    saveFailedWhatsAppBody:
+      "مفيش مشكلة — هنحوّلك لواتساب عشان تبعت بياناتك يدويًا ونكمّل معاك.",
+    saveFailedWhatsAppCountdown: "هنفتح واتساب خلال {seconds} ثانية…",
+    saveFailedWhatsAppCta: "ابعت على واتساب دلوقتي",
+    whatsappFallbackIntro:
+      "مرحبا، حصل خطأ في إرسال طلب الشراء عبر الموقع. دي بياناتي:",
+    city: "المدينة",
+    district: "المنطقة",
+    subDistrict: "الحي",
     errors: {
       save_failed: "مش قادرين نحفظ الطلب دلوقتي. جرّب تاني.",
       load_failed: "مش قادرين نحمّل طلبك دلوقتي.",
@@ -297,6 +307,17 @@ export default {
     submit: "ابعت الوحدة",
     saved: "تم استلام بيانات وحدتك. فريقنا هيراجعها ويتواصل معاك.",
     saveFailed: "مش قادرين نحفظ الطلب دلوقتي. جرّب تاني.",
+    saveFailedTitle: "حصل خطأ في إرسال الوحدة",
+    saveFailedWhatsAppBody:
+      "مفيش مشكلة — هنحوّلك لواتساب عشان تبعت بيانات الوحدة يدويًا ونكمّل معاك.",
+    saveFailedWhatsAppCountdown: "هنفتح واتساب خلال {seconds} ثانية…",
+    saveFailedWhatsAppCta: "ابعت على واتساب دلوقتي",
+    whatsappFallbackIntro:
+      "مرحبا، حصل خطأ في إرسال بيانات الوحدة عبر الموقع. دي بياناتي:",
+    city: "المدينة",
+    district: "المنطقة",
+    subDistrict: "الحي",
+    paidAmount: "المدفوع",
     errors: {
       save_failed: "مش قادرين نحفظ الطلب دلوقتي. جرّب تاني.",
       rate_limited: "طلبات كتير في وقت قصير. حاول بعد شوية.",

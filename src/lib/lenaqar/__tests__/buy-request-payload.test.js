@@ -33,10 +33,19 @@ test("parseMoney strips grouping characters", () => {
   assert.ok(Number.isNaN(parseMoney("abc")));
 });
 
+test("parseMoney converts Eastern Arabic digits", () => {
+  assert.equal(parseMoney("٣٠٠٠٠٠٠"), 3000000);
+  assert.equal(parseMoney("3٬000٬000"), 3000000);
+});
+
 test("toYearMonth keeps YYYY-MM and trims ISO dates", () => {
   assert.equal(toYearMonth("2026-12"), "2026-12");
   assert.equal(toYearMonth("2026-12-01T00:00:00Z"), "2026-12");
   assert.equal(toYearMonth("not-a-date"), "");
+});
+
+test("toYearMonth converts Eastern Arabic digits", () => {
+  assert.equal(toYearMonth("٢٠٢٦-١٢"), "2026-12");
 });
 
 test("builds the documented API requirement and drops extra keys", () => {
@@ -122,5 +131,24 @@ test("normalizes city/district case and ISO deliveryDate", () => {
   assert.equal(result.ok, true);
   assert.equal(result.requirement.city, "cairo");
   assert.equal(result.requirement.district, "new cairo");
+  assert.equal(result.requirement.deliveryDate, "2026-12");
+});
+
+test("converts Arabic digits in money, rooms, and deliveryDate before API payload", () => {
+  const result = buildPublicBuyRequirement({
+    ...sampleForm,
+    roomsCount: "٣",
+    max_price: "٣٠٠٠٠٠٠",
+    downPayment: "٣٠٠٠٠٠",
+    monthlyInstallment: "١٥٠٠٠",
+    overPrice: "١٠٠٠٠٠",
+    deliveryDate: "٢٠٢٦-١٢",
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.requirement.roomsCount, 3);
+  assert.equal(result.requirement.max_price, 3000000);
+  assert.equal(result.requirement.downPayment, 300000);
+  assert.equal(result.requirement.monthlyInstallment, 15000);
+  assert.equal(result.requirement.overPrice, 100000);
   assert.equal(result.requirement.deliveryDate, "2026-12");
 });

@@ -126,6 +126,9 @@ const catalogCache = {
   promise: null,
 };
 
+/** `/public/projects` is ~4MB; allow slower networks than the default BFF timeout. */
+const PUBLIC_PROJECTS_TIMEOUT_MS = 30_000;
+
 function unwrapProjectRows(body) {
   if (Array.isArray(body)) return body;
   if (Array.isArray(body?.data)) return body.data;
@@ -134,21 +137,44 @@ function unwrapProjectRows(body) {
   return [];
 }
 
-async function fetchCatalogJson(path) {
+/**
+ * @param {string} path
+ * @param {{ timeoutMs?: number }} [options]
+ * @returns {Promise<object[]|null>} rows on success, null on HTTP/network failure
+ */
+async function fetchCatalogJson(path, { timeoutMs } = {}) {
   const headers = { accept: "application/json" };
   if (PUBLIC_X_API_KEY) headers["X-API-Key"] = PUBLIC_X_API_KEY;
-  const response = await bffFetch(`${API_BASE_URL}${path}`, {
-    headers,
-    next: { revalidate: 3600 },
-  });
-  if (!response.ok) return [];
-  const body = await response.json().catch(() => null);
-  return unwrapProjectRows(body);
+  try {
+    // Own module cache only — `/public/projects` exceeds Next's 2MB fetch cache.
+    const response = await bffFetch(`${API_BASE_URL}${path}`, {
+      headers,
+      cache: "no-store",
+      ...(timeoutMs ? { signal: AbortSignal.timeout(timeoutMs) } : {}),
+    });
+    if (!response.ok) {
+      console.warn(
+        `[lenaqar] catalog fetch ${path} failed`,
+        response.status,
+      );
+      return null;
+    }
+    const body = await response.json().catch(() => null);
+    return unwrapProjectRows(body);
+  } catch (error) {
+    console.warn(
+      `[lenaqar] catalog fetch ${path} error`,
+      error?.code || error?.message,
+    );
+    return null;
+  }
 }
 
 /**
- * Full public compound list — same source add-unit uses (`projects_names`),
- * not the bounded resale feed. Used by the public sell form.
+ * Full public compound list for buy/sell forms.
+ * Prefer the slim `projects_names` endpoint when the backend allows anonymous
+ * access; otherwise fall back to `/public/projects` and keep only name fields
+ * in memory (never cache the full dump).
  */
 export async function fetchPublicCatalogProjectNames() {
   const now = Date.now();
@@ -158,13 +184,23 @@ export async function fetchPublicCatalogProjectNames() {
   if (catalogCache.promise) return catalogCache.promise;
 
   catalogCache.promise = (async () => {
-    const rows = await fetchCatalogJson(
+    let rows = await fetchCatalogJson(
       "/projects/v3/projects_names?public=true",
     );
-    catalogCache.data = uniqueProjects(rows);
-    catalogCache.fetchedAt = Date.now();
+    if (!rows?.length) {
+      rows = await fetchCatalogJson("/public/projects", {
+        timeoutMs: PUBLIC_PROJECTS_TIMEOUT_MS,
+      });
+    }
+
+    const list = uniqueProjects(rows || []);
+    // Only cache successful non-empty results so a 401/empty miss can retry.
+    if (list.length > 0) {
+      catalogCache.data = list;
+      catalogCache.fetchedAt = Date.now();
+    }
     catalogCache.promise = null;
-    return catalogCache.data;
+    return list;
   })();
 
   try {

@@ -69,6 +69,19 @@ test("formatted display prices parse to full amounts, not Number('20,000,000') =
   assert.equal(payload.downPayment, 1500000);
 });
 
+test("converts Eastern Arabic digits in landArea and money fields", () => {
+  const payload = buildSaleUnitPayload({
+    ...validForm,
+    landArea: "١٢٠",
+    totalPrice: "٢٠٠٠٠٠٠",
+    paidAmount: "٥٠٠٠٠٠",
+  });
+  assert.equal(payload.landArea, 120);
+  assert.equal(payload.totalPrice, 2000000);
+  assert.equal(payload.paid_amount, 500000);
+  assert.equal(payload.downPayment, 500000);
+});
+
 test("empty developer and project are omitted, not sent as empty strings", () => {
   const payload = buildSaleUnitPayload({ ...validForm, developer: "  ", project: "" });
   assert.equal(payload.developer, undefined);

@@ -10,11 +10,16 @@ import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import UnitLocationSearch from "@/components/ui/unit-forms/unit-location-search";
-import { parseAmount, parseMoneyInput } from "@/utils/parse-amount";
+import { parseAmount, parseMoneyInput, normalizeToEnglishDigits } from "@/utils/parse-amount";
 import { PhoneField } from "@/components/phone/PhoneField";
 import { submitPublicSellUnit } from "@/app/(lenaqar)/_actions/add-sale";
 import { actionButtonClass } from "@/components/ui/action-button-class";
 import ActionButtonArrow from "@/components/ui/action-button-arrow";
+import SubmitWhatsAppFallback from "@/components/lenaqar/submit-whatsapp-fallback";
+import {
+  composeSellRequestWhatsAppMessage,
+  whatsappFallbackHref,
+} from "@/lib/lenaqar/whatsapp-fallback";
 
 const EMPTY_FORM = {
   ownerName: "",
@@ -58,11 +63,17 @@ export default function PublicSellCta({
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phonePayload, setPhonePayload] = useState(null);
   const [ownerConfirmed, setOwnerConfirmed] = useState(false);
+  const [whatsappFallbackHrefState, setWhatsappFallbackHrefState] = useState("");
 
   const tr = (key, fallback) => translate(key, fallback);
 
-  const setField = (key) => (event) =>
-    setForm((prev) => ({ ...prev, [key]: event.target.value }));
+  const setField = (key) => (event) => {
+    let value = event.target.value;
+    if (key === "landArea") {
+      value = String(normalizeToEnglishDigits(value ?? "")).replace(/[^\d.]/g, "");
+    }
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
 
   const setMoneyField = (key) => (event) =>
     setForm((prev) => ({
@@ -70,6 +81,14 @@ export default function PublicSellCta({
       [key]: parseMoneyInput(event.target.value),
     }));
 
+  const canSubmit =
+    ownerConfirmed &&
+    form.ownerName.trim() &&
+    phonePayload?.combined &&
+    form.buildingType &&
+    parseAmount(form.landArea) > 0 &&
+    parseAmount(form.totalPrice) > 0 &&
+    parseAmount(form.paidAmount) >= 0;
   const handleLocationChange = ({ city, district, sub_district, project }) =>
     setForm((prev) => ({
       ...prev,
@@ -100,33 +119,42 @@ export default function PublicSellCta({
     setPhoneNumber("");
     setPhonePayload(null);
     setOwnerConfirmed(false);
+    setWhatsappFallbackHrefState("");
     setOpen(false);
   };
-
-  const canSubmit =
-    ownerConfirmed &&
-    form.ownerName.trim() &&
-    phonePayload?.combined &&
-    form.buildingType &&
-    Number(form.landArea) > 0 &&
-    parseAmount(form.totalPrice) > 0 &&
-    parseAmount(form.paidAmount) >= 0;
 
   const handleSubmit = async () => {
     if (!canSubmit || saving) return;
     setSaving(true);
+    setWhatsappFallbackHrefState("");
     try {
       const result = await submitPublicSellUnit({
         ...form,
         ownerPhone: phonePayload.combined,
       });
       if (!result?.ok) {
-        toast.error(
-          tr(
-            `lenaqar.sellRequest.errors.${result?.code || "save_failed"}`,
-            tr("lenaqar.sellRequest.saveFailed"),
-          ),
-        );
+        const buildingTypeLabel = form.buildingType
+          ? tr(`buildingTypes.${form.buildingType}`, form.buildingType)
+          : form.buildingType;
+        const message = composeSellRequestWhatsAppMessage({
+          form: { ...form, buildingType: buildingTypeLabel },
+          phone: phonePayload?.combined,
+          intro: tr("lenaqar.sellRequest.whatsappFallbackIntro"),
+          labels: {
+            name: tr("lenaqar.buyRequest.name"),
+            phone: tr("lenaqar.buyRequest.phone"),
+            city: tr("lenaqar.sellRequest.city"),
+            district: tr("lenaqar.sellRequest.district"),
+            subDistrict: tr("lenaqar.sellRequest.subDistrict"),
+            project: tr("lenaqar.buyRequest.project"),
+            developer: tr("lenaqar.sellRequest.developer"),
+            buildingType: tr("lenaqar.sellRequest.buildingType"),
+            landArea: tr("lenaqar.sellRequest.landArea"),
+            contractPrice: tr("lenaqar.sellRequest.contractPrice"),
+            paidAmount: tr("lenaqar.sellRequest.paidAmount"),
+          },
+        });
+        setWhatsappFallbackHrefState(whatsappFallbackHref(message));
         return;
       }
       trackEvent(ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED);
@@ -161,6 +189,16 @@ export default function PublicSellCta({
         dialogClassName="w-full sm:max-w-xl"
         bodyClassName="space-y-5 text-sm !p-4 pb-8"
       >
+        {whatsappFallbackHrefState ? (
+          <SubmitWhatsAppFallback
+            href={whatsappFallbackHrefState}
+            title={tr("lenaqar.sellRequest.saveFailedTitle")}
+            body={tr("lenaqar.sellRequest.saveFailedWhatsAppBody")}
+            countdownLabel={tr("lenaqar.sellRequest.saveFailedWhatsAppCountdown")}
+            ctaLabel={tr("lenaqar.sellRequest.saveFailedWhatsAppCta")}
+          />
+        ) : null}
+
         <div className="space-y-3 -mt-1">
           <h3 className="text-base font-bold text-primary leading-snug">
             {tr("lenaqar.sellRequest.headline")}

@@ -1,4 +1,5 @@
 import { BUILDING_TYPE_VALUES } from "../../data/constants.js";
+import { normalizeToEnglishDigits } from "../../utils/parse-amount.js";
 
 const BUILDING_TYPE_SET = new Set(
   BUILDING_TYPE_VALUES.map((value) => String(value).trim().toLowerCase()),
@@ -8,7 +9,7 @@ const YEAR_MONTH = /^(\d{4})-(0[1-9]|1[0-2])/;
 
 export function toYearMonth(value) {
   if (value == null || value === "") return "";
-  const match = String(value).trim().match(YEAR_MONTH);
+  const match = String(normalizeToEnglishDigits(value)).trim().match(YEAR_MONTH);
   return match ? `${match[1]}-${match[2]}` : "";
 }
 
@@ -17,8 +18,21 @@ export function parseMoney(value) {
   if (typeof value === "number") {
     return Number.isFinite(value) ? value : NaN;
   }
-  const n = parseFloat(String(value).replace(/[^0-9.]/g, ""));
+  const n = parseFloat(
+    String(normalizeToEnglishDigits(value)).replace(/[^0-9.]/g, ""),
+  );
   return Number.isFinite(n) ? n : NaN;
+}
+
+function parsePositiveInteger(value) {
+  if (value === "" || value == null) return null;
+  if (typeof value === "number") {
+    return Number.isInteger(value) ? value : NaN;
+  }
+  const digits = String(normalizeToEnglishDigits(value)).trim();
+  if (!/^\d+$/.test(digits)) return NaN;
+  const n = Number(digits);
+  return Number.isInteger(n) ? n : NaN;
 }
 
 function optionalMoney(form, key, errors, errorKey) {
@@ -80,7 +94,7 @@ export function buildPublicBuyRequirement(form) {
 
   let roomsCount;
   if (form?.roomsCount !== "" && form?.roomsCount != null) {
-    const n = Number(form.roomsCount);
+    const n = parsePositiveInteger(form.roomsCount);
     if (!Number.isInteger(n) || n <= 0) {
       errors.roomsCount = "invalidRooms";
     } else {

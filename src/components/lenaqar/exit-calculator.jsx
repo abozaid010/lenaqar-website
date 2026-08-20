@@ -11,11 +11,12 @@ import {
   computeExitComparison,
 } from "@/lib/lenaqar/exit-comparison";
 import { formatEgpNumber } from "@/lib/lenaqar/metrics";
+import { normalizeToEnglishDigits } from "@/utils/parse-amount";
 import EgpAmount from "./egp-amount";
 import WhatsAppCta from "./whatsapp-cta";
 
 function digitsOnly(raw) {
-  return String(raw ?? "").replace(/\D/g, "");
+  return String(normalizeToEnglishDigits(raw ?? "")).replace(/\D/g, "");
 }
 
 function EgpPriceInput({ value, onChange, required, translate }) {
