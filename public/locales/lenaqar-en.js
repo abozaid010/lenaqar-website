@@ -13,6 +13,7 @@ export default {
   },
   home: {
     heroTitle: "Continue someone else's investment — buy at yesterday's price.",
+    heroHook: "Let's see how many millions we can save you…",
     heroSub:
       "We bring you units from owners who want out, units on old contracts, and units straight from developers — and we help you tell whether the deal is actually worth it.",
     heroNote:
