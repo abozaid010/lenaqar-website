@@ -27,7 +27,7 @@
 | **SEO gate enforced on commit + CI**: missing `metadata`/`title`/`description` = hard error | [.husky/pre-commit](.husky/pre-commit), [scripts/check-seo.js:172](scripts/check-seo.js:172) |
 | **Push to `main` auto-deploys lenaai.net to GCP** — changes must be inert without the brand env | [.github/workflows/deploy.yml](.github/workflows/deploy.yml) |
 | Primary token `--primary: #030250` → `--color-primary` | [src/app/globals.css:6](src/app/globals.css:6) |
-| LenaAI contacts to inherit: `505 Siac Building, ARCHPLAN Square, New Capital`, Cairo, EG · Facebook + LinkedIn URLs | [LocalBusinessSchema.jsx:13](src/components/schema/LocalBusinessSchema.jsx:13), [src/lib/solutions/links.ts:9](src/lib/solutions/links.ts:9) |
+| LenaAI contacts to inherit: `505 ARCHPLAN Square, New Capital`, Cairo, EG · Facebook + LinkedIn URLs | [LocalBusinessSchema.jsx:13](src/components/schema/LocalBusinessSchema.jsx:13), [src/lib/solutions/links.ts:9](src/lib/solutions/links.ts:9) |
 
 ---
 
@@ -112,7 +112,7 @@ Publishing the raw object would leak a staff email into the page HTML. **Mandato
 | 3 | Payment-plan fields land soon | Already present on the public endpoint; optional-field rendering regardless |
 | 4 | **Simple URLs, no login.** Later login is for **end users**, not clients | `/opportunities/{code}`, no clientId segment. CRM `(auth)` flow is *not* the base for it |
 | 5 | Creds later as `LENAQAR_CLIENT_EMAIL` / `LENAQAR_CLIENT_PASSWORD` | Reserved names, documented, unused at launch |
-| 6 | Contacts: phone + WhatsApp `01036464346`, `info@lenaqar.com`, rest same as LenaAI, **all in one file** | `src/config/lenaqar-contact.js` |
+| 6 | Contacts: phone + WhatsApp `01036364340`, `info@lenaqar.com`, rest same as LenaAI, **all in one file** | `src/config/lenaqar-contact.js` |
 | 7 | **One developer — TMG**, four projects: Noor · Madinaty · South Med · Celia. Pull from the `public` tenant | Token allowlist in config. **But see §2.2 — only 1 of the 1,783 units in that tenant qualifies** |
 | 8 | **No guarantee. No one fronts cash.** Promise = exit faster, get more money, backed by a signed contract | The word ضمان never appears. Single honest copy set — the dual "guarantee mode" flag is deleted as YAGNI |
 | 9 | A written seller agreement is signed | `/sell` trust block: "باتفاق مكتوب" |
@@ -197,14 +197,14 @@ Literals, not env — you asked for one file to edit later.
 /** ⚠️ Single place for every LenAqar contact detail. Replace here, nowhere else. */
 export const LENAQAR_CONTACT = {
   // E.164 is required — formatPhoneForWhatsApp() strips non-digits, so a local
-  // "01036464346" would build wa.me/01036464346 and fail.
+  // "01036364340" would build wa.me/01036364340 and fail.
   phoneE164: "+201036464346",
   phoneDisplay: "010 3646 4346",
   whatsappE164: "+201036464346",
   // Not live yet (answer #12) — held behind SITE.showEmail, kept here for the flip.
   email: "info@lenaqar.com",
   // Inherited from LenaAI until LenAqar has its own (LocalBusinessSchema.jsx:13)
-  address: "505 Siac Building, ARCHPLAN Square, New Capital",
+  address: "505 ARCHPLAN Square, New Capital",
   city: "Cairo",
   country: "EG",
   facebook: "https://www.facebook.com/profile.php?id=61587419182034",

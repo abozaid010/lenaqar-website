@@ -3,10 +3,8 @@ import { SITE_URL } from './metadata';
 import { SITE } from '@/config/site';
 
 /**
- * CRM route segments. Kept in sync with the `adminPaths` rewrite list in
- * next.config.mjs — that rewrite maps `/:clientId/<segment>` onto `/<segment>`,
- * so every one of these is reachable under a client-id prefix as well as at the
- * root. Disallowing only the root form leaves `/homey/units/ABC` crawlable.
+ * CRM route segments — kept in Disallow for one release after admin removal
+ * so crawlers stop requesting dead URLs. Remove after 2026-09-20.
  */
 const ADMIN_PATHS = [
   'dashboard',
@@ -36,9 +34,6 @@ const PRIVATE_PATHS = [
   '/api/',
   '/_next/',
   '/lenaqar',
-  '/login',
-  '/allProberties',
-  '/allProberties/',
   '/match/',
   '/properties/',
   '/property/',
@@ -81,7 +76,7 @@ const AI_CRAWLERS = [
 ];
 
 export default function robots(): MetadataRoute.Robots {
-  const allow = ['/', '/sell', '/calculator', '/privacy'];
+  const allow = ['/', '/sell', '/calculator', '/privacy', '/how-it-works'];
   if (SITE.feed.enabled) {
     allow.push('/opportunities', '/opportunities/*');
   }

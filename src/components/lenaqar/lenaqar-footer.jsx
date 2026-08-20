@@ -83,6 +83,9 @@ export default function LenaqarFooter() {
             <Link href="/sell" className="hover:text-white/80">
               {translate("lenaqar.header.sell")}
             </Link>
+            <Link href="/how-it-works" className="hover:text-white/80">
+              {translate("lenaqar.header.howItWorks")}
+            </Link>
             <Link href="/calculator" className="hover:text-white/80">
               {translate("lenaqar.header.calculator")}
             </Link>

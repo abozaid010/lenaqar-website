@@ -19,12 +19,10 @@ export async function loadLocaleMessages(locale) {
   const lang = locale === "en" ? "en" : "ar";
   if (cache.has(lang)) return cache.get(lang);
 
-  // Dynamic import — English becomes a separate async chunk.
-  // Arabic is normally already primed; this path covers server helpers too.
   const mod =
     lang === "en"
-      ? await import("../../../public/locales/en.js")
-      : await import("../../../public/locales/ar.js");
+      ? await import("../../../public/locales/public-en.js")
+      : await import("../../../public/locales/public-ar.js");
 
   const messages = mod.default ?? mod;
   cache.set(lang, messages);
