@@ -1,45 +1,61 @@
-# CLAUDE.md — LenaAI CRM (Next.js)
-ROLE: Act As Senior Next JS, and Senior UX engineer,
+# CLAUDE.md — LenaQar Public Marketplace (Next.js)
+
+ROLE: Act as Senior Next.js and Senior UX engineer.
+
 ## Stack & Theme
-Next.js App Router · TypeScript · Tailwind · React Query · Axios (`src/utils/axiosInstance`)
+Next.js App Router · TypeScript · Tailwind · React Query · Axios (`src/utils/axiosInstance` server-side, `src/lib/axiosInstance` client-side BFF — being slimmed)
 Primary color `#030250` — defined once in `globals.css`, never hardcoded elsewhere.
 
 ## Architecture
-`(admin)/` — CRM pages (units, myProjects, campaigns, developers, team, dashboard) — wrapped in sidebar layout
-`(auth)/` — login flows | `projects/[id]/[slug]` · `properties/[id]` — standalone full-page detail views (no admin layout)
-`src/lib/` server API helpers · `src/utils/api.js` shared layer · `src/hooks/` React Query hooks · `src/context/` i18n + auth
+This repo is the **public LenaQar marketplace only** — no CRM, no login, no admin sidebar.
+CRM (units, leads, teams, campaigns) lives on **lenaai.net** (separate repository).
+
+### Public routes
+```
+/                      home
+/opportunities         listing feed
+/opportunities/[slug]  detail
+/sell                  list-your-unit flow
+/calculator            exit calculator
+/how-it-works          three flows explained
+/privacy
+/properties/[id]       legacy SEO redirect
+/property/[id]         legacy SEO redirect
+/unit/[slug]           legacy SEO redirect
+```
+
+### API routes (server-only, anonymous)
+```
+/api/lenaqar/catalog-projects/
+/api/lenaqar/project-names/
+/api/locations/catalog/
+```
+
+### Server actions
+`src/app/(lenaqar)/_actions/add-sale.js`, `buy-request.js` — anonymous, rate-limited, post to `/public/v1/*`.
+
+### Key directories
+`src/app/(lenaqar)/**` · `src/components/lenaqar/**` · `src/lib/lenaqar/**` · `src/lib/units/**` · `src/lib/locations/**` · `src/context/translate-api.js` · `public/locales/lenaqar-ar.js`
 
 ## Component Rules
-**Reuse first**: `UnifiedDialog`, `ImageWithLoader`, `LoadingSpinner`, `LenaField`, `LenaTextArea`, `SearchableDropdown`, `EditButton`, `DeleteButton`, `WhatsAppButton`, `OwnerActions`
+**Reuse first**: `UnifiedDialog`, `ImageWithLoader`, `LoadingSpinner`, `LenaTextField`, `LenaTextArea`, `SearchableDropdown`, `PhoneField`
 New components must match existing spacing, styling, and patterns exactly.
 
 ## UX (Non-Negotiable)
-Primary action → **top-right** · Cancel/Back → top-left · Delete → always needs confirmation dialog
-Forms: labels above fields, inline validation, keep short · No raw API errors — unified messages only
-Hide (don't disable) unauthorized actions · Mobile-first · Full RTL, no hardcoded `left`/`right`
+Primary action → **top-right** · Cancel/Back → top-left
+Forms: labels above fields, inline validation · No raw API errors — unified messages only
+Mobile-first · Full RTL (`ar-EG`, `dir=rtl`) · No hardcoded `left`/`right` — use logical properties
 
-## Routing Rule for Detail Pages
-Detail pages (`properties/[id]`, `projects/[id]/[slug]`) must live **outside** `(admin)/` to avoid the sidebar layout.
-`/units/[id]` redirects to `/properties/[id]` — feature-flagged via `NEXT_PUBLIC_NEW_UNIT_DESIGN`.
+## Public navigation (header)
+الرئيسية · الفرص العقارية · بيع وحدتك · اشتري وحدة (dialog) · كيف نعمل
+`/calculator` is footer + inline links only.
 
-## Auth & Permissions
-Cookies (`COOKIE_KEYS`) → `getRoleFromToken` + `useModuleActions` + `useBrokerPermission` · Server components read cookies directly; client components use hooks.
-
-## Sidebar & Navigation
-- **Sidebar always visible**: Keep sidebar visible at all times for admin users
-- **Admin routes structure**: All admin routes start with client_id, e.g. `http://localhost:3000/public/units` where `public` is the client_id for the currently logged in user
+## Localization
+Every user-visible string uses `translate('lenaqar.…')`. Arabic source of truth in `public/locales/lenaqar-ar.js`.
 
 ## Constraints
-Server components fetch data · Client components handle interactions only · Prefer local state; React Query for server state
-No new patterns, dependencies, or layout changes without a clear need — stability over experimentation
+Server components fetch data · Client components handle interactions · Prefer local state; React Query for sell-form catalogs and buy-request dialog
+No new patterns or dependencies without clear need — stability over experimentation
 
-yes please use (translate('…')). everywhere.   for lcoalzaiton
-
-
-- Think before you write code. Define the assumptions, ask questions if anything is unclear, and don't guess.
-
-- Write the minimum code that solves the problem, without any unnecessary complexityor abstractions.
-
-- Only modify what needs modifying. Don't touch any code that isn't relevant to the requirements. Every modification must have a clear reason in the specifications.
--  wiret production ready code and dont use fake/dump solutions to skip issue,  better to look for issues root cause .
-- Before you begin, define the goal.%    
+## Cleanup tooling
+`scripts/orphan-scan.mjs` + `scripts/entrypoints.txt` — only approved way to verify orphaned files.

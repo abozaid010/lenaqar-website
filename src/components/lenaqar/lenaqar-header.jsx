@@ -9,7 +9,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { sellerCtaHref } from "@/lib/lenaqar/whatsapp";
 import { ANALYTICS } from "@/constants/analytics";
 import WhatsAppCta from "./whatsapp-cta";
-import CoreActions from "./core-actions";
+import BuyRequestCta from "./buy-request-cta";
 
 export default function LenaqarHeader() {
   const { translate } = useI18n();
@@ -17,11 +17,11 @@ export default function LenaqarHeader() {
   const [open, setOpen] = useState(false);
   const isHome = pathname === "/" || pathname === "/lenaqar";
 
-  const links = [
+  const routeLinks = [
     { href: "/", label: translate("lenaqar.header.home") },
     { href: "/opportunities", label: translate("lenaqar.header.opportunities") },
     { href: "/sell", label: translate("lenaqar.header.sell") },
-    { href: "/calculator", label: translate("lenaqar.header.calculator") },
+    { href: "/how-it-works", label: translate("lenaqar.header.howItWorks") },
   ];
 
   return (
@@ -38,7 +38,7 @@ export default function LenaqarHeader() {
         </Link>
 
         <nav className="hidden lg:flex items-center gap-4 text-sm">
-          {links.map((link) => (
+          {routeLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -47,20 +47,24 @@ export default function LenaqarHeader() {
               {link.label}
             </Link>
           ))}
+          <BuyRequestCta
+            variant="secondary"
+            tone="onPrimary"
+            size="compact"
+            label={translate("lenaqar.header.buyUnit")}
+          />
         </nav>
 
         <div className="hidden lg:block">
-          {isHome ? (
-            <WhatsAppCta
-              href={sellerCtaHref()}
-              eventName={ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED}
-              className="!py-2 !px-3 !text-xs"
-            >
-              {translate("lenaqar.home.lenaCta")}
-            </WhatsAppCta>
-          ) : (
-            <CoreActions compact tone="onPrimary" className="shrink-0" />
-          )}
+          <WhatsAppCta
+            href={sellerCtaHref()}
+            eventName={ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED}
+            className="!py-2 !px-3 !text-xs"
+          >
+            {isHome
+              ? translate("lenaqar.home.lenaCta")
+              : translate("lenaqar.header.sell")}
+          </WhatsAppCta>
         </div>
 
         <button
@@ -80,7 +84,7 @@ export default function LenaqarHeader() {
 
       {open ? (
         <nav className="lg:hidden border-t border-white/20 px-4 py-3 flex flex-col gap-3">
-          {links.map((link) => (
+          {routeLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -90,6 +94,12 @@ export default function LenaqarHeader() {
               {link.label}
             </Link>
           ))}
+          <BuyRequestCta
+            variant="secondary"
+            tone="onPrimary"
+            label={translate("lenaqar.header.buyUnit")}
+            className="w-full"
+          />
           <WhatsAppCta
             href={sellerCtaHref()}
             eventName={ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED}

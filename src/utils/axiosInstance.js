@@ -3,7 +3,6 @@ import axios from "axios";
 import { cookies } from "next/headers";
 import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
-import { isPermissionsUpdatedError } from "@/constants/permissionsAuth";
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -59,13 +58,6 @@ axiosInstance.interceptors.response.use(
       } catch (retryError) {
         console.error("Retry failed:", retryError?.message);
         throw retryError;
-      }
-    }
-
-    if (error.response?.status === 401) {
-      const detail = error.response?.data?.detail;
-      if (isPermissionsUpdatedError(detail)) {
-        return Promise.reject(error);
       }
     }
 

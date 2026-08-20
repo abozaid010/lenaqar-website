@@ -177,11 +177,6 @@ input[type="number"] {
   -moz-appearance: textfield; /* For Firefox */
 }
 
-.swiper-button-prev,
-.swiper-button-next {
-  color: var(--primary) !important;
-}
-
 .scroll-snap-x-mandatory {
   scroll-snap-type: x mandatory;
   overflow-x: auto;

@@ -4,8 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { useI18n } from "@/hooks/useI18n";
-import { useProjectsNames } from "@/hooks/use-admin-shared-data";
-import { fetchProjectById } from "@/utils/api";
 import CityManager from "@/utils/city_manager";
 
 function normalizeQuery(value) {
@@ -47,9 +45,8 @@ export default function UnitLocationSearch({
   errorMessage = "",
   disabled = false,
   isPublic = false,
-  /** auth = CRM names, feed = resale inventory, catalog = all public compounds */
-  projectSource,
-  hydrateSelectedProject,
+  /** feed = resale inventory, catalog = all public compounds */
+  projectSource = "catalog",
   showHint = true,
   showHierarchySummary = true,
   showAllOption = false,
@@ -62,14 +59,8 @@ export default function UnitLocationSearch({
 }) {
   const { locale, translate } = useI18n();
   const cityManager = CityManager.getInstance();
-  const source = projectSource || (isPublic ? "feed" : "auth");
-  const shouldHydrateProject =
-    hydrateSelectedProject ?? source !== "feed";
+  const source = projectSource || "catalog";
 
-  const { data: authProjects, isLoading: authProjectsLoading } = useProjectsNames(
-    false,
-    { enabled: source === "auth" },
-  );
   const { data: feedProjects, isLoading: feedProjectsLoading } = useQuery({
     queryKey: ["lenaqar", "project-names"],
     queryFn: async () => {
@@ -96,18 +87,9 @@ export default function UnitLocationSearch({
     staleTime: 1000 * 60 * 5,
     retry: 1,
   });
-  const projectsData =
-    source === "catalog"
-      ? catalogProjects
-      : source === "feed"
-        ? feedProjects
-        : authProjects;
+  const projectsData = source === "feed" ? feedProjects : catalogProjects;
   const projectsLoading =
-    source === "catalog"
-      ? catalogProjectsLoading
-      : source === "feed"
-        ? feedProjectsLoading
-        : authProjectsLoading;
+    source === "feed" ? feedProjectsLoading : catalogProjectsLoading;
 
   const [geoLoading, setGeoLoading] = useState(true);
   const [cities, setCities] = useState([]);
@@ -346,17 +328,6 @@ export default function UnitLocationSearch({
     if (opt.kind === "project") {
       const proj = opt.payload.project;
       onSelectProject?.(proj);
-      if (shouldHydrateProject && proj?.id) {
-        setFetchingProject(true);
-        try {
-          const res = await fetchProjectById(proj.id, isPublic);
-          if (res?.data) onSelectProject?.(res.data, { full: true });
-        } catch {
-          // Location already applied from list item; developer fill is best-effort.
-        } finally {
-          setFetchingProject(false);
-        }
-      }
       return;
     }
 

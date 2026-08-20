@@ -40,6 +40,12 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
+  async redirects() {
+    return [
+      { source: "/allProberties", destination: "/opportunities", permanent: true },
+      { source: "/allProberties/:code", destination: "/opportunities/:code", permanent: true },
+    ];
+  },
   async headers() {
     const securityHeaders = [
       // Prevent the site from being framed by another origin (clickjacking).
@@ -74,25 +80,6 @@ const nextConfig = {
         ],
       },
     ];
-  },
-  async rewrites() {
-    const adminPaths = [
-      'dashboard', 'campaigns', 'campaign-chat', 'schedule',
-      'analytics', 'units', 'team', 'myProjects', 'developers', 'news', 'map', 'notifications',
-      'social-media',
-      'market-index',
-      'locations',
-      'tools',
-      'matching',
-    ];
-    // `api` is excluded so `/api/social-media/*` BFF routes are not rewritten to pages.
-    const clientIdSegment = "/:clientId((?!api$)[^/]+)";
-    const adminRewrites = adminPaths.flatMap((path) => [
-      { source: `${clientIdSegment}/${path}`, destination: `/${path}` },
-      { source: `${clientIdSegment}/${path}/:rest*`, destination: `/${path}/:rest*` },
-    ]);
-
-    return adminRewrites;
   },
 };
 
