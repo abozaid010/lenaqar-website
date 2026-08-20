@@ -23,6 +23,15 @@ export default {
     locationSearchPlaceholder: "ابحث عن مدينة أو منطقة أو حي…",
     locationSearchEmpty: "مفيش مواقع مطابقة",
   },
+  phoneField: {
+    required: "رقم الهاتف مطلوب",
+    tooShort: "رقم الهاتف قصير جدًا",
+    tooLong: "رقم الهاتف طويل جدًا",
+    invalidLength: "طول رقم الهاتف غير صالح",
+    invalid: "رقم هاتف غير صالح",
+    label: "رقم الهاتف",
+    placeholder: "أدخل رقم الهاتف",
+  },
   unitFormValidation: {
     locationRequired: "يرجى اختيار موقع صالح.",
     locationSelectDistrict: "يرجى اختيار المنطقة.",

@@ -23,6 +23,15 @@ export default {
     locationSearchPlaceholder: "Search city, district, or area…",
     locationSearchEmpty: "No matching locations",
   },
+  phoneField: {
+    required: "Phone number is required",
+    tooShort: "Phone number is too short",
+    tooLong: "Phone number is too long",
+    invalidLength: "Phone number length is invalid",
+    invalid: "Invalid phone number",
+    label: "Phone number",
+    placeholder: "Enter phone number",
+  },
   unitFormValidation: {
     locationRequired: "Please select a valid location.",
     locationSelectDistrict: "Please select a district.",

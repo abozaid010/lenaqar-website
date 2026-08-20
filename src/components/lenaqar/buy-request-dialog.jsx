@@ -426,8 +426,10 @@ export default function BuyRequestDialog({
               errorMessage={locationError}
               showAllOption={false}
               placeholder={tr(
-                "basicDetails.locationSearchPlaceholder",
-                "Search city, district, or area…",
+                "unitsFilter.locationSearchPlaceholder",
+                locale === "ar"
+                  ? "ابحث عن مدينة أو منطقة أو حي…"
+                  : "Search city, district, or area…",
               )}
               className={dropdownClassName}
             />

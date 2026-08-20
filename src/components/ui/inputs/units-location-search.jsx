@@ -205,7 +205,13 @@ export default function UnitsLocationSearch({
 
   const resolvedAllLabel =
     allOptionLabel || translate("unitsFilter.allLocations", "All Locations");
-  const resolvedPlaceholder = placeholder || resolvedAllLabel;
+  const locationSearchPlaceholder = translate(
+    "unitsFilter.locationSearchPlaceholder",
+    locale === "ar"
+      ? "ابحث عن مدينة أو منطقة أو حي…"
+      : "Search city, district, or area…",
+  );
+  const resolvedPlaceholder = placeholder || locationSearchPlaceholder;
   const loadFailedMessage = translate(
     "basicDetails.locationLoadFailed",
     locale === "ar"
@@ -217,32 +223,29 @@ export default function UnitsLocationSearch({
 
   return (
     <div className="space-y-1.5">
-    <SearchableDropdownSelect
-      name={name}
-      label={label}
-      options={options}
-      value={selectedKey}
-      onChange={handleChange}
-      disabled={disabled}
-      required={required}
-      error={error || geoError}
-      errorMessage={
-        errorMessage ||
-        (geoError ? loadFailedMessage : "")
-      }
-      isLoading={geoBusy}
-      showAllOption={showAllOption}
-      allOptionLabel={resolvedAllLabel}
-      allOptionValue=""
-      placeholder={resolvedPlaceholder}
-      searchPlaceholder={translate(
-        "unitsFilter.locationSearchPlaceholder",
-        "Search city, district, or area…",
-      )}
-      noResultsText={translate(
-        "unitsFilter.locationSearchEmpty",
-        "No matching locations",
-      )}
+      <SearchableDropdownSelect
+        name={name}
+        label={label}
+        options={options}
+        value={selectedKey}
+        onChange={handleChange}
+        disabled={disabled}
+        required={required}
+        error={error || geoError}
+        errorMessage={
+          errorMessage ||
+          (geoError ? loadFailedMessage : "")
+        }
+        isLoading={geoBusy}
+        showAllOption={showAllOption}
+        allOptionLabel={resolvedAllLabel}
+        allOptionValue=""
+        placeholder={resolvedPlaceholder}
+        searchPlaceholder={locationSearchPlaceholder}
+        noResultsText={translate(
+          "unitsFilter.locationSearchEmpty",
+          locale === "ar" ? "مفيش مواقع مطابقة" : "No matching locations",
+        )}
       className={className}
       buttonClassName={buttonClassName}
       getValue={(opt) => opt.key}

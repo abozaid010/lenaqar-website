@@ -238,7 +238,7 @@ export default function MonthYearField({
         <div
           role="dialog"
           aria-label={label || (locale === "ar" ? "اختيار الشهر" : "Choose month")}
-          className="absolute z-[100] mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg p-3"
+          className="absolute z-[100] bottom-full mb-1 w-full rounded-md border border-gray-200 bg-white shadow-lg p-3"
         >
           <div className="flex items-center justify-between gap-2 mb-3">
             <button
