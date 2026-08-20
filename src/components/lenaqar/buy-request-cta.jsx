@@ -7,7 +7,7 @@ import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { ANALYTICS } from "@/constants/analytics";
 import { SITE } from "@/config/site";
 import { requirementToUnitsFilter } from "@/lib/match/requirement-to-units-filter";
-import EditRequirementDialog from "./buy-request-dialog";
+import BuyRequestDialog from "./buy-request-dialog";
 import {
   loadPublicBuyRequest,
   savePublicBuyRequest,
@@ -134,21 +134,17 @@ export default function BuyRequestCta({
         {label || translate("lenaqar.actions.buyUnit", "Buy Unit")}
         <ActionButtonArrow size={size} />
       </button>
-      <EditRequirementDialog
+      <BuyRequestDialog
         open={open}
         onClose={() => setOpen(false)}
         userId={userId}
         onUserId={handleUserId}
-        clientId={SITE.clientId}
         title={translate("lenaqar.buyRequest.title")}
         submitLabel={translate("lenaqar.buyRequest.submit")}
         intro={translate("lenaqar.buyRequest.intro")}
         successMessage={translate("lenaqar.buyRequest.saved")}
-        defaultPurpose="buy"
-        initialValues={{ purpose: "buy", ...(initialValues || {}) }}
+        initialValues={initialValues || {}}
         showContactFields={!userId}
-        fetchProjects={false}
-        compact
         overlayClassName="!z-[70]"
         loadRequirement={loadRequirement}
         saveRequirement={saveRequirement}

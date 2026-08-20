@@ -180,7 +180,6 @@ export default function PublicSellCta({
           <UnitLocationSearch
             isPublic
             projectSource="catalog"
-            hydrateSelectedProject
             showHint
             showHierarchySummary
             name="sell_unit_location"
