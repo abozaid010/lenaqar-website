@@ -17,6 +17,11 @@ export default {
     subDistrict: "الحي",
     compound: "المشروع",
     locationLoadFailed: "تعذّر تحميل المواقع. حاول تاني.",
+    locationSearchLabel: "الموقع / المشروع",
+    locationSearchPlaceholder: "ابحث عن مشروع أو منطقة أو حي أو مدينة…",
+    locationSearchEmpty: "مفيش مواقع أو مشاريع مطابقة",
+    locationSearchHint:
+      "اختار موقع نهائي: مشروع أو حي فرعي، أو منطقة من غير أحياء فرعية. اختيار المشروع بيملأ المدينة والمنطقة والحي.",
   },
   unitsFilter: {
     allLocations: "كل المواقع",

@@ -477,7 +477,9 @@ export default function UnitLocationSearch({
         <p className="text-xs text-gray-500">
           {translate(
             "basicDetails.locationSearchHint",
-            "Select a leaf location: project, sub-district, or a district with no sub-districts. Choosing a project fills city, district, and area.",
+            locale === "ar"
+              ? "اختار موقع نهائي: مشروع أو حي فرعي، أو منطقة من غير أحياء فرعية. اختيار المشروع بيملأ المدينة والمنطقة والحي."
+              : "Select a leaf location: project, sub-district, or a district with no sub-districts. Choosing a project fills city, district, and area.",
           )}
         </p>
       ) : null}

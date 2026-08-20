@@ -17,6 +17,11 @@ export default {
     subDistrict: "Sub-district",
     compound: "Project",
     locationLoadFailed: "Couldn't load locations. Try again.",
+    locationSearchLabel: "Location / Project",
+    locationSearchPlaceholder: "Search project, area, district, or city…",
+    locationSearchEmpty: "No matching locations or projects",
+    locationSearchHint:
+      "Select a leaf location: project, sub-district, or a district with no sub-districts. Choosing a project fills city, district, and area.",
   },
   unitsFilter: {
     allLocations: "All locations",
