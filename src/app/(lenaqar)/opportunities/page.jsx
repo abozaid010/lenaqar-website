@@ -7,6 +7,7 @@ import {
 import OpportunitiesPageContent from "./opportunities-page-content";
 
 export const revalidate = 900;
+export const maxDuration = 20;
 
 export const metadata = {
   title: "شقق ووحدات ريسيل للبيع بالتقسيط في مصر",

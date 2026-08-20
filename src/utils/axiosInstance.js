@@ -6,9 +6,12 @@ import { COOKIE_KEYS } from "@/constants/cookieKeys";
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, // 30 seconds timeout
+  timeout: 8000,
   headers: {
     "Content-Type": "application/json",
+    Accept: "application/json",
+    "User-Agent":
+      "LenaQar-Marketplace/1.0 (+https://www.lenaqar.com; server-side catalog)",
   },
 });
 

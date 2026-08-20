@@ -12,6 +12,11 @@
 
 const BFF_SECRET = (process.env.BFF_SECRET ?? "").trim();
 export const HAS_BFF_SECRET = BFF_SECRET.length > 0;
+const FETCH_TIMEOUT_MS = 8_000;
+
+/** Node's default User-Agent (`node`) is challenged by Cloudflare Bot Fight. */
+const SERVER_USER_AGENT =
+  "LenaQar-Marketplace/1.0 (+https://www.lenaqar.com; server-side catalog)";
 
 if (
   process.env.VERCEL &&
@@ -25,6 +30,24 @@ if (
 }
 
 /**
+ * Cloudflare JS challenge HTML — origin never sees the request.
+ * @param {Response} response
+ * @param {string} [body]
+ */
+export function isCloudflareChallenge(response, body = "") {
+  const mitigated = (response.headers.get("cf-mitigated") || "").toLowerCase();
+  if (mitigated && mitigated !== "none") return true;
+  const contentType = (response.headers.get("content-type") || "").toLowerCase();
+  if (contentType.includes("text/html") && response.status === 403) return true;
+  const snippet = String(body).slice(0, 500).toLowerCase();
+  return (
+    snippet.includes("just a moment") ||
+    snippet.includes("cf-browser-verification") ||
+    snippet.includes("challenge-platform")
+  );
+}
+
+/**
  * Drop-in replacement for `fetch()` that injects X-BFF-Secret.
  * @param {string | URL} url
  * @param {RequestInit} [options]
@@ -33,9 +56,23 @@ if (
 export function bffFetch(url, options = {}) {
   const headers = new Headers(options.headers);
 
+  if (!headers.has("User-Agent")) {
+    headers.set("User-Agent", SERVER_USER_AGENT);
+  }
+  if (!headers.has("Accept")) {
+    headers.set("Accept", "application/json");
+  }
+  if (!headers.has("Accept-Language")) {
+    headers.set("Accept-Language", "ar-EG,ar;q=0.9,en;q=0.8");
+  }
+
   if (BFF_SECRET) {
     headers.set("X-BFF-Secret", BFF_SECRET);
   }
 
-  return fetch(url, { ...options, headers });
+  return fetch(url, {
+    ...options,
+    headers,
+    signal: options.signal ?? AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
 }
