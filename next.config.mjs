@@ -75,25 +75,6 @@ const nextConfig = {
       },
     ];
   },
-  async rewrites() {
-    const adminPaths = [
-      'dashboard', 'campaigns', 'campaign-chat', 'schedule',
-      'analytics', 'units', 'team', 'myProjects', 'developers', 'news', 'map', 'notifications',
-      'social-media',
-      'market-index',
-      'locations',
-      'tools',
-      'matching',
-    ];
-    // `api` is excluded so `/api/social-media/*` BFF routes are not rewritten to pages.
-    const clientIdSegment = "/:clientId((?!api$)[^/]+)";
-    const adminRewrites = adminPaths.flatMap((path) => [
-      { source: `${clientIdSegment}/${path}`, destination: `/${path}` },
-      { source: `${clientIdSegment}/${path}/:rest*`, destination: `/${path}/:rest*` },
-    ]);
-
-    return adminRewrites;
-  },
 };
 
 export default nextConfig;

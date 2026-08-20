@@ -22,7 +22,6 @@ import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-context";
-import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
 import { BULK_AVAILABILITY_DEFAULT_MESSAGE_AR } from "@/lib/units/unit-whatsapp-recipient";
 import {
   getAuthorOptionLabel,
@@ -1250,16 +1249,6 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
             />
           )}
 
-          {showBulkToolbar && (
-            <AddNewWhatsappCampaignDialog
-              isOpen={isWhatsappBulkOpen}
-              onClose={() => setIsWhatsappBulkOpen(false)}
-              recipients={bulkSelection.resolvedRecipients}
-              defaultAutomationMessage={defaultAvailabilityMessage}
-              appendUnitLinkPerRecipient
-              onSendSuccess={() => bulkSelection.clearUnitSelection()}
-            />
-          )}
         </div>
 
         {/* Filters: compact bar + sheet on mobile; sticky sidebar on desktop */}

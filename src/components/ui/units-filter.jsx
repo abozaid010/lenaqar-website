@@ -34,7 +34,6 @@ const UploadUnitsExcelDialog = dynamic(
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useBrokerUnitsBadgeOptional } from "@/context/broker-units-badge-context";
 import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-context";
-import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
 import { BULK_AVAILABILITY_DEFAULT_MESSAGE_AR } from "@/lib/units/unit-whatsapp-recipient";
 import { detectBrokerUnitIds } from "@/lib/units/detect-broker-units";
 import {
@@ -2132,16 +2131,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         />
       )}
 
-      {showBulkToolbar && (
-        <AddNewWhatsappCampaignDialog
-          isOpen={isWhatsappBulkOpen}
-          onClose={() => setIsWhatsappBulkOpen(false)}
-          recipients={bulkSelection.resolvedRecipients}
-          defaultAutomationMessage={defaultAvailabilityMessage}
-          appendUnitLinkPerRecipient
-          onSendSuccess={() => bulkSelection.clearUnitSelection()}
-        />
-      )}
     </>
   );
 
