@@ -30,11 +30,13 @@ axiosInstance.interceptors.request.use(async (config) => {
   }
 
   if (!config.headers.Authorization) {
-    const cookieStore = await cookies();
-    const token = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const accessKey = COOKIE_KEYS.ACCESS_TOKEN;
+    if (accessKey) {
+      const cookieStore = await cookies();
+      const token = cookieStore.get(accessKey)?.value;
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
   }
 

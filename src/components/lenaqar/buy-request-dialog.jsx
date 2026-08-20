@@ -350,6 +350,7 @@ export default function BuyRequestDialog({
               district={form.district}
               subDistrict={form.sub_district}
               onChange={handleLocationChange}
+              enabled={open}
               required
               error={Boolean(locationError)}
               errorMessage={locationError}

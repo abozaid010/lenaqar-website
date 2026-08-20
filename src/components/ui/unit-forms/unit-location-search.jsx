@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { useI18n } from "@/hooks/useI18n";
-import CityManager from "@/utils/city_manager";
+import { useLocationsGeo } from "@/hooks/use-locations-geo";
 
 function normalizeQuery(value) {
   return String(value || "")
@@ -56,10 +56,23 @@ export default function UnitLocationSearch({
   name = "unit_location_search",
   className = "flex flex-col gap-2 md:col-span-2",
   buttonClassName = "",
+  /** When false, defer loading geo + project catalogs (e.g. closed dialog). */
+  enabled = true,
 }) {
   const { locale, translate } = useI18n();
-  const cityManager = CityManager.getInstance();
   const source = projectSource || "catalog";
+
+  const {
+    data: geo,
+    isLoading: geoLoading,
+    isFetching: geoFetching,
+    isError: geoError,
+    refetch: refetchGeo,
+  } = useLocationsGeo({ enabled });
+
+  const cities = geo?.cities ?? [];
+  const districts = geo?.districts ?? [];
+  const subDistricts = geo?.subDistricts ?? [];
 
   const { data: feedProjects, isLoading: feedProjectsLoading } = useQuery({
     queryKey: ["lenaqar", "project-names"],
@@ -70,7 +83,7 @@ export default function UnitLocationSearch({
       const rows = json?.data ?? json;
       return Array.isArray(rows) ? rows : [];
     },
-    enabled: source === "feed",
+    enabled: source === "feed" && enabled,
     staleTime: 1000 * 60 * 5,
     retry: 1,
   });
@@ -83,7 +96,7 @@ export default function UnitLocationSearch({
       const rows = json?.data ?? json;
       return Array.isArray(rows) ? rows : [];
     },
-    enabled: source === "catalog",
+    enabled: source === "catalog" && enabled,
     staleTime: 1000 * 60 * 5,
     retry: 1,
   });
@@ -91,42 +104,12 @@ export default function UnitLocationSearch({
   const projectsLoading =
     source === "feed" ? feedProjectsLoading : catalogProjectsLoading;
 
-  const [geoLoading, setGeoLoading] = useState(true);
-  const [cities, setCities] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [subDistricts, setSubDistricts] = useState([]);
   const [fetchingProject, setFetchingProject] = useState(false);
 
   const allProjects = useMemo(
     () => (Array.isArray(projectsData) ? projectsData : []),
     [projectsData],
   );
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        setGeoLoading(true);
-        await cityManager.initializeData();
-        if (cancelled) return;
-        setCities(await cityManager.getCities());
-        setDistricts(await cityManager.getDistricts());
-        setSubDistricts(await cityManager.getSubDistricts());
-      } catch (err) {
-        console.error("Failed to load location index:", err?.message ?? err);
-        if (!cancelled) {
-          setCities([]);
-          setDistricts([]);
-          setSubDistricts([]);
-        }
-      } finally {
-        if (!cancelled) setGeoLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [cityManager]);
 
   const labelFor = useCallback(
     (en, ar) => (locale === "ar" ? ar || en : en || ar) || "",
@@ -334,7 +317,14 @@ export default function UnitLocationSearch({
     onSelectLocation?.(opt.payload);
   };
 
-  const isLoading = geoLoading || projectsLoading || fetchingProject;
+  const isLoading = geoLoading || geoFetching || projectsLoading || fetchingProject;
+  const loadFailedMessage = translate(
+    "basicDetails.locationLoadFailed",
+    locale === "ar"
+      ? "تعذّر تحميل المواقع. حاول تاني."
+      : "Couldn't load locations. Try again.",
+  );
+  const retryLabel = translate("common.retry", locale === "ar" ? "حاول تاني" : "Retry");
   const resolvedPlaceholder =
     placeholder ||
     translate(
@@ -357,8 +347,11 @@ export default function UnitLocationSearch({
         value={selectedKey}
         onChange={handleChange}
         required={required}
-        error={error}
-        errorMessage={errorMessage}
+        error={error || geoError}
+        errorMessage={
+          errorMessage ||
+          (geoError ? loadFailedMessage : "")
+        }
         disabled={disabled || fetchingProject}
         isLoading={isLoading}
         showAllOption={showAllOption}
@@ -406,6 +399,15 @@ export default function UnitLocationSearch({
           return selectedSummary.title || "";
         }}
       />
+      {geoError ? (
+        <button
+          type="button"
+          onClick={() => refetchGeo()}
+          className="text-xs font-medium text-primary underline underline-offset-2"
+        >
+          {retryLabel}
+        </button>
+      ) : null}
       {showHierarchySummary &&
       (formData?.city || formData?.district || formData?.sub_district) ? (
         <p className="text-xs text-gray-500">

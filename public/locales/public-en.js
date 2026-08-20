@@ -9,15 +9,19 @@ export default {
     cancel: "Cancel",
     submit: "Save",
     all: "All",
+    retry: "Retry",
   },
   basicDetails: {
     city: "City",
     district: "District",
     subDistrict: "Sub-district",
     compound: "Project",
+    locationLoadFailed: "Couldn't load locations. Try again.",
   },
   unitsFilter: {
     allLocations: "All locations",
+    locationSearchPlaceholder: "Search city, district, or area…",
+    locationSearchEmpty: "No matching locations",
   },
   unitFormValidation: {
     locationRequired: "Please select a valid location.",
