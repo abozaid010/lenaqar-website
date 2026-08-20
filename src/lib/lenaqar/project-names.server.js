@@ -1,5 +1,5 @@
 import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
-import { bffFetch } from "@/lib/bffFetch";
+import { bffFetch, isCloudflareChallenge } from "@/lib/bffFetch";
 import { SITE, lenaqarInventoryQuery } from "@/config/site";
 
 const TTL_MS = 60 * 60 * 1000;
@@ -65,6 +65,10 @@ async function fetchResaleUnitsPage(cursor) {
   });
 
   if (!response.ok) {
+    const errBody = await response.text().catch(() => "");
+    if (isCloudflareChallenge(response, errBody)) {
+      throw new Error("PROJECT_NAMES_FETCH_FAILED_CLOUDFLARE");
+    }
     throw new Error(`PROJECT_NAMES_FETCH_FAILED_${response.status}`);
   }
 

@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
-import { bffFetch } from "@/lib/bffFetch";
+import { bffFetch, isCloudflareChallenge } from "@/lib/bffFetch";
 import { SITE, lenaqarInventoryQuery } from "@/config/site";
 import { mapSlimUnitToListItem } from "@/lib/units/slim-unit-list-mapper";
 import { getPublicUnitByCode } from "@/lib/units/unit-api";
@@ -71,14 +71,18 @@ async function fetchPage(query) {
     });
 
     if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      const cf = isCloudflareChallenge(response, body);
       console.error(
         "[lenaqar] units fetch failed",
         response.status,
-        response.status === 401
-          ? "(check X_API_KEY on the server)"
-          : response.status === 403
-            ? "(check BFF_SECRET on Vercel — backend blocks serverless egress without it)"
-            : ""
+        cf
+          ? "(Cloudflare JS challenge on api.lenaai.net — origin never saw this request)"
+          : response.status === 401
+            ? "(check X_API_KEY on the server)"
+            : response.status === 403
+              ? "(check BFF_SECRET on Vercel — backend blocks serverless egress without it)"
+              : ""
       );
       return { units: [], pagination: {} };
     }
