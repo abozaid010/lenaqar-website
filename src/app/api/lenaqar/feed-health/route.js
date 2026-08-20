@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { API_BASE_URL, HAS_X_API_KEY, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
+import { HAS_BFF_SECRET, bffFetch } from "@/lib/bffFetch";
 import { SITE, lenaqarInventoryQuery } from "@/config/site";
 
 export const dynamic = "force-dynamic";
@@ -20,9 +21,11 @@ export async function GET() {
 
   if (!HAS_X_API_KEY) {
     apiError = "missing_api_key";
+  } else if (process.env.VERCEL && !HAS_BFF_SECRET) {
+    apiError = "missing_bff_secret";
   } else {
     try {
-      const response = await fetch(`${API_BASE_URL}/public/v1/units?${qs}`, {
+      const response = await bffFetch(`${API_BASE_URL}/public/v1/units?${qs}`, {
         headers: {
           accept: "application/json",
           "X-API-Key": PUBLIC_X_API_KEY,
@@ -35,7 +38,8 @@ export async function GET() {
         const units = json?.data?.units ?? json?.units ?? [];
         unitCount = Array.isArray(units) ? units.length : 0;
       } else {
-        apiError = `http_${response.status}`;
+        const body = await response.text().catch(() => "");
+        apiError = `http_${response.status}${body ? `:${body.slice(0, 120)}` : ""}`;
       }
     } catch (error) {
       apiError = error instanceof Error ? error.message : "fetch_failed";
@@ -44,8 +48,9 @@ export async function GET() {
 
   return NextResponse.json(
     {
-      ok: HAS_X_API_KEY && apiStatus === 200 && unitCount > 0,
+      ok: HAS_X_API_KEY && HAS_BFF_SECRET && apiStatus === 200 && unitCount > 0,
       hasApiKey: HAS_X_API_KEY,
+      hasBffSecret: HAS_BFF_SECRET,
       tenant,
       apiStatus,
       unitCount,

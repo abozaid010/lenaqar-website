@@ -1,12 +1,11 @@
 import { cache } from "react";
 import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
+import { bffFetch } from "@/lib/bffFetch";
 import { SITE, lenaqarInventoryQuery } from "@/config/site";
 import { mapSlimUnitToListItem } from "@/lib/units/slim-unit-list-mapper";
 import { getPublicUnitByCode } from "@/lib/units/unit-api";
 import { toPublicOpportunity } from "./to-public-opportunity";
 import { isListableOpportunity, validateUnit } from "./validate-unit";
-
-const BFF_SECRET = process.env.BFF_SECRET ?? "";
 
 function yearFromDate(value) {
   if (!value) return null;
@@ -57,7 +56,6 @@ async function fetchPage(query) {
 
   const headers = { accept: "application/json" };
   if (PUBLIC_X_API_KEY) headers["X-API-Key"] = PUBLIC_X_API_KEY;
-  if (BFF_SECRET) headers["X-BFF-Secret"] = BFF_SECRET;
 
   if (!PUBLIC_X_API_KEY) {
     console.error(
@@ -67,7 +65,7 @@ async function fetchPage(query) {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/public/v1/units?${qs}`, {
+    const response = await bffFetch(`${API_BASE_URL}/public/v1/units?${qs}`, {
       headers,
       next: { revalidate: 900 },
     });
@@ -76,7 +74,11 @@ async function fetchPage(query) {
       console.error(
         "[lenaqar] units fetch failed",
         response.status,
-        response.status === 401 ? "(check X_API_KEY on the server)" : ""
+        response.status === 401
+          ? "(check X_API_KEY on the server)"
+          : response.status === 403
+            ? "(check BFF_SECRET on Vercel — backend blocks serverless egress without it)"
+            : ""
       );
       return { units: [], pagination: {} };
     }

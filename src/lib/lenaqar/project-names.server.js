@@ -1,8 +1,8 @@
 import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
+import { bffFetch } from "@/lib/bffFetch";
 import { SITE, lenaqarInventoryQuery } from "@/config/site";
 
 const TTL_MS = 60 * 60 * 1000;
-const BFF_SECRET = process.env.BFF_SECRET ?? "";
 
 /** @type {{ data: object[]|null, fetchedAt: number, promise: Promise<object[]>|null }} */
 const cache = {
@@ -58,9 +58,8 @@ async function fetchResaleUnitsPage(cursor) {
 
   const headers = { accept: "application/json" };
   if (PUBLIC_X_API_KEY) headers["X-API-Key"] = PUBLIC_X_API_KEY;
-  if (BFF_SECRET) headers["X-BFF-Secret"] = BFF_SECRET;
 
-  const response = await fetch(`${API_BASE_URL}/public/v1/units?${qs}`, {
+  const response = await bffFetch(`${API_BASE_URL}/public/v1/units?${qs}`, {
     headers,
     next: { revalidate: 900 },
   });
@@ -134,8 +133,7 @@ function unwrapProjectRows(body) {
 async function fetchCatalogJson(path) {
   const headers = { accept: "application/json" };
   if (PUBLIC_X_API_KEY) headers["X-API-Key"] = PUBLIC_X_API_KEY;
-  if (BFF_SECRET) headers["X-BFF-Secret"] = BFF_SECRET;
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await bffFetch(`${API_BASE_URL}${path}`, {
     headers,
     next: { revalidate: 3600 },
   });
