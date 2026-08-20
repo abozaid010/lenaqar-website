@@ -41,7 +41,7 @@ export default function UnifiedDialog({
   /** Optional class for the dialog panel (e.g. max-width) */
   dialogClassName = "",
 }) {
-  const { t, locale } = useI18n();
+  const { locale, translate } = useI18n();
   const isRTL = locale === "ar";
   const dialogRef = useRef(null);
   const [mounted, setMounted] = useState(false);
@@ -50,16 +50,17 @@ export default function UnifiedDialog({
   useEffect(() => {
     setMounted(true);
   }, []);
-  
-  // Use translated labels and guard against blank strings.
+
+  const fallbackCancel = translate("common.cancel", locale === "ar" ? "إلغاء" : "Cancel");
+  const fallbackSubmit = translate("common.submit", locale === "ar" ? "حفظ" : "Save");
   const finalCancelLabel =
     typeof cancelLabel === "string"
-      ? cancelLabel.trim() || t?.buttons?.cancel || (locale === "ar" ? "إلغاء" : "Cancel")
-      : cancelLabel ?? t?.buttons?.cancel ?? (locale === "ar" ? "إلغاء" : "Cancel");
+      ? cancelLabel.trim() || fallbackCancel
+      : cancelLabel ?? fallbackCancel;
   const finalSubmitLabel =
     typeof submitLabel === "string"
-      ? submitLabel.trim() || t?.buttons?.submit || (locale === "ar" ? "حفظ" : "Save")
-      : submitLabel ?? t?.buttons?.submit ?? (locale === "ar" ? "حفظ" : "Save");
+      ? submitLabel.trim() || fallbackSubmit
+      : submitLabel ?? fallbackSubmit;
 
   useEffect(() => {
     const handleEscape = (e) => {

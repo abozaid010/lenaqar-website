@@ -5,7 +5,9 @@ export default {
   lenaqar,
   common: {
     loading: "Loading...",
+    saving: "Saving...",
     cancel: "Cancel",
+    submit: "Save",
     all: "All",
   },
   basicDetails: {
@@ -16,5 +18,11 @@ export default {
   },
   unitsFilter: {
     allLocations: "All locations",
+  },
+  unitFormValidation: {
+    locationRequired: "Please select a valid location.",
+    locationSelectDistrict: "Please select a district.",
+    locationSelectSubdistrict: "Please select a subdistrict.",
+    locationSelectDeepest: "Please select the deepest available location.",
   },
 };

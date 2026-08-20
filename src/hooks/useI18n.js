@@ -115,50 +115,44 @@ export function useI18n() {
     textAlign: locale === 'ar' ? 'right' : 'left',
   }), [locale]);
 
-  // Common translation helpers
-  const common = useMemo(() => ({
-    // Actions
-    save: translate('common.save'),
-    cancel: translate('common.cancel'),
-    delete: translate('common.delete'),
-    edit: translate('common.edit'),
-    add: translate('common.add'),
-    retry: translate('common.retry'),
-    loading: translate('common.loading'),
-    
-    // Status
-    success: translate('common.success'),
-    error: translate('common.error'),
-    warning: translate('common.warning'),
-    info: translate('common.info'),
-    
-    // Navigation
-    back: translate('common.back'),
-    next: translate('common.next'),
-    previous: translate('common.previous'),
-    
-    // Form
-    required: translate('common.required'),
-    optional: translate('common.optional'),
-    submit: translate('common.submit'),
-    
-    // Dashboard specific
-    selectLead: translate('dashboard.selectLead'),
-    leads: translate('dashboard.leads'),
-    requirement: translate('dashboard.requirement'),
-    contact: translate('dashboard.contact'),
-    actions: translate('dashboard.actions'),
-    loadingConversation: translate('common.loadingConversation'),
-    couldNotLoadChat: translate('common.couldNotLoadChat'),
-    failedToLoadLeads: translate('common.failedToLoadLeads'),
-    loadingMore: translate('common.loadingMore'),
-    loadMore: translate('common.loadMore'),
-    deleteUser: translate('common.deleteUser'),
-    deleteCannotBeUndone: translate('common.deleteCannotBeUndone'),
-    openWhatsApp: translate('common.openWhatsApp'),
-    whatsapp: translate('common.whatsapp'),
-    operationFailed: translate('common.operationFailed'),
-  }), [translate]);
+  // Lazy so unused CRM keys are not resolved (and logged) on every hook call.
+  const common = useMemo(() => {
+    const text = (key) => translate(key);
+    return {
+      get save() { return text("common.save"); },
+      get cancel() { return text("common.cancel"); },
+      get delete() { return text("common.delete"); },
+      get edit() { return text("common.edit"); },
+      get add() { return text("common.add"); },
+      get retry() { return text("common.retry"); },
+      get loading() { return text("common.loading"); },
+      get success() { return text("common.success"); },
+      get error() { return text("common.error"); },
+      get warning() { return text("common.warning"); },
+      get info() { return text("common.info"); },
+      get back() { return text("common.back"); },
+      get next() { return text("common.next"); },
+      get previous() { return text("common.previous"); },
+      get required() { return text("common.required"); },
+      get optional() { return text("common.optional"); },
+      get submit() { return text("common.submit"); },
+      get selectLead() { return text("dashboard.selectLead"); },
+      get leads() { return text("dashboard.leads"); },
+      get requirement() { return text("dashboard.requirement"); },
+      get contact() { return text("dashboard.contact"); },
+      get actions() { return text("dashboard.actions"); },
+      get loadingConversation() { return text("common.loadingConversation"); },
+      get couldNotLoadChat() { return text("common.couldNotLoadChat"); },
+      get failedToLoadLeads() { return text("common.failedToLoadLeads"); },
+      get loadingMore() { return text("common.loadingMore"); },
+      get loadMore() { return text("common.loadMore"); },
+      get deleteUser() { return text("common.deleteUser"); },
+      get deleteCannotBeUndone() { return text("common.deleteCannotBeUndone"); },
+      get openWhatsApp() { return text("common.openWhatsApp"); },
+      get whatsapp() { return text("common.whatsapp"); },
+      get operationFailed() { return text("common.operationFailed"); },
+    };
+  }, [translate]);
 
   // Property-related helpers
   const property = useMemo(() => ({

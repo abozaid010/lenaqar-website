@@ -97,8 +97,7 @@ export default function BuyRequestDialog({
   loadRequirement,
   saveRequirement,
 }) {
-  const { locale, translate } = useI18n();
-  const tr = (key, fallback) => translate(key, fallback);
+  const { locale, translate: tr } = useI18n();
 
   const { data: catalogProjects = [], isLoading: catalogProjectsLoading } = useQuery({
     queryKey: ["lenaqar", "catalog-projects"],
@@ -129,20 +128,27 @@ export default function BuyRequestDialog({
         value,
         label: tr(`buildingTypes.${value}`, value),
       })),
-    [locale, translate],
+    [locale, tr],
   );
 
   const compactError = (key) =>
     fieldErrors[key]
-      ? tr(`lenaqar.buyRequest.errors.${fieldErrors[key]}`)
+      ? tr(
+          `lenaqar.buyRequest.errors.${fieldErrors[key]}`,
+          locale === "ar" ? "راجع البيانات المطلوبة" : "Check the required fields",
+        )
       : "";
 
   useEffect(() => {
-    if (!open) {
-      setLocationError("");
-      setFieldErrors({});
-      return undefined;
-    }
+    if (open) return;
+    setLocationError("");
+    setFieldErrors((prev) =>
+      prev && Object.keys(prev).length === 0 ? prev : {},
+    );
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return undefined;
     if (!userId) {
       setForm(createEmptyForm(initialValues));
       setContactName("");
@@ -227,7 +233,7 @@ export default function BuyRequestDialog({
       CityManager.getInstance(),
     );
     if (!locationResult.ok) {
-      const message = tValidation(translate, locationResult.key);
+      const message = tValidation(tr, locationResult.key);
       setLocationError(message);
       toast.error(message);
       return;
@@ -285,7 +291,7 @@ export default function BuyRequestDialog({
       isOpen={open}
       onClose={onClose}
       title={title || tr("lenaqar.buyRequest.title", "Buy request")}
-      cancelLabel={tr("buttons.cancel", locale === "ar" ? "إلغاء" : "Cancel")}
+      cancelLabel={tr("common.cancel", locale === "ar" ? "إلغاء" : "Cancel")}
       onCancel={onClose}
       submitLabel={
         saving

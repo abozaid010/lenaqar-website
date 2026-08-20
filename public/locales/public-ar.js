@@ -5,7 +5,9 @@ export default {
   lenaqar,
   common: {
     loading: "جاري التحميل...",
+    saving: "جارٍ الحفظ...",
     cancel: "إلغاء",
+    submit: "حفظ",
     all: "الكل",
   },
   basicDetails: {
@@ -16,5 +18,11 @@ export default {
   },
   unitsFilter: {
     allLocations: "كل المواقع",
+  },
+  unitFormValidation: {
+    locationRequired: "يرجى اختيار موقع صالح.",
+    locationSelectDistrict: "يرجى اختيار المنطقة.",
+    locationSelectSubdistrict: "يرجى اختيار الحي الفرعي.",
+    locationSelectDeepest: "يرجى اختيار أعمق مستوى متاح للموقع.",
   },
 };

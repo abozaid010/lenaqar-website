@@ -143,7 +143,7 @@ export default function BuyRequestCta({
         submitLabel={translate("lenaqar.buyRequest.submit")}
         intro={translate("lenaqar.buyRequest.intro")}
         successMessage={translate("lenaqar.buyRequest.saved")}
-        initialValues={initialValues || {}}
+        initialValues={initialValues}
         showContactFields={!userId}
         overlayClassName="!z-[70]"
         loadRequirement={loadRequirement}
