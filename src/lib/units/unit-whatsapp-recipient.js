@@ -3,7 +3,11 @@ import {
   resolveUnitCodeFromListItem,
   resolveUnitIdFromListItem,
 } from "@/lib/units/unit-share-links";
-import { resolveWhatsappRecipientFields } from "@/lib/whatsapp-recipient";
+
+function resolveWhatsappRecipientFields({ phone_number }) {
+  const normalized = String(phone_number ?? "").trim();
+  return normalized ? { phone_number: normalized } : null;
+}
 
 /** Default WhatsApp body for bulk availability checks — always Arabic. */
 export const BULK_AVAILABILITY_DEFAULT_MESSAGE_AR =

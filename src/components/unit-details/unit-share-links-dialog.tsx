@@ -4,9 +4,7 @@ import { useState } from 'react';
 import { Check, Copy, ExternalLink, Globe, MessageCircle } from 'lucide-react';
 import UnifiedDialog from '@/components/ui/UnifiedDialog';
 import { useI18n } from '@/hooks/useI18n';
-import { useMessagingProviderConfig } from '@/hooks/useMessagingProviderConfig';
 import { buildUnitShareLinks, buildUnitWhatsappShareMessage } from '@/lib/units/unit-share-links';
-import { normalizeWhatsappPhone } from '@/lib/whatsapp-messaging-provider';
 
 interface UnitShareLinksDialogProps {
   isOpen: boolean;
@@ -74,13 +72,7 @@ export default function UnitShareLinksDialog({
   listingClientId,
 }: UnitShareLinksDialogProps) {
   const { translate } = useI18n();
-  const { data: messagingConfig } = useMessagingProviderConfig();
-  const primaryAccount =
-    messagingConfig?.readyAccounts?.[0] ?? messagingConfig?.accounts?.[0] ?? null;
-  const linkedWhatsappNumberRaw = primaryAccount?.whatsapp_number ?? null;
-  const linkedWhatsappNumber = linkedWhatsappNumberRaw
-    ? normalizeWhatsappPhone(linkedWhatsappNumberRaw)
-    : null;
+  const linkedWhatsappNumber = null;
   const [copiedWebsite, setCopiedWebsite] = useState(false);
   const [copiedWhatsapp, setCopiedWhatsapp] = useState(false);
 

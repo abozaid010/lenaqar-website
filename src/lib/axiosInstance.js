@@ -2,7 +2,6 @@
 
 import axios from "axios";
 import { TokenRefreshService } from "./TokenRefreshService";
-import { isPermissionsUpdatedError } from "@/constants/permissionsAuth";
 import { isPublicSiteRoute } from "@/lib/lenaqar/is-public-site-route";
 
 // All API calls route through the same-origin BFF at /api/crm/*.
@@ -29,16 +28,6 @@ axiosInstance.interceptors.response.use(
       isPublicSiteRoute(window.location.pathname)
     ) {
       return Promise.reject(error);
-    }
-
-    if (error.response?.status === 401) {
-      const detail = error.response?.data?.detail;
-      if (isPermissionsUpdatedError(detail)) {
-        await TokenRefreshService.clearSessionAndRedirectToLogin({
-          reason: "permissions_updated",
-        });
-        return Promise.reject(error);
-      }
     }
 
     if (error.response?.status === 401 && !originalRequest._retry) {

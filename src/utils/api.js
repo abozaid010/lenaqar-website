@@ -29,7 +29,18 @@ import { withErrorHandling, createApiError, ERROR_TYPES } from "./api-error-hand
 import { validateClientId, createSafeClientId } from "./clientId-validator";
 import { with2SecondRetry } from "./api-retry";
 import { cleanRequirementsPayload } from "./cleanRequirements";
-import { resolveWhatsappRecipientFields } from "@/lib/whatsapp-recipient";
+import { parseMoneyInput } from "@/utils/parse-amount";
+
+function resolveWhatsappRecipientFields(msg) {
+  if (!msg || typeof msg !== "object") return null;
+  const phone = msg.phone_number ?? msg.chat_id;
+  if (!phone) return null;
+  const normalized = String(phone).trim();
+  if (!normalized) return null;
+  const out = { phone_number: normalized };
+  if (msg.chat_id) out.chat_id = String(msg.chat_id).trim();
+  return out;
+}
 import {
   resolveWhatsappMessageSource,
   WHATSAPP_RATE_LIMIT_EXCEEDED_CODE,
