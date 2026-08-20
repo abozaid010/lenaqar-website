@@ -59,6 +59,13 @@ async function fetchPage(query) {
   if (PUBLIC_X_API_KEY) headers["X-API-Key"] = PUBLIC_X_API_KEY;
   if (BFF_SECRET) headers["X-BFF-Secret"] = BFF_SECRET;
 
+  if (!PUBLIC_X_API_KEY) {
+    console.error(
+      "[lenaqar] units fetch skipped — no X_API_KEY / NEXT_PUBLIC_X_API_KEY configured"
+    );
+    return { units: [], pagination: {} };
+  }
+
   try {
     const response = await fetch(`${API_BASE_URL}/public/v1/units?${qs}`, {
       headers,
@@ -66,7 +73,11 @@ async function fetchPage(query) {
     });
 
     if (!response.ok) {
-      console.error("[lenaqar] units fetch failed", response.status);
+      console.error(
+        "[lenaqar] units fetch failed",
+        response.status,
+        response.status === 401 ? "(check X_API_KEY on the server)" : ""
+      );
       return { units: [], pagination: {} };
     }
 
