@@ -11,6 +11,7 @@ import CommissionBlock from "./commission-block";
 import NetworkStrip from "./network-strip";
 import OpportunityCard from "./opportunity-card";
 import CoreActions from "./core-actions";
+import HowItWorksSteps from "./how-it-works-steps";
 import OpportunitiesEmpty from "./opportunities-empty";
 
 export default function HomeContent({ units = [] }) {
@@ -49,44 +50,7 @@ export default function HomeContent({ units = [] }) {
 
       <CommissionBlock />
 
-      <section className="container py-10">
-        <h2 className="text-xl font-bold text-primary mb-6">
-          {translate("lenaqar.home.howTitle")}
-        </h2>
-        <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((step) => (
-            <li
-              key={step}
-              className="rounded-lg border border-black/10 p-5 bg-white"
-            >
-              <p className="text-xs text-black/50 mb-2 tabular-nums">{step}</p>
-              <h3 className="font-semibold mb-2">
-                {step === 4 ? (
-                  <>
-                    {translate("lenaqar.home.howStep4TitleBefore")}
-                    <span className="font-extrabold text-red-600">
-                      {translate("lenaqar.home.howStep4TitleHighlight")}
-                    </span>
-                  </>
-                ) : (
-                  translate(`lenaqar.home.howStep${step}Title`)
-                )}
-              </h3>
-              <p className="text-sm text-black/70">
-                {translate(`lenaqar.home.howStep${step}Body`)}
-              </p>
-            </li>
-          ))}
-        </ol>
-        <div className="mt-6">
-          <Link
-            href="/sell"
-            className="text-sm text-primary font-medium underline-offset-2 hover:underline"
-          >
-            {translate("lenaqar.home.sellLearnMore")}
-          </Link>
-        </div>
-      </section>
+      <HowItWorksSteps />
 
       <NetworkStrip />
 
