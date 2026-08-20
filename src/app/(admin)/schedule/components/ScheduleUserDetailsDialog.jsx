@@ -5,7 +5,7 @@ import NewActionForm from "@/app/(admin)/dashboard/_components/new-action-form";
 import ChatHistory from "@/app/(admin)/dashboard/[userId]/_components/chat-history";
 import ChatWith from "@/app/(admin)/dashboard/[userId]/_components/chat-with";
 import SendNewMessageForm from "@/app/(admin)/dashboard/[userId]/_components/send-new-message";
-import EditRequirementDialog from "@/app/(admin)/dashboard/_components/split-view/EditRequirementDialog";
+import EditRequirementDialog from "@/components/lenaqar/buy-request-dialog";
 import LeadDetailTabs from "@/app/(admin)/dashboard/_components/split-view/LeadDetailTabs";
 import TagChip from "@/components/ui/tag-chip";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";

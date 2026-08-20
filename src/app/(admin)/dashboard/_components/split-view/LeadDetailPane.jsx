@@ -54,7 +54,7 @@ import toast from "react-hot-toast";
 import { DASHBOARD_BUTTON } from "@/constants/ui-classes";
 import TagChip from "@/components/ui/tag-chip";
 import { ThreeDotsLoader } from "@/components/ui/loading-spinner";
-import EditRequirementDialog from "./EditRequirementDialog";
+import EditRequirementDialog from "@/components/lenaqar/buy-request-dialog";
 import EditUserInfoDialog from "./EditUserInfoDialog";
 import BulkLeadActionDialog from "./BulkLeadActionDialog";
 import LeadDetailTabs from "./LeadDetailTabs";

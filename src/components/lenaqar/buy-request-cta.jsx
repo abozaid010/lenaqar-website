@@ -7,7 +7,7 @@ import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { ANALYTICS } from "@/constants/analytics";
 import { SITE } from "@/config/site";
 import { requirementToUnitsFilter } from "@/lib/match/requirement-to-units-filter";
-import EditRequirementDialog from "@/app/(admin)/dashboard/_components/split-view/EditRequirementDialog";
+import EditRequirementDialog from "./buy-request-dialog";
 import {
   loadPublicBuyRequest,
   savePublicBuyRequest,
