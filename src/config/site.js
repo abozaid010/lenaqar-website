@@ -1,5 +1,5 @@
 export const LENAQAR_TENANT_ID = (
-  process.env.NEXT_PUBLIC_LENAQAR_TENANT_ID || "homey"
+  process.env.NEXT_PUBLIC_LENAQAR_TENANT_ID || "lenaqar"
 ).trim();
 
 export const SITE = {
