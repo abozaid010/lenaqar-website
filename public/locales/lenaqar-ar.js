@@ -154,7 +154,7 @@ export default {
     years: "سنين",
     year: "سنة",
     delivery: "الاستلام",
-    totalValue: "بتمتلك أصل بـ",
+    totalValue: "اجمالى العقد",
     cashMultiple: "مضاعف الكاش",
     priceUpdated: "سعر المطور محدّث: {date}",
     pricePerMeter: "سعر المتر",
