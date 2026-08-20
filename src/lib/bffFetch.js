@@ -10,7 +10,19 @@
  * value as BFF_SECRET on the backend.
  */
 
-const BFF_SECRET = process.env.BFF_SECRET ?? "";
+const BFF_SECRET = (process.env.BFF_SECRET ?? "").trim();
+export const HAS_BFF_SECRET = BFF_SECRET.length > 0;
+
+if (
+  process.env.VERCEL &&
+  !HAS_BFF_SECRET &&
+  process.env.NODE_ENV !== "test"
+) {
+  console.error(
+    "[bffFetch] BFF_SECRET is not set on Vercel. " +
+      "The backend rejects serverless egress with 403 and /opportunities stays empty."
+  );
+}
 
 /**
  * Drop-in replacement for `fetch()` that injects X-BFF-Secret.
