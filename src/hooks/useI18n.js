@@ -4,7 +4,7 @@ import { useI18n as useTranslation } from "@/context/translate-api";
 import { useCallback, useMemo } from "react";
 import { getMappedTranslation, formatDate, formatNumber, formatCurrency } from "@/lib/i18n-mappings";
 import { safePropertyAccess, sanitizeTranslationValue, validateTranslationKey } from "@/utils/translation-sanitizer";
-import arFallback from "../../public/locales/ar.js";
+import arFallback from "../../public/locales/public-ar.js";
 
 const warnedDirectTAccess = new Set();
 
