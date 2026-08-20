@@ -76,7 +76,7 @@ const AI_CRAWLERS = [
 ];
 
 export default function robots(): MetadataRoute.Robots {
-  const allow = ['/', '/sell', '/calculator', '/privacy'];
+  const allow = ['/', '/sell', '/calculator', '/privacy', '/how-it-works'];
   if (SITE.feed.enabled) {
     allow.push('/opportunities', '/opportunities/*');
   }
