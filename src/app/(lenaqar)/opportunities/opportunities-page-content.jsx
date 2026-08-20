@@ -17,15 +17,9 @@ export default function OpportunitiesPageContent({
 
   return (
     <section className="container py-12 pb-24 lg:pb-12">
-      <h1 className="text-3xl font-bold text-primary leading-snug">
+      <h1 className="text-3xl font-bold text-primary leading-snug mb-6">
         {translate("lenaqar.opportunities.title")}
       </h1>
-      <p className="mt-4 mb-2 text-black/70 max-w-2xl">
-        {translate("lenaqar.opportunities.sub")}
-      </p>
-      <p className="text-sm text-black/60 mb-6">
-        {translate("lenaqar.opportunities.honesty")}
-      </p>
 
       <Suspense
         fallback={

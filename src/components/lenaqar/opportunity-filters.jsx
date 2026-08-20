@@ -6,6 +6,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { ANALYTICS } from "@/constants/analytics";
 import UnitLocationSearch from "@/components/ui/unit-forms/unit-location-search";
+import { formatPrice, parseMoneyInput } from "@/utils/parse-amount";
 
 function emptyLocation() {
   return {
@@ -30,6 +31,12 @@ function locationFromSearchParams(searchParams) {
   };
 }
 
+/** URL / form cash → "" or positive integer (Arabic digits normalized). */
+function cashFromParam(value) {
+  const parsed = parseMoneyInput(value);
+  return parsed === "" ? "" : parsed;
+}
+
 export default function OpportunityFilters({ years = [] }) {
   const { translate } = useI18n();
   const { trackEvent } = useGoogleAnalytics();
@@ -37,14 +44,17 @@ export default function OpportunityFilters({ years = [] }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const cash = searchParams.get("cash") || "";
   const delivery = searchParams.get("delivery") || "";
+  const [cash, setCash] = useState(() =>
+    cashFromParam(searchParams.get("cash")),
+  );
   const [location, setLocation] = useState(() =>
     locationFromSearchParams(searchParams),
   );
 
   useEffect(() => {
     setLocation(locationFromSearchParams(searchParams));
+    setCash(cashFromParam(searchParams.get("cash")));
   }, [searchParams]);
 
   function apply(next) {
@@ -60,7 +70,7 @@ export default function OpportunityFilters({ years = [] }) {
     else params.delete("sub_district");
     if (next.project) params.set("project", next.project);
     else params.delete("project");
-    if (next.cash) params.set("cash", next.cash);
+    if (next.cash) params.set("cash", String(next.cash));
     else params.delete("cash");
     if (next.delivery) params.set("delivery", next.delivery);
     else params.delete("delivery");
@@ -75,16 +85,16 @@ export default function OpportunityFilters({ years = [] }) {
       onSubmit={(event) => {
         event.preventDefault();
         const form = new FormData(event.currentTarget);
-        const nextCash = String(form.get("cash") || "").trim();
-        if (nextCash) {
-          trackEvent(ANALYTICS.EVENTS.CASH_ENTERED, { cash: nextCash });
+        const nextCash = cashFromParam(cash);
+        if (nextCash !== "") {
+          trackEvent(ANALYTICS.EVENTS.CASH_ENTERED, { cash: String(nextCash) });
         }
         apply({
           city: location.city,
           district: location.district,
           sub_district: location.sub_district,
           project: location.project,
-          cash: nextCash,
+          cash: nextCash === "" ? "" : String(nextCash),
           delivery: String(form.get("delivery") || "").trim(),
         });
       }}
@@ -128,11 +138,12 @@ export default function OpportunityFilters({ years = [] }) {
       <label className="flex flex-col gap-1 text-sm">
         <span>{translate("lenaqar.opportunities.filterCash")}</span>
         <input
-          name="cash"
-          type="number"
-          min="1"
+          type="text"
           inputMode="numeric"
-          defaultValue={cash}
+          autoComplete="off"
+          dir="ltr"
+          value={formatPrice(cash)}
+          onChange={(event) => setCash(parseMoneyInput(event.target.value))}
           placeholder={translate("lenaqar.opportunities.cashPlaceholder")}
           className="border border-black/15 rounded-md px-3 py-2 tabular-nums"
         />
