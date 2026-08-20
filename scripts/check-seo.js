@@ -105,6 +105,10 @@ function checkFile(filePath) {
       if (returnMatch) {
         titleMatch = returnMatch;
       }
+      // Shorthand: title, after destructuring from LEGACY_REDIRECT_COPY / const { title }
+      if (!titleMatch && /return\s*\{[\s\S]*?\btitle\s*,/.test(content)) {
+        titleMatch = { 1: `Dynamic Title ${relativePath}` };
+      }
       // Check for title variable assignment before return (handles template literals too)
       const titleVarMatch = content.match(/const\s+title\s*=\s*[^;]+/);
       if (titleVarMatch) {
@@ -123,9 +127,9 @@ function checkFile(filePath) {
         }
       }
       // Check for title in return object with variable
-      const returnTitleVar = content.match(/return\s*\{[\s\S]{0,2000}?title\s*:\s*title/);
+      const returnTitleVar = content.match(/return\s*\{[\s\S]{0,2000}?title\s*:\s*title[^|]/);
       if (returnTitleVar) {
-        titleMatch = { 1: 'Dynamic Title' }; // Mark as having title
+        titleMatch = { 1: `Dynamic Title ${relativePath}` }; // Mark as having title
       }
       // Check for template literal title in return
       const templateMatch = content.match(/title\s*:\s*[`'"]\$\{([^}]+)\}[^`'"]*[`'"]/);
@@ -148,13 +152,17 @@ function checkFile(filePath) {
 
       if (!isAdminPage) {
         const titleLower = title.toLowerCase();
-        const hasValueKeyword = VALUE_KEYWORDS.some((keyword) => {
+        const isDynamicTitle =
+          title.startsWith('Dynamic Title') || title === 'Template Title';
+        const hasValueKeyword =
+          !isDynamicTitle &&
+          VALUE_KEYWORDS.some((keyword) => {
           const keywordLower = keyword.toLowerCase();
           if (titleLower.includes(keywordLower)) return true;
           if (title.includes(keyword)) return true;
           return false;
         });
-        if (!hasValueKeyword && !filePath.includes('layout.')) {
+        if (!hasValueKeyword && !filePath.includes('layout.') && !isDynamicTitle) {
           warnings.push(
             `⚠️  ${relativePath}: Title should mention LenaQar value (عقار، أقساط، وحدة، فرص)`
           );
@@ -290,6 +298,10 @@ function checkFile(filePath) {
         if (returnDescVar) {
           descriptionMatch = { 1: 'Dynamic Description' }; // Mark as having description
         }
+      }
+      // Shorthand: description, after destructuring
+      if (!descriptionMatch && /return\s*\{[\s\S]*?\bdescription\s*,/.test(content)) {
+        descriptionMatch = { 1: 'Dynamic Description' };
       }
       
       // If still no match, try to find description in return object (but exclude openGraph.description)

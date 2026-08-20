@@ -27,4 +27,4 @@ Admin files `LeadDetailPane.jsx` and `ScheduleUserDetailsDialog.jsx` still refer
 - i18n now loads `public/locales/public-ar.js` / `public-en.js` (~18 KB vs 181 KB `ar.js`)
 - Dropped 251 npm packages (exceljs, recharts, leaflet, swiper, etc.)
 - `npm run build` passes; lenaqar payload tests 30/30 pass
-- `lint:seo`: 6 errors remain on legacy redirect pages (`properties/`, `property/`, `unit/`) — pre-existing
+- `lint:seo`: passes (legacy redirect pages + privacy title fixed 2026-08-20)
