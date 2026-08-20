@@ -25,6 +25,9 @@ export default function HomeContent({ units = [] }) {
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-primary leading-[1.15] max-w-4xl">
             {translate("lenaqar.home.heroTitle")}
           </h1>
+          <p className="mt-5 inline-block max-w-3xl rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-base font-bold leading-relaxed text-emerald-800 shadow-sm sm:text-lg">
+            {translate("lenaqar.home.heroHook")}
+          </p>
           <p className="mt-6 text-lg sm:text-xl text-black/75 max-w-3xl leading-relaxed">
             {translate("lenaqar.home.heroSub")}
           </p>

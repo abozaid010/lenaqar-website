@@ -57,6 +57,7 @@ export default function PublicSellCta({
   const [form, setForm] = useState(EMPTY_FORM);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phonePayload, setPhonePayload] = useState(null);
+  const [ownerConfirmed, setOwnerConfirmed] = useState(false);
 
   const tr = (key, fallback) => translate(key, fallback);
 
@@ -98,10 +99,12 @@ export default function PublicSellCta({
     setForm(EMPTY_FORM);
     setPhoneNumber("");
     setPhonePayload(null);
+    setOwnerConfirmed(false);
     setOpen(false);
   };
 
   const canSubmit =
+    ownerConfirmed &&
     form.ownerName.trim() &&
     phonePayload?.combined &&
     form.buildingType &&
@@ -155,10 +158,39 @@ export default function PublicSellCta({
         submitLoading={saving}
         onSubmit={handleSubmit}
         overlayClassName="!z-[70]"
+        dialogClassName="w-full sm:max-w-xl"
+        bodyClassName="space-y-5 text-sm !p-4 pb-8"
       >
-        <p className="text-sm text-black/60 mb-4">{tr("lenaqar.sellRequest.intro")}</p>
-        <div className="space-y-4">
-          <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-3 -mt-1">
+          <h3 className="text-base font-bold text-primary leading-snug">
+            {tr("lenaqar.sellRequest.headline")}
+          </h3>
+          <p className="text-sm text-black/70">{tr("lenaqar.sellRequest.introLead")}</p>
+        </div>
+
+        <div className="rounded-xl border border-primary/15 bg-primary/[0.04] p-4">
+          <div className="flex gap-3">
+            <span className="text-xl leading-none shrink-0" aria-hidden>
+              👤
+            </span>
+            <div className="min-w-0">
+              <p className="font-semibold text-primary">
+                {tr("lenaqar.sellRequest.ownersOnlyTitle")}
+              </p>
+              <p className="mt-1.5 text-sm text-black/70 leading-relaxed">
+                {tr("lenaqar.sellRequest.ownersOnlyBody")}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-sm text-black/60">{tr("lenaqar.sellRequest.formIntro")}</p>
+
+        <section className="space-y-3">
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            {tr("lenaqar.sellRequest.contactSection")}
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <LenaTextField
               name="owner_name"
               label={tr("lenaqar.buyRequest.name", locale === "ar" ? "الاسم" : "Name")}
@@ -175,10 +207,16 @@ export default function PublicSellCta({
               onChange={(next) => setPhoneNumber(next ?? "")}
               onValueChange={setPhonePayload}
             />
-          </section>
+          </div>
+        </section>
 
+        <section className="space-y-3">
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            {tr("lenaqar.sellRequest.locationSection")}
+          </h4>
           <UnitLocationSearch
             isPublic
+            enabled={open}
             projectSource="catalog"
             showHint
             showHierarchySummary
@@ -202,7 +240,12 @@ export default function PublicSellCta({
             onSelectLocation={handleLocationChange}
             onSelectProject={handleProjectSelect}
           />
+        </section>
 
+        <section className="space-y-3">
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            {tr("lenaqar.sellRequest.propertySection")}
+          </h4>
           <SearchableDropdownSelect
             name="buildingType"
             label={tr(
@@ -224,16 +267,21 @@ export default function PublicSellCta({
               locale === "ar" ? "ابحث عن النوع…" : "Search type…",
             )}
           />
+          <LenaTextField
+            name="landArea"
+            type="number"
+            label={tr("lenaqar.sellRequest.landArea", locale === "ar" ? "المساحة (م²)" : "Area (sqm)")}
+            value={form.landArea}
+            onChange={setField("landArea")}
+            required
+          />
+        </section>
 
-          <section className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <LenaTextField
-              name="landArea"
-              type="number"
-              label={tr("lenaqar.sellRequest.landArea", locale === "ar" ? "المساحة (م²)" : "Area (sqm)")}
-              value={form.landArea}
-              onChange={setField("landArea")}
-              required
-            />
+        <section className="space-y-3">
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            {tr("lenaqar.sellRequest.pricingSection")}
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <LenaTextField
               name="totalPrice"
               type="money"
@@ -252,8 +300,25 @@ export default function PublicSellCta({
               adornment="EGP"
               required
             />
-          </section>
-        </div>
+          </div>
+          <p className="text-xs text-black/55 leading-relaxed">
+            {tr("lenaqar.sellRequest.paidAmountHint")}
+          </p>
+        </section>
+
+        <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-black/10 bg-black/[0.02] p-3.5">
+          <input
+            type="checkbox"
+            name="owner_confirm"
+            checked={ownerConfirmed}
+            onChange={(event) => setOwnerConfirmed(event.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-black/20 text-primary focus:ring-primary/30"
+            required
+          />
+          <span className="text-sm text-black/80 leading-relaxed">
+            {tr("lenaqar.sellRequest.ownerConfirm")}
+          </span>
+        </label>
       </UnifiedDialog>
     </>
   );

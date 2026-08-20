@@ -13,6 +13,7 @@ export default {
   },
   home: {
     heroTitle: "Continue someone else's investment — buy at yesterday's price.",
+    heroHook: "Let's see how many millions we can save you…",
     heroSub:
       "We bring you units from owners who want out, units on old contracts, and units straight from developers — and we help you tell whether the deal is actually worth it.",
     heroNote:
@@ -22,8 +23,6 @@ export default {
     howTitle: "How we work",
     howStep1Title: "Send your contract on WhatsApp",
     howStep1Body: "Photos of the contract and receipts. Lena reads them and replies in Arabic.",
-    howStep2Title: "We value it and agree the price in writing",
-    howStep2Body: "The price is written down, and the terms are clear, before the next step.",
     howStep3Title: "We list your unit to ready buyers",
     howStep3Body: "No brokers stacking over-price, and no calls that wear you down.",
     howStep4TitleBefore: "If it doesn't sell in ",
@@ -236,6 +235,10 @@ export default {
     phone: "Mobile",
     nameRequired: "Name is required",
     phoneRequired: "Mobile number is required",
+    locationSection: "Location",
+    location: "Location",
+    budgetSection: "Budget",
+    selectType: "Select type",
     budgetLabel: "Budget",
     maxPrice: "Max price",
     contractPrice: "Contract price",
@@ -270,7 +273,21 @@ export default {
   },
   sellRequest: {
     title: "Your unit details",
-    intro: "Fill in these details — our team will review and reach out.",
+    headline: "Want out of your contract? Let's get the numbers right",
+    introLead:
+      "Before anything else, you need to know exactly where you stand: cancellation penalty, refund schedule, and what you could recover by assigning the contract. That's what our team reviews — for free. There's no commission for you as the seller when you sell through us.",
+    ownersOnlyTitle: "We only work with the unit owner",
+    ownersOnlyBody:
+      "Requests from brokers or agents are excluded. Any unit found to come from a broker is rejected or permanently removed. The platform works because buyers get the old contract price with no over-price — a broker adds margin and breaks the model.",
+    formIntro: "Fill in these details — our team will review your request and reach out.",
+    contactSection: "Contact",
+    locationSection: "Location & project",
+    propertySection: "Unit details",
+    pricingSection: "Price & paid amount",
+    paidAmountHint: "You'll receive exactly what you've paid — no over-price or markup.",
+    ownerConfirm:
+      "I confirm I am the unit owner, not a real-estate broker. Any violation means the listing may be rejected or permanently removed.",
+    ownerConfirmRequired: "You must confirm you are the unit owner.",
     location: "Location",
     developer: "Developer",
     buildingType: "Property type",

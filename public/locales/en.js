@@ -448,7 +448,7 @@ export default {
     companyInfo: {
       title: "Company Information",
       address:
-        "Company Address: 505 Siac Building, ARCHPLAN Square, New Capital, Cairo, Egypt",
+        "Company Address: 505 ARCHPLAN Square, New Capital, Cairo, Egypt",
     },
     contact: {
       title: "Contact Details",

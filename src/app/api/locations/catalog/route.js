@@ -1,6 +1,4 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import {
   clearLocationsCatalogCache,
   getLocationsCatalog,
@@ -9,78 +7,43 @@ import {
 
 export const dynamic = "force-dynamic";
 
+function catalogResponse(catalog, maxAge = 3600) {
+  return NextResponse.json(catalog, {
+    headers: {
+      "Cache-Control": `private, max-age=${maxAge}, stale-while-revalidate=86400`,
+    },
+  });
+}
+
 /**
  * GET /api/locations/catalog
- * Auth preferred. Unauthenticated visitors (LenaQar public site) fall back
- * to the anonymous, API-key-only /public/v1/market-index/locations/* routes
- * — no login needed. If that somehow fails and the server cache is warm,
- * serve it. Otherwise 401.
+ * Public LenaQar site: anonymous market-index via X-API-Key (no login).
+ * Falls back to warm server cache when the upstream API is temporarily down.
  */
 export async function GET() {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
-
   try {
-    if (accessToken) {
-      const catalog = await getLocationsCatalog();
-      return NextResponse.json(catalog, {
-        headers: {
-          "Cache-Control": "private, max-age=3600, stale-while-revalidate=86400",
-        },
-      });
-    }
-
-    try {
-      const catalog = await getLocationsCatalog({ usePublicEndpoint: true });
-      return NextResponse.json(catalog, {
-        headers: {
-          "Cache-Control": "private, max-age=3600, stale-while-revalidate=86400",
-        },
-      });
-    } catch (error) {
-      console.error(
-        "[locations/catalog] public catalog failed:",
-        error?.code || error?.message,
-      );
-    }
-
-    const warm = peekLocationsCatalogCache();
-    if (warm) {
-      return NextResponse.json(warm, {
-        headers: {
-          "Cache-Control": "private, max-age=3600, stale-while-revalidate=86400",
-        },
-      });
-    }
-
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const catalog = await getLocationsCatalog({ usePublicEndpoint: true });
+    return catalogResponse(catalog);
   } catch (error) {
     console.error(
-      "[locations/catalog] failed:",
-      error?.response?.status || error?.message || error
+      "[locations/catalog] public catalog failed:",
+      error?.code || error?.message,
     );
+
     const warm = peekLocationsCatalogCache();
     if (warm) {
-      return NextResponse.json(warm, {
-        headers: { "Cache-Control": "private, max-age=60" },
-      });
+      return catalogResponse(warm, 60);
     }
+
     return NextResponse.json(
       { error: "Failed to load locations catalog" },
-      { status: 502 }
+      { status: 502 },
     );
   }
 }
 
-/**
- * DELETE /api/locations/catalog — drop server in-memory cache (after admin edits).
- */
+/** Drop server in-memory cache (after admin edits or manual bust). */
 export async function DELETE() {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
-  if (!accessToken) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
   clearLocationsCatalogCache();
   return NextResponse.json({ status: true, cleared: true });
 }

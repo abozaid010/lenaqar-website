@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { useI18n } from "@/hooks/useI18n";
-import CityManager from "@/utils/city_manager";
+import { useLocationsGeo } from "@/hooks/use-locations-geo";
 
 function normalizeQuery(value) {
   return String(value || "")
@@ -51,40 +51,21 @@ export default function UnitsLocationSearch({
   required = false,
   error = false,
   errorMessage = "",
+  /** When false, defer loading the geo catalog (e.g. closed dialog). */
+  enabled = true,
 }) {
   const { locale, translate } = useI18n();
-  const cityManager = CityManager.getInstance();
+  const {
+    data: geo,
+    isLoading: geoLoading,
+    isFetching: geoFetching,
+    isError: geoError,
+    refetch: refetchGeo,
+  } = useLocationsGeo({ enabled });
 
-  const [geoLoading, setGeoLoading] = useState(true);
-  const [cities, setCities] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [subDistricts, setSubDistricts] = useState([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        setGeoLoading(true);
-        await cityManager.initializeData();
-        if (cancelled) return;
-        setCities(await cityManager.getCities());
-        setDistricts(await cityManager.getDistricts());
-        setSubDistricts(await cityManager.getSubDistricts());
-      } catch (err) {
-        console.error("Failed to load location index:", err?.message ?? err);
-        if (!cancelled) {
-          setCities([]);
-          setDistricts([]);
-          setSubDistricts([]);
-        }
-      } finally {
-        if (!cancelled) setGeoLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [cityManager]);
+  const cities = geo?.cities ?? [];
+  const districts = geo?.districts ?? [];
+  const subDistricts = geo?.subDistricts ?? [];
 
   const labelFor = useCallback(
     (en, ar) => (locale === "ar" ? ar || en : en || ar) || "",
@@ -225,8 +206,17 @@ export default function UnitsLocationSearch({
   const resolvedAllLabel =
     allOptionLabel || translate("unitsFilter.allLocations", "All Locations");
   const resolvedPlaceholder = placeholder || resolvedAllLabel;
+  const loadFailedMessage = translate(
+    "basicDetails.locationLoadFailed",
+    locale === "ar"
+      ? "تعذّر تحميل المواقع. حاول تاني."
+      : "Couldn't load locations. Try again.",
+  );
+  const retryLabel = translate("common.retry", locale === "ar" ? "حاول تاني" : "Retry");
+  const geoBusy = geoLoading || geoFetching;
 
   return (
+    <div className="space-y-1.5">
     <SearchableDropdownSelect
       name={name}
       label={label}
@@ -235,9 +225,12 @@ export default function UnitsLocationSearch({
       onChange={handleChange}
       disabled={disabled}
       required={required}
-      error={error}
-      errorMessage={errorMessage}
-      isLoading={geoLoading}
+      error={error || geoError}
+      errorMessage={
+        errorMessage ||
+        (geoError ? loadFailedMessage : "")
+      }
+      isLoading={geoBusy}
       showAllOption={showAllOption}
       allOptionLabel={resolvedAllLabel}
       allOptionValue=""
@@ -283,5 +276,15 @@ export default function UnitsLocationSearch({
         return selectedSummary.title || resolvedAllLabel;
       }}
     />
+    {geoError ? (
+      <button
+        type="button"
+        onClick={() => refetchGeo()}
+        className="text-xs font-medium text-primary underline underline-offset-2"
+      >
+        {retryLabel}
+      </button>
+    ) : null}
+    </div>
   );
 }

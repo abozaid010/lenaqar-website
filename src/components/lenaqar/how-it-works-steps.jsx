@@ -18,15 +18,15 @@ export default function HowItWorksSteps({ variant = "compact", showSellLink = tr
         className={
           isFull
             ? "space-y-4"
-            : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+            : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
         }
       >
-        {[1, 2, 3, 4].map((step) => (
+        {[1, 3, 4].map((step, index) => (
           <li
             key={step}
             className="rounded-lg border border-black/10 p-5 bg-white"
           >
-            <p className="text-xs text-black/50 mb-2 tabular-nums">{step}</p>
+            <p className="text-xs text-black/50 mb-2 tabular-nums">{index + 1}</p>
             <h3 className="font-semibold mb-2">
               {step === 4 ? (
                 <>

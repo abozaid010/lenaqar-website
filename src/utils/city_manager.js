@@ -138,21 +138,34 @@ class CityManager {
     this.isInitialized = true;
   }
 
-  async fetchCatalogFromApi() {
-    const response = await fetch("/api/locations/catalog", {
-      credentials: "include",
-      headers: { Accept: "application/json" },
-    });
-    if (!response.ok) {
-      const err = new Error(`Locations catalog HTTP ${response.status}`);
-      err.status = response.status;
-      throw err;
+  async fetchCatalogFromApi(maxAttempts = 3) {
+    let lastError;
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      try {
+        const response = await fetch("/api/locations/catalog", {
+          credentials: "include",
+          headers: { Accept: "application/json" },
+        });
+        if (!response.ok) {
+          const err = new Error(`Locations catalog HTTP ${response.status}`);
+          err.status = response.status;
+          throw err;
+        }
+        const catalog = await response.json();
+        if (!catalog || !Array.isArray(catalog.cities) || catalog.cities.length === 0) {
+          throw new Error("Invalid locations catalog payload");
+        }
+        return catalog;
+      } catch (error) {
+        lastError = error;
+        if (attempt < maxAttempts - 1) {
+          await new Promise((resolve) =>
+            setTimeout(resolve, Math.min(1000 * 2 ** attempt, 8000)),
+          );
+        }
+      }
     }
-    const catalog = await response.json();
-    if (!catalog || !Array.isArray(catalog.cities)) {
-      throw new Error("Invalid locations catalog payload");
-    }
-    return catalog;
+    throw lastError;
   }
 
   /**
