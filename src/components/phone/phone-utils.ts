@@ -21,13 +21,28 @@ function buildDigitMap(): Record<string, string> {
 
 const UNICODE_DIGIT_TO_ASCII = buildDigitMap();
 
-export const PHONE_VALIDATION_MESSAGES = {
+export type PhoneValidationCode =
+  | "required"
+  | "tooShort"
+  | "tooLong"
+  | "invalidLength"
+  | "invalid";
+
+/** English fallbacks — UI must translate via `phoneField.${code}` at render time. */
+export const PHONE_VALIDATION_FALLBACKS: Record<PhoneValidationCode, string> = {
   required: "Phone number is required",
   tooShort: "Phone number is too short",
   tooLong: "Phone number is too long",
   invalidLength: "Phone number length is invalid",
   invalid: "Invalid phone number",
-} as const;
+};
+
+/** @deprecated Prefer {@link PHONE_VALIDATION_FALLBACKS} + i18n keys. */
+export const PHONE_VALIDATION_MESSAGES = PHONE_VALIDATION_FALLBACKS;
+
+export function phoneValidationKey(code: PhoneValidationCode): string {
+  return `phoneField.${code}`;
+}
 
 export type PhonePayload = {
   e164: string;
@@ -174,27 +189,28 @@ export function maskPhoneForDisplay(
 /**
  * Validation order: length hints from {@link validatePhoneNumberLength}, then
  * {@link isPossiblePhoneNumber}. Empty value yields an error only when `required` is true.
+ * Returns a stable code — translate with {@link phoneValidationKey} in the UI.
  */
 export function getPhoneValidationError(
   value: string | undefined,
   options?: { defaultCountry?: CountryCode; required?: boolean },
-): string | undefined {
+): PhoneValidationCode | undefined {
   const defaultCountry = options?.defaultCountry ?? "EG";
   const trimmed = value?.trim();
   if (!trimmed) {
-    return options?.required ? PHONE_VALIDATION_MESSAGES.required : undefined;
+    return options?.required ? "required" : undefined;
   }
 
   const lengthResult = validatePhoneNumberLength(trimmed, defaultCountry);
-  if (lengthResult === "TOO_SHORT") return PHONE_VALIDATION_MESSAGES.tooShort;
-  if (lengthResult === "TOO_LONG") return PHONE_VALIDATION_MESSAGES.tooLong;
-  if (lengthResult === "INVALID_LENGTH") return PHONE_VALIDATION_MESSAGES.invalidLength;
+  if (lengthResult === "TOO_SHORT") return "tooShort";
+  if (lengthResult === "TOO_LONG") return "tooLong";
+  if (lengthResult === "INVALID_LENGTH") return "invalidLength";
   if (lengthResult === "NOT_A_NUMBER" || lengthResult === "INVALID_COUNTRY") {
-    return PHONE_VALIDATION_MESSAGES.invalid;
+    return "invalid";
   }
 
   if (!isPossiblePhoneNumber(trimmed, defaultCountry)) {
-    return PHONE_VALIDATION_MESSAGES.invalid;
+    return "invalid";
   }
   return undefined;
 }

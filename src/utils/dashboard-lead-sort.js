@@ -13,14 +13,14 @@ export const DASHBOARD_SORT = {
 const VALID_SORTS = new Set(Object.values(DASHBOARD_SORT));
 
 /** Matches Homey tenant id — kept local to avoid circular imports. */
-const HOMEY_CLIENT_ID = "homey";
+const LENAQAR_CLIENT_ID = "lenaqar";
 
 /**
  * @param {string | null | undefined} clientId
  * @returns {"recent" | "oldest"}
  */
 export function getDefaultDashboardSort(clientId) {
-  return String(clientId || "").trim().toLowerCase() === HOMEY_CLIENT_ID
+  return String(clientId || "").trim().toLowerCase() === LENAQAR_CLIENT_ID
     ? DASHBOARD_SORT.OLDEST
     : DASHBOARD_SORT.RECENT;
 }

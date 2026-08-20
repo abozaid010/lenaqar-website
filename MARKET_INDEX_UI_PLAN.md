@@ -16,8 +16,8 @@ task description — treat it as the API source of truth, but re-verify against 
 backend in Gate 0).
 
 **Visibility rule (hard requirement):**
-- Only for the tenant **`client_id === "homey"`** (case-insensitive compare, like
-  [dashboard-lead-sort.js:16](src/utils/dashboard-lead-sort.js:16) does with `HOMEY_CLIENT_ID = "homey"`).
+- Only for the tenant **`client_id === "lenaqar"`** (case-insensitive compare, like
+  [dashboard-lead-sort.js:16](src/utils/dashboard-lead-sort.js:16) does with `LENAQAR_CLIENT_ID = "lenaqar"`).
 - Only for **role `admin` or `owner`** (JWT-derived, exactly like
   `canManageTeamFromToken()` in [getRoleFromToken.js:66](src/lib/getRoleFromToken.js:66)).
 - Everyone else: the sidebar item is **hidden** (not disabled) and the route returns **404**
@@ -77,7 +77,7 @@ refused). Nothing below was runtime-verified yet — that is your first job.
    # paste the access_token cookie value from DevTools → Application → Cookies
    node -e "const t=process.argv[1].split('.')[1];console.log(JSON.parse(Buffer.from(t.replace(/-/g,'+').replace(/_/g,'/'),'base64').toString()))" "<ACCESS_TOKEN>"
    ```
-   You must see `client_id: "homey"` (or CLIENT_ID cookie `homey`) and `role`/`client_type`
+   You must see `client_id: "lenaqar"` (or CLIENT_ID cookie `homey`) and `role`/`client_type`
    of `admin` or `owner`. If no homey credentials exist locally, get them created on the
    backend first — do not fake the gate.
 4. **Verify the BFF path end-to-end** from the logged-in browser session (DevTools console):
@@ -198,7 +198,7 @@ import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { getRoleFromToken } from "@/lib/getRoleFromToken";
 import { decodeJwtClientId } from "@/lib/jwtCookieUtils";
 
-const MARKET_INDEX_CLIENT_ID = "homey";
+const MARKET_INDEX_CLIENT_ID = "lenaqar";
 const ALLOWED_ROLES = ["admin", "owner"];
 
 export async function assertMarketIndexAccess() {
@@ -359,7 +359,7 @@ import { getRoleFromToken, getClientIdFromToken } from "@/lib/getRoleFromToken.c
 export function isMarketIndexVisible() {
   const clientId = (getClientIdFromToken() || "").trim().toLowerCase();
   const role = (getRoleFromToken() || "").trim().toLowerCase();
-  return clientId === "homey" && (role === "admin" || role === "owner");
+  return clientId === "lenaqar" && (role === "admin" || role === "owner");
 }
 ```
 

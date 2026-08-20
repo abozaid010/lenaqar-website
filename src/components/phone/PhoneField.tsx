@@ -13,8 +13,9 @@ import { useI18n } from "@/hooks/useI18n";
 import { PhoneInputBase } from "./PhoneInputBase";
 import {
   getPhoneValidationError,
+  PHONE_VALIDATION_FALLBACKS,
+  phoneValidationKey,
   parsePhonePayload,
-  PHONE_VALIDATION_MESSAGES,
   sanitizePhoneInput,
   toPhoneFieldPublicValue,
   type PhoneFieldPublicValue,
@@ -48,24 +49,6 @@ const DigitSanitizingInput = forwardRef<
 
   return <input ref={ref} {...rest} onChange={handleChange} />;
 });
-
-function localizeValidationMessage(
-  translate: (key: string, fallback: string) => string,
-  message: string | undefined,
-): string | undefined {
-  if (!message) return undefined;
-  const pairs: [string, string][] = [
-    [PHONE_VALIDATION_MESSAGES.required, "phoneField.required"],
-    [PHONE_VALIDATION_MESSAGES.tooShort, "phoneField.tooShort"],
-    [PHONE_VALIDATION_MESSAGES.tooLong, "phoneField.tooLong"],
-    [PHONE_VALIDATION_MESSAGES.invalidLength, "phoneField.invalidLength"],
-    [PHONE_VALIDATION_MESSAGES.invalid, "phoneField.invalid"],
-  ];
-  for (const [en, key] of pairs) {
-    if (message === en) return translate(key, en);
-  }
-  return message;
-}
 
 export type PhoneFieldProps = {
   /**
@@ -156,15 +139,21 @@ export function PhoneField({
     [defaultCountry, isControlled, onChange, onValueChange],
   );
 
-  const builtInError = touched
+  const builtInCode = touched
     ? getPhoneValidationError(value, {
         defaultCountry,
         required: Boolean(required),
       })
     : undefined;
 
-  const resolvedError = externalError ?? builtInError;
-  const displayError = localizeValidationMessage(translate, resolvedError);
+  const builtInError = builtInCode
+    ? translate(
+        phoneValidationKey(builtInCode),
+        PHONE_VALIDATION_FALLBACKS[builtInCode],
+      )
+    : undefined;
+
+  const displayError = externalError || builtInError;
   const showError = Boolean(displayError);
 
   // Shake animation on error (mirrors LenaTextField).

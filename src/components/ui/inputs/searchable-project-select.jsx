@@ -97,7 +97,9 @@ export default function SearchableProjectSelect({
       allOptionLabel={allOptionLabel || translate("lenaqar.buyRequest.selectProject", "Select project")}
       getValue={(project) => project.en_name}
       getLabel={(project, currentLocale) =>
-        currentLocale === "ar" ? project.ar_name : project.en_name
+        currentLocale === "ar"
+          ? project.ar_name || project.en_name
+          : project.en_name || project.ar_name
       }
       getKey={(project) => {
         if (project.id) return `project-${project.id}`;

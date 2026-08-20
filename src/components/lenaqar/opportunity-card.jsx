@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useI18n } from "@/hooks/useI18n";
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
-import { formatDate, formatDeliveryDate } from "@/lib/units/unit-formatters";
+import { formatDeliveryDate } from "@/lib/units/unit-formatters";
 import {
   buildingTypeAr,
   buildListingHeadline,
@@ -30,7 +30,6 @@ export default function OpportunityCard({ unit }) {
     .join(" · ");
   const typeLabel = buildingTypeAr(unit.buildingType) || null;
   const deliveryLabel = formatDeliveryDate(unit.deliveryDate, "ar");
-  const priceDate = formatDate(unit.updatedAt, "ar");
   const href = `/opportunities/${encodeURIComponent(unit.code)}`;
   const showOffer = Number(unit.overPrice) > 0;
 
@@ -81,8 +80,6 @@ export default function OpportunityCard({ unit }) {
           </p>
           {unit.isPrimary === true ? (
             <p className="text-xs mt-1">{translate("lenaqar.unit.primary")}</p>
-          ) : unit.isPrimary === false ? (
-            <p className="text-xs mt-1">{translate("lenaqar.unit.resale")}</p>
           ) : null}
         </div>
 
@@ -98,7 +95,7 @@ export default function OpportunityCard({ unit }) {
         ) : null}
 
         {unit.downPayment != null ? (
-          <p className="text-sm">
+          <p className="text-sm font-semibold text-emerald-700">
             {translate("lenaqar.unit.cashRequired")}{" "}
             <EgpAmount value={unit.downPayment} translate={translate} />
           </p>
@@ -149,12 +146,6 @@ export default function OpportunityCard({ unit }) {
             </div>
           ) : null}
         </dl>
-
-        {priceDate ? (
-          <p className="text-xs text-black/50">
-            {translate("lenaqar.unit.priceUpdated").replace("{date}", priceDate)}
-          </p>
-        ) : null}
 
         <OpportunityUnitActions unit={unit} className="mt-auto" />
       </div>

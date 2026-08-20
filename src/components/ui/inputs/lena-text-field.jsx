@@ -73,7 +73,7 @@ const LenaTextField = forwardRef(({
 
   const resolvedDir =
     dir ??
-    (type === "money" || type === "number" ? "ltr" : documentDir);
+    (type === "money" || type === "number" || type === "month" ? "ltr" : documentDir);
 
   // Page direction drives visual alignment; numeric fields keep dir=ltr for digit order.
   const layoutDir = documentDir ?? resolvedDir ?? "ltr";

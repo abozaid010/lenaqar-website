@@ -51,7 +51,7 @@ export function buildSaleUnitPayload({
     city: city || undefined,
     district: district || undefined,
     sub_district: subDistrict || undefined,
-    landArea: Number(landArea) || 0,
+    landArea: parseAmount(landArea) || 0,
     totalPrice: parseAmount(totalPrice),
     downPayment: paid,
     paid_amount: paid,

@@ -1,23 +1,58 @@
 "use client";
 
 import { BUILDING_TYPE_VALUES } from "@/data/constants";
+import { getBuildingTypeOptions } from "@/lib/enums/buildingTypes";
 import { useI18n } from "@/hooks/useI18n";
-import { validateLocationLeaf } from "@/lib/locations/validate-location-leaf";
-import { tValidation } from "@/constants/unit-form-validation-keys";
-import CityManager from "@/utils/city_manager";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
+import MonthYearField from "@/components/ui/inputs/month-year-field";
 import UnitsLocationSearch from "@/components/ui/inputs/units-location-search";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import { PhoneField } from "@/components/phone/PhoneField";
+import SubmitWhatsAppFallback from "@/components/lenaqar/submit-whatsapp-fallback";
 import {
   buildPublicBuyRequirement,
   toYearMonth,
 } from "@/lib/lenaqar/buy-request-payload";
+import {
+  composeBuyRequestWhatsAppMessage,
+  whatsappFallbackHref,
+} from "@/lib/lenaqar/whatsapp-fallback";
+import { parseMoneyInput, normalizeToEnglishDigits } from "@/utils/parse-amount";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+
+const MONEY_FIELDS = new Set([
+  "max_price",
+  "downPayment",
+  "monthlyInstallment",
+  "overPrice",
+]);
+
+/** YYYY-MM bounds for the native month picker (ready units → near-term delivery). */
+function deliveryMonthBounds(now = new Date()) {
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  return {
+    min: `${year - 2}-${month}`,
+    max: `${year + 15}-${month}`,
+  };
+}
+
+/** Numeric text fields that must keep ASCII digits in form state. */
+function normalizeNumericField(name, value) {
+  if (MONEY_FIELDS.has(name)) return parseMoneyInput(value);
+  if (name === "roomsCount") {
+    return String(normalizeToEnglishDigits(value ?? "")).replace(/\D/g, "");
+  }
+  if (name === "deliveryDate") {
+    // Native <input type="month"> yields "" or ASCII YYYY-MM.
+    return value == null ? "" : String(value);
+  }
+  return value;
+}
 
 function numberToFieldValue(v) {
   if (v === null || v === undefined || v === "") return "";
@@ -121,14 +156,16 @@ export default function BuyRequestDialog({
   const [contactName, setContactName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phonePayload, setPhonePayload] = useState(null);
+  const [whatsappFallbackHrefState, setWhatsappFallbackHrefState] = useState("");
 
   const buildingTypeOptions = useMemo(
-    () =>
-      BUILDING_TYPE_VALUES.map((value) => ({
-        value,
-        label: tr(`buildingTypes.${value}`, value),
-      })),
+    () => getBuildingTypeOptions(tr),
     [locale, tr],
+  );
+
+  const { min: deliveryMin, max: deliveryMax } = useMemo(
+    () => deliveryMonthBounds(),
+    [],
   );
 
   const compactError = (key) =>
@@ -142,6 +179,7 @@ export default function BuyRequestDialog({
   useEffect(() => {
     if (open) return;
     setLocationError("");
+    setWhatsappFallbackHrefState("");
     setFieldErrors((prev) =>
       prev && Object.keys(prev).length === 0 ? prev : {},
     );
@@ -187,7 +225,8 @@ export default function BuyRequestDialog({
 
   const handleFieldChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const nextValue = normalizeNumericField(name, value);
+    setForm((prev) => ({ ...prev, [name]: nextValue }));
     if (fieldErrors[name]) {
       setFieldErrors((prev) => {
         const next = { ...prev };
@@ -223,17 +262,12 @@ export default function BuyRequestDialog({
       }
     }
 
-    const locationResult = await validateLocationLeaf(
-      {
-        city: form.city,
-        district: form.district,
-        sub_district: form.sub_district,
-        project: form.project,
-      },
-      CityManager.getInstance(),
-    );
-    if (!locationResult.ok) {
-      const message = tValidation(tr, locationResult.key);
+    // Buy request: any selected location level is fine — city + district only.
+    // No leaf/deepest-level check (sub-district stays optional).
+    if (!String(form.city || "").trim() || !String(form.district || "").trim()) {
+      const message = !String(form.city || "").trim()
+        ? tr("lenaqar.buyRequest.errors.cityRequired")
+        : tr("lenaqar.buyRequest.errors.districtRequired");
       setLocationError(message);
       toast.error(message);
       return;
@@ -255,6 +289,7 @@ export default function BuyRequestDialog({
     setFieldErrors({});
 
     setSaving(true);
+    setWhatsappFallbackHrefState("");
     try {
       const extra = showContactFields
         ? {
@@ -275,10 +310,35 @@ export default function BuyRequestDialog({
       onSuccess?.(built.requirement);
       onClose();
     } catch (err) {
-      toast.error(
-        err?.message ||
-          tr("lenaqar.buyRequest.saveFailed", "Save failed"),
-      );
+      const buildingTypeLabel = form.buildingType
+        ? tr(`buildingTypes.${form.buildingType}`, form.buildingType)
+        : "";
+      const message = composeBuyRequestWhatsAppMessage({
+        form: { ...form, buildingType: buildingTypeLabel },
+        contact: showContactFields
+          ? {
+              name: contactName.trim(),
+              phone: phonePayload?.combined,
+            }
+          : {},
+        intro: tr("lenaqar.buyRequest.whatsappFallbackIntro"),
+        labels: {
+          name: tr("lenaqar.buyRequest.name"),
+          phone: tr("lenaqar.buyRequest.phone"),
+          city: tr("lenaqar.buyRequest.city"),
+          district: tr("lenaqar.buyRequest.district"),
+          subDistrict: tr("lenaqar.buyRequest.subDistrict"),
+          project: tr("lenaqar.buyRequest.project"),
+          buildingType: tr("lenaqar.buyRequest.buildingType"),
+          roomsCount: tr("lenaqar.buyRequest.roomsCount"),
+          maxPrice: tr("lenaqar.buyRequest.maxPrice"),
+          downPayment: tr("lenaqar.buyRequest.downPayment"),
+          monthlyInstallment: tr("lenaqar.buyRequest.monthlyInstallment"),
+          overPrice: tr("lenaqar.buyRequest.overPrice"),
+          deliveryDate: tr("lenaqar.buyRequest.deliveryDate"),
+        },
+      });
+      setWhatsappFallbackHrefState(whatsappFallbackHref(message));
     } finally {
       setSaving(false);
     }
@@ -313,6 +373,16 @@ export default function BuyRequestDialog({
       ) : (
         <>
           {intro ? <p className="text-sm text-gray-600 -mt-1">{intro}</p> : null}
+
+          {whatsappFallbackHrefState ? (
+            <SubmitWhatsAppFallback
+              href={whatsappFallbackHrefState}
+              title={tr("lenaqar.buyRequest.saveFailedTitle")}
+              body={tr("lenaqar.buyRequest.saveFailedWhatsAppBody")}
+              countdownLabel={tr("lenaqar.buyRequest.saveFailedWhatsAppCountdown")}
+              ctaLabel={tr("lenaqar.buyRequest.saveFailedWhatsAppCta")}
+            />
+          ) : null}
 
           {showContactFields ? (
             <section className="space-y-3">
@@ -356,8 +426,10 @@ export default function BuyRequestDialog({
               errorMessage={locationError}
               showAllOption={false}
               placeholder={tr(
-                "basicDetails.locationSearchPlaceholder",
-                "Search city, district, or area…",
+                "unitsFilter.locationSearchPlaceholder",
+                locale === "ar"
+                  ? "ابحث عن مدينة أو منطقة أو حي…"
+                  : "Search city, district, or area…",
               )}
               className={dropdownClassName}
             />
@@ -411,43 +483,53 @@ export default function BuyRequestDialog({
             </h4>
             <LenaTextField
               name="max_price"
+              type="money"
               label={tr("lenaqar.buyRequest.maxPrice", "Max budget")}
               value={form.max_price}
               onChange={handleFieldChange}
+              adornment={tr("lenaqar.unit.egp")}
               required
               error={Boolean(compactError("max_price"))}
               errorMessage={compactError("max_price")}
             />
             <LenaTextField
               name="downPayment"
+              type="money"
               label={tr("lenaqar.buyRequest.downPayment", "Down payment")}
               value={form.downPayment}
               onChange={handleFieldChange}
+              adornment={tr("lenaqar.unit.egp")}
               error={Boolean(compactError("downPayment"))}
               errorMessage={compactError("downPayment")}
             />
             <LenaTextField
               name="monthlyInstallment"
+              type="money"
               label={tr("lenaqar.buyRequest.monthlyInstallment", "Monthly installment")}
               value={form.monthlyInstallment}
               onChange={handleFieldChange}
+              adornment={tr("lenaqar.unit.egp")}
               error={Boolean(compactError("monthlyInstallment"))}
               errorMessage={compactError("monthlyInstallment")}
             />
             <LenaTextField
               name="overPrice"
+              type="money"
               label={tr("lenaqar.buyRequest.overPrice", "Over price")}
               value={form.overPrice}
               onChange={handleFieldChange}
+              adornment={tr("lenaqar.unit.egp")}
               error={Boolean(compactError("overPrice"))}
               errorMessage={compactError("overPrice")}
             />
-            <LenaTextField
+            <MonthYearField
               name="deliveryDate"
-              label={tr("lenaqar.buyRequest.deliveryDate", "Delivery (YYYY-MM)")}
+              label={tr("lenaqar.buyRequest.deliveryDate")}
               value={form.deliveryDate}
               onChange={handleFieldChange}
-              placeholder="2026-12"
+              min={deliveryMin}
+              max={deliveryMax}
+              locale={locale}
               error={Boolean(compactError("deliveryDate"))}
               errorMessage={compactError("deliveryDate")}
             />

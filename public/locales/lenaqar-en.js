@@ -268,7 +268,7 @@ export default {
       maxPriceRequired: "Max price is required.",
       invalidNumber: "Enter a valid amount.",
       invalidRooms: "Rooms must be a whole number greater than zero.",
-      invalidDeliveryDate: "Choose a delivery month (YYYY-MM).",
+      invalidDeliveryDate: "Choose a delivery month.",
     },
   },
   sellRequest: {
