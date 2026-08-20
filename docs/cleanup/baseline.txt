@@ -1,0 +1,340 @@
+=== BASELINE RECORDED 2026-08-20T00:51:54Z ===
+
+=== SOURCE FILE COUNT ===
+     733
+
+=== npx tsc --noEmit ===
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm.
+src/utils/__tests__/extract-phone-from-text.test.ts(7,38): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled.
+npm notice
+npm notice New minor version of npm available! 11.6.2 -> 11.19.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.19.0
+npm notice To update run: npm install -g npm@11.19.0
+npm notice
+EXIT: 2
+
+=== npm run lint ===
+
+=== npm run build ===
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm.
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm.
+
+> lenaqar@0.1.0 prebuild
+> npm rebuild lightningcss
+
+
+> lenaqar@0.1.0 lint
+> next lint
+
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm.
+Invalid project directory provided, no such directory: /Users/abozaid/workspace/lenaqar/lint
+EXIT: 1
+rebuilt dependencies successfully
+
+> lenaqar@0.1.0 build
+> NODE_OPTIONS='--max-old-space-size=1536' next build
+
+(node:45028) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/abozaid/workspace/lenaqar/src/config/imageHosts.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/abozaid/workspace/lenaqar/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+▲ Next.js 16.2.7 (Turbopack)
+- Environments: .env.local, .env
+- Experiments (use with caution):
+  · cpus: 1
+  · serverActions
+
+  Creating an optimized production build ...
+(node:45028) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/abozaid/workspace/lenaqar/src/config/imageHosts.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/abozaid/workspace/lenaqar/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✓ Compiled successfully in 5.2s
+  Running TypeScript ...
+  Finished TypeScript in 3.3s ...
+  Collecting page data using 1 worker ...
+  Generating static pages using 1 worker (0/85) ...
+Error checking king admin status: Dynamic server usage: Route /clients/new couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+  Generating static pages using 1 worker (21/85) 
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+  Generating static pages using 1 worker (42/85) 
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+  Generating static pages using 1 worker (63/85) 
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+[lenaqar] unit-by-code failed Dynamic server usage: Route /opportunities/[slug] couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+✓ Generating static pages using 1 worker (85/85) in 2.2s
+  Finalizing page optimization ...
+
+Route (app)                                   Revalidate  Expire
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /[email]
+├ ƒ /[email]/clients
+├ ƒ /[email]/clients/new
+├ ƒ /allProberties
+├ ƒ /allProberties/[code]
+├ ƒ /allProberties/[code]/whatsapp
+├ ƒ /analytics
+├ ƒ /api/auth/clear-session
+├ ƒ /api/auth/status
+├ ƒ /api/bff/social-media/[...path]
+├ ƒ /api/client/admin/clients
+├ ƒ /api/client/admin/clients/[clientId]
+├ ƒ /api/client/signup
+├ ƒ /api/client/whatsapp-instance
+├ ƒ /api/crm/[...path]
+├ ƒ /api/crm/notifications
+├ ƒ /api/lenaqar/catalog-projects
+├ ƒ /api/lenaqar/project-names
+├ ƒ /api/locations/catalog
+├ ƒ /api/match/share
+├ ƒ /api/match/share/[token]
+├ ƒ /api/match/share/[token]/reactions
+├ ƒ /api/match/share/[token]/viewing-request
+├ ƒ /api/openwa/reconnect
+├ ƒ /api/openwa/sessions/status
+├ ƒ /api/openwa/status
+├ ƒ /api/refresh-token
+├ ƒ /api/social-media/[...path]
+├ ƒ /api/upload
+├ ƒ /calculator
+├ ƒ /campaign-chat
+├ ƒ /campaigns
+├ ƒ /clients/new
+├ ƒ /dashboard
+├ ƒ /dashboard/[userId]
+├ ƒ /developers
+├ ƒ /developers/[developerId]
+├ ƒ /locations
+├ ƒ /login
+├ ƒ /map
+├ ƒ /market-index
+├ ƒ /market-index/[locationId]
+├ ƒ /match/[token]
+├ ƒ /matching
+├ ƒ /myProjects
+├ ƒ /myProjects/[project_en_name]
+├ ƒ /news
+├ ƒ /notifications
+├ ƒ /opportunities
+├ ƒ /opportunities/[slug]
+├ ƒ /privacy
+├ ƒ /properties/[id]
+├ ƒ /property/[id]
+├ ○ /robots.txt
+├ ƒ /schedule
+├ ƒ /sell
+├ ○ /sitemap.xml                                     15m      1y
+├ ƒ /social-media/comments
+├ ƒ /social-media/dashboard
+├ ƒ /social-media/posts
+├ ƒ /team
+├ ƒ /tools
+├ ƒ /tools/present-value
+├ ƒ /unit/[slug]
+├ ƒ /units
+├ ƒ /units/[code]
+├ ƒ /units/[code]/edit
+└ ƒ /units/pending-approval
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+EXIT: 0
+
+=== npm run lint:seo ===
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm.
+
+> lenaqar@0.1.0 lint:seo
+> node scripts/check-seo.js
+
+🔍 Checking SEO metadata across all pages...
+
+Found 50 page files to check
+
+
+📊 SEO Audit Results:
+
+❌ ERRORS (must be fixed):
+
+  ❌ src/app/(admin)/[email]/clients/new/page.jsx: Missing metadata export
+  ❌ src/app/(admin)/[email]/clients/page.jsx: Missing description in metadata
+  ❌ src/app/(admin)/clients/new/page.jsx: Missing metadata export
+  ❌ src/app/(admin)/dashboard/[userId]/page.jsx: Missing metadata export
+  ❌ src/app/(admin)/locations/page.jsx: Missing description in metadata
+  ❌ src/app/(admin)/market-index/[locationId]/page.jsx: Missing description in metadata
+  ❌ src/app/(admin)/market-index/page.jsx: Missing description in metadata
+  ❌ src/app/(admin)/notifications/page.jsx: Missing description in metadata
+  ❌ src/app/(admin)/social-media/comments/page.tsx: Missing metadata export
+  ❌ src/app/(admin)/social-media/dashboard/page.tsx: Missing metadata export
+  ❌ src/app/(admin)/social-media/posts/page.tsx: Missing metadata export
+  ❌ src/app/(admin)/tools/page.jsx: Missing description in metadata
+  ❌ src/app/(admin)/tools/present-value/page.jsx: Missing description in metadata
+  ❌ src/app/allProberties/[code]/page.jsx: Missing metadata export
+  ❌ src/app/match/[token]/page.tsx: Missing metadata export
+  ❌ src/app/properties/[id]/page.tsx: Missing openGraph in metadata
+  ❌ src/app/properties/[id]/page.tsx: Missing canonical URL in metadata
+  ❌ src/app/property/[id]/page.tsx: Missing openGraph in metadata
+  ❌ src/app/property/[id]/page.tsx: Missing canonical URL in metadata
+  ❌ src/app/unit/[slug]/page.tsx: Missing openGraph in metadata
+  ❌ src/app/unit/[slug]/page.tsx: Missing canonical URL in metadata
+
+⚠️  WARNINGS (should be fixed):
+
+  ⚠️  src/app/(admin)/[email]/clients/page.jsx: Missing openGraph in metadata (recommended even for non-indexed pages)
+  ⚠️  src/app/(admin)/[email]/clients/page.jsx: Missing canonical URL in metadata (recommended)
+  ⚠️  src/app/(admin)/campaigns/page.jsx: Missing openGraph in metadata (recommended even for non-indexed pages)
+  ⚠️  src/app/(admin)/dashboard/page.jsx: Duplicate title "Dashboard - LENAAI AI Sales Agent" (also used in src/app/(admin)/analytics/page.jsx)
+  ⚠️  src/app/(admin)/locations/page.jsx: Missing openGraph in metadata (recommended even for non-indexed pages)
+  ⚠️  src/app/(admin)/market-index/[locationId]/page.jsx: Duplicate title "clientName" (also used in src/app/(admin)/locations/page.jsx)
+  ⚠️  src/app/(admin)/market-index/[locationId]/page.jsx: Missing openGraph in metadata (recommended even for non-indexed pages)
+  ⚠️  src/app/(admin)/market-index/page.jsx: Duplicate title "clientName" (also used in src/app/(admin)/locations/page.jsx)
+  ⚠️  src/app/(admin)/market-index/page.jsx: Missing openGraph in metadata (recommended even for non-indexed pages)
+  ⚠️  src/app/(admin)/matching/page.jsx: Missing openGraph in metadata (recommended even for non-indexed pages)
+  ⚠️  src/app/(admin)/notifications/page.jsx: Missing openGraph in metadata (recommended even for non-indexed pages)
+  ⚠️  src/app/(admin)/notifications/page.jsx: Missing canonical URL in metadata (recommended)
+  ⚠️  src/app/(admin)/tools/page.jsx: Duplicate title "clientName" (also used in src/app/(admin)/locations/page.jsx)
+  ⚠️  src/app/(admin)/tools/page.jsx: Missing openGraph in metadata (recommended even for non-indexed pages)
+  ⚠️  src/app/(admin)/tools/present-value/page.jsx: Duplicate title "clientName" (also used in src/app/(admin)/locations/page.jsx)
+  ⚠️  src/app/(admin)/tools/present-value/page.jsx: Missing openGraph in metadata (recommended even for non-indexed pages)
+  ⚠️  src/app/(admin)/units/[code]/page.jsx: Description is too short (43 chars, recommended: 120-160)
+  ⚠️  src/app/(admin)/units/pending-approval/page.jsx: Missing openGraph in metadata (recommended even for non-indexed pages)
+  ⚠️  src/app/(lenaqar)/privacy/page.jsx: Title should mention LenaQar value (عقار، أقساط، وحدة، فرص)
+  ⚠️  src/app/allProberties/page.jsx: Title should mention LenaQar value (عقار، أقساط، وحدة، فرص)
+  ⚠️  src/app/properties/[id]/page.tsx: Title should mention LenaQar value (عقار، أقساط، وحدة، فرص)
+  ⚠️  src/app/property/[id]/page.tsx: Duplicate title "Property Details" (also used in src/app/properties/[id]/page.tsx)
+  ⚠️  src/app/property/[id]/page.tsx: Title should mention LenaQar value (عقار، أقساط، وحدة، فرص)
+  ⚠️  src/app/unit/[slug]/page.tsx: Duplicate title "Property Details" (also used in src/app/properties/[id]/page.tsx)
+  ⚠️  src/app/unit/[slug]/page.tsx: Title should mention LenaQar value (عقار، أقساط، وحدة، فرص)
+
+
+❌ Found 21 error(s) and 25 warning(s)
+Please fix the errors before committing.
+
+EXIT: 1
+
+=== TESTS ===
+node:internal/modules/cjs/loader:1424
+  throw err;
+  ^
+
+Error: Cannot find module '/Users/abozaid/workspace/lenaqar/src/lib/lenaqar/__tests__'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1227:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v24.11.1
+✖ src/lib/lenaqar/__tests__ (24.701875ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 28.876834
+
+✖ failing tests:
+
+test at src/lib/lenaqar/__tests__:1:1
+✖ src/lib/lenaqar/__tests__ (24.701875ms)
+  'test failed'
+EXIT: 1
+
+=== .next/static SIZE ===
+8.2M	.next/static
+
+=== PRE-EXISTING FAILURES (not introduced by cleanup) ===
+- tsc: extract-phone-from-text.test.ts import extension error (TS5097)
+- lint: `next lint` fails with "Invalid project directory provided, no such directory: .../lint" (parallel run artifact; lint script may need separate run)
+- lint:seo: 21 errors, 25 warnings (mostly admin/legacy redirect pages)
+- tests: `node --test src/lib/lenaqar/__tests__/` fails on directory path — use `src/lib/lenaqar/__tests__/*.test.js` instead
+- tests: sale-pricing-validation.test.js fails when run standalone (pre-existing)
+- build: succeeds (EXIT 0); cookie dynamic warnings on admin/opportunity routes are expected
