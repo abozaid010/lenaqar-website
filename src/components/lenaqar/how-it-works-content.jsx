@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useI18n } from "@/hooks/useI18n";
 import HowItWorksSteps from "./how-it-works-steps";
 import BuyRequestCta from "./buy-request-cta";
+import FaqSection from "./faq-section";
 
 function FlowSteps({ titleKey, steps, cta }) {
   const { translate } = useI18n();
@@ -100,6 +101,8 @@ export default function HowItWorksContent() {
           <BuyRequestCta variant="primary" />
         }
       />
+
+      <FaqSection />
     </div>
   );
 }

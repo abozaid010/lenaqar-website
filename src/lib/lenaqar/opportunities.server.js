@@ -3,7 +3,6 @@ import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
 import { bffFetch, isCloudflareChallenge } from "@/lib/bffFetch";
 import { SITE, lenaqarInventoryQuery } from "@/config/site";
 import { mapSlimUnitToListItem } from "@/lib/units/slim-unit-list-mapper";
-import { getPublicUnitByCode } from "@/lib/units/unit-api";
 import { toPublicOpportunity } from "./to-public-opportunity";
 import { isListableOpportunity, validateUnit } from "./validate-unit";
 
@@ -47,26 +46,25 @@ export function parseOpportunitySearchParams(params = {}) {
   };
 }
 
-async function fetchPage(query) {
-  const qs = new URLSearchParams();
-  for (const [key, value] of Object.entries(query)) {
-    if (value == null || value === "") continue;
-    qs.set(key, String(value));
-  }
-
-  const headers = { accept: "application/json" };
-  if (PUBLIC_X_API_KEY) headers["X-API-Key"] = PUBLIC_X_API_KEY;
-
+/**
+ * The one server->backend GET for the public catalog. Returns the parsed body,
+ * or null when the call could not be made or did not succeed.
+ *
+ * Deliberately cookie-free: anything that reads cookies (the CRM's axiosInstance
+ * did) opts the calling route into dynamic rendering, which costs TTFB on every
+ * listing page and defeats `generateStaticParams`.
+ */
+async function publicApiGet(path) {
   if (!PUBLIC_X_API_KEY) {
     console.error(
-      "[lenaqar] units fetch skipped — no X_API_KEY / NEXT_PUBLIC_X_API_KEY configured"
+      "[lenaqar] public API call skipped — no X_API_KEY / NEXT_PUBLIC_X_API_KEY configured"
     );
-    return { units: [], pagination: {} };
+    return null;
   }
 
   try {
-    const response = await bffFetch(`${API_BASE_URL}/public/v1/units?${qs}`, {
-      headers,
+    const response = await bffFetch(`${API_BASE_URL}${path}`, {
+      headers: { accept: "application/json", "X-API-Key": PUBLIC_X_API_KEY },
       next: { revalidate: 900 },
     });
 
@@ -74,7 +72,8 @@ async function fetchPage(query) {
       const body = await response.text().catch(() => "");
       const cf = isCloudflareChallenge(response, body);
       console.error(
-        "[lenaqar] units fetch failed",
+        "[lenaqar] public API call failed",
+        path,
         response.status,
         cf
           ? "(Cloudflare JS challenge on api.lenaai.net — origin never saw this request)"
@@ -84,20 +83,32 @@ async function fetchPage(query) {
               ? "(check BFF_SECRET on Vercel — backend blocks serverless egress without it)"
               : ""
       );
-      return { units: [], pagination: {} };
+      return null;
     }
 
-    const json = await response.json();
-    const units = json?.data?.units ?? json?.units ?? [];
-    const pagination = json?.data?.pagination ?? json?.pagination ?? {};
-    return {
-      units: Array.isArray(units) ? units : [],
-      pagination,
-    };
+    return await response.json();
   } catch (error) {
-    console.error("[lenaqar] units fetch failed", error);
-    return { units: [], pagination: {} };
+    console.error("[lenaqar] public API call failed", path, error);
+    return null;
   }
+}
+
+async function fetchPage(query) {
+  const qs = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value == null || value === "") continue;
+    qs.set(key, String(value));
+  }
+
+  const json = await publicApiGet(`/public/v1/units?${qs}`);
+  if (!json) return { units: [], pagination: {} };
+
+  const units = json?.data?.units ?? json?.units ?? [];
+  const pagination = json?.data?.pagination ?? json?.pagination ?? {};
+  return {
+    units: Array.isArray(units) ? units : [],
+    pagination,
+  };
 }
 
 async function fetchBoundedPages({
@@ -315,17 +326,13 @@ export async function fetchOpportunityByCode(code) {
   const needle = String(code || "").trim();
   if (!needle) return null;
 
-  try {
-    const response = await getPublicUnitByCode(needle);
-    const raw = response?.data?.units?.[0];
-    const item = raw ? toFeedItem(raw) : null;
-    if (item) return item;
-  } catch (error) {
-    console.error(
-      "[lenaqar] unit-by-code failed",
-      error instanceof Error ? error.message : error
-    );
-  }
+  const json = await publicApiGet(
+    `/public/unit-by-code/${encodeURIComponent(needle)}`
+  );
+  // /public/unit-by-code/{code} returns the unit itself at `data`,
+  // not the `data.units[]` envelope the list endpoint uses.
+  const item = json?.data ? toFeedItem(json.data) : null;
+  if (item) return item;
 
   const units = await fetchOpportunities();
   return units.find((unit) => unit.code === needle) ?? null;

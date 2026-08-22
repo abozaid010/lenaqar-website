@@ -1,7 +1,6 @@
 import { I18nProvider } from "@/context/translate-api";
 import TanStackQueryProvider from "@/providers/query-client-provider";
 import { Cairo, Montserrat } from "next/font/google";
-import { cookies } from "next/headers";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import { defaultMetadata } from "./metadata";
@@ -27,21 +26,21 @@ const cairo = Cairo({
 
 export const metadata = defaultMetadata;
 
-export default async function RootLayout({ children }) {
-  const cookieStore = await cookies();
-  const langCookie = cookieStore.get("lang")?.value;
-  const supportedLocales = ["en", "ar"];
-  const initialLocale =
-    langCookie && supportedLocales.includes(langCookie) ? langCookie : "ar";
-
-  const htmlLang = initialLocale === "ar" ? SITE.htmlLang : initialLocale;
-  const htmlDir = initialLocale === "ar" ? SITE.dir : "ltr";
-
+/**
+ * Arabic-only, and deliberately not `async`.
+ *
+ * Reading the `lang` cookie here opted every route into dynamic rendering, which
+ * cost TTFB on the listing pages and made `notFound()` resolve after the stream
+ * had already committed HTTP 200. The cookie no longer decides anything: the CRM
+ * (the only English consumer) is gone, there is no language switcher, and
+ * `LenaqarLocale` forces `ar` on every public page.
+ */
+export default function RootLayout({ children }) {
   return (
     <html
-      lang={htmlLang}
+      lang={SITE.htmlLang}
       className={`${montserrat.variable} ${cairo.className}`}
-      dir={htmlDir}
+      dir={SITE.dir}
     >
       <head>
         <Script
@@ -65,7 +64,7 @@ export default async function RootLayout({ children }) {
         <OrganizationSchema />
         <LocalBusinessSchema />
         <WebSiteSchema />
-        <I18nProvider initialLocal={initialLocale}>
+        <I18nProvider initialLocal="ar">
           <Toaster position="top-center" reverseOrder={false} />
           <TanStackQueryProvider>
             <MetaPixelProvider>{children}</MetaPixelProvider>

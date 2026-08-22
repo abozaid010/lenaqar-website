@@ -438,69 +438,139 @@ developer B2B page.
 
 ---
 
-## Implementation log
+## Implementation log — pass 2 (2026-08-21)
 
-Verified against a production build (`npm run build`, exit 0) served by `next start`,
-not against the dev server.
+Pass 1 (2026-08-20) fixed titles, listing metadata, `RealEstateListing` schema, the AI
+crawler allowlist and the admin crawl hole. Since then the CRM route group was removed
+from this repo and the production feed outage was fixed upstream, so pass 2 re-measured
+everything before changing anything.
 
-**Done**
+Verified against a production build (`npm run build`, exit 0) served by `next start`.
 
-- **P0-2 / P0-3 — titles and descriptions.** Brand now appears exactly once per title.
-  Home uses `title.absolute` to opt out of the layout template; the other four pages
-  dropped their inline brand and let the template supply it. All five titles and
-  descriptions rewritten around Tier A keywords (ريسيل، تنازل، أقساط، إلغاء التعاقد).
-- **P0-4 — listing pages.** New `src/lib/lenaqar/listing-seo.js` builds the H1, title,
-  and description from fields already in the payload. `madinaty b14` became
-  `استوديو للبيع في madinaty b14 — 67 م²`, with a description carrying the real cash
-  figure and delivery year. Building types and Egyptian place names now render in
-  Arabic (reusing the CRM's `property.buildingTypes` dictionary); each listing image
-  gets its own alt text.
-- **P0-5 — `RealEstateListing` schema.** New `ListingSchema` component emits
-  `RealEstateListing` → `Accommodation` + `Offer` + `PropertyValue`. All five JSON-LD
-  blocks on a listing page parse as valid JSON. Every value traces to an API field;
-  `downPayment` is an `additionalProperty`, not the offer price.
-- **P0-6 — AI crawlers.** `robots.ts` now declares an explicit allow group for GPTBot,
-  OAI-SearchBot, ChatGPT-User, ClaudeBot, PerplexityBot, Google-Extended, Applebot-
-  Extended, meta-externalagent and others — the position AqarExit has forfeited.
-- **P0-7 — admin crawl hole closed.** `robots.ts` now disallows `/*/units`,
-  `/*/dashboard`, and every other rewritten CRM segment alongside their root forms.
-- **Also fixed:** removed the `WebSite.potentialAction` SearchAction that pointed at a
-  `?q=` parameter no route reads; localised the breadcrumb root from "Home" to
-  "الرئيسية"; aligned the sitemap's `/opportunities` entry with the robots feed flag;
-  added a branded root `not-found.jsx`; guarded the `[email]` CRM route so it no longer
-  renders the CRM screen for arbitrary URLs; stopped studios rendering "0 غرف".
+### P0 — inventory ceiling: done
 
-**P0-8 — partially fixed, and here is the honest status.**
+**Measured first.** Walking the API's own cursor pagination
+(`/public/v1/units?client_id=lenaqar&purpose=sell&is_primary=false`) returned
+**135 units, all 135 listable** (`totalPrice > 0`). The site was publishing 40 —
+`maxPages 4 × pageSize 16 = 64` fetched, then `.slice(0, 40)`. 95 units (70%) were
+invisible to search.
 
-Unknown URLs now render the branded 404 page with `robots: noindex` instead of the CRM
-"Client Information" screen. **But they still return HTTP 200, not 404.** This is not
-caused by the change — it is app-wide and pre-existing: `/opportunities/{bad-code}` and
-`/allProberties/{bad-code}`, which have always called `notFound()` directly, return 200
-too. I confirmed by experiment that `src/proxy.js` is not the cause (a path excluded
-from the proxy matcher still returned 200). The cause is that the root layout awaits
-`cookies()`, making the whole tree dynamic and streamed, so the 200 is committed before
-`notFound()` resolves. Fixing it properly means moving locale detection out of the root
-layout — an i18n refactor well beyond this pass, and not something to do unannounced.
-Impact is now limited to soft-404 reports in Search Console and wasted crawl budget;
-nothing gets indexed, because the 404 page is `noindex`.
+- `SITE.feed` bounds raised to `pageSize 50 / maxPages 30 / maxUnits 1500`. These are
+  runaway guards, not a product cap: the cursor loop already stops on
+  `has_more_next: false`, so the whole catalogue publishes and only a looping API
+  reaches these numbers.
+- `/opportunities` paginated at `SITE.pageSize = 24`. Verified: exactly **135 cards
+  across 6 pages**, no gaps and no duplicates. Page weight dropped from ~286 KB (40
+  cards, one document) to ~180 KB.
+- Pagination is real `<a href>` links, not buttons — that is the only path a crawler has
+  to units below page 1. Filters carry across pages; changing a filter resets `page`.
+- Each page is self-canonical (`?page=2` canonicals to itself). Filter combinations still
+  all fold back to the clean `/opportunities` URL, so facets cannot spawn indexable
+  duplicates while paginated units stay reachable.
+- An out-of-range `?page=` now calls `notFound()` instead of clamping — clamping served
+  the last page under unlimited distinct self-canonical URLs.
 
-**Not done — still the highest-value open item**
+**Result: sitemap went from 46 URLs / 40 listings to 141 URLs / 135 listings.**
 
-- **P0-1 — the empty production feed.** Untouched. Production still has 4 sitemap URLs
-  and zero indexable listings. This needs someone with production env access to work out
-  why `fetchOpportunities()` returns empty there and returns 40 units locally — API key,
-  `BFF_SECRET`, or the `client_id=homey` inventory. Until it is fixed, every improvement
-  above applies to listing pages that Google cannot find.
+### P1-3 — TTFB and static rendering: done, and it was the biggest structural win
 
-**Two data problems worth raising with whoever owns the API**
+The root layout was `async` and read `cookies()` for a `lang` value that no longer
+decides anything: the CRM (the only English consumer) is gone, there is no language
+switcher, and `LenaqarLocale` already forces `ar` on every public page. That one read was
+opting **every route** into dynamic rendering.
 
-- `project_ar` is empty on the feed, so listing titles read `madinaty b14` in English on
-  an Arabic page. A lookup table here would be guesswork ("b14" is a phase code); the
-  fix belongs in the data.
-- `/opportunities/[slug]` cannot be statically generated — `getPublicUnitByCode()` reads
-  `cookies()`, so `generateStaticParams()` is wasted and every listing is SSR-on-demand.
+Removed it, and routed `fetchOpportunityByCode` off the CRM's cookie-reading
+`axiosInstance` onto the same cookie-free `bffFetch` path the feed uses — consolidated
+into one `publicApiGet()` helper, so there is now a single server→backend call site for
+the public catalogue.
 
-**Also noted:** `npm run lint` is broken (`next lint` was removed in Next 16), and
-`SEO_RULES.md`, `SEO_IMPLEMENTATION.md`, `docs/seo-geo-content-qc.md` plus
-`scripts/check-seo.js` still enforce LenaAI rules that would actively damage Lenaqar's
-SEO if followed.
+Build output before → after:
+
+| Route | Before | After |
+|---|---|---|
+| `/opportunities/[slug]` | `ƒ` dynamic | `●` **135 pages prerendered** |
+| `/`, `/sell`, `/calculator`, `/how-it-works`, `/privacy` | `ƒ` dynamic | `○` static |
+
+Measured TTFB on a listing page: **1.8 ms** (was ~650 ms in production).
+
+### P1-1 — FAQ: fixed a live policy violation, not just a gap
+
+`FaqSchema` was already emitting `FAQPage` markup with five Q&As on `/how-it-works` —
+but **none of those questions or answers were rendered on the page**. Structured data
+that does not match visible content is a Google structured-data policy violation and is
+grounds for a manual action.
+
+Rather than add a separate `/faq` route (YAGNI — `/how-it-works` already owns this
+content and is already in the sitemap and robots allowlist), the same five entries now
+render visibly through a new `FaqSection`. Both the schema and the section read one
+`FAQ_IDS` list in `src/lib/lenaqar/faq.js`, with the strings in the locale, so an entry
+cannot exist in markup without also rendering. The wording is the team's existing copy,
+unchanged.
+
+Verified: **5/5 schema entries have matching visible text** in the served HTML.
+
+### P1-2 — `project_ar`: measured, not fixable in code
+
+**67 of 135 units (50%) have no `project_ar`.** This is data entry, not a translation
+capability — the same projects already appear in both forms in the feed, so the site
+renders `شقة 3 غرف للبيع في مدينتي ب 14` for one unit and
+`شقة 3 غرف للبيع في madinaty b14` for another.
+
+The concentration makes this cheap to fix upstream. `madinaty` alone is spelled **nine
+different ways** across ~19 units (`madinaty b14`, `madinaty b15`, `madinaty b10`,
+`madinaty b11`, `madinaty b1`, `madinaty b6`, `madinaty`, `Madinaty`, `b14`), plus
+19 units with no project at all. Normalising the madinaty variants fixes ~19 units.
+
+Separately, `PLACES_AR` was extended after auditing all 38 distinct city/district values
+in the feed against the map: added `fifth settlement → التجمع الخامس` (a top-volume
+Egyptian keyword that was rendering in English), plus `6 october`, `el shorouk`,
+`alamein new city`, `madinaty`, `rehab`, `montaza`, `al-abbaseya`, `marina`. The
+remaining unmapped values are project and zone codes leaking into the `district` field
+(`mu-23`, `r8 district`, `c1`, `town center mall`, `green river`) — those correctly fall
+through to the raw value rather than being guessed at.
+
+### P1-4 — `notFound()` returning HTTP 200: root-caused, partly fixed
+
+Static routes now return a correct **404** — `/no-such-page` verified. That came free
+with the P1-3 layout fix.
+
+Dynamically-rendered routes still return **200** with the not-found body:
+`/opportunities/{unknown-slug}` and `/opportunities?page=99`.
+
+This is **framework behavior in Next 16.2.7, not something in this codebase.** Proven by
+elimination, each tested against a production build:
+
+1. Not the proxy — a path excluded from the `proxy.js` matcher behaved identically.
+2. Not the root layout — removing `cookies()` fixed static routes only.
+3. Not `loading.jsx` / Suspense — removing the boundary on `[slug]` changed nothing.
+4. A scratch route containing nothing but `export const dynamic = "force-dynamic"` and
+   `notFound()` also returned **200**.
+
+**Deliberately not "fixed" by setting `dynamicParams = false`** on `/opportunities/[slug]`.
+That would produce a true 404 for unknown slugs, but `generateStaticParams` only runs at
+build time — so any unit added to the backend between deploys would 404 until the next
+build. Trading live inventory for a status code is the wrong way round when inventory is
+the thing this whole roadmap is trying to grow.
+
+Impact is contained: those responses carry `noindex, follow` (verified in the served
+HTML), so nothing is indexed. The residual cost is soft-404 reports in Search Console and
+some wasted crawl budget. Worth revisiting on a future Next upgrade.
+
+### Files touched
+
+`src/config/site.js` · `src/app/layout.jsx` · `src/lib/lenaqar/opportunities.server.js` ·
+`src/app/(lenaqar)/opportunities/page.jsx` · `opportunities-page-content.jsx` ·
+`src/components/lenaqar/opportunity-pagination.jsx` (new) · `opportunity-filters.jsx` ·
+`src/lib/lenaqar/faq.js` (new) · `src/components/lenaqar/faq-section.jsx` (new) ·
+`src/components/schema/FaqSchema.jsx` · `how-it-works-content.jsx` ·
+`src/lib/lenaqar/listing-seo.js` · `public/locales/lenaqar-{ar,en}.js`
+
+### Still open
+
+- **`project_ar` on 67 units** — backend data task, quantified above.
+- **`notFound()` → 200 on dynamic routes** — framework limitation, noindex-contained.
+- **P2 items untouched:** descriptive listing slugs (still `aXcvoehA`), project/area
+  landing pages, guides, internal linking between listings.
+- `npm run lint` is still broken (`next lint` was removed in Next 16), and
+  `SEO_RULES.md` / `SEO_IMPLEMENTATION.md` / `scripts/check-seo.js` still enforce LenaAI
+  rules that would damage Lenaqar's SEO if followed.
