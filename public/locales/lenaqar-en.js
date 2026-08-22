@@ -127,6 +127,19 @@ export default {
     point3: "The commission is written into the agreement before any step.",
     note: "Commission is calculated on the final sale price and is due only once the assignment completes.",
   },
+  faq: {
+    title: "Frequently asked questions",
+    q1: "How do I sell my unit on LenaQar?",
+    a1: "Send us your contract and payment receipts on WhatsApp, and we list your unit to ready buyers.",
+    q2: "How do I buy a listed opportunity?",
+    a2: "Browse the opportunities page, run the numbers in the calculator, and message us on WhatsApp if the deal suits you.",
+    q3: "What is the difference between a buy request and a listed opportunity?",
+    a3: "Listed opportunities are units available now. With a buy request you describe what you want and we come back to you with what fits.",
+    q4: "Are there any fees before we agree?",
+    a4: "There is no registration fee. Any price or commitment is written into an agreement with you before we take any step.",
+    q5: "Does every unit come with the 45-day plan?",
+    a5: "It does not apply to every listed unit. We make it clear to you before taking any step.",
+  },
   opportunities: {
     title: "What can the cash you have buy today?",
     sub: "Developer prices, dated, with a clear payment plan.",
@@ -145,6 +158,10 @@ export default {
     honesty:
       "The cash multiple measures cash efficiency only — not a profit promise. The installment stays your responsibility until delivery.",
     buyRequestHint: "You don't have to search every unit. Tell us what you want.",
+    resultsCount: "{count} units listed",
+    pagePosition: "Page {page} of {total}",
+    prevPage: "Previous",
+    nextPage: "Next",
   },
   unit: {
     egp: "EGP",

@@ -6,10 +6,14 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 import OpportunityCard from "@/components/lenaqar/opportunity-card";
 import OpportunityFilters from "@/components/lenaqar/opportunity-filters";
 import OpportunitiesEmpty from "@/components/lenaqar/opportunities-empty";
+import OpportunityPagination from "@/components/lenaqar/opportunity-pagination";
 
 export default function OpportunitiesPageContent({
   units,
   years,
+  total = 0,
+  page = 1,
+  totalPages = 1,
   hasActiveFilters = false,
   cash = "",
 }) {
@@ -35,11 +39,20 @@ export default function OpportunitiesPageContent({
       {units.length === 0 ? (
         <OpportunitiesEmpty hasActiveFilters={hasActiveFilters} cash={cash} />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {units.map((unit) => (
-            <OpportunityCard key={unit.code} unit={unit} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {units.map((unit) => (
+              <OpportunityCard key={unit.code} unit={unit} />
+            ))}
+          </div>
+          <Suspense fallback={null}>
+            <OpportunityPagination
+              page={page}
+              totalPages={totalPages}
+              total={total}
+            />
+          </Suspense>
+        </>
       )}
     </section>
   );

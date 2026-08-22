@@ -51,6 +51,16 @@ const PLACES_AR = {
   "sheraton": "شيراتون",
   "mostakbal city": "مدينة المستقبل",
   "badya": "بادية",
+  "fifth settlement": "التجمع الخامس",
+  "6 october": "السادس من أكتوبر",
+  "6 october city": "السادس من أكتوبر",
+  "el shorouk": "الشروق",
+  "alamein new city": "العلمين الجديدة",
+  madinaty: "مدينتي",
+  rehab: "الرحاب",
+  montaza: "المنتزه",
+  "al-abbaseya": "العباسية",
+  marina: "مارينا",
 };
 
 function clean(value) {

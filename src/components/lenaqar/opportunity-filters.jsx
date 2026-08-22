@@ -61,6 +61,9 @@ export default function OpportunityFilters({ years = [] }) {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("area");
     params.delete("project_name");
+    // A new filter means a new result set — keeping the old page number would
+    // land the visitor past the end of it.
+    params.delete("page");
 
     if (next.city) params.set("city", next.city);
     else params.delete("city");

@@ -35,13 +35,22 @@ export const SITE = {
   showPresentValue: false,
   /** Flip when info@lenaqar.com actually receives mail. */
   showEmail: false,
-  /** Feed sizing: bounded pages in, capped list out. Set FEED_ENABLED=false to pause fetching. */
+  /**
+   * Feed sizing. These are runaway guards, not a product cap: the cursor loop
+   * stops as soon as the API reports `has_more_next: false`, so the whole
+   * catalogue is published and only a broken/looping API hits these numbers.
+   *
+   * Sized against a measured catalogue of 135 sell/resale units (2026-08-21),
+   * which is 3 pages at this page size. Set FEED_ENABLED=false to pause fetching.
+   */
   feed: {
     enabled: process.env.NEXT_PUBLIC_LENAQAR_FEED_ENABLED !== "false",
-    maxPages: 4,
-    pageSize: 16,
-    maxUnits: 40,
+    maxPages: 30,
+    pageSize: 50,
+    maxUnits: 1500,
   },
+  /** Cards per page on /opportunities. Bounds document size, not the catalogue. */
+  pageSize: 24,
 };
 
 /** Query params for the LenaQar public units catalog. */
