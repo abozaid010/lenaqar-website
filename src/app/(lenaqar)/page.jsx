@@ -1,19 +1,17 @@
 import { SITE } from "@/config/site";
-import { fetchOpportunities } from "@/lib/lenaqar/opportunities.server";
-import HomeContent from "@/components/lenaqar/home-content";
+import { fetchPublicRequirements } from "@/lib/lenaqar/requirements.server";
+import MarketplaceHomeContent from "@/components/lenaqar/marketplace-home-content";
 
-export const revalidate = 900;
+export const revalidate = 300;
 
 export const metadata = {
-  // `absolute` opts out of the root layout's "%s | لينا عقار" template so the
-  // brand is not repeated on the one title that already leads with it.
-  title: { absolute: "لينا عقار | عقارات ريسيل وتنازل عن وحدات التقسيط في مصر" },
+  title: { absolute: "لينا عقار | طلبات شراء حقيقية — ابعت وحدتك على واتساب" },
   description:
-    "وحدات ريسيل وعقود قديمة وفرص من المطور — اشتري بسعر التعاقد القديم. ولو مش قادر تكمّل أقساطك، بنعرض وحدتك على مشترين جاهزين باتفاق مكتوب.",
+    "دى مش إعلانات — دول ناس فعلاً بتدور على شقق بالمواصفات دي. لو شقتك مناسبة، ابعتها على الواتساب والفريق هيراجعها ويبعتها للمشتري فوراً.",
   openGraph: {
-    title: "لينا عقار | عقارات ريسيل وتنازل عن وحدات التقسيط في مصر",
+    title: "لينا عقار | طلبات شراء حقيقية — ابعت وحدتك على واتساب",
     description:
-      "مش قادر تكمّل أقساطك؟ بنعرض وحدتك على مشترين جاهزين ونتفق معاك على السعر باتفاق مكتوب. من غير مضايقات، ومن غير أوفر مضاف عليك.",
+      "دى مش إعلانات — دول ناس فعلاً بتدور على شقق بالمواصفات دي. لو شقتك مناسبة لأي عميل من دول، خش ابعتها على الواتساب.",
     url: SITE.url,
     locale: "ar_EG",
     siteName: SITE.name,
@@ -26,11 +24,8 @@ export const metadata = {
 };
 
 export default async function LenaqarHomePage() {
-  let units = [];
-  try {
-    units = await fetchOpportunities();
-  } catch {
-    units = [];
-  }
-  return <HomeContent units={units} />;
+  const { requirements, error } = await fetchPublicRequirements({ limit: 48 });
+  return (
+    <MarketplaceHomeContent requirements={requirements} error={error} />
+  );
 }

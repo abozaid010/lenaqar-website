@@ -6,7 +6,7 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useI18n } from "@/hooks/useI18n";
-import { sellerCtaHref } from "@/lib/lenaqar/whatsapp";
+import { marketplaceAddUnitHref, sellerCtaHref } from "@/lib/lenaqar/whatsapp";
 import { ANALYTICS } from "@/constants/analytics";
 import WhatsAppCta from "./whatsapp-cta";
 import BuyRequestCta from "./buy-request-cta";
@@ -57,12 +57,16 @@ export default function LenaqarHeader() {
 
         <div className="hidden lg:block">
           <WhatsAppCta
-            href={sellerCtaHref()}
-            eventName={ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED}
+            href={isHome ? marketplaceAddUnitHref() : sellerCtaHref()}
+            eventName={
+              isHome
+                ? ANALYTICS.EVENTS.MARKETPLACE_WHATSAPP_CLICKED
+                : ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED
+            }
             className="!py-2 !px-3 !text-xs"
           >
             {isHome
-              ? translate("lenaqar.home.lenaCta")
+              ? translate("lenaqar.marketplace.hero.whatsappCta")
               : translate("lenaqar.header.sell")}
           </WhatsAppCta>
         </div>
@@ -101,10 +105,16 @@ export default function LenaqarHeader() {
             className="w-full"
           />
           <WhatsAppCta
-            href={sellerCtaHref()}
-            eventName={ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED}
+            href={isHome ? marketplaceAddUnitHref() : sellerCtaHref()}
+            eventName={
+              isHome
+                ? ANALYTICS.EVENTS.MARKETPLACE_WHATSAPP_CLICKED
+                : ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED
+            }
           >
-            {translate("lenaqar.home.lenaCta")}
+            {isHome
+              ? translate("lenaqar.marketplace.hero.whatsappCta")
+              : translate("lenaqar.home.lenaCta")}
           </WhatsAppCta>
         </nav>
       ) : null}

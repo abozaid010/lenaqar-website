@@ -19,12 +19,13 @@ const sampleForm = {
   max_price: 3000000,
   downPayment: 300000,
   monthlyInstallment: 15000,
-  overPrice: 100000,
+  notes: "عايز شقة قريبة من الخدمات",
   deliveryDate: "2026-12",
   project: "Madinaty",
   client_id: "must-not-be-sent",
   totalPrice: 999,
   finishingType: "fully finished",
+  overPrice: 100000,
 };
 
 test("parseMoney strips grouping characters", () => {
@@ -59,13 +60,15 @@ test("builds the documented API requirement and drops extra keys", () => {
     max_price: 3000000,
     downPayment: 300000,
     monthlyInstallment: 15000,
-    overPrice: 100000,
     deliveryDate: "2026-12",
     project: "Madinaty",
+    additionalFeatures: ["عايز شقة قريبة من الخدمات"],
   });
   assert.equal("client_id" in result.requirement, false);
   assert.equal("totalPrice" in result.requirement, false);
   assert.equal("finishingType" in result.requirement, false);
+  assert.equal("overPrice" in result.requirement, false);
+  assert.equal("notes" in result.requirement, false);
 });
 
 test("omits empty optional fields instead of sending null", () => {
@@ -77,7 +80,7 @@ test("omits empty optional fields instead of sending null", () => {
     roomsCount: "",
     downPayment: "",
     monthlyInstallment: "",
-    overPrice: "",
+    notes: "",
     deliveryDate: "",
     project: "",
   });
@@ -88,6 +91,7 @@ test("omits empty optional fields instead of sending null", () => {
     buildingType: "apartment",
     max_price: 3000000,
   });
+  assert.equal("additionalFeatures" in result.requirement, false);
 });
 
 test("rejects missing required fields", () => {
@@ -112,13 +116,22 @@ test("rejects invalid rooms, money, and deliveryDate", () => {
   const result = buildPublicBuyRequirement({
     ...sampleForm,
     roomsCount: 2.5,
-    overPrice: -1,
+    downPayment: -1,
     deliveryDate: "December 2026",
   });
   assert.equal(result.ok, false);
   assert.equal(result.errors.roomsCount, "invalidRooms");
-  assert.equal(result.errors.overPrice, "invalidNumber");
+  assert.equal(result.errors.downPayment, "invalidNumber");
   assert.equal(result.errors.deliveryDate, "invalidDeliveryDate");
+});
+
+test("rejects notes that are too long", () => {
+  const result = buildPublicBuyRequirement({
+    ...sampleForm,
+    notes: "x".repeat(1001),
+  });
+  assert.equal(result.ok, false);
+  assert.equal(result.errors.notes, "notesTooLong");
 });
 
 test("normalizes city/district case and ISO deliveryDate", () => {
@@ -141,7 +154,6 @@ test("converts Arabic digits in money, rooms, and deliveryDate before API payloa
     max_price: "٣٠٠٠٠٠٠",
     downPayment: "٣٠٠٠٠٠",
     monthlyInstallment: "١٥٠٠٠",
-    overPrice: "١٠٠٠٠٠",
     deliveryDate: "٢٠٢٦-١٢",
   });
   assert.equal(result.ok, true);
@@ -149,6 +161,5 @@ test("converts Arabic digits in money, rooms, and deliveryDate before API payloa
   assert.equal(result.requirement.max_price, 3000000);
   assert.equal(result.requirement.downPayment, 300000);
   assert.equal(result.requirement.monthlyInstallment, 15000);
-  assert.equal(result.requirement.overPrice, 100000);
   assert.equal(result.requirement.deliveryDate, "2026-12");
 });

@@ -4,6 +4,7 @@ import { BUILDING_TYPE_VALUES } from "@/data/constants";
 import { getBuildingTypeOptions } from "@/lib/enums/buildingTypes";
 import { useI18n } from "@/hooks/useI18n";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
+import LenaTextarea from "@/components/ui/inputs/lena-textarea";
 import MonthYearField from "@/components/ui/inputs/month-year-field";
 import UnitsLocationSearch from "@/components/ui/inputs/units-location-search";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
@@ -28,7 +29,6 @@ const MONEY_FIELDS = new Set([
   "max_price",
   "downPayment",
   "monthlyInstallment",
-  "overPrice",
 ]);
 
 /** YYYY-MM bounds for the native month picker (ready units → near-term delivery). */
@@ -81,6 +81,21 @@ function normalizeEnumValue(raw, allowedValues) {
   );
 }
 
+function notesFromLoaded(raw) {
+  if (typeof raw?.notes === "string" && raw.notes.trim()) {
+    return raw.notes.trim();
+  }
+  const features = raw?.additionalFeatures ?? raw?.additional_features;
+  if (Array.isArray(features)) {
+    return features
+      .map((item) => String(item || "").trim())
+      .filter(Boolean)
+      .join("\n");
+  }
+  if (typeof features === "string") return features.trim();
+  return "";
+}
+
 function createEmptyForm(initialValues = {}) {
   const initial =
     initialValues && typeof initialValues === "object" ? initialValues : {};
@@ -94,8 +109,8 @@ function createEmptyForm(initialValues = {}) {
     max_price: numberToFieldValue(initial.max_price ?? initial.totalPrice),
     downPayment: numberToFieldValue(initial.downPayment),
     monthlyInstallment: numberToFieldValue(initial.monthlyInstallment),
-    overPrice: numberToFieldValue(initial.overPrice),
     deliveryDate: toYearMonth(initial.deliveryDate),
+    notes: notesFromLoaded(initial),
   };
 }
 
@@ -110,8 +125,8 @@ function mapLoadedRequirement(raw) {
     max_price: numberToFieldValue(raw.max_price ?? raw.totalPrice),
     downPayment: numberToFieldValue(raw.downPayment),
     monthlyInstallment: numberToFieldValue(raw.monthlyInstallment),
-    overPrice: numberToFieldValue(raw.overPrice),
     deliveryDate: toYearMonth(raw.deliveryDate),
+    notes: notesFromLoaded(raw),
   };
 }
 
@@ -334,7 +349,7 @@ export default function BuyRequestDialog({
           maxPrice: tr("lenaqar.buyRequest.maxPrice"),
           downPayment: tr("lenaqar.buyRequest.downPayment"),
           monthlyInstallment: tr("lenaqar.buyRequest.monthlyInstallment"),
-          overPrice: tr("lenaqar.buyRequest.overPrice"),
+          notes: tr("lenaqar.buyRequest.notes"),
           deliveryDate: tr("lenaqar.buyRequest.deliveryDate"),
         },
       });
@@ -512,16 +527,6 @@ export default function BuyRequestDialog({
               error={Boolean(compactError("monthlyInstallment"))}
               errorMessage={compactError("monthlyInstallment")}
             />
-            <LenaTextField
-              name="overPrice"
-              type="money"
-              label={tr("lenaqar.buyRequest.overPrice", "Over price")}
-              value={form.overPrice}
-              onChange={handleFieldChange}
-              adornment={tr("lenaqar.unit.egp")}
-              error={Boolean(compactError("overPrice"))}
-              errorMessage={compactError("overPrice")}
-            />
             <MonthYearField
               name="deliveryDate"
               label={tr("lenaqar.buyRequest.deliveryDate")}
@@ -532,6 +537,19 @@ export default function BuyRequestDialog({
               locale={locale}
               error={Boolean(compactError("deliveryDate"))}
               errorMessage={compactError("deliveryDate")}
+            />
+            <LenaTextarea
+              name="notes"
+              label={tr("lenaqar.buyRequest.notes", "Notes")}
+              value={form.notes}
+              onChange={handleFieldChange}
+              rows={4}
+              helperText={tr(
+                "lenaqar.buyRequest.notesHint",
+                "اكتب أي تفاصيل إضافية عن اللي بتدور عليه",
+              )}
+              error={Boolean(compactError("notes"))}
+              errorMessage={compactError("notes")}
             />
           </section>
         </>

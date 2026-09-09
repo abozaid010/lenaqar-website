@@ -114,7 +114,6 @@ export function buildPublicBuyRequirement(form) {
     errors,
     "invalidNumber",
   );
-  const overPrice = optionalMoney(form, "overPrice", errors, "invalidNumber");
 
   let deliveryDate;
   if (form?.deliveryDate !== "" && form?.deliveryDate != null) {
@@ -124,6 +123,12 @@ export function buildPublicBuyRequirement(form) {
     } else {
       deliveryDate = ym;
     }
+  }
+
+  let notes = String(form?.notes || "").trim();
+  if (notes.length > 1000) {
+    errors.notes = "notesTooLong";
+    notes = "";
   }
 
   if (Object.keys(errors).length) {
@@ -142,8 +147,9 @@ export function buildPublicBuyRequirement(form) {
   if (roomsCount != null) requirement.roomsCount = roomsCount;
   if (downPayment != null) requirement.downPayment = downPayment;
   if (monthlyInstallment != null) requirement.monthlyInstallment = monthlyInstallment;
-  if (overPrice != null) requirement.overPrice = overPrice;
   if (deliveryDate) requirement.deliveryDate = deliveryDate;
+  // Public API stores free-text notes as additionalFeatures (string[]).
+  if (notes) requirement.additionalFeatures = [notes];
 
   return { ok: true, requirement };
 }
