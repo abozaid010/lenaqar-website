@@ -5,7 +5,6 @@ import { getBuildingTypeOptions } from "@/lib/enums/buildingTypes";
 import { useI18n } from "@/hooks/useI18n";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import LenaTextarea from "@/components/ui/inputs/lena-textarea";
-import MonthYearField from "@/components/ui/inputs/month-year-field";
 import UnitsLocationSearch from "@/components/ui/inputs/units-location-search";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
@@ -14,8 +13,13 @@ import { PhoneField } from "@/components/phone/PhoneField";
 import SubmitWhatsAppFallback from "@/components/lenaqar/submit-whatsapp-fallback";
 import {
   buildPublicBuyRequirement,
-  toYearMonth,
+  inferBuyRequestPaymentMode,
+  normalizeBuyRequestPaymentMode,
 } from "@/lib/lenaqar/buy-request-payload";
+import {
+  getBuyRequestDeliveryOptions,
+  normalizeBuyRequestDelivery,
+} from "@/lib/lenaqar/buy-request-delivery";
 import {
   composeBuyRequestWhatsAppMessage,
   whatsappFallbackHref,
@@ -31,25 +35,11 @@ const MONEY_FIELDS = new Set([
   "monthlyInstallment",
 ]);
 
-/** YYYY-MM bounds for the native month picker (ready units → near-term delivery). */
-function deliveryMonthBounds(now = new Date()) {
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  return {
-    min: `${year - 2}-${month}`,
-    max: `${year + 15}-${month}`,
-  };
-}
-
 /** Numeric text fields that must keep ASCII digits in form state. */
 function normalizeNumericField(name, value) {
   if (MONEY_FIELDS.has(name)) return parseMoneyInput(value);
   if (name === "roomsCount") {
     return String(normalizeToEnglishDigits(value ?? "")).replace(/\D/g, "");
-  }
-  if (name === "deliveryDate") {
-    // Native <input type="month"> yields "" or ASCII YYYY-MM.
-    return value == null ? "" : String(value);
   }
   return value;
 }
@@ -99,7 +89,9 @@ function notesFromLoaded(raw) {
 function createEmptyForm(initialValues = {}) {
   const initial =
     initialValues && typeof initialValues === "object" ? initialValues : {};
+  const paymentMode = inferBuyRequestPaymentMode(initial);
   return {
+    paymentMode,
     city: pickSingleValue(initial.city),
     district: pickSingleValue(initial.district),
     sub_district: pickSingleValue(initial.sub_district),
@@ -109,13 +101,18 @@ function createEmptyForm(initialValues = {}) {
     max_price: numberToFieldValue(initial.max_price ?? initial.totalPrice),
     downPayment: numberToFieldValue(initial.downPayment),
     monthlyInstallment: numberToFieldValue(initial.monthlyInstallment),
-    deliveryDate: toYearMonth(initial.deliveryDate),
+    deliveryDate:
+      paymentMode === "cash"
+        ? "ready"
+        : normalizeBuyRequestDelivery(initial.deliveryDate),
     notes: notesFromLoaded(initial),
   };
 }
 
 function mapLoadedRequirement(raw) {
+  const paymentMode = inferBuyRequestPaymentMode(raw);
   return {
+    paymentMode,
     city: pickSingleValue(raw.city),
     district: pickSingleValue(raw.district),
     sub_district: pickSingleValue(raw.sub_district),
@@ -125,7 +122,10 @@ function mapLoadedRequirement(raw) {
     max_price: numberToFieldValue(raw.max_price ?? raw.totalPrice),
     downPayment: numberToFieldValue(raw.downPayment),
     monthlyInstallment: numberToFieldValue(raw.monthlyInstallment),
-    deliveryDate: toYearMonth(raw.deliveryDate),
+    deliveryDate:
+      paymentMode === "cash"
+        ? "ready"
+        : normalizeBuyRequestDelivery(raw.deliveryDate),
     notes: notesFromLoaded(raw),
   };
 }
@@ -171,6 +171,7 @@ export default function BuyRequestDialog({
   const [contactName, setContactName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phonePayload, setPhonePayload] = useState(null);
+  const [notBrokerConfirmed, setNotBrokerConfirmed] = useState(false);
   const [whatsappFallbackHrefState, setWhatsappFallbackHrefState] = useState("");
 
   const buildingTypeOptions = useMemo(
@@ -178,9 +179,9 @@ export default function BuyRequestDialog({
     [locale, tr],
   );
 
-  const { min: deliveryMin, max: deliveryMax } = useMemo(
-    () => deliveryMonthBounds(),
-    [],
+  const deliveryOptions = useMemo(
+    () => getBuyRequestDeliveryOptions(tr),
+    [tr],
   );
 
   const compactError = (key) =>
@@ -194,6 +195,7 @@ export default function BuyRequestDialog({
   useEffect(() => {
     if (open) return;
     setLocationError("");
+    setNotBrokerConfirmed(false);
     setWhatsappFallbackHrefState("");
     setFieldErrors((prev) =>
       prev && Object.keys(prev).length === 0 ? prev : {},
@@ -262,9 +264,51 @@ export default function BuyRequestDialog({
     setLocationError("");
   };
 
+  const handlePaymentModeChange = (nextMode) => {
+    const mode = normalizeBuyRequestPaymentMode(nextMode);
+    setForm((prev) => {
+      if (prev.paymentMode === mode) return prev;
+      if (mode === "cash") {
+        return {
+          ...prev,
+          paymentMode: mode,
+          downPayment: "",
+          monthlyInstallment: "",
+          deliveryDate: "ready",
+        };
+      }
+      return {
+        ...prev,
+        paymentMode: mode,
+        deliveryDate: "",
+      };
+    });
+    setFieldErrors((prev) => {
+      if (!prev || Object.keys(prev).length === 0) return prev;
+      const next = { ...prev };
+      delete next.max_price;
+      delete next.downPayment;
+      delete next.monthlyInstallment;
+      delete next.deliveryDate;
+      return next;
+    });
+  };
+
+  const isCash = form.paymentMode !== "installment";
+
   const handleSubmit = async (e) => {
     e?.preventDefault?.();
     if (!userId && !showContactFields) return;
+
+    if (!notBrokerConfirmed) {
+      toast.error(
+        tr(
+          "lenaqar.buyRequest.notBrokerRequired",
+          "You must confirm you are not a broker",
+        ),
+      );
+      return;
+    }
 
     if (showContactFields) {
       if (!contactName.trim()) {
@@ -306,14 +350,17 @@ export default function BuyRequestDialog({
     setSaving(true);
     setWhatsappFallbackHrefState("");
     try {
-      const extra = showContactFields
-        ? {
-            contact: {
-              name: contactName.trim(),
-              phone: phonePayload.combined,
-            },
-          }
-        : undefined;
+      const extra = {
+        notBrokerConfirmed: true,
+        ...(showContactFields
+          ? {
+              contact: {
+                name: contactName.trim(),
+                phone: phonePayload.combined,
+              },
+            }
+          : {}),
+      };
       const saveResult = await saveRequirement(userId, built.requirement, extra);
       const savedUserId = String(saveResult?.userId || userId || "").trim();
       if (savedUserId) onUserId?.(savedUserId);
@@ -374,7 +421,12 @@ export default function BuyRequestDialog({
           : submitLabel || tr("lenaqar.buyRequest.submit", "Submit")
       }
       onSubmit={handleSubmit}
-      submitDisabled={loading || saving || (!userId && !showContactFields)}
+      submitDisabled={
+        loading ||
+        saving ||
+        (!userId && !showContactFields) ||
+        !notBrokerConfirmed
+      }
       submitLoading={saving}
       closeOnEscape
       overlayClassName={overlayClassName}
@@ -388,6 +440,15 @@ export default function BuyRequestDialog({
       ) : (
         <>
           {intro ? <p className="text-sm text-gray-600 -mt-1">{intro}</p> : null}
+
+          <div className="rounded-xl border border-primary/15 bg-primary/[0.04] p-3.5">
+            <p className="font-semibold text-primary">
+              {tr("lenaqar.buyRequest.notBrokerTitle")}
+            </p>
+            <p className="mt-1.5 text-sm text-black/70 leading-relaxed">
+              {tr("lenaqar.buyRequest.notBrokerBody")}
+            </p>
+          </div>
 
           {whatsappFallbackHrefState ? (
             <SubmitWhatsAppFallback
@@ -440,12 +501,7 @@ export default function BuyRequestDialog({
               error={Boolean(locationError)}
               errorMessage={locationError}
               showAllOption={false}
-              placeholder={tr(
-                "unitsFilter.locationSearchPlaceholder",
-                locale === "ar"
-                  ? "ابحث عن مدينة أو منطقة أو حي…"
-                  : "Search city, district, or area…",
-              )}
+              placeholder={tr("lenaqar.buyRequest.locationPlaceholder")}
               className={dropdownClassName}
             />
             <SearchableProjectSelect
@@ -496,48 +552,117 @@ export default function BuyRequestDialog({
             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
               {tr("lenaqar.buyRequest.budgetSection", "Budget")}
             </h4>
-            <LenaTextField
-              name="max_price"
-              type="money"
-              label={tr("lenaqar.buyRequest.maxPrice", "Max budget")}
-              value={form.max_price}
-              onChange={handleFieldChange}
-              adornment={tr("lenaqar.unit.egp")}
-              required
-              error={Boolean(compactError("max_price"))}
-              errorMessage={compactError("max_price")}
-            />
-            <LenaTextField
-              name="downPayment"
-              type="money"
-              label={tr("lenaqar.buyRequest.downPayment", "Down payment")}
-              value={form.downPayment}
-              onChange={handleFieldChange}
-              adornment={tr("lenaqar.unit.egp")}
-              error={Boolean(compactError("downPayment"))}
-              errorMessage={compactError("downPayment")}
-            />
-            <LenaTextField
-              name="monthlyInstallment"
-              type="money"
-              label={tr("lenaqar.buyRequest.monthlyInstallment", "Monthly installment")}
-              value={form.monthlyInstallment}
-              onChange={handleFieldChange}
-              adornment={tr("lenaqar.unit.egp")}
-              error={Boolean(compactError("monthlyInstallment"))}
-              errorMessage={compactError("monthlyInstallment")}
-            />
-            <MonthYearField
-              name="deliveryDate"
-              label={tr("lenaqar.buyRequest.deliveryDate")}
-              value={form.deliveryDate}
-              onChange={handleFieldChange}
-              min={deliveryMin}
-              max={deliveryMax}
-              locale={locale}
-              error={Boolean(compactError("deliveryDate"))}
-              errorMessage={compactError("deliveryDate")}
-            />
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-800">
+                {tr("lenaqar.buyRequest.paymentModeLabel", "Payment method")}
+              </p>
+              <div
+                role="radiogroup"
+                aria-label={tr("lenaqar.buyRequest.paymentModeLabel")}
+                className="grid grid-cols-2 gap-2"
+              >
+                {[
+                  {
+                    value: "cash",
+                    label: tr("lenaqar.buyRequest.paymentModeCash", "Cash"),
+                  },
+                  {
+                    value: "installment",
+                    label: tr(
+                      "lenaqar.buyRequest.paymentModeInstallment",
+                      "Installment",
+                    ),
+                  },
+                ].map((option) => {
+                  const selected = form.paymentMode === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      onClick={() => handlePaymentModeChange(option.value)}
+                      className={`min-h-[40px] rounded-md border px-3 text-sm font-medium transition-colors ${
+                        selected
+                          ? "border-primary bg-primary text-white"
+                          : "border-gray-300 bg-white text-gray-800 hover:border-gray-400"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-gray-500">
+                {isCash
+                  ? tr("lenaqar.buyRequest.paymentModeCashHint")
+                  : tr("lenaqar.buyRequest.paymentModeInstallmentHint")}
+              </p>
+            </div>
+
+            {isCash ? (
+              <>
+                <LenaTextField
+                  name="max_price"
+                  type="money"
+                  label={tr("lenaqar.buyRequest.maxPrice", "Max cash budget")}
+                  value={form.max_price}
+                  onChange={handleFieldChange}
+                  placeholder={tr("lenaqar.buyRequest.maxPricePlaceholder")}
+                  adornment={tr("lenaqar.unit.egp")}
+                  required
+                  error={Boolean(compactError("max_price"))}
+                  errorMessage={compactError("max_price")}
+                />
+                <p className="text-xs text-gray-600 -mt-1">
+                  {tr("lenaqar.buyRequest.cashDeliveryNote")}
+                </p>
+              </>
+            ) : (
+              <>
+                <LenaTextField
+                  name="downPayment"
+                  type="money"
+                  label={tr("lenaqar.buyRequest.downPayment", "Down payment")}
+                  value={form.downPayment}
+                  onChange={handleFieldChange}
+                  placeholder={tr("lenaqar.buyRequest.downPaymentPlaceholder")}
+                  adornment={tr("lenaqar.unit.egp")}
+                  required
+                  error={Boolean(compactError("downPayment"))}
+                  errorMessage={compactError("downPayment")}
+                />
+                <LenaTextField
+                  name="monthlyInstallment"
+                  type="money"
+                  label={tr(
+                    "lenaqar.buyRequest.monthlyInstallment",
+                    "Monthly installment",
+                  )}
+                  value={form.monthlyInstallment}
+                  onChange={handleFieldChange}
+                  placeholder={tr(
+                    "lenaqar.buyRequest.monthlyInstallmentPlaceholder",
+                  )}
+                  adornment={tr("lenaqar.unit.egp")}
+                  error={Boolean(compactError("monthlyInstallment"))}
+                  errorMessage={compactError("monthlyInstallment")}
+                />
+                <SearchableDropdownSelect
+                  name="deliveryDate"
+                  label={tr("lenaqar.buyRequest.deliveryDate")}
+                  value={form.deliveryDate}
+                  onChange={handleFieldChange}
+                  options={deliveryOptions}
+                  placeholder={tr("lenaqar.buyRequest.selectDelivery")}
+                  error={Boolean(compactError("deliveryDate"))}
+                  errorMessage={compactError("deliveryDate")}
+                  className={dropdownClassName}
+                />
+              </>
+            )}
+
             <LenaTextarea
               name="notes"
               label={tr("lenaqar.buyRequest.notes", "Notes")}
@@ -552,6 +677,20 @@ export default function BuyRequestDialog({
               errorMessage={compactError("notes")}
             />
           </section>
+
+          <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-black/10 bg-black/[0.02] p-3.5">
+            <input
+              type="checkbox"
+              name="not_broker_confirm"
+              checked={notBrokerConfirmed}
+              onChange={(event) => setNotBrokerConfirmed(event.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-black/20 text-primary focus:ring-primary/30"
+              required
+            />
+            <span className="text-sm text-black/80 leading-relaxed">
+              {tr("lenaqar.buyRequest.notBrokerConfirm")}
+            </span>
+          </label>
         </>
       )}
     </UnifiedDialog>

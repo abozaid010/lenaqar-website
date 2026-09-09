@@ -38,10 +38,15 @@ export default function MarketplaceHomeContent({
         />
 
         <div className="container relative pt-14 pb-12 sm:pt-20 sm:pb-16">
-          <p className="text-sm font-semibold tracking-wide text-primary/70">
-            {translate("lenaqar.marketplace.hero.eyebrow")}
-          </p>
-          <h1 className="mt-3 max-w-4xl text-4xl font-bold leading-[1.15] text-primary sm:text-5xl lg:text-6xl">
+          <div className="max-w-3xl space-y-1.5">
+            <p className="text-xs font-semibold tracking-wide text-primary sm:text-sm">
+              {translate("lenaqar.marketplace.hero.eyebrow")}
+            </p>
+            <p className="text-xs leading-relaxed text-black/65 sm:text-sm">
+              {translate("lenaqar.marketplace.hero.eyebrowDetail")}
+            </p>
+          </div>
+          <h1 className="mt-4 max-w-4xl text-4xl font-bold leading-[1.15] text-primary sm:mt-5 sm:text-5xl lg:text-6xl">
             {translate("lenaqar.marketplace.hero.title")}
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-black/75 sm:text-xl">

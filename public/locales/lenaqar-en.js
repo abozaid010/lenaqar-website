@@ -245,6 +245,12 @@ export default {
     cta: "Buy a unit",
     title: "What are you looking for?",
     intro: "Tell us the specs, and we'll prepare matching opportunities.",
+    notBrokerTitle: "Direct buyers only — no brokers",
+    notBrokerBody:
+      "Requests from brokers or agents are excluded. The platform is for the buyer directly, so they get the contract price with no over-price — a broker adds margin and breaks the model.",
+    notBrokerConfirm:
+      "I confirm I am not a real-estate broker, and that I am submitting this request as a buyer, not as an agent. Any violation means the request may be rejected.",
+    notBrokerRequired: "You must confirm you are not a broker.",
     submit: "Send your request",
     saved: "Your request was saved. We'll contact you with matching opportunities.",
     contactSection: "Contact details",
@@ -286,6 +292,7 @@ export default {
       invalidNumber: "Enter a valid amount.",
       invalidRooms: "Rooms must be a whole number greater than zero.",
       invalidDeliveryDate: "Choose a delivery month.",
+      not_broker_required: "You must confirm you are not a broker.",
     },
   },
   sellRequest: {

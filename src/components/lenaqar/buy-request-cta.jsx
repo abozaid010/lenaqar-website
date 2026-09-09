@@ -106,6 +106,7 @@ export default function BuyRequestCta({
         userId: id,
         contact: extra?.contact,
         payload,
+        notBrokerConfirmed: extra?.notBrokerConfirmed === true,
       });
       if (!result?.ok) {
         const code = result?.code || "save_failed";
@@ -144,7 +145,7 @@ export default function BuyRequestCta({
         intro={translate("lenaqar.buyRequest.intro")}
         successMessage={translate("lenaqar.buyRequest.saved")}
         initialValues={initialValues}
-        showContactFields={!userId}
+        showContactFields
         overlayClassName="!z-[70]"
         loadRequirement={loadRequirement}
         saveRequirement={saveRequirement}

@@ -1,5 +1,6 @@
 import { BUILDING_TYPE_VALUES } from "../../data/constants.js";
 import { normalizeToEnglishDigits } from "../../utils/parse-amount.js";
+import { normalizeBuyRequestDelivery } from "./buy-request-delivery.js";
 
 const BUILDING_TYPE_SET = new Set(
   BUILDING_TYPE_VALUES.map((value) => String(value).trim().toLowerCase()),
@@ -60,6 +61,35 @@ function requiredMoney(form, key, errors, requiredKey, invalidKey) {
   return n;
 }
 
+export const BUY_REQUEST_PAYMENT_MODES = ["cash", "installment"];
+
+/**
+ * @param {unknown} value
+ * @returns {"cash" | "installment"}
+ */
+export function normalizeBuyRequestPaymentMode(value) {
+  const raw = String(value || "").trim().toLowerCase();
+  return raw === "installment" ? "installment" : "cash";
+}
+
+/**
+ * Infer payment mode when loading a saved requirement (no UI mode stored).
+ * @param {object | null | undefined} raw
+ * @returns {"cash" | "installment"}
+ */
+export function inferBuyRequestPaymentMode(raw) {
+  if (!raw || typeof raw !== "object") return "cash";
+  if (raw.paymentMode != null && String(raw.paymentMode).trim()) {
+    return normalizeBuyRequestPaymentMode(raw.paymentMode);
+  }
+  const down = parseMoney(raw.downPayment);
+  const monthly = parseMoney(raw.monthlyInstallment);
+  if ((Number.isFinite(down) && down > 0) || (Number.isFinite(monthly) && monthly > 0)) {
+    return "installment";
+  }
+  return "cash";
+}
+
 /**
  * Public `/public/v1/buy-request/submit` requirement body.
  * Only the keys the API documents — extra CRM fields are dropped.
@@ -69,6 +99,7 @@ export function buildPublicBuyRequirement(form) {
   const city = String(form?.city || "").trim().toLowerCase();
   const district = String(form?.district || "").trim().toLowerCase();
   const buildingRaw = String(form?.buildingType || "").trim().toLowerCase();
+  const paymentMode = normalizeBuyRequestPaymentMode(form?.paymentMode);
 
   if (!city) errors.city = "cityRequired";
   if (!district) errors.district = "districtRequired";
@@ -84,14 +115,6 @@ export function buildPublicBuyRequirement(form) {
     );
   }
 
-  const max_price = requiredMoney(
-    form,
-    "max_price",
-    errors,
-    "maxPriceRequired",
-    "invalidNumber",
-  );
-
   let roomsCount;
   if (form?.roomsCount !== "" && form?.roomsCount != null) {
     const n = parsePositiveInteger(form.roomsCount);
@@ -102,26 +125,43 @@ export function buildPublicBuyRequirement(form) {
     }
   }
 
-  const downPayment = optionalMoney(
-    form,
-    "downPayment",
-    errors,
-    "invalidNumber",
-  );
-  const monthlyInstallment = optionalMoney(
-    form,
-    "monthlyInstallment",
-    errors,
-    "invalidNumber",
-  );
-
+  let max_price;
+  let downPayment;
+  let monthlyInstallment;
   let deliveryDate;
-  if (form?.deliveryDate !== "" && form?.deliveryDate != null) {
-    const ym = toYearMonth(form.deliveryDate);
-    if (!ym) {
-      errors.deliveryDate = "invalidDeliveryDate";
-    } else {
-      deliveryDate = ym;
+
+  if (paymentMode === "cash") {
+    max_price = requiredMoney(
+      form,
+      "max_price",
+      errors,
+      "maxPriceRequired",
+      "invalidNumber",
+    );
+    // Cash buyers want a delivered unit by default.
+    deliveryDate = "ready";
+  } else {
+    downPayment = requiredMoney(
+      form,
+      "downPayment",
+      errors,
+      "downPaymentRequired",
+      "invalidNumber",
+    );
+    monthlyInstallment = optionalMoney(
+      form,
+      "monthlyInstallment",
+      errors,
+      "invalidNumber",
+    );
+    max_price = optionalMoney(form, "max_price", errors, "invalidNumber");
+    if (form?.deliveryDate !== "" && form?.deliveryDate != null) {
+      const token = normalizeBuyRequestDelivery(form.deliveryDate);
+      if (!token) {
+        errors.deliveryDate = "invalidDeliveryDate";
+      } else {
+        deliveryDate = token;
+      }
     }
   }
 
@@ -141,12 +181,14 @@ export function buildPublicBuyRequirement(form) {
     city,
     district,
     buildingType,
-    max_price,
   };
   if (project) requirement.project = project;
   if (roomsCount != null) requirement.roomsCount = roomsCount;
+  if (max_price != null) requirement.max_price = max_price;
   if (downPayment != null) requirement.downPayment = downPayment;
-  if (monthlyInstallment != null) requirement.monthlyInstallment = monthlyInstallment;
+  if (monthlyInstallment != null) {
+    requirement.monthlyInstallment = monthlyInstallment;
+  }
   if (deliveryDate) requirement.deliveryDate = deliveryDate;
   // Public API stores free-text notes as additionalFeatures (string[]).
   if (notes) requirement.additionalFeatures = [notes];

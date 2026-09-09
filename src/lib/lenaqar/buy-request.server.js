@@ -67,8 +67,13 @@ export async function saveBuyRequestRequirement({ userId, contact, payload }) {
   try {
     const response = await axiosInstance.post("/public/v1/buy-request/submit", {
       user_id: id || undefined,
-      name: id ? undefined : name,
-      phone: id ? undefined : phone,
+      // Always forward contact when present so the backend can create a
+      // dashboard buyer lead if the stored user_id has no dashboard row yet.
+      name: name || undefined,
+      phone: phone || undefined,
+      // Backend attribution: when source === lenaaqar_forum, ensure a dashboard
+      // buyer lead exists (name, phone, last_action=new) before saving the requirement.
+      source: "lenaaqar_forum",
       requirement: built.requirement,
     });
     const savedUserId = String(response.data?.data?.user_id || id || "").trim();

@@ -22,12 +22,21 @@ export async function loadPublicBuyRequest(userId) {
   }
 }
 
-export async function savePublicBuyRequest({ userId, contact, payload }) {
+export async function savePublicBuyRequest({
+  userId,
+  contact,
+  payload,
+  notBrokerConfirmed,
+}) {
   const headerStore = await headers();
   const ip = clientIpFromHeaders(headerStore);
   const { allowed } = rateLimit(`lenaqar-buy-request:${ip}`, 8, 60 * 60 * 1000);
   if (!allowed) {
     return { ok: false, code: "rate_limited" };
+  }
+
+  if (notBrokerConfirmed !== true) {
+    return { ok: false, code: "not_broker_required" };
   }
 
   try {
