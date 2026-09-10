@@ -16,7 +16,8 @@ function trimString(value) {
 
 /**
  * Public Lena Network signup payload.
- * Sends exactly the backend contract fields — never `client_id` or `is_active`.
+ * Sends exactly the six form fields — never accepts browser-supplied
+ * `client_id` or `is_active` (those are applied only in network-auth.server.js).
  *
  * @param {Record<string, unknown>} input
  * @returns {{ ok: true, payload: Record<string, string> } | { ok: false, errors: Record<string, string> }}

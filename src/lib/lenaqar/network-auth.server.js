@@ -1,7 +1,13 @@
 /**
  * Server-only Lena Network broker signup/login against the existing API contract.
  * Does not create a session after signup — new clients are inactive until approved.
+ *
+ * Security: never forward browser-supplied `client_id` / `is_active`. The server
+ * action may attach a fresh UUID `client_id` and `is_active: false` for older API
+ * deployments that still require `client_id` and default `is_active` to true.
+ * Once the backend ignores those fields on /client/signup, they remain harmless.
  */
+import { randomUUID } from "crypto";
 import { bffFetch, isCloudflareChallenge } from "@/lib/bffFetch";
 import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
 import { buildNetworkSignupPayload } from "@/lib/lenaqar/network-signup-payload";
@@ -39,12 +45,20 @@ export async function signupNetworkClient(input) {
     return { ok: false, code: "validation_failed", errors: built.errors };
   }
 
+  // Production OpenAPI still requires client_id and defaults is_active=true.
+  // Generate both server-side only — never accept them from the browser form.
+  const payload = {
+    ...built.payload,
+    client_id: randomUUID(),
+    is_active: false,
+  };
+
   let response;
   try {
     response = await bffFetch(`${API_BASE_URL}/client/signup`, {
       method: "POST",
       headers: jsonHeaders(),
-      body: JSON.stringify(built.payload),
+      body: JSON.stringify(payload),
     });
   } catch (error) {
     console.error("[lenaqar] network signup network error", error?.message);
