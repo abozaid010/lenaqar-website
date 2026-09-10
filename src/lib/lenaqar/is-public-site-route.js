@@ -4,7 +4,15 @@
  * these pages must surface as a normal error, never a navigation to /login —
  * these visitors were never asked to log in.
  */
-const PUBLIC_SITE_ROUTE_PREFIXES = ["/", "/sell", "/calculator", "/opportunities"];
+const PUBLIC_SITE_ROUTE_PREFIXES = [
+  "/",
+  "/sell",
+  "/calculator",
+  "/opportunities",
+  "/how-it-works",
+  "/privacy",
+  "/network",
+];
 
 export function isPublicSiteRoute(pathname) {
   const path = String(pathname || "");

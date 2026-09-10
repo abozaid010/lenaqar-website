@@ -1,7 +1,5 @@
 import { formatPhoneForWhatsApp } from "@/utils/phone-utils";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
-import { placeAr, buildingTypeAr } from "@/lib/lenaqar/listing-seo";
-import { formatEgpNumber } from "@/lib/lenaqar/metrics";
 
 const SELLER_MESSAGE = "عندى وحده عايز ابيعها من غير اوفر";
 
@@ -28,45 +26,13 @@ export function marketplaceAddUnitMessage() {
   return MARKETPLACE_SELLER_MESSAGE;
 }
 
-function requirementSummaryLine(requirement) {
-  if (!requirement || typeof requirement !== "object") return "";
-  const loc = requirement.locations?.[0] || {};
-  const place = [
-    placeAr(loc.project) || loc.project,
-    placeAr(loc.subDistrict) || loc.subDistrict,
-    placeAr(loc.district),
-  ]
-    .filter(Boolean)
-    .join("، ");
-  const type =
-    buildingTypeAr(requirement.propertyTypes?.[0]) ||
-    requirement.propertyTypes?.[0] ||
-    "";
-  const rooms =
-    requirement.roomsCount > 0 ? `${requirement.roomsCount} غرف` : "";
-  const budget = formatEgpNumber(requirement.maxPrice || requirement.minPrice);
-  const budgetLabel = budget ? `ميزانية حتى ${budget} ج.م` : "";
-  const intent = requirement.intent === "buy" ? "شراء" : "";
-  const notes = String(requirement.notes || "").trim();
-  const notesLine = notes
-    ? `ملاحظات: ${notes.replace(/\s+/g, " ").slice(0, 160)}`
-    : "";
-  return [intent, type, place, rooms, budgetLabel, notesLine]
-    .filter(Boolean)
-    .join(" · ");
-}
-
 /**
  * Prefill WhatsApp so an owner can offer a unit against an anonymous demand card.
- * Never includes names, phones, or CRM ids — only public criteria + anonymous ref.
+ * Keep it short: welcome + anonymous ref only — the owner fills in their details.
  */
 export function addUnitForRequirementMessage(requirement) {
-  const summary = requirementSummaryLine(requirement);
   const ref = requirement?.id ? ` (مرجع: ${requirement.id})` : "";
-  if (summary) {
-    return `مرحبا لينا عقار — عندي وحدة مناسبة للطلب ده${ref}:\n${summary}\nهبعت التفاصيل لوكيل واتساب الذكي عشان يضيفها.`;
-  }
-  return MARKETPLACE_SELLER_MESSAGE;
+  return `مرحبا لينا عقار — عندي وحدة مناسبة للطلب ده${ref}:`;
 }
 
 export function addUnitForRequirementHref(requirement) {

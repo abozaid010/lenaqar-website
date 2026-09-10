@@ -16,6 +16,7 @@ import { submitPublicSellUnit } from "@/app/(lenaqar)/_actions/add-sale";
 import { actionButtonClass } from "@/components/ui/action-button-class";
 import ActionButtonArrow from "@/components/ui/action-button-arrow";
 import SubmitWhatsAppFallback from "@/components/lenaqar/submit-whatsapp-fallback";
+import NetworkBrokerCta from "@/components/lenaqar/network-broker-cta";
 import {
   composeSellRequestWhatsAppMessage,
   whatsappFallbackHref,
@@ -221,6 +222,8 @@ export default function PublicSellCta({
             </div>
           </div>
         </div>
+
+        <NetworkBrokerCta compact onNavigate={resetAndClose} />
 
         <p className="text-sm text-black/60">{tr("lenaqar.sellRequest.formIntro")}</p>
 

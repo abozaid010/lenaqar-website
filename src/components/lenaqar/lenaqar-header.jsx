@@ -22,11 +22,16 @@ export default function LenaqarHeader() {
     { href: "/opportunities", label: translate("lenaqar.header.opportunities") },
     { href: "/sell", label: translate("lenaqar.header.sell") },
     { href: "/how-it-works", label: translate("lenaqar.header.howItWorks") },
+    {
+      href: "/network",
+      label: translate("lenaqar.header.joinNetwork"),
+      emphasis: true,
+    },
   ];
 
   return (
     <header className="sticky top-0 z-40 bg-primary text-white">
-      <div className="container flex items-center justify-between py-2 gap-3">
+      <div className="container flex flex-wrap items-center justify-between py-2 gap-2">
         <Link href="/" className="flex items-center shrink-0">
           <Image
             src="/images/logo-5.png"
@@ -37,12 +42,16 @@ export default function LenaqarHeader() {
           />
         </Link>
 
-        <nav className="hidden lg:flex items-center gap-4 text-sm">
+        <nav className="hidden lg:flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-sm min-w-0">
           {routeLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="hover:text-white/80 transition-colors"
+              className={
+                link.emphasis
+                  ? "shrink-0 rounded-md border border-white/40 px-2 py-1 font-semibold hover:bg-white hover:text-primary transition-colors"
+                  : "hover:text-white/80 transition-colors whitespace-nowrap"
+              }
             >
               {link.label}
             </Link>
@@ -92,7 +101,7 @@ export default function LenaqarHeader() {
             <Link
               key={link.href}
               href={link.href}
-              className="py-1"
+              className={link.emphasis ? "py-1 font-semibold" : "py-1"}
               onClick={() => setOpen(false)}
             >
               {link.label}

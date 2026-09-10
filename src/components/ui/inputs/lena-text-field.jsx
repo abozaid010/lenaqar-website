@@ -57,11 +57,7 @@ const LenaTextField = forwardRef(({
     setIsHovered((prev) => (prev === next ? prev : next));
   };
 
-  const [documentDir, setDocumentDir] = useState(() => {
-    if (typeof document === "undefined") return undefined;
-    const htmlDir = document.documentElement.getAttribute("dir");
-    return htmlDir === "ltr" || htmlDir === "rtl" ? htmlDir : undefined;
-  });
+  const [documentDir, setDocumentDir] = useState(undefined);
 
   useEffect(() => {
     if (dir != null) return;
@@ -76,7 +72,7 @@ const LenaTextField = forwardRef(({
     (type === "money" || type === "number" || type === "month" ? "ltr" : documentDir);
 
   // Page direction drives visual alignment; numeric fields keep dir=ltr for digit order.
-  const layoutDir = documentDir ?? resolvedDir ?? "ltr";
+  const layoutDir = documentDir ?? "rtl";
   const textAlignClass = layoutDir === "rtl" ? "text-right" : "text-left";
 
   // Expose refs for parent components

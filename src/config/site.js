@@ -6,6 +6,8 @@ export const SITE = {
   clientId: LENAQAR_TENANT_ID,
   name: "لينا عقار",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://lenaqar.com",
+  /** Broker CRM — Lena Network members manage inventory here after approval. */
+  crmUrl: process.env.NEXT_PUBLIC_CRM_URL || "https://lenaai.net",
   htmlLang: "ar-EG",
   dir: "rtl",
   ogLocale: "ar_EG",

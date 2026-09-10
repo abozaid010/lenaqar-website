@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { useI18n } from "@/hooks/useI18n";
 import { ANALYTICS } from "@/constants/analytics";
 import { marketplaceAddUnitHref } from "@/lib/lenaqar/whatsapp";
@@ -11,6 +12,10 @@ import {
 import WhatsAppCta from "./whatsapp-cta";
 import RequirementCard from "./requirement-card";
 import MarketplaceHowItWorks from "./marketplace-how-it-works";
+import BuyRequestCta from "./buy-request-cta";
+import NetworkBrokerCta from "./network-broker-cta";
+import { actionButtonClass } from "@/components/ui/action-button-class";
+import ActionButtonArrow from "@/components/ui/action-button-arrow";
 
 export default function MarketplaceHomeContent({
   requirements = [],
@@ -53,7 +58,42 @@ export default function MarketplaceHomeContent({
             {translate("lenaqar.marketplace.hero.sub")}
           </p>
 
-          <div className="mt-8">
+          <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <article className="rounded-2xl border border-primary/15 bg-white/90 p-5 shadow-sm">
+              <h2 className="text-lg font-bold text-primary">
+                {translate("lenaqar.marketplace.audience.buyersTitle")}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-black/70">
+                {translate("lenaqar.marketplace.audience.buyersBody")}
+              </p>
+              <div className="mt-4">
+                <BuyRequestCta
+                  variant="primary"
+                  label={translate("lenaqar.marketplace.audience.buyersCta")}
+                />
+              </div>
+            </article>
+            <article className="rounded-2xl border border-primary/15 bg-white/90 p-5 shadow-sm">
+              <h2 className="text-lg font-bold text-primary">
+                {translate("lenaqar.marketplace.audience.brokersTitle")}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-black/70">
+                {translate("lenaqar.marketplace.audience.brokersBody")}
+              </p>
+              <Link
+                href="/network"
+                className={`${actionButtonClass({ variant: "secondary" })} mt-4`}
+              >
+                {translate("lenaqar.marketplace.audience.brokersCta")}
+                <ActionButtonArrow />
+              </Link>
+            </article>
+          </div>
+
+          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-black/60">
+            {translate("lenaqar.marketplace.audience.ownersNote")}
+          </p>
+          <div className="mt-3">
             <WhatsAppCta
               href={marketplaceAddUnitHref()}
               eventName={ANALYTICS.EVENTS.MARKETPLACE_WHATSAPP_CLICKED}
@@ -113,6 +153,10 @@ export default function MarketplaceHomeContent({
               );
             })}
           </div>
+        </div>
+
+        <div className="mt-6">
+          <NetworkBrokerCta compact />
         </div>
 
         {error ? (

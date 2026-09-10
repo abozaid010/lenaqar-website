@@ -11,6 +11,7 @@ import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-s
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import { PhoneField } from "@/components/phone/PhoneField";
 import SubmitWhatsAppFallback from "@/components/lenaqar/submit-whatsapp-fallback";
+import NetworkBrokerCta from "@/components/lenaqar/network-broker-cta";
 import {
   buildPublicBuyRequirement,
   inferBuyRequestPaymentMode,
@@ -449,6 +450,8 @@ export default function BuyRequestDialog({
               {tr("lenaqar.buyRequest.notBrokerBody")}
             </p>
           </div>
+
+          <NetworkBrokerCta compact onNavigate={onClose} />
 
           {whatsappFallbackHrefState ? (
             <SubmitWhatsAppFallback

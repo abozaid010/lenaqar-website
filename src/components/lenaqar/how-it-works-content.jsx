@@ -5,6 +5,7 @@ import { useI18n } from "@/hooks/useI18n";
 import HowItWorksSteps from "./how-it-works-steps";
 import BuyRequestCta from "./buy-request-cta";
 import FaqSection from "./faq-section";
+import NetworkBrokerCta from "./network-broker-cta";
 
 function FlowSteps({ titleKey, steps, cta }) {
   const { translate } = useI18n();
@@ -98,7 +99,10 @@ export default function HowItWorksContent() {
         titleKey="lenaqar.howItWorks.requestSectionTitle"
         steps={requestSteps}
         cta={
-          <BuyRequestCta variant="primary" />
+          <div className="space-y-4">
+            <BuyRequestCta variant="primary" />
+            <NetworkBrokerCta compact />
+          </div>
         }
       />
 
