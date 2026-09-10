@@ -111,7 +111,7 @@ Publishing the raw object would leak a staff email into the page HTML. **Mandato
 | 2 | Feed = assignment / resale | Overridden by measurement: the only viable TMG unit is **primary**. Config fetches both (`isPrimary: null`) and labels each row |
 | 3 | Payment-plan fields land soon | Already present on the public endpoint; optional-field rendering regardless |
 | 4 | **Simple URLs, no login.** Later login is for **end users**, not clients | `/opportunities/{code}`, no clientId segment. CRM `(auth)` flow is *not* the base for it |
-| 5 | Creds later as `LENAQAR_CLIENT_EMAIL` / `LENAQAR_CLIENT_PASSWORD` | Reserved names, documented, unused at launch |
+| 5 | Public requirements via `GET /public/v1/requirements` (API key) | No CRM username/password on the marketplace |
 | 6 | Contacts: phone + WhatsApp `01036364340`, `info@lenaqar.com`, rest same as LenaAI, **all in one file** | `src/config/lenaqar-contact.js` |
 | 7 | **One developer — TMG**, four projects: Noor · Madinaty · South Med · Celia. Pull from the `public` tenant | Token allowlist in config. **But see §2.2 — only 1 of the 1,783 units in that tenant qualifies** |
 | 8 | **No guarantee. No one fronts cash.** Promise = exit faster, get more money, backed by a signed contract | The word ضمان never appears. Single honest copy set — the dual "guarantee mode" flag is deleted as YAGNI |
@@ -389,8 +389,7 @@ NEXT_PUBLIC_LENAQAR_FEED_ENABLED=false    # flip to true when TMG inventory land
 NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXX
 NEXT_PUBLIC_META_PIXEL_ID=XXXXXXXXXXX
 # Reserved for the future end-user login (answers #4, #5) — unused at launch:
-# LENAQAR_CLIENT_EMAIL=
-# LENAQAR_CLIENT_PASSWORD=
+# Homepage requirements: GET /public/v1/requirements (X-API-Key). No CRM password.
 ```
 `API_BASE_URL`, `X_API_KEY`, `BFF_SECRET` are reused unchanged. Contacts are **not** env vars — they live in `src/config/lenaqar-contact.js` (answer #6).
 
