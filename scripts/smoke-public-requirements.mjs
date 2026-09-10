@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { toPublicRequirement } from "../src/lib/lenaqar/to-public-requirement.js";
+import { createHash } from "crypto";
 
 function loadEnv(path) {
   try {
@@ -23,11 +23,9 @@ function loadEnv(path) {
 
 loadEnv(".env");
 loadEnv(".env.local");
-process.env.API_BASE_URL = "https://api.lenaai.net";
+process.env.API_BASE_URL = process.env.API_BASE_URL || "https://api.lenaai.net";
 
 const base = process.env.API_BASE_URL;
-const username = process.env.LENAQAR_CLIENT_EMAIL || process.env.CLIENT;
-const password = process.env.LENAQAR_CLIENT_PASSWORD || process.env.PASSWORD;
 const headers = {
   "User-Agent": "LenaQar-Marketplace/1.0",
   Accept: "application/json",
@@ -36,21 +34,9 @@ const headers = {
     process.env.X_API_KEY || process.env.NEXT_PUBLIC_X_API_KEY || "",
 };
 
-const loginRes = await fetch(`${base}/client/login`, {
-  method: "POST",
-  headers: { ...headers, "Content-Type": "application/x-www-form-urlencoded" },
-  body: new URLSearchParams({ username, password }),
-});
-const login = await loginRes.json();
-const token = login?.data?.access_token;
-const pendingRes = await fetch(`${base}/requirements/pending?limit=50`, {
-  headers: { ...headers, Authorization: `Bearer ${token}` },
-});
-const pending = await pendingRes.json();
-const raw = pending?.data?.requirements || [];
-const publicRows = raw.map(toPublicRequirement).filter(Boolean);
-const keys = new Set();
-for (const row of publicRows) Object.keys(row).forEach((k) => keys.add(k));
+const res = await fetch(`${base}/public/v1/requirements?limit=48`, { headers });
+const json = await res.json().catch(() => ({}));
+const rows = json?.data?.requirements || [];
 const forbidden = [
   "lead",
   "user_id",
@@ -59,24 +45,24 @@ const forbidden = [
   "name",
   "email",
   "matched_units",
-  "notes",
-  "score",
   "client_id",
+  "score",
+  "additionalFeatures",
 ];
-const leaked = publicRows.some((row) => forbidden.some((f) => f in row));
-const intents = {
-  buy: publicRows.filter((r) => r.intent === "buy").length,
-  sell: publicRows.filter((r) => r.intent === "sell").length,
-};
+const leaked = rows.some((row) => forbidden.some((f) => f in row));
+const keys = new Set();
+for (const row of rows) Object.keys(row).forEach((k) => keys.add(k));
+
 console.log(
   JSON.stringify(
     {
-      raw: raw.length,
-      public: publicRows.length,
-      intents,
+      http: res.status,
+      apiStatus: json?.status ?? null,
+      count: rows.length,
       keys: [...keys].sort(),
       leaked,
-      sampleIdLooksHashed: /^[a-f0-9]{12}$/.test(publicRows[0]?.id || ""),
+      sampleIdLooksHashed: /^[a-f0-9]{12}$/.test(rows[0]?.id || ""),
+      hashSmoke: createHash("sha256").update("lenaqar-req:x").digest("hex").slice(0, 12),
     },
     null,
     2,

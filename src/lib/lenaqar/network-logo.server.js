@@ -1,11 +1,11 @@
 /**
  * Upload a company logo for Lena Network signup via the existing GCS pipeline.
- * Uses the LenaQar tenant token so the file can be stored before the broker exists.
+ * Uses API-key / BFF egress only — no CRM service-account password.
+ * client_id is forced server-side to the LenaQar tenant.
  */
 import { bffFetch, isCloudflareChallenge } from "@/lib/bffFetch";
-import { API_BASE_URL } from "@/lib/apiConfig";
+import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
 import { SITE } from "@/config/site";
-import { getLenaqarTenantAccessToken } from "@/lib/lenaqar/tenant-auth.server";
 import {
   NETWORK_LOGO_MAX_BYTES,
   NETWORK_LOGO_MIME_TYPES,
@@ -41,14 +41,11 @@ export async function uploadNetworkLogo(file) {
     return { ok: false, code: "logoTooLarge" };
   }
 
-  const accessToken = await getLenaqarTenantAccessToken();
-  if (!accessToken) {
-    console.error("[lenaqar] network logo upload missing tenant token");
-    return { ok: false, code: "logoFailed" };
-  }
-
   const storageForm = new FormData();
   storageForm.append("file", file, file.name || "logo.webp");
+
+  const headers = {};
+  if (PUBLIC_X_API_KEY) headers["X-API-Key"] = PUBLIC_X_API_KEY;
 
   let response;
   try {
@@ -56,7 +53,7 @@ export async function uploadNetworkLogo(file) {
       `${API_BASE_URL}/gcs/upload?client_id=${encodeURIComponent(SITE.clientId)}`,
       {
         method: "POST",
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers,
         body: storageForm,
         signal: AbortSignal.timeout(30_000),
       },
