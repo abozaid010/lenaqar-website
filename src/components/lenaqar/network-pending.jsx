@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useI18n } from "@/hooks/useI18n";
+import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
 import { actionButtonClass } from "@/components/ui/action-button-class";
 import NetworkActivationWhatsApp from "@/components/lenaqar/network-activation-whatsapp";
 
@@ -15,7 +16,10 @@ export default function NetworkPending() {
           {translate("lenaqar.network.pending.title")}
         </h1>
         <p className="mt-3 text-base leading-relaxed text-black/70">
-          {translate("lenaqar.network.pending.body")}
+          {translate("lenaqar.network.pending.body").replace(
+            "{phone}",
+            LENAQAR_CONTACT.phoneDisplay,
+          )}
         </p>
         <NetworkActivationWhatsApp />
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">

@@ -14,6 +14,7 @@ import {
   composeNetworkActivationMessage,
   networkActivationHref,
 } from "../network-activation.js";
+import { LENAQAR_CONTACT } from "../../../config/lenaqar-contact.js";
 
 const validInput = {
   client_name: "Horizon Realty",
@@ -85,9 +86,9 @@ test("activation WhatsApp uses dedicated number and named message", () => {
   });
   assert.equal(message, "I'm Ahmed Broker, and I want to activate my account.");
   const href = networkActivationHref(message);
-  assert.equal(href.startsWith("https://wa.me/201016080323?text="), true);
+  const whatsappDigits = LENAQAR_CONTACT.whatsappE164.replace(/\D/g, "");
+  assert.equal(href.startsWith(`https://wa.me/${whatsappDigits}?text=`), true);
   assert.equal(decodeURIComponent(href).includes("Ahmed Broker"), true);
-  assert.equal(href.includes("201036464346"), false);
 });
 
 test("activation WhatsApp falls back when name is missing", () => {

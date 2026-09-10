@@ -304,7 +304,7 @@ export default {
     },
     pending: {
       title: "Your Lena Network application has been received",
-      body: "Your account still needs activation. Contact us on WhatsApp +201016080323 to activate it. Tap the button, or we'll open WhatsApp in 3 seconds with a message that includes your name.",
+      body: "Your account still needs activation. Contact us on WhatsApp {phone} to activate it. Tap the button, or we'll open WhatsApp in 3 seconds with a message that includes your name.",
       back: "Back to Lena Network",
       whatsappCta: "WhatsApp us to activate your account",
       countdown: "Opening WhatsApp in {seconds} seconds…",

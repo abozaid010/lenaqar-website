@@ -5,6 +5,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useI18n } from "@/hooks/useI18n";
 import { SITE } from "@/config/site";
+import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { submitNetworkLogin } from "@/app/(lenaqar)/_actions/network-auth";
 import { actionButtonClass } from "@/components/ui/action-button-class";
@@ -73,7 +74,10 @@ export default function NetworkLoginForm() {
           {translate("lenaqar.network.pending.title")}
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-black/70">
-          {translate("lenaqar.network.pending.body")}
+          {translate("lenaqar.network.pending.body").replace(
+            "{phone}",
+            LENAQAR_CONTACT.phoneDisplay,
+          )}
         </p>
         <NetworkActivationWhatsApp name={email} />
         <Link
