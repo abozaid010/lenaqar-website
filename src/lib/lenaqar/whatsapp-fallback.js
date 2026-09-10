@@ -31,7 +31,7 @@ export function composeBuyRequestWhatsAppMessage({
   pushLine(lines, labels.maxPrice, form.max_price);
   pushLine(lines, labels.downPayment, form.downPayment);
   pushLine(lines, labels.monthlyInstallment, form.monthlyInstallment);
-  pushLine(lines, labels.overPrice, form.overPrice);
+  pushLine(lines, labels.notes, form.notes);
   pushLine(lines, labels.deliveryDate, form.deliveryDate);
   lines.push("", "من lenaqar.com");
   return lines.join("\n");

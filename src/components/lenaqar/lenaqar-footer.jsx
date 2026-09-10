@@ -86,6 +86,9 @@ export default function LenaqarFooter() {
             <Link href="/how-it-works" className="hover:text-white/80">
               {translate("lenaqar.header.howItWorks")}
             </Link>
+            <Link href="/network" className="hover:text-white/80">
+              {translate("lenaqar.header.joinNetwork")}
+            </Link>
             <Link href="/calculator" className="hover:text-white/80">
               {translate("lenaqar.header.calculator")}
             </Link>

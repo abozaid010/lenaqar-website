@@ -38,6 +38,9 @@ const PRIVATE_PATHS = [
   '/properties/',
   '/property/',
   '/unit/',
+  '/network/signup',
+  '/network/login',
+  '/network/pending',
 ];
 
 function buildDisallow(): string[] {
@@ -76,7 +79,7 @@ const AI_CRAWLERS = [
 ];
 
 export default function robots(): MetadataRoute.Robots {
-  const allow = ['/', '/sell', '/calculator', '/privacy', '/how-it-works'];
+  const allow = ['/', '/sell', '/calculator', '/privacy', '/how-it-works', '/network'];
   if (SITE.feed.enabled) {
     allow.push('/opportunities', '/opportunities/*');
   }

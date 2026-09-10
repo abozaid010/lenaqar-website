@@ -7,11 +7,13 @@ import assert from "node:assert/strict";
 
 import {
   buildPublicBuyRequirement,
+  inferBuyRequestPaymentMode,
   parseMoney,
   toYearMonth,
 } from "../buy-request-payload.js";
 
-const sampleForm = {
+const sampleCashForm = {
+  paymentMode: "cash",
   city: "cairo",
   district: "new cairo",
   buildingType: "apartment",
@@ -19,12 +21,26 @@ const sampleForm = {
   max_price: 3000000,
   downPayment: 300000,
   monthlyInstallment: 15000,
-  overPrice: 100000,
-  deliveryDate: "2026-12",
+  notes: "عايز شقة قريبة من الخدمات",
+  deliveryDate: "less_than_2_years",
   project: "Madinaty",
   client_id: "must-not-be-sent",
   totalPrice: 999,
   finishingType: "fully finished",
+  overPrice: 100000,
+};
+
+const sampleInstallmentForm = {
+  paymentMode: "installment",
+  city: "cairo",
+  district: "new cairo",
+  buildingType: "apartment",
+  roomsCount: 3,
+  downPayment: 300000,
+  monthlyInstallment: 15000,
+  notes: "عايز شقة قريبة من الخدمات",
+  deliveryDate: "less_than_2_years",
+  project: "Madinaty",
 };
 
 test("parseMoney strips grouping characters", () => {
@@ -48,8 +64,20 @@ test("toYearMonth converts Eastern Arabic digits", () => {
   assert.equal(toYearMonth("٢٠٢٦-١٢"), "2026-12");
 });
 
-test("builds the documented API requirement and drops extra keys", () => {
-  const result = buildPublicBuyRequirement(sampleForm);
+test("inferBuyRequestPaymentMode uses installment fields when present", () => {
+  assert.equal(inferBuyRequestPaymentMode({}), "cash");
+  assert.equal(
+    inferBuyRequestPaymentMode({ downPayment: 100000 }),
+    "installment",
+  );
+  assert.equal(
+    inferBuyRequestPaymentMode({ paymentMode: "cash", downPayment: 1 }),
+    "cash",
+  );
+});
+
+test("cash mode sends max_price and forces ready delivery", () => {
+  const result = buildPublicBuyRequirement(sampleCashForm);
   assert.equal(result.ok, true);
   assert.deepEqual(result.requirement, {
     city: "cairo",
@@ -57,18 +85,46 @@ test("builds the documented API requirement and drops extra keys", () => {
     buildingType: "apartment",
     roomsCount: 3,
     max_price: 3000000,
-    downPayment: 300000,
-    monthlyInstallment: 15000,
-    overPrice: 100000,
-    deliveryDate: "2026-12",
+    deliveryDate: "ready",
     project: "Madinaty",
+    additionalFeatures: ["عايز شقة قريبة من الخدمات"],
   });
+  assert.equal("downPayment" in result.requirement, false);
+  assert.equal("monthlyInstallment" in result.requirement, false);
   assert.equal("client_id" in result.requirement, false);
   assert.equal("totalPrice" in result.requirement, false);
   assert.equal("finishingType" in result.requirement, false);
+  assert.equal("overPrice" in result.requirement, false);
+  assert.equal("notes" in result.requirement, false);
 });
 
-test("omits empty optional fields instead of sending null", () => {
+test("installment mode sends down payment fields and optional delivery", () => {
+  const result = buildPublicBuyRequirement(sampleInstallmentForm);
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.requirement, {
+    city: "cairo",
+    district: "new cairo",
+    buildingType: "apartment",
+    roomsCount: 3,
+    downPayment: 300000,
+    monthlyInstallment: 15000,
+    deliveryDate: "less_than_2_years",
+    project: "Madinaty",
+    additionalFeatures: ["عايز شقة قريبة من الخدمات"],
+  });
+  assert.equal("max_price" in result.requirement, false);
+});
+
+test("installment mode allows empty delivery", () => {
+  const result = buildPublicBuyRequirement({
+    ...sampleInstallmentForm,
+    deliveryDate: "",
+  });
+  assert.equal(result.ok, true);
+  assert.equal("deliveryDate" in result.requirement, false);
+});
+
+test("defaults to cash when paymentMode is missing", () => {
   const result = buildPublicBuyRequirement({
     city: "cairo",
     district: "new cairo",
@@ -77,7 +133,7 @@ test("omits empty optional fields instead of sending null", () => {
     roomsCount: "",
     downPayment: "",
     monthlyInstallment: "",
-    overPrice: "",
+    notes: "",
     deliveryDate: "",
     project: "",
   });
@@ -87,6 +143,7 @@ test("omits empty optional fields instead of sending null", () => {
     district: "new cairo",
     buildingType: "apartment",
     max_price: 3000000,
+    deliveryDate: "ready",
   });
 });
 
@@ -99,9 +156,35 @@ test("rejects missing required fields", () => {
   assert.equal(result.errors.max_price, "maxPriceRequired");
 });
 
+test("rejects missing installment down payment", () => {
+  const result = buildPublicBuyRequirement({
+    paymentMode: "installment",
+    city: "cairo",
+    district: "new cairo",
+    buildingType: "apartment",
+  });
+  assert.equal(result.ok, false);
+  assert.equal(result.errors.downPayment, "downPaymentRequired");
+  assert.equal(result.errors.monthlyInstallment, undefined);
+  assert.equal(result.errors.max_price, undefined);
+});
+
+test("installment mode allows down payment without monthly", () => {
+  const result = buildPublicBuyRequirement({
+    paymentMode: "installment",
+    city: "cairo",
+    district: "new cairo",
+    buildingType: "apartment",
+    downPayment: 400000,
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.requirement.downPayment, 400000);
+  assert.equal("monthlyInstallment" in result.requirement, false);
+});
+
 test("rejects a buildingType that is not in the enum", () => {
   const result = buildPublicBuyRequirement({
-    ...sampleForm,
+    ...sampleCashForm,
     buildingType: "spaceship",
   });
   assert.equal(result.ok, false);
@@ -110,45 +193,50 @@ test("rejects a buildingType that is not in the enum", () => {
 
 test("rejects invalid rooms, money, and deliveryDate", () => {
   const result = buildPublicBuyRequirement({
-    ...sampleForm,
+    ...sampleInstallmentForm,
     roomsCount: 2.5,
-    overPrice: -1,
+    downPayment: -1,
     deliveryDate: "December 2026",
   });
   assert.equal(result.ok, false);
   assert.equal(result.errors.roomsCount, "invalidRooms");
-  assert.equal(result.errors.overPrice, "invalidNumber");
+  assert.equal(result.errors.downPayment, "invalidNumber");
   assert.equal(result.errors.deliveryDate, "invalidDeliveryDate");
 });
 
-test("normalizes city/district case and ISO deliveryDate", () => {
+test("rejects notes that are too long", () => {
   const result = buildPublicBuyRequirement({
-    ...sampleForm,
+    ...sampleCashForm,
+    notes: "x".repeat(1001),
+  });
+  assert.equal(result.ok, false);
+  assert.equal(result.errors.notes, "notesTooLong");
+});
+
+test("normalizes city/district case and delivery preference tokens", () => {
+  const result = buildPublicBuyRequirement({
+    ...sampleInstallmentForm,
     city: "Cairo",
     district: "New Cairo",
-    deliveryDate: "2026-12-15",
+    deliveryDate: "immediate",
   });
   assert.equal(result.ok, true);
   assert.equal(result.requirement.city, "cairo");
   assert.equal(result.requirement.district, "new cairo");
-  assert.equal(result.requirement.deliveryDate, "2026-12");
+  assert.equal(result.requirement.deliveryDate, "ready");
 });
 
-test("converts Arabic digits in money, rooms, and deliveryDate before API payload", () => {
+test("converts Arabic digits in money and rooms before API payload", () => {
   const result = buildPublicBuyRequirement({
-    ...sampleForm,
+    ...sampleInstallmentForm,
     roomsCount: "٣",
-    max_price: "٣٠٠٠٠٠٠",
     downPayment: "٣٠٠٠٠٠",
     monthlyInstallment: "١٥٠٠٠",
-    overPrice: "١٠٠٠٠٠",
-    deliveryDate: "٢٠٢٦-١٢",
+    deliveryDate: "less_than_1_year",
   });
   assert.equal(result.ok, true);
   assert.equal(result.requirement.roomsCount, 3);
-  assert.equal(result.requirement.max_price, 3000000);
   assert.equal(result.requirement.downPayment, 300000);
   assert.equal(result.requirement.monthlyInstallment, 15000);
-  assert.equal(result.requirement.overPrice, 100000);
-  assert.equal(result.requirement.deliveryDate, "2026-12");
+  assert.equal(result.requirement.deliveryDate, "less_than_1_year");
 });
