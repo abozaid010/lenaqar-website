@@ -54,6 +54,7 @@ export const MARKETPLACE_CITY_FILTERS = [
       "the new administrative capital",
     ],
   },
+
 ];
 
 const FILTERS_BY_VALUE = new Map(
