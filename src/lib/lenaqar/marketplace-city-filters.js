@@ -6,6 +6,7 @@ import { placeAr } from "@/lib/lenaqar/listing-seo";
  */
 export const MARKETPLACE_CITY_FILTERS = [
   { value: "cairo", label: placeAr("cairo") || "cairo" },
+  { value: "new cairo", label: placeAr("new cairo") || "new cairo" },
   { value: "6 october", label: placeAr("6 october") || "6 october" },
   { value: "north coast", label: placeAr("north coast") || "north coast" },
   { value: "sheikh zayed", label: placeAr("sheikh zayed") || "sheikh zayed" },
