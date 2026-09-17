@@ -31,6 +31,7 @@ const PLACES_AR = {
   "ain sokhna": "العين السخنة",
   "ras el hekma": "رأس الحكمة",
   "new administrative capital": "العاصمة الإدارية الجديدة",
+  "new capital": "العاصمة الإدارية الجديدة",
   matrouh: "مطروح",
   "red sea": "البحر الأحمر",
   suez: "السويس",

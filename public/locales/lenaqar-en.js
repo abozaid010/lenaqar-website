@@ -359,8 +359,8 @@ export default {
   },
   buyRequest: {
     cta: "Buy a unit",
-    title: "What are you looking for?",
-    intro: "Tell us the specs, and we'll prepare matching opportunities.",
+    title: "What unit do you have in mind?",
+    intro: "Tell us the location and budget — we'll send matches only.",
     notBrokerTitle: "This form is for buyer requirements",
     notBrokerBody:
       "If you are looking for a home for yourself, continue here. If you are a broker who wants to share inventory or collaborate with other brokers, Lena Network is the right place.",
@@ -368,7 +368,7 @@ export default {
       "I confirm this request is for me as a buyer, not as a real-estate broker.",
     notBrokerRequired: "You must confirm you are not a broker.",
     submit: "Send your request",
-    saved: "Your request was saved. We'll contact you with matching opportunities.",
+    saved: "Request saved. We'll send you units that match your budget.",
     contactSection: "Contact details",
     name: "Name",
     phone: "Mobile",
@@ -466,9 +466,10 @@ export default {
   },
   marketplace: {
     audience: {
-      buyersTitle: "For buyers",
-      buyersBody: "Tell us what property you need.",
-      buyersCta: "Submit a requirement",
+      buyersTitle: "We'll find what fits you",
+      buyersBody:
+        "Tell us your budget — we'll send a unit that matches it, not whatever we have.",
+      buyersCta: "I'm looking for a specific unit",
       brokersTitle: "For brokers",
       brokersBody: "Join Lena Network and collaborate with other brokers.",
       brokersCta: "Join Lena Network",
