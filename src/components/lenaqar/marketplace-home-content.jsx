@@ -70,6 +70,7 @@ export default function MarketplaceHomeContent({
                 <BuyRequestCta
                   variant="primary"
                   label={translate("lenaqar.marketplace.audience.buyersCta")}
+                  className="w-full !whitespace-normal"
                 />
               </div>
             </article>
@@ -184,7 +185,16 @@ export default function MarketplaceHomeContent({
             <p className="mt-2 text-sm text-black/70">
               {translate("lenaqar.marketplace.list.empty")}
             </p>
-            <div className="mt-4">
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              {cityFilter ? (
+                <Link
+                  href={`/opportunities?city=${encodeURIComponent(cityFilter)}`}
+                  className={actionButtonClass({ variant: "secondary" })}
+                >
+                  {translate("lenaqar.marketplace.list.seeUnits")}
+                  <ActionButtonArrow />
+                </Link>
+              ) : null}
               <WhatsAppCta
                 href={marketplaceAddUnitHref()}
                 eventName={ANALYTICS.EVENTS.MARKETPLACE_WHATSAPP_CLICKED}
@@ -201,7 +211,7 @@ export default function MarketplaceHomeContent({
                 String(filtered.length),
               )}
             </p>
-            <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="-mb-4 mt-6 columns-1 gap-4 md:columns-2 xl:columns-3">
               {filtered.map((requirement) => (
                 <RequirementCard
                   key={requirement.id}

@@ -6,7 +6,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   MARKETPLACE_CITY_FILTERS,
+  marketplaceCitiesMatch,
   requirementMatchesCity,
+  resolveMarketplaceCityToken,
 } from "../marketplace-city-filters.js";
 
 test("exposes the six marketplace cities in the requested order", () => {
@@ -89,5 +91,24 @@ test("matches october, zayed, north coast, and new capital aliases", () => {
       "new administrative capital",
     ),
     true,
+  );
+});
+
+test("new capital aliases resolve to catalog city token", () => {
+  assert.equal(
+    resolveMarketplaceCityToken("New Administrative Capital"),
+    "new administrative capital",
+  );
+  assert.equal(
+    resolveMarketplaceCityToken("new capital"),
+    "new administrative capital",
+  );
+  assert.equal(
+    marketplaceCitiesMatch("new administrative capital", "new capital"),
+    true,
+  );
+  assert.equal(
+    marketplaceCitiesMatch("new cairo", "new capital"),
+    false,
   );
 });
