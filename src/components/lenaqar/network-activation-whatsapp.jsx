@@ -8,14 +8,17 @@ import { ANALYTICS } from "@/constants/analytics";
 import { getWhatsAppFallbackDelayMs } from "@/lib/lenaqar/whatsapp-fallback";
 import {
   composeNetworkActivationMessage,
+  composeNetworkSignupWhatsAppMessage,
   networkActivationHref,
   readNetworkActivationName,
+  readNetworkSignupSnapshot,
 } from "@/lib/lenaqar/network-activation";
 
 export default function NetworkActivationWhatsApp({ name = "" }) {
   const { translate } = useI18n();
   const { trackEvent } = useGoogleAnalytics();
   const [storedName, setStoredName] = useState(null);
+  const [snapshot, setSnapshot] = useState(null);
   const redirectedRef = useRef(false);
   const delayMs = getWhatsAppFallbackDelayMs();
   const [secondsLeft, setSecondsLeft] = useState(() =>
@@ -24,15 +27,30 @@ export default function NetworkActivationWhatsApp({ name = "" }) {
 
   useEffect(() => {
     setStoredName(readNetworkActivationName());
+    setSnapshot(readNetworkSignupSnapshot());
   }, []);
 
   const resolvedName = String(name || storedName || "").trim();
   const storageReady = Boolean(name) || storedName !== null;
-  const message = composeNetworkActivationMessage(resolvedName, {
-    withName: translate("lenaqar.network.pending.whatsappMessage"),
-    withoutName: translate("lenaqar.network.pending.whatsappMessageAnonymous"),
-  });
-  const href = storageReady ? networkActivationHref(message) : "";
+  const message = snapshot
+    ? composeNetworkSignupWhatsAppMessage({
+        form: snapshot,
+        intro: translate("lenaqar.network.pending.whatsappMessageComplete"),
+        labels: {
+          clientName: translate("lenaqar.network.signup.clientName"),
+          fullName: translate("lenaqar.network.signup.fullName"),
+          email: translate("lenaqar.network.signup.email"),
+          phone: translate("lenaqar.network.signup.phone"),
+          logo: translate("lenaqar.network.signup.logo"),
+        },
+      })
+    : composeNetworkActivationMessage(resolvedName, {
+        withName: translate("lenaqar.network.pending.whatsappMessage"),
+        withoutName: translate(
+          "lenaqar.network.pending.whatsappMessageAnonymous",
+        ),
+      });
+  const href = storageReady || snapshot ? networkActivationHref(message) : "";
 
   useEffect(() => {
     if (!href) return undefined;

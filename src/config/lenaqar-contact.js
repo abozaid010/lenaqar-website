@@ -1,6 +1,8 @@
 /** Single place for every LenAqar contact detail. Replace here, nowhere else. */
 const PHONE_E164 = "+201036364340";
 const WHATSAPP_E164 = "+491745661918";
+/** Lena Network signup / activation only — do not reuse for other WhatsApp CTAs. */
+const NETWORK_SIGNUP_WHATSAPP_E164 = "+201016080323";
 
 export const LENAQAR_CONTACT = {
   // E.164 is required — formatPhoneForWhatsApp() strips non-digits, so a local
@@ -10,7 +12,9 @@ export const LENAQAR_CONTACT = {
   // WhatsApp (Germany) — used by every wa.me / WhatsApp CTA on the site.
   whatsappE164: WHATSAPP_E164,
   whatsappDisplay: WHATSAPP_E164,
-  networkActivationWhatsappE164: WHATSAPP_E164,
+  // Scoped to Lena Network signup confirmation + activation only.
+  networkActivationWhatsappE164: NETWORK_SIGNUP_WHATSAPP_E164,
+  networkActivationWhatsappDisplay: NETWORK_SIGNUP_WHATSAPP_E164,
   // Not live yet — held behind SITE.showEmail, kept here for the flip.
   email: "info@lenaqar.com",
   // Inherited from LenaAI until LenAqar has its own

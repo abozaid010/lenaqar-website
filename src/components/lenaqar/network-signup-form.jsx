@@ -7,10 +7,18 @@ import toast from "react-hot-toast";
 import { useI18n } from "@/hooks/useI18n";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { PhoneField } from "@/components/phone/PhoneField";
-import NetworkLogoField from "@/components/lenaqar/network-logo-field";
+import SubmitWhatsAppFallback from "@/components/lenaqar/submit-whatsapp-fallback";
 import { submitNetworkSignup } from "@/app/(lenaqar)/_actions/network-auth";
 import { actionButtonClass } from "@/components/ui/action-button-class";
-import { saveNetworkActivationName } from "@/lib/lenaqar/network-activation";
+import { buildNetworkSignupPayload } from "@/lib/lenaqar/network-signup-payload";
+import {
+  composeNetworkSignupWhatsAppMessage,
+  hasCompleteNetworkSignupSnapshot,
+  networkActivationHref,
+  saveNetworkSignupSnapshot,
+  shouldFallbackNetworkSignupToWhatsApp,
+  toNetworkSignupSnapshot,
+} from "@/lib/lenaqar/network-activation";
 
 const EMPTY = {
   client_name: "",
@@ -25,9 +33,9 @@ export default function NetworkSignupForm() {
   const [form, setForm] = useState(EMPTY);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phonePayload, setPhonePayload] = useState(null);
-  const [logoUrl, setLogoUrl] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
   const [saving, setSaving] = useState(false);
+  const [whatsappFallbackHrefState, setWhatsappFallbackHrefState] = useState("");
 
   const setField = (name) => (event) => {
     const value = event.target.value;
@@ -46,6 +54,20 @@ export default function NetworkSignupForm() {
       ? translate(`lenaqar.network.signup.errors.${fieldErrors[key]}`)
       : "";
 
+  const buildWhatsAppHref = (snapshot) => {
+    const message = composeNetworkSignupWhatsAppMessage({
+      form: snapshot,
+      intro: translate("lenaqar.network.signup.whatsappFallbackIntro"),
+      labels: {
+        clientName: translate("lenaqar.network.signup.clientName"),
+        fullName: translate("lenaqar.network.signup.fullName"),
+        email: translate("lenaqar.network.signup.email"),
+        phone: translate("lenaqar.network.signup.phone"),
+      },
+    });
+    return networkActivationHref(message);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (saving) return;
@@ -55,16 +77,35 @@ export default function NetworkSignupForm() {
       return;
     }
 
+    const input = {
+      client_name: form.client_name,
+      full_name: form.full_name,
+      email: form.email,
+      password: form.password,
+      phone_number: phonePayload.combined,
+      logo_url: "",
+    };
+
+    // Client-side validation first — incomplete forms stay on the page (no WhatsApp).
+    const built = buildNetworkSignupPayload(input);
+    if (!built.ok) {
+      setFieldErrors(built.errors);
+      setWhatsappFallbackHrefState("");
+      toast.error(
+        translate(
+          "lenaqar.network.signup.errors.validation_failed",
+          translate("lenaqar.network.signup.errors.save_failed"),
+        ),
+      );
+      return;
+    }
+
+    const snapshot = toNetworkSignupSnapshot(input);
+
     setSaving(true);
+    setWhatsappFallbackHrefState("");
     try {
-      const result = await submitNetworkSignup({
-        client_name: form.client_name,
-        full_name: form.full_name,
-        email: form.email,
-        password: form.password,
-        phone_number: phonePayload.combined,
-        logo_url: logoUrl,
-      });
+      const result = await submitNetworkSignup(input);
       if (!result?.ok) {
         if (result?.errors) setFieldErrors(result.errors);
         toast.error(
@@ -73,9 +114,19 @@ export default function NetworkSignupForm() {
             translate("lenaqar.network.signup.errors.save_failed"),
           ),
         );
+
+        // Frontend-only WhatsApp fallback when HTTP signup fails and payload is complete.
+        // Never falls back for email_taken (login instead). Backend never sends WhatsApp.
+        if (
+          shouldFallbackNetworkSignupToWhatsApp(result?.code || "save_failed") &&
+          hasCompleteNetworkSignupSnapshot(snapshot)
+        ) {
+          setWhatsappFallbackHrefState(buildWhatsAppHref(snapshot));
+        }
         return;
       }
-      saveNetworkActivationName(form.full_name);
+
+      saveNetworkSignupSnapshot(snapshot);
       router.push("/network/pending");
     } finally {
       setSaving(false);
@@ -84,6 +135,18 @@ export default function NetworkSignupForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+      {whatsappFallbackHrefState ? (
+        <SubmitWhatsAppFallback
+          href={whatsappFallbackHrefState}
+          title={translate("lenaqar.network.signup.saveFailedTitle")}
+          body={translate("lenaqar.network.signup.saveFailedWhatsAppBody")}
+          countdownLabel={translate(
+            "lenaqar.network.signup.saveFailedWhatsAppCountdown",
+          )}
+          ctaLabel={translate("lenaqar.network.signup.saveFailedWhatsAppCta")}
+        />
+      ) : null}
+
       <LenaTextField
         name="client_name"
         label={translate("lenaqar.network.signup.clientName")}
@@ -139,7 +202,6 @@ export default function NetworkSignupForm() {
         onValueChange={setPhonePayload}
         error={fieldError("phone_number")}
       />
-      <NetworkLogoField logoUrl={logoUrl} onLogoUrlChange={setLogoUrl} />
 
       <button
         type="submit"

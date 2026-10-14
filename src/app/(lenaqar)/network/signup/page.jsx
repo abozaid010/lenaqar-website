@@ -5,7 +5,7 @@ import NetworkSignupForm from "@/components/lenaqar/network-signup-form";
 export const metadata = {
   title: "انضم لشبكة لينا — تسجيل وسيط عقاري",
   description:
-    "أنشئ حساب شركة أو وسيط على شبكة لينا عشان تشارك مخزونك وتتعاون مع وسطاء تانيين.",
+    "سجّل كوسيط شركة أو وسيط حر. استفد من طلبات عملاء لينا، وشارك مخزون الشبكة لعملائك.",
   robots: { index: false, follow: false },
   openGraph: {
     title: "انضم لشبكة لينا | لينا عقار",
@@ -25,6 +25,18 @@ export default function NetworkSignupPage() {
     <NetworkAuthShell
       titleKey="lenaqar.network.signup.title"
       introKey="lenaqar.network.signup.intro"
+      benefitsTitleKey="lenaqar.network.signup.benefitsTitle"
+      reviewKey="lenaqar.network.signup.review"
+      benefits={[
+        {
+          titleKey: "lenaqar.network.signup.benefit1Title",
+          bodyKey: "lenaqar.network.signup.benefit1Body",
+        },
+        {
+          titleKey: "lenaqar.network.signup.benefit2Title",
+          bodyKey: "lenaqar.network.signup.benefit2Body",
+        },
+      ]}
     >
       <NetworkSignupForm />
     </NetworkAuthShell>
