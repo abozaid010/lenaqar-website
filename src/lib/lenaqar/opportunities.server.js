@@ -5,6 +5,10 @@ import { SITE, lenaqarInventoryQuery } from "@/config/site";
 import { mapSlimUnitToListItem } from "@/lib/units/slim-unit-list-mapper";
 import { toPublicOpportunity } from "./to-public-opportunity";
 import { isListableOpportunity, validateUnit } from "./validate-unit";
+import {
+  marketplaceCitiesMatch,
+  resolveMarketplaceCityToken,
+} from "./marketplace-city-filters";
 
 function yearFromDate(value) {
   if (!value) return null;
@@ -154,13 +158,23 @@ function matchesExact(value, needle) {
   return String(value || "").trim().toLowerCase() === want;
 }
 
+function matchesCity(value, needle) {
+  if (!needle) return true;
+  // Catalog city tokens + aliases (e.g. "new capital" → "new administrative capital")
+  return marketplaceCitiesMatch(value, needle);
+}
+
 function matchesArea(unit, area) {
   if (!area) return true;
   const needle = String(area).trim().toLowerCase();
   if (!needle) return true;
-  return [unit.city, unit.district, unit.subDistrict].some(
-    (value) => String(value || "").trim().toLowerCase() === needle
-  );
+  const resolvedNeedle = resolveMarketplaceCityToken(needle);
+  return [unit.city, unit.district, unit.subDistrict].some((value) => {
+    const raw = String(value || "").trim().toLowerCase();
+    if (!raw) return false;
+    if (raw === needle) return true;
+    return resolveMarketplaceCityToken(raw) === resolvedNeedle;
+  });
 }
 
 function matchesProject(unit, project) {
@@ -214,7 +228,7 @@ export function applyInProcessFilters(
   return units.filter(
     (unit) =>
       matchesArea(unit, area) &&
-      matchesExact(unit.city, city) &&
+      matchesCity(unit.city, city) &&
       matchesExact(unit.district, district) &&
       matchesExact(unit.subDistrict, subDistrict) &&
       matchesProject(unit, project) &&
@@ -301,8 +315,11 @@ export async function fetchOpportunities({
   deliveryYear,
   propertyType,
 } = {}) {
+  // Always query the backend with the catalog city token
+  // ("new capital" → "new administrative capital").
+  const resolvedCity = resolveMarketplaceCityToken(city) || city;
   const catalog = await fetchOpportunityCatalog({
-    city,
+    city: resolvedCity,
     district,
     subDistrict,
     project,
@@ -312,7 +329,7 @@ export async function fetchOpportunities({
   });
   return applyInProcessFilters(catalog, {
     area,
-    city,
+    city: resolvedCity,
     district,
     subDistrict,
     project,

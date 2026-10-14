@@ -576,6 +576,7 @@ export default {
       count: "{count} requests shown",
       emptyTitle: "No requests are listed right now",
       empty: "Write a buy request with the details you need, and we will help look for suitable options.",
+      seeUnits: "See available units in this area",
       errorTitle: "We can't load requests right now",
       error: "Try again in a bit, or write your buy request directly.",
     },

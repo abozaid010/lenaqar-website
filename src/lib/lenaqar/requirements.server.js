@@ -157,7 +157,12 @@ export const fetchPublicRequirements = cache(async function fetchPublicRequireme
       error: null,
     };
   } catch (error) {
-    console.error("[lenaqar] public requirements error", error);
+    console.error(
+      "[lenaqar] public requirements error",
+      error,
+      "url=",
+      API_BASE_URL,
+    );
     return { requirements: [], error: "unavailable" };
   }
 });

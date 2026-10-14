@@ -43,7 +43,7 @@ export default function RequirementCard({ requirement }) {
   const notes = String(requirement.notes || "").trim();
 
   return (
-    <article className="flex flex-col gap-4 rounded-2xl border border-primary/10 bg-white p-5 shadow-[0_10px_40px_-24px_rgba(3,2,80,0.45)]">
+    <article className="mb-4 break-inside-avoid flex flex-col gap-4 rounded-2xl border border-primary/10 bg-white p-5 shadow-[0_10px_40px_-24px_rgba(3,2,80,0.45)]">
       <div className="flex flex-wrap items-center gap-2">
         <span className="inline-flex rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-800">
           {translate("lenaqar.marketplace.intent.buy")}
@@ -70,9 +70,17 @@ export default function RequirementCard({ requirement }) {
               <span>{translate("lenaqar.marketplace.card.budget")}</span>
               {requirement.minPrice && requirement.maxPrice ? (
                 <>
-                  <EgpAmount value={requirement.minPrice} translate={translate} />
+                  <EgpAmount
+                    value={requirement.minPrice}
+                    translate={translate}
+                    className="font-bold text-red-700"
+                  />
                   <span>—</span>
-                  <EgpAmount value={requirement.maxPrice} translate={translate} />
+                  <EgpAmount
+                    value={requirement.maxPrice}
+                    translate={translate}
+                    className="font-bold text-red-700"
+                  />
                 </>
               ) : (
                 <>
@@ -80,6 +88,7 @@ export default function RequirementCard({ requirement }) {
                   <EgpAmount
                     value={requirement.maxPrice || requirement.minPrice}
                     translate={translate}
+                    className="font-bold text-red-700"
                   />
                 </>
               )}
@@ -88,7 +97,11 @@ export default function RequirementCard({ requirement }) {
           {requirement.downPayment ? (
             <li className="flex flex-wrap items-baseline gap-1">
               <span>{translate("lenaqar.marketplace.card.downPayment")}</span>
-              <EgpAmount value={requirement.downPayment} translate={translate} />
+              <EgpAmount
+                value={requirement.downPayment}
+                translate={translate}
+                className="font-bold text-red-700"
+              />
             </li>
           ) : null}
           {requirement.monthlyInstallment ? (
@@ -97,6 +110,7 @@ export default function RequirementCard({ requirement }) {
               <EgpAmount
                 value={requirement.monthlyInstallment}
                 translate={translate}
+                className="font-bold text-red-700"
               />
             </li>
           ) : null}
@@ -122,7 +136,7 @@ export default function RequirementCard({ requirement }) {
         ) : null}
       </div>
 
-      <div className="mt-auto pt-1">
+      <div className="pt-1">
         <WhatsAppCta
           href={whatsappHref}
           eventName={ANALYTICS.EVENTS.MARKETPLACE_WHATSAPP_CLICKED}
