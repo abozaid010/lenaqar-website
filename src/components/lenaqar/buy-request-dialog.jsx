@@ -418,7 +418,7 @@ export default function BuyRequestDialog({
       onCancel={onClose}
       submitLabel={
         saving
-          ? tr("common.saving", locale === "ar" ? "جارٍ الحفظ..." : "Saving...")
+          ? tr("lenaqar.buyRequest.sending", "بنبعت الطلب...")
           : submitLabel || tr("lenaqar.buyRequest.submit", "Submit")
       }
       onSubmit={handleSubmit}
@@ -436,7 +436,7 @@ export default function BuyRequestDialog({
     >
       {loading ? (
         <div className="p-6 text-center text-sm text-gray-500">
-          {tr("common.loading", locale === "ar" ? "جارٍ التحميل..." : "Loading...")}
+          {tr("common.loading", locale === "ar" ? "بنحمّل..." : "Loading...")}
         </div>
       ) : (
         <>

@@ -4,13 +4,13 @@ import FaqSchema from "@/components/schema/FaqSchema";
 import HowItWorksContent from "@/components/lenaqar/how-it-works-content";
 
 export const metadata = {
-  title: "إزاي بنشتغل — بيع، شراء، أو قولنا عايز إيه",
+  title: "إزاي بنشتغل — اكتب طلبك، شوف الفرص، أو شارك وحدة",
   description:
-    "خطوة بخطوة: إزاي تبيع وحدتك، إزاي تشتري فرصة جاهزة، وإزاي تبعت طلب شراء ونرشّح لك المناسب.",
+    "بنبدأ من طلب المشتري. لما تتبعت وحدة مناسبة، بنراجع تفاصيلها وبعدين نشاركها معاك — وإنت تقرر تكمل ولا لأ. من غير وعود ببيع مضمون.",
   openGraph: {
     title: "إزاي بنشتغل | لينا عقار",
     description:
-      "خطوة بخطوة: إزاي تبيع وحدتك، إزاي تشتري فرصة جاهزة، وإزاي تبعت طلب شراء ونرشّح لك المناسب.",
+      "بنبدأ من طلب المشتري. لما تتبعت وحدة مناسبة، بنراجع تفاصيلها وبعدين نشاركها معاك — وإنت تقرر تكمل ولا لأ.",
     url: `${SITE.url}/how-it-works`,
     locale: "ar_EG",
     siteName: SITE.name,
@@ -26,7 +26,7 @@ export default function HowItWorksPage() {
   return (
     <>
       <BreadcrumbSchema
-        items={[{ name: "كيف نعمل", url: `${SITE.url}/how-it-works` }]}
+        items={[{ name: "إزاي بنشتغل", url: `${SITE.url}/how-it-works` }]}
       />
       <FaqSchema />
       <HowItWorksContent />

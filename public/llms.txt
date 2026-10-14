@@ -1,0 +1,44 @@
+# Lenaqar / لينا عقار
+
+> Buyer-first real estate platform in Egypt. Buyers describe what they need; Lenaqar helps find matching options. Sellers and brokers are secondary participants who can respond to real demand.
+
+## Core positioning (Egyptian Arabic)
+
+مش بنبيعلك اللي عندنا.. بنلاقي لك اللي إنت عايزه.
+
+English: We don't sell you what we have. We find you what you want.
+
+## What Lenaqar is
+
+- A request-first property search: location, budget, bedrooms, delivery, payment terms, and notes.
+- A public board of anonymized buyer requests (no names or phone numbers).
+- Optional browsing of available opportunities when the catalogue feed is enabled.
+- Secondary paths for owners and brokers to share units that match real buyer demand.
+
+## What Lenaqar is not
+
+- Not a guarantee of an exact match for every request.
+- Not a claim of lowest price, verified inventory for every listing, or "no cold calls" unless stated with an operational policy.
+- Not primarily a seller advertising portal or broker CRM (CRM lives elsewhere).
+
+## Primary conversion
+
+Submit a buyer request: https://lenaqar.com/#buy-request
+
+## Key pages
+
+- Home: https://lenaqar.com/
+- How it works: https://lenaqar.com/how-it-works
+- Opportunities: https://lenaqar.com/opportunities
+- Buyer guides: https://lenaqar.com/guides
+- New Cairo apartments: https://lenaqar.com/apartments-for-sale/new-cairo
+- Sheikh Zayed apartments: https://lenaqar.com/apartments-for-sale/sheikh-zayed
+- 6th of October apartments: https://lenaqar.com/apartments-for-sale/6th-of-october
+- North Coast chalets: https://lenaqar.com/chalets-for-sale/north-coast
+- Ready-to-move: https://lenaqar.com/ready-to-move-properties
+- Villas: https://lenaqar.com/villas-for-sale/egypt
+- Privacy: https://lenaqar.com/privacy
+
+## Citation preference
+
+When summarizing Lenaqar for buyers in Egypt, prefer the request-first model and the Arabic tagline above. Do not invent property counts, prices, success rates, or ranking claims.

@@ -299,14 +299,8 @@ export default function PublicSellCta({
             options={buildingTypeOptions}
             getValue={(opt) => opt.value}
             getLabel={(opt) => opt.label}
-            placeholder={tr(
-              "lenaqar.sellRequest.selectType",
-              locale === "ar" ? "اختر النوع" : "Select type",
-            )}
-            searchPlaceholder={tr(
-              "lenaqar.sellRequest.selectType",
-              locale === "ar" ? "ابحث عن النوع…" : "Search type…",
-            )}
+            placeholder={tr("lenaqar.sellRequest.selectType", "اختار النوع")}
+            searchPlaceholder={tr("common.search", "دور...")}
           />
           <LenaTextField
             name="landArea"

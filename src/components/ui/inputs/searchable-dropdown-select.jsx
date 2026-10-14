@@ -441,14 +441,9 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
     setHighlightedIndex(-1);
   };
 
-  const defaultLoadingText =
-    loadingText || (locale === "ar" ? "جاري التحميل..." : "Loading...");
-  const defaultNoResultsText =
-    noResultsText ||
-    (locale === "ar" ? "لا توجد نتائج" : "No results found");
-  const defaultSearchPlaceholder =
-    searchPlaceholder ||
-    (locale === "ar" ? "ابحث..." : "Search...");
+  const defaultLoadingText = loadingText || translate("common.loading");
+  const defaultNoResultsText = noResultsText || translate("common.noResults");
+  const defaultSearchPlaceholder = searchPlaceholder || translate("common.search");
 
   const hasError = !!error || !!errorMessage;
   const displayErrorMessage = typeof error === "string" ? error : errorMessage;
@@ -724,7 +719,11 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
             {!isLoading && sortedOptions.length > 0 && searchQuery && (
               <div className="px-4 py-2 border-t border-gray-200 text-xs text-gray-500">
                 {locale === "ar"
-                  ? `${sortedOptions.length} نتيجة`
+                  ? sortedOptions.length === 1
+                    ? "نتيجة واحدة"
+                    : sortedOptions.length === 2
+                      ? "نتيجتين"
+                      : `${sortedOptions.length} نتائج`
                   : `${sortedOptions.length} result${
                       sortedOptions.length !== 1 ? "s" : ""
                     }`}

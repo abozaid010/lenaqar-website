@@ -7,7 +7,7 @@ import BuyRequestCta from "./buy-request-cta";
 import FaqSection from "./faq-section";
 import NetworkBrokerCta from "./network-broker-cta";
 
-function FlowSteps({ titleKey, steps, cta }) {
+function FlowSteps({ titleKey, steps, noteKey, cta }) {
   const { translate } = useI18n();
 
   return (
@@ -25,6 +25,11 @@ function FlowSteps({ titleKey, steps, cta }) {
           </li>
         ))}
       </ol>
+      {noteKey ? (
+        <p className="max-w-2xl text-sm leading-relaxed text-black/70">
+          {translate(noteKey)}
+        </p>
+      ) : null}
       {cta}
     </section>
   );
@@ -67,6 +72,11 @@ export default function HowItWorksContent() {
       titleKey: "lenaqar.howItWorks.requestStep3Title",
       bodyKey: "lenaqar.howItWorks.requestStep3Body",
     },
+    {
+      num: 4,
+      titleKey: "lenaqar.howItWorks.requestStep4Title",
+      bodyKey: "lenaqar.howItWorks.requestStep4Body",
+    },
   ];
 
   return (
@@ -78,9 +88,19 @@ export default function HowItWorksContent() {
         <p className="text-base sm:text-lg text-black/70 leading-relaxed">
           {translate("lenaqar.howItWorks.pageIntro")}
         </p>
+        <BuyRequestCta variant="primary" />
       </header>
 
-      <HowItWorksSteps variant="full" showSellLink={false} />
+      <FlowSteps
+        titleKey="lenaqar.howItWorks.requestSectionTitle"
+        steps={requestSteps}
+        noteKey="lenaqar.howItWorks.requestWaitingNote"
+        cta={
+          <div className="space-y-4">
+            <BuyRequestCta variant="primary" />
+          </div>
+        }
+      />
 
       <FlowSteps
         titleKey="lenaqar.howItWorks.buySectionTitle"
@@ -95,16 +115,13 @@ export default function HowItWorksContent() {
         }
       />
 
-      <FlowSteps
-        titleKey="lenaqar.howItWorks.requestSectionTitle"
-        steps={requestSteps}
-        cta={
-          <div className="space-y-4">
-            <BuyRequestCta variant="primary" />
-            <NetworkBrokerCta compact />
-          </div>
-        }
-      />
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold text-primary">
+          {translate("lenaqar.marketplace.closing.sellerTitle")}
+        </h2>
+        <HowItWorksSteps variant="full" showSellLink={false} />
+        <NetworkBrokerCta compact />
+      </section>
 
       <FaqSection />
     </div>

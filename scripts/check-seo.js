@@ -13,6 +13,12 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://lenaqar.com';
 const VALUE_KEYWORDS = [
   'لينا عقار',
   'عقار',
+  'طلب',
+  'مشتري',
+  'شقة',
+  'فيلا',
+  'شاليه',
+  'ميزانية',
   'أقساط',
   'وحدة',
   'فرص',
@@ -138,6 +144,12 @@ function checkFile(filePath) {
       }
     }
     
+    if (/buyerLandingMetadata\(\s*landing\s*\)/.test(content)) {
+      titleMatch = { 1: `Dynamic Title ${relativePath}` };
+    } else if (titleMatch?.[1] === "guide") {
+      titleMatch = { 1: `Dynamic Title ${relativePath}` };
+    }
+
     if (!titleMatch && !filePath.includes('layout.')) {
       errors.push(`❌ ${relativePath}: Missing title in metadata`);
     } else if (titleMatch) {
@@ -213,6 +225,30 @@ function checkFile(filePath) {
         }
       }
       if (descriptionMatch) break;
+    }
+
+    // Static metadata that references DESCRIPTION / landing.description constants
+    if (!descriptionMatch) {
+      const upperDesc = content.match(
+        /const\s+DESCRIPTION\s*=\s*\n?\s*["']([^"']{40,})["']/,
+      );
+      if (
+        upperDesc &&
+        /description\s*:\s*DESCRIPTION/.test(content)
+      ) {
+        descriptionMatch = { 1: upperDesc[1] };
+      } else if (
+        (/description\s*:\s*landing\.description/.test(content) ||
+          /buyerLandingMetadata\(\s*landing\s*\)/.test(content)) &&
+        /getBuyerLanding\(/.test(content)
+      ) {
+        descriptionMatch = { 1: `Buyer landing description ${relativePath}` };
+      } else if (
+        /description\s*:\s*guide\.description/.test(content) &&
+        /getBuyerGuide\(/.test(content)
+      ) {
+        descriptionMatch = { 1: `Buyer guide description ${relativePath}` };
+      }
     }
     
     // Also check for description in return statement of generateMetadata
@@ -340,8 +376,10 @@ function checkFile(filePath) {
       }
     }
 
+    const usesLandingMetadata = /buyerLandingMetadata\(\s*landing\s*\)/.test(content);
+
     // Check for openGraph (optional for admin pages, but recommended)
-    if (!content.includes('openGraph:') && !filePath.includes('layout.')) {
+    if (!content.includes('openGraph:') && !usesLandingMetadata && !filePath.includes('layout.')) {
       if (isAdminPage) {
         warnings.push(`⚠️  ${relativePath}: Missing openGraph in metadata (recommended even for non-indexed pages)`);
       } else {
@@ -353,6 +391,7 @@ function checkFile(filePath) {
     if (
       !content.includes('alternates:') &&
       !content.includes('canonical:') &&
+      !usesLandingMetadata &&
       !filePath.includes('layout.')
     ) {
       if (isAdminPage) {

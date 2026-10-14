@@ -7,6 +7,7 @@ import OpportunityCard from "@/components/lenaqar/opportunity-card";
 import OpportunityFilters from "@/components/lenaqar/opportunity-filters";
 import OpportunitiesEmpty from "@/components/lenaqar/opportunities-empty";
 import OpportunityPagination from "@/components/lenaqar/opportunity-pagination";
+import BuyRequestCta from "@/components/lenaqar/buy-request-cta";
 
 export default function OpportunitiesPageContent({
   units,
@@ -21,9 +22,21 @@ export default function OpportunitiesPageContent({
 
   return (
     <section className="container py-12 pb-24 lg:pb-12">
-      <h1 className="text-3xl font-bold text-primary leading-snug mb-6">
+      <h1 className="text-3xl font-bold text-primary leading-snug mb-3">
         {translate("lenaqar.opportunities.title")}
       </h1>
+      <p className="text-base text-black/70 mb-4 max-w-2xl">
+        {translate("lenaqar.opportunities.sub")}
+      </p>
+      <p className="text-sm text-black/60 mb-4 max-w-2xl">
+        {translate("lenaqar.opportunities.buyRequestHint")}
+      </p>
+      <div className="mb-6">
+        <BuyRequestCta
+          variant="primary"
+          initialValues={cash ? { downPayment: cash } : undefined}
+        />
+      </div>
 
       <Suspense
         fallback={

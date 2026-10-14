@@ -18,26 +18,17 @@ export default function HowItWorksSteps({ variant = "compact", showSellLink = tr
         className={
           isFull
             ? "space-y-4"
-            : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+            : "grid grid-cols-1 sm:grid-cols-2 gap-4"
         }
       >
-        {[1, 3, 4].map((step, index) => (
+        {[1, 2, 3, 4].map((step) => (
           <li
             key={step}
             className="rounded-lg border border-black/10 p-5 bg-white"
           >
-            <p className="text-xs text-black/50 mb-2 tabular-nums">{index + 1}</p>
+            <p className="text-xs text-black/50 mb-2 tabular-nums">{step}</p>
             <h3 className="font-semibold mb-2">
-              {step === 4 ? (
-                <>
-                  {translate("lenaqar.home.howStep4TitleBefore")}
-                  <span className="font-extrabold text-red-600">
-                    {translate("lenaqar.home.howStep4TitleHighlight")}
-                  </span>
-                </>
-              ) : (
-                translate(`lenaqar.home.howStep${step}Title`)
-              )}
+              {translate(`lenaqar.home.howStep${step}Title`)}
             </h3>
             <p className="text-sm text-black/70">
               {translate(`lenaqar.home.howStep${step}Body`)}

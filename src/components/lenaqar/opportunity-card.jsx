@@ -9,6 +9,7 @@ import {
   buildingTypeAr,
   buildListingHeadline,
   placeAr,
+  roomsLabelAr,
 } from "@/lib/lenaqar/listing-seo";
 import EgpAmount from "./egp-amount";
 import OpportunityUnitActions from "./opportunity-unit-actions";
@@ -68,9 +69,7 @@ export default function OpportunityCard({ unit }) {
             {[
               typeLabel,
               // A studio reports 0 rooms; "0 غرف" is noise, not information.
-              unit.roomsCount > 0
-                ? `${unit.roomsCount} ${translate("lenaqar.unit.rooms")}`
-                : null,
+              unit.roomsCount > 0 ? roomsLabelAr(unit.roomsCount) : null,
               unit.landArea != null
                 ? `${unit.landArea} ${translate("lenaqar.unit.meter")}`
                 : null,

@@ -8,7 +8,7 @@ export default function CoreActions({
   className = "",
   initialValues,
   anchor = false,
-  emphasis = "sell",
+  emphasis = "buy",
   compact = false,
   tone = "default",
   layout,

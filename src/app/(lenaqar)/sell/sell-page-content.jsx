@@ -3,7 +3,6 @@
 import { useI18n } from "@/hooks/useI18n";
 import { sellerCtaHref } from "@/lib/lenaqar/whatsapp";
 import { ANALYTICS } from "@/constants/analytics";
-import ComparisonBlock from "@/components/lenaqar/comparison-block";
 import NetworkStrip from "@/components/lenaqar/network-strip";
 import WhatsAppCta from "@/components/lenaqar/whatsapp-cta";
 import PublicSellCta from "@/components/lenaqar/public-sell-cta";
@@ -31,18 +30,14 @@ export default function SellPageContent() {
         </p>
       </section>
 
-      <ComparisonBlock />
-
       <section className="container py-8">
         <h2 className="text-xl font-bold text-primary mb-4">
           {translate("lenaqar.sell.criteriaTitle")}
         </h2>
-        <ul className="space-y-2 text-black/80">
-          <li>{translate("lenaqar.sell.criteria1")}</li>
-          <li>{translate("lenaqar.sell.criteria2")}</li>
-          <li>{translate("lenaqar.sell.criteria3")}</li>
-          <li>{translate("lenaqar.sell.criteria4")}</li>
-          <li>{translate("lenaqar.sell.criteria5")}</li>
+        <ul className="max-w-2xl list-disc space-y-2 ps-5 text-black/80">
+          {[1, 2, 3, 4, 5, 6].map((item) => (
+            <li key={item}>{translate(`lenaqar.sell.criteria${item}`)}</li>
+          ))}
         </ul>
       </section>
 

@@ -7,6 +7,7 @@ import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { ANALYTICS } from "@/constants/analytics";
 import { SITE } from "@/config/site";
 import { requirementToUnitsFilter } from "@/lib/match/requirement-to-units-filter";
+import { trackMetaLead } from "@/lib/meta-pixel";
 import BuyRequestDialog from "./buy-request-dialog";
 import {
   loadPublicBuyRequest,
@@ -151,6 +152,8 @@ export default function BuyRequestCta({
         saveRequirement={saveRequirement}
         onSuccess={(requirement) => {
           trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_SUBMITTED);
+          // Ads conversion: Lead = successful buyer request (no PII in payload).
+          trackMetaLead({ content_name: "buyer_request", content_category: "buy" });
           const qs = opportunityQueryFromRequirement({
             ...requirement,
             purpose: "buy",

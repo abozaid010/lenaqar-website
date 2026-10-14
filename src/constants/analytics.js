@@ -33,8 +33,20 @@ export const META_PIXEL = {
   PIXEL_ID: (process.env.NEXT_PUBLIC_META_PIXEL_ID || META_PIXEL_DEFAULT_ID).trim(),
   SCRIPT_URL: 'https://connect.facebook.net/en_US/fbevents.js',
   NOSCRIPT_BASE: 'https://www.facebook.com/tr',
-  /** Routes that fire ViewContent on visit */
-  VIEW_CONTENT_PATHS: ['/services', '/pricing', '/ai-agent'],
+  /**
+   * Buyer-intent routes that fire ViewContent for Meta ads optimization.
+   * Keep aligned with indexable landing pages in sitemap.ts.
+   */
+  VIEW_CONTENT_PATHS: [
+    '/',
+    '/how-it-works',
+    '/opportunities',
+    '/apartments-for-sale',
+    '/chalets-for-sale',
+    '/villas-for-sale',
+    '/ready-to-move-properties',
+    '/guides',
+  ],
   EVENTS: {
     PAGE_VIEW: 'PageView',
     VIEW_CONTENT: 'ViewContent',

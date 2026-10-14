@@ -2,11 +2,11 @@ import { SITE } from "@/config/site";
 import NetworkPending from "@/components/lenaqar/network-pending";
 
 export const metadata = {
-  title: "طلب شبكة لينا قيد المراجعة",
-  description: "تم استلام طلب الانضمام لشبكة لينا. كلّم واتساب لتفعيل الحساب.",
+  title: "طلب شبكة لينا لسه تحت المراجعة",
+  description: "طلب الانضمام لشبكة لينا وصلنا. كلّمنا على واتساب عشان نفعّل الحساب.",
   robots: { index: false, follow: false },
   openGraph: {
-    title: "طلب شبكة لينا قيد المراجعة | لينا عقار",
+    title: "طلب شبكة لينا لسه تحت المراجعة | لينا عقار",
     url: `${SITE.url}/network/pending`,
     locale: "ar_EG",
     siteName: SITE.name,

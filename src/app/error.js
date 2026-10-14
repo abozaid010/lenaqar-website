@@ -1,5 +1,6 @@
 'use client';
 
+import { useI18n } from '@/hooks/useI18n';
 import { InfoIcon } from 'lucide-react';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -26,6 +27,7 @@ function clearRetryCount(key) {
 export default function Error({ error, reset }) {
     const router = useRouter();
     const pathname = usePathname();
+    const { translate } = useI18n();
     const retryTimerRef = useRef(null);
     const [showErrorUI, setShowErrorUI] = useState(false);
     const [attemptForUI, setAttemptForUI] = useState(0);
@@ -96,9 +98,11 @@ export default function Error({ error, reset }) {
         return (
             <div className="flex flex-col items-center justify-center h-screen bg-gray-100 text-center px-4">
                 <InfoIcon color="#030250" size={60} className="mb-6 animate-pulse" />
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Reconnecting…</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">{translate("lenaqar.errors.reconnecting")}</h2>
                 <p className="text-gray-600">
-                    Trying again ({attemptForUI + 1}/{MAX_AUTO_RETRIES + 1})
+                    {translate("lenaqar.errors.retryProgress")
+                      .replace("{current}", String(attemptForUI + 1))
+                      .replace("{total}", String(MAX_AUTO_RETRIES + 1))}
                 </p>
             </div>
         );
@@ -110,10 +114,10 @@ export default function Error({ error, reset }) {
             <InfoIcon color='#030250' size={60} className='mb-6' />
 
             <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                We are upgrading our service
+                {translate("lenaqar.errors.title")}
             </h2>
             <p className="text-gray-600 mb-6">
-                We are running some maintenance on our system. Please click reload to try again.
+                {translate("lenaqar.errors.body")}
             </p>
 
             <div className="flex items-center gap-3">
@@ -121,7 +125,7 @@ export default function Error({ error, reset }) {
                     onClick={handleTryAgain}
                     className="px-6 py-2 bg-primary text-white font-medium rounded-md hover:bg-primary-dark transition hover:opacity-90"
                 >
-                    Try again
+                    {translate("lenaqar.errors.retry")}
                 </button>
 
                 {/* Button to Home */}
@@ -129,7 +133,7 @@ export default function Error({ error, reset }) {
                     onClick={() => router.push('/')}
                     className="px-6 py-2 bg-white text-gray-800 font-medium rounded-md border border-gray-300 hover:bg-gray-50 transition"
                 >
-                    Go to Home
+                    {translate("lenaqar.errors.home")}
                 </button>
             </div>
         </div>

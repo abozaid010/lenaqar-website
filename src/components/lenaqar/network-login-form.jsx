@@ -76,7 +76,7 @@ export default function NetworkLoginForm() {
         <p className="mt-2 text-sm leading-relaxed text-black/70">
           {translate("lenaqar.network.pending.body").replace(
             "{phone}",
-            LENAQAR_CONTACT.phoneDisplay,
+            LENAQAR_CONTACT.whatsappDisplay,
           )}
         </p>
         <NetworkActivationWhatsApp name={email} />
@@ -118,7 +118,7 @@ export default function NetworkLoginForm() {
         className={`${actionButtonClass({ variant: "primary" })} w-full`}
       >
         {saving
-          ? translate("common.saving")
+          ? translate("lenaqar.network.login.sending")
           : translate("lenaqar.network.login.submit")}
       </button>
       <p className="text-center text-sm text-black/65">

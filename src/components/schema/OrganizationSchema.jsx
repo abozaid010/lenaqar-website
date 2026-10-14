@@ -11,7 +11,7 @@ export default function OrganizationSchema() {
     url: SITE_URL,
     logo: `${SITE_URL}/images/logo.png`,
     description:
-      "لينا عقار بتخرجك من أقساط الوحدة أسرع وبفلوس أكتر، باتفاق مكتوب.",
+      "منصة عقارية في مصر بتبدأ من طلب المشتري: اكتب مواصفات بيتك وميزانيتك، وهنساعدك تلاقي اختيارات مناسبة لطلبك.",
     sameAs: [LENAQAR_CONTACT.facebook, LENAQAR_CONTACT.linkedin].filter(Boolean),
   };
 
