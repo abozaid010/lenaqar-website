@@ -79,7 +79,23 @@ const AI_CRAWLERS = [
 ];
 
 export default function robots(): MetadataRoute.Robots {
-  const allow = ['/', '/sell', '/calculator', '/privacy', '/how-it-works', '/network'];
+  const allow = [
+    '/',
+    '/sell',
+    '/calculator',
+    '/privacy',
+    '/how-it-works',
+    '/network',
+    '/guides',
+    '/guides/*',
+    '/apartments-for-sale',
+    '/apartments-for-sale/*',
+    '/chalets-for-sale',
+    '/chalets-for-sale/*',
+    '/villas-for-sale',
+    '/villas-for-sale/*',
+    '/ready-to-move-properties',
+  ];
   if (SITE.feed.enabled) {
     allow.push('/opportunities', '/opportunities/*');
   }

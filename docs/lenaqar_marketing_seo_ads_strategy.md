@@ -926,6 +926,8 @@ Use this table to preserve important decisions and the reasons behind them.
 | 2026-10-13 | Shift positioning to buyer-first, request-led real estate | Strategic direction | Marketing / Founder | TBD |
 | 2026-10-13 | Use “We don't sell you what we have. We find you what you want” as the core message | Communicates the difference clearly | Marketing / Founder | TBD |
 | 2026-10-13 | Prioritize buyers in the homepage hierarchy; keep seller/broker journeys secondary | Aligns the site with the new audience | Marketing / Product | TBD |
+| 2026-10-14 | Ship buyer-first homepage, metadata, CTAs, landings, guides, llms.txt, Meta Lead | Implemented in repo; see `docs/buyer-first-implementation-log.md` | Engineering / Marketing | 2026-11-14 |
+| 2026-10-14 | Avoid “أول منصة” and absolute “no cold calls” in live copy until evidenced | Claims policy §5 | Marketing | TBD |
 
 ---
 

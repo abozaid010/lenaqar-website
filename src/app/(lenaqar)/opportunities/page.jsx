@@ -10,9 +10,9 @@ import OpportunitiesPageContent from "./opportunities-page-content";
 export const revalidate = 900;
 export const maxDuration = 20;
 
-const TITLE = "شقق ووحدات ريسيل للبيع بالتقسيط في مصر";
-const DESCRIPTION =
-  "شقق وشاليهات ووحدات ريسيل للبيع بالتقسيط في مصر — تشتريها بالكاش اللي معاك وتكمّل الأقساط على المطور. السعر من المطور بتاريخه، مش تقدير.";
+const TITLE = "فرص عقارية للبيع في مصر — أو اكتب طلبك بمواصفاتك";
+const description =
+  "تصفّح شقق ووحدات معروضة للبيع في مصر، أو اكتب طلب شراء بالمكان والميزانية والمواصفات. الأسعار المعروضة من بيانات المطور بتاريخها لما تكون متاحة.";
 
 /** 1-based page number from `?page=`; anything else is page 1. */
 function parsePage(value) {
@@ -53,10 +53,10 @@ export async function generateMetadata({ searchParams }) {
 
   return {
     title,
-    description: DESCRIPTION,
+    description,
     openGraph: {
-      title: `${title} | لينا عقار`,
-      description: DESCRIPTION,
+      title,
+      description,
       url,
       locale: "ar_EG",
       siteName: SITE.name,

@@ -77,14 +77,23 @@ export default function LenaqarFooter() {
             <Link href="/" className="hover:text-white/80">
               {translate("lenaqar.header.home")}
             </Link>
+            <Link href="/#buy-request" className="hover:text-white/80">
+              {translate("lenaqar.header.buyUnit")}
+            </Link>
             <Link href="/opportunities" className="hover:text-white/80">
               {translate("lenaqar.header.opportunities")}
             </Link>
-            <Link href="/sell" className="hover:text-white/80">
-              {translate("lenaqar.header.sell")}
+            <Link href="/guides" className="hover:text-white/80">
+              {translate("lenaqar.guides.indexTitle")}
+            </Link>
+            <Link href="/apartments-for-sale/new-cairo" className="hover:text-white/80">
+              {translate("lenaqar.marketplace.browse.newCairo")}
             </Link>
             <Link href="/how-it-works" className="hover:text-white/80">
               {translate("lenaqar.header.howItWorks")}
+            </Link>
+            <Link href="/sell" className="hover:text-white/80">
+              {translate("lenaqar.header.sell")}
             </Link>
             <Link href="/network" className="hover:text-white/80">
               {translate("lenaqar.header.joinNetwork")}

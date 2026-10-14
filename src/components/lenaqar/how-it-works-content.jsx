@@ -78,9 +78,18 @@ export default function HowItWorksContent() {
         <p className="text-base sm:text-lg text-black/70 leading-relaxed">
           {translate("lenaqar.howItWorks.pageIntro")}
         </p>
+        <BuyRequestCta variant="primary" />
       </header>
 
-      <HowItWorksSteps variant="full" showSellLink={false} />
+      <FlowSteps
+        titleKey="lenaqar.howItWorks.requestSectionTitle"
+        steps={requestSteps}
+        cta={
+          <div className="space-y-4">
+            <BuyRequestCta variant="primary" />
+          </div>
+        }
+      />
 
       <FlowSteps
         titleKey="lenaqar.howItWorks.buySectionTitle"
@@ -95,16 +104,13 @@ export default function HowItWorksContent() {
         }
       />
 
-      <FlowSteps
-        titleKey="lenaqar.howItWorks.requestSectionTitle"
-        steps={requestSteps}
-        cta={
-          <div className="space-y-4">
-            <BuyRequestCta variant="primary" />
-            <NetworkBrokerCta compact />
-          </div>
-        }
-      />
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold text-primary">
+          {translate("lenaqar.marketplace.closing.sellerTitle")}
+        </h2>
+        <HowItWorksSteps variant="full" showSellLink={false} />
+        <NetworkBrokerCta compact />
+      </section>
 
       <FaqSection />
     </div>

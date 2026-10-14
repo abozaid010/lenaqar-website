@@ -4,28 +4,22 @@ import Image from "next/image";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
 import { useI18n } from "@/hooks/useI18n";
-import { marketplaceAddUnitHref, sellerCtaHref } from "@/lib/lenaqar/whatsapp";
-import { ANALYTICS } from "@/constants/analytics";
-import WhatsAppCta from "./whatsapp-cta";
 import BuyRequestCta from "./buy-request-cta";
 
 export default function LenaqarHeader() {
   const { translate } = useI18n();
-  const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const isHome = pathname === "/" || pathname === "/lenaqar";
 
   const routeLinks = [
     { href: "/", label: translate("lenaqar.header.home") },
     { href: "/opportunities", label: translate("lenaqar.header.opportunities") },
-    { href: "/sell", label: translate("lenaqar.header.sell") },
     { href: "/how-it-works", label: translate("lenaqar.header.howItWorks") },
+    { href: "/guides", label: translate("lenaqar.guides.indexTitle") },
+    { href: "/sell", label: translate("lenaqar.header.sell") },
     {
       href: "/network",
       label: translate("lenaqar.header.joinNetwork"),
-      emphasis: true,
     },
   ];
 
@@ -47,38 +41,18 @@ export default function LenaqarHeader() {
             <Link
               key={link.href}
               href={link.href}
-              className={
-                link.emphasis
-                  ? "shrink-0 rounded-md border border-white/40 px-2 py-1 font-semibold hover:bg-white hover:text-primary transition-colors"
-                  : "hover:text-white/80 transition-colors whitespace-nowrap"
-              }
+              className="hover:text-white/80 transition-colors whitespace-nowrap"
             >
               {link.label}
             </Link>
           ))}
           <BuyRequestCta
-            variant="secondary"
+            variant="primary"
             tone="onPrimary"
             size="compact"
             label={translate("lenaqar.header.buyUnit")}
           />
         </nav>
-
-        <div className="hidden lg:block">
-          <WhatsAppCta
-            href={isHome ? marketplaceAddUnitHref() : sellerCtaHref()}
-            eventName={
-              isHome
-                ? ANALYTICS.EVENTS.MARKETPLACE_WHATSAPP_CLICKED
-                : ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED
-            }
-            className="!py-2 !px-3 !text-xs"
-          >
-            {isHome
-              ? translate("lenaqar.marketplace.hero.whatsappCta")
-              : translate("lenaqar.header.sell")}
-          </WhatsAppCta>
-        </div>
 
         <button
           type="button"
@@ -101,30 +75,18 @@ export default function LenaqarHeader() {
             <Link
               key={link.href}
               href={link.href}
-              className={link.emphasis ? "py-1 font-semibold" : "py-1"}
+              className="py-1"
               onClick={() => setOpen(false)}
             >
               {link.label}
             </Link>
           ))}
           <BuyRequestCta
-            variant="secondary"
+            variant="primary"
             tone="onPrimary"
             label={translate("lenaqar.header.buyUnit")}
             className="w-full"
           />
-          <WhatsAppCta
-            href={isHome ? marketplaceAddUnitHref() : sellerCtaHref()}
-            eventName={
-              isHome
-                ? ANALYTICS.EVENTS.MARKETPLACE_WHATSAPP_CLICKED
-                : ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED
-            }
-          >
-            {isHome
-              ? translate("lenaqar.marketplace.hero.whatsappCta")
-              : translate("lenaqar.home.lenaCta")}
-          </WhatsAppCta>
         </nav>
       ) : null}
     </header>

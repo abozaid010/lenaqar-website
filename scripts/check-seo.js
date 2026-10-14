@@ -13,6 +13,12 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://lenaqar.com';
 const VALUE_KEYWORDS = [
   'لينا عقار',
   'عقار',
+  'طلب',
+  'مشتري',
+  'شقة',
+  'فيلا',
+  'شاليه',
+  'ميزانية',
   'أقساط',
   'وحدة',
   'فرص',
@@ -213,6 +219,29 @@ function checkFile(filePath) {
         }
       }
       if (descriptionMatch) break;
+    }
+
+    // Static metadata that references DESCRIPTION / landing.description constants
+    if (!descriptionMatch) {
+      const upperDesc = content.match(
+        /const\s+DESCRIPTION\s*=\s*\n?\s*["']([^"']{40,})["']/,
+      );
+      if (
+        upperDesc &&
+        /description\s*:\s*DESCRIPTION/.test(content)
+      ) {
+        descriptionMatch = { 1: upperDesc[1] };
+      } else if (
+        /description\s*:\s*landing\.description/.test(content) &&
+        /getBuyerLanding\(/.test(content)
+      ) {
+        descriptionMatch = { 1: `Buyer landing description ${relativePath}` };
+      } else if (
+        /description\s*:\s*guide\.description/.test(content) &&
+        /getBuyerGuide\(/.test(content)
+      ) {
+        descriptionMatch = { 1: `Buyer guide description ${relativePath}` };
+      }
     }
     
     // Also check for description in return statement of generateMetadata

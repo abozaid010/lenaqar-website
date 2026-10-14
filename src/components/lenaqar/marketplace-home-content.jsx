@@ -9,11 +9,13 @@ import {
   MARKETPLACE_CITY_FILTERS,
   requirementMatchesCity,
 } from "@/lib/lenaqar/marketplace-city-filters";
+import { BUYER_LANDING_LINKS } from "@/lib/lenaqar/buyer-landings";
+import { BUYER_GUIDE_LINKS } from "@/lib/lenaqar/buyer-guides";
 import WhatsAppCta from "./whatsapp-cta";
 import RequirementCard from "./requirement-card";
 import MarketplaceHowItWorks from "./marketplace-how-it-works";
 import BuyRequestCta from "./buy-request-cta";
-import NetworkBrokerCta from "./network-broker-cta";
+import FaqSection from "./faq-section";
 import { actionButtonClass } from "@/components/ui/action-button-class";
 import ActionButtonArrow from "@/components/ui/action-button-arrow";
 
@@ -35,7 +37,7 @@ export default function MarketplaceHomeContent({
       <section className="relative overflow-hidden border-b border-primary/10">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_500px_at_100%_-10%,rgba(3,2,80,0.16),transparent_55%),radial-gradient(900px_420px_at_0%_100%,rgba(37,211,102,0.12),transparent_50%),linear-gradient(180deg,#f7f6f2_0%,#ffffff_72%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_500px_at_100%_-10%,rgba(3,2,80,0.16),transparent_55%),radial-gradient(900px_420px_at_0%_100%,rgba(37,211,102,0.08),transparent_50%),linear-gradient(180deg,#f7f6f2_0%,#ffffff_72%)]"
         />
         <div
           aria-hidden
@@ -43,69 +45,68 @@ export default function MarketplaceHomeContent({
         />
 
         <div className="container relative pt-14 pb-12 sm:pt-20 sm:pb-16">
-          <div className="max-w-3xl space-y-1.5">
-            <p className="text-xs font-semibold tracking-wide text-primary sm:text-sm">
-              {translate("lenaqar.marketplace.hero.eyebrow")}
-            </p>
-            <p className="text-xs leading-relaxed text-black/65 sm:text-sm">
-              {translate("lenaqar.marketplace.hero.eyebrowDetail")}
-            </p>
-          </div>
-          <h1 className="mt-4 max-w-4xl text-4xl font-bold leading-[1.15] text-primary sm:mt-5 sm:text-5xl lg:text-6xl">
+          <p className="text-xs font-semibold tracking-wide text-primary sm:text-sm">
+            {translate("lenaqar.marketplace.hero.eyebrow")}
+          </p>
+          <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-black/65 sm:text-sm">
+            {translate("lenaqar.marketplace.hero.eyebrowDetail")}
+          </p>
+          <h1 className="mt-4 max-w-4xl text-3xl font-bold leading-[1.2] text-primary sm:mt-5 sm:text-5xl lg:text-6xl">
             {translate("lenaqar.marketplace.hero.title")}
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-black/75 sm:text-xl">
             {translate("lenaqar.marketplace.hero.sub")}
           </p>
 
-          <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <article className="rounded-2xl border border-primary/15 bg-white/90 p-5 shadow-sm">
-              <h2 className="text-lg font-bold text-primary">
-                {translate("lenaqar.marketplace.audience.buyersTitle")}
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-black/70">
-                {translate("lenaqar.marketplace.audience.buyersBody")}
-              </p>
-              <div className="mt-4">
-                <BuyRequestCta
-                  variant="primary"
-                  label={translate("lenaqar.marketplace.audience.buyersCta")}
-                />
-              </div>
-            </article>
-            <article className="rounded-2xl border border-primary/15 bg-white/90 p-5 shadow-sm">
-              <h2 className="text-lg font-bold text-primary">
-                {translate("lenaqar.marketplace.audience.brokersTitle")}
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-black/70">
-                {translate("lenaqar.marketplace.audience.brokersBody")}
-              </p>
-              <Link
-                href="/network"
-                className={`${actionButtonClass({ variant: "secondary" })} mt-4`}
-              >
-                {translate("lenaqar.marketplace.audience.brokersCta")}
-                <ActionButtonArrow />
-              </Link>
-            </article>
-          </div>
-
-          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-black/60">
-            {translate("lenaqar.marketplace.audience.ownersNote")}
-          </p>
-          <div className="mt-3">
-            <WhatsAppCta
-              href={marketplaceAddUnitHref()}
-              eventName={ANALYTICS.EVENTS.MARKETPLACE_WHATSAPP_CLICKED}
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <BuyRequestCta
+              variant="primary"
+              label={translate("lenaqar.marketplace.hero.buyCta")}
               className="!px-6 !py-3.5 !text-base font-bold"
+            />
+            <a
+              href="#requirements"
+              className={actionButtonClass({ variant: "secondary" })}
             >
-              {translate("lenaqar.marketplace.hero.whatsappCta")}
-            </WhatsAppCta>
+              {translate("lenaqar.marketplace.hero.secondaryCta")}
+              <ActionButtonArrow />
+            </a>
+            <Link
+              href="/how-it-works"
+              className={actionButtonClass({ variant: "secondary" })}
+            >
+              {translate("lenaqar.marketplace.hero.howCta")}
+              <ActionButtonArrow />
+            </Link>
           </div>
 
           <p className="mt-5 max-w-2xl text-sm leading-relaxed text-black/60">
             {translate("lenaqar.marketplace.hero.privacyNote")}
           </p>
+        </div>
+      </section>
+
+      <section className="container py-10 sm:py-14">
+        <h2 className="text-2xl font-bold text-primary sm:text-3xl">
+          {translate("lenaqar.marketplace.why.title")}
+        </h2>
+        <p className="mt-2 max-w-2xl text-base text-black/70">
+          {translate("lenaqar.marketplace.why.sub")}
+        </p>
+        <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+          {[1, 2, 3].map((n) => (
+            <article
+              key={n}
+              className="rounded-2xl border border-primary/10 bg-white p-5"
+            >
+              <h3 className="font-bold text-primary">
+                {translate(`lenaqar.marketplace.why.point${n}Title`)}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-black/70">
+                {translate(`lenaqar.marketplace.why.point${n}Body`)}
+              </p>
+            </article>
+          ))}
         </div>
       </section>
 
@@ -155,10 +156,6 @@ export default function MarketplaceHomeContent({
           </div>
         </div>
 
-        <div className="mt-6">
-          <NetworkBrokerCta compact />
-        </div>
-
         {error ? (
           <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5">
             <p className="font-semibold text-amber-950">
@@ -168,12 +165,7 @@ export default function MarketplaceHomeContent({
               {translate("lenaqar.marketplace.list.error")}
             </p>
             <div className="mt-4">
-              <WhatsAppCta
-                href={marketplaceAddUnitHref()}
-                eventName={ANALYTICS.EVENTS.MARKETPLACE_WHATSAPP_CLICKED}
-              >
-                {translate("lenaqar.marketplace.hero.whatsappCta")}
-              </WhatsAppCta>
+              <BuyRequestCta variant="primary" />
             </div>
           </div>
         ) : filtered.length === 0 ? (
@@ -185,12 +177,7 @@ export default function MarketplaceHomeContent({
               {translate("lenaqar.marketplace.list.empty")}
             </p>
             <div className="mt-4">
-              <WhatsAppCta
-                href={marketplaceAddUnitHref()}
-                eventName={ANALYTICS.EVENTS.MARKETPLACE_WHATSAPP_CLICKED}
-              >
-                {translate("lenaqar.marketplace.hero.whatsappCta")}
-              </WhatsAppCta>
+              <BuyRequestCta variant="primary" />
             </div>
           </div>
         ) : (
@@ -217,6 +204,48 @@ export default function MarketplaceHomeContent({
         <MarketplaceHowItWorks />
       </div>
 
+      <section className="container py-10 sm:py-14">
+        <h2 className="text-2xl font-bold text-primary sm:text-3xl">
+          {translate("lenaqar.marketplace.browse.areasTitle")}
+        </h2>
+        <p className="mt-2 max-w-2xl text-base text-black/70">
+          {translate("lenaqar.marketplace.browse.areasSub")}
+        </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          {BUYER_LANDING_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="min-h-11 rounded-lg border border-primary/20 bg-white px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/5"
+            >
+              {translate(link.labelKey)}
+            </Link>
+          ))}
+        </div>
+
+        <h2 className="mt-12 text-2xl font-bold text-primary sm:text-3xl">
+          {translate("lenaqar.marketplace.browse.guidesTitle")}
+        </h2>
+        <p className="mt-2 max-w-2xl text-base text-black/70">
+          {translate("lenaqar.marketplace.browse.guidesSub")}
+        </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          {BUYER_GUIDE_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="min-h-11 rounded-lg border border-primary/20 bg-white px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/5"
+            >
+              {translate(link.labelKey)}
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="container py-10 sm:py-14">
+        <FaqSection />
+      </section>
+
       <section className="container py-12 pb-24 sm:py-16 lg:pb-16">
         <div className="rounded-3xl bg-primary px-6 py-10 text-white sm:px-10">
           <h2 className="max-w-3xl text-2xl font-bold leading-snug sm:text-3xl">
@@ -226,13 +255,37 @@ export default function MarketplaceHomeContent({
             {translate("lenaqar.marketplace.closing.sub")}
           </p>
           <div className="mt-6">
-            <WhatsAppCta
-              href={marketplaceAddUnitHref()}
-              eventName={ANALYTICS.EVENTS.MARKETPLACE_WHATSAPP_CLICKED}
-              className="!bg-[#25D366] hover:!bg-[#20BA5A]"
-            >
-              {translate("lenaqar.marketplace.closing.cta")}
-            </WhatsAppCta>
+            <BuyRequestCta
+              variant="primary"
+              tone="onPrimary"
+              label={translate("lenaqar.marketplace.closing.cta")}
+              className="!bg-white !text-primary hover:!bg-white/90"
+            />
+          </div>
+
+          <div className="mt-10 border-t border-white/20 pt-8">
+            <h3 className="text-lg font-bold">
+              {translate("lenaqar.marketplace.closing.sellerTitle")}
+            </h3>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/80">
+              {translate("lenaqar.marketplace.closing.sellerSub")}
+            </p>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+              <WhatsAppCta
+                href={marketplaceAddUnitHref()}
+                eventName={ANALYTICS.EVENTS.MARKETPLACE_WHATSAPP_CLICKED}
+                className="!bg-[#25D366] hover:!bg-[#20BA5A]"
+              >
+                {translate("lenaqar.marketplace.closing.sellerCta")}
+              </WhatsAppCta>
+              <Link
+                href="/network"
+                className={`${actionButtonClass({ variant: "secondary", tone: "onPrimary" })} border-white/40`}
+              >
+                {translate("lenaqar.marketplace.audience.brokersCta")}
+                <ActionButtonArrow />
+              </Link>
+            </div>
           </div>
         </div>
       </section>

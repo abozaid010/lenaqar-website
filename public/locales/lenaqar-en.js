@@ -358,9 +358,10 @@ export default {
     whatsapp: "Message Lena on WhatsApp",
   },
   buyRequest: {
-    cta: "Buy a unit",
+    cta: "Write your property request",
     title: "What are you looking for?",
-    intro: "Tell us the specs, and we'll prepare matching opportunities.",
+    intro:
+      "Describe the home you want — location, budget, and must-haves. We'll help find options that fit your request and contact you using the details you provide.",
     notBrokerTitle: "This form is for buyer requirements",
     notBrokerBody:
       "If you are looking for a home for yourself, continue here. If you are a broker who wants to share inventory or collaborate with other brokers, Lena Network is the right place.",
@@ -465,15 +466,31 @@ export default {
     requestWhatsappCta: "Or message us on WhatsApp",
   },
   marketplace: {
+    hero: {
+      eyebrow: "A buyer-first property platform",
+      eyebrowDetail:
+        "We don't just sell what we have — we help you find what fits your needs and budget.",
+      title: "We don't sell you what we have. We find you what you want.",
+      sub: "Instead of endless listings, write your budget, location, and requirements. We'll help you reach options that match your request.",
+      whatsappCta: "Share a unit that matches buyer demand",
+      buyCta: "Write your property request",
+      secondaryCta: "See current buyer requests",
+      howCta: "See how it works",
+      privacyNote:
+        "Public requests hide names and phone numbers. Your contact details are not published.",
+    },
     audience: {
       buyersTitle: "For buyers",
-      buyersBody: "Tell us what property you need.",
-      buyersCta: "Submit a requirement",
+      buyersBody: "Tell us what property you need for your budget and lifestyle.",
+      buyersCta: "Write your property request",
       brokersTitle: "For brokers",
-      brokersBody: "Join Lena Network and collaborate with other brokers.",
+      brokersBody: "Clearer buyer requests help you match units for your clients.",
       brokersCta: "Join Lena Network",
       ownersNote:
-        "If you own a matching unit, you can still send it on WhatsApp.",
+        "Have a unit that matches a real buyer request? Share it with us.",
     },
+  },
+  guides: {
+    indexTitle: "Buyer guides",
   },
 };

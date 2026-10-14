@@ -2,13 +2,16 @@ import { SITE } from "@/config/site";
 
 const SITE_URL = SITE.url;
 
+/** Sitewide default — buyer-first. Pages override with absolute titles where needed. */
 const LENAQAR_DESCRIPTION =
-  "لينا عقار بتخرجك من أقساط الوحدة أسرع وبفلوس أكتر، باتفاق مكتوب. أسعار من المطور بتاريخها، ومن غير مضايقات.";
+  "بتدور على شقة أو فيلا أو شاليه في مصر؟ اكتب طلبك وحدد ميزانيتك والمكان والمواصفات. لينا عقار تساعدك تلاقي عقارات مناسبة لاحتياجاتك — ابدأ بطلب واضح.";
+
+const LENAQAR_TITLE = "لينا عقار | دور على بيتك المناسب في مصر حسب طلبك وميزانيتك";
 
 export const defaultMetadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "لينا عقار | اخرج من وحدتك أسرع وبفلوس أكتر",
+    default: LENAQAR_TITLE,
     template: "%s | لينا عقار",
   },
   icons: {
@@ -20,7 +23,7 @@ export const defaultMetadata = {
   openGraph: {
     type: "website",
     url: SITE_URL,
-    title: "لينا عقار | اخرج من وحدتك أسرع وبفلوس أكتر",
+    title: LENAQAR_TITLE,
     description: LENAQAR_DESCRIPTION,
     siteName: "لينا عقار",
     locale: "ar_EG",
@@ -35,7 +38,7 @@ export const defaultMetadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "لينا عقار | اخرج من وحدتك أسرع وبفلوس أكتر",
+    title: LENAQAR_TITLE,
     description: LENAQAR_DESCRIPTION,
     images: [`${SITE_URL}/images/logo.png`],
   },
