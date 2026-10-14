@@ -118,7 +118,7 @@ export default function NetworkLoginForm() {
         className={`${actionButtonClass({ variant: "primary" })} w-full`}
       >
         {saving
-          ? translate("common.saving")
+          ? translate("lenaqar.network.login.sending")
           : translate("lenaqar.network.login.submit")}
       </button>
       <p className="text-center text-sm text-black/65">

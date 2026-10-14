@@ -147,7 +147,7 @@ export default function NetworkSignupForm() {
         className={`${actionButtonClass({ variant: "primary" })} w-full`}
       >
         {saving
-          ? translate("common.saving")
+          ? translate("lenaqar.network.signup.sending")
           : translate("lenaqar.network.signup.submit")}
       </button>
 

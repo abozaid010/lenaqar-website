@@ -14,8 +14,8 @@ export const LENAQAR_CONTACT = {
   // Not live yet — held behind SITE.showEmail, kept here for the flip.
   email: "info@lenaqar.com",
   // Inherited from LenaAI until LenAqar has its own
-  address: "505 ARCHPLAN Square, New Capital",
-  city: "Cairo",
+  address: "505 ARCHPLAN Square، العاصمة الإدارية",
+  city: "القاهرة",
   country: "EG",
   facebook: "https://www.facebook.com/profile.php?id=61587419182034",
   linkedin: "https://www.linkedin.com/company/lenaai-net/",

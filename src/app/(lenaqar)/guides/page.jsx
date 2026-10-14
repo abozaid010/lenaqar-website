@@ -4,7 +4,7 @@ import { BUYER_GUIDES } from "@/lib/lenaqar/buyer-guides";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = {
-  title: "دليل المشتري — اكتب طلبك واختار أوضح",
+  title: "دليل المشتري — اكتب طلبك بشكل أوضح",
   description:
     "مقالات عملية لمشتري العقارات في مصر: إزاي تكتب طلب عقاري واضح، والفرق بين إعادة البيع والوحدات الجديدة — من غير إحصائيات مخترعة.",
   openGraph: {

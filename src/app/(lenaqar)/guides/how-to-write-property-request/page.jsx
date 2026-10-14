@@ -6,13 +6,11 @@ import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 const guide = getBuyerGuide("how-to-write-property-request");
 
 export const metadata = {
-  title: "إزاي تكتب طلب عقاري واضح يساعدك تلاقي اختيارات أنسب؟",
-  description:
-    "دليل عملي لكتابة طلب شراء عقار في مصر: المكان، الميزانية، الغرف، الاستلام، والملاحظات اللي بتفَرّق — من غير وعود أو أرقام مخترعة.",
+  title: guide.title,
+  description: guide.description,
   openGraph: {
-    title: "إزاي تكتب طلب عقاري واضح يساعدك تلاقي اختيارات أنسب؟",
-    description:
-      "دليل عملي لكتابة طلب شراء عقار في مصر: المكان، الميزانية، الغرف، الاستلام، والملاحظات اللي بتفَرّق — من غير وعود أو أرقام مخترعة.",
+    title: guide.title,
+    description: guide.description,
     url: `${SITE.url}${guide.href}`,
     locale: "ar_EG",
     siteName: SITE.name,
@@ -28,7 +26,7 @@ export default function BuyerGuidePage() {
       <BreadcrumbSchema
         items={[
           { name: "دليل المشتري", url: `${SITE.url}/guides` },
-          { name: "إزاي تكتب طلب عقاري واضح؟", url: `${SITE.url}${guide.href}` },
+          { name: guide.h1, url: `${SITE.url}${guide.href}` },
         ]}
       />
       <BuyerGuideContent guide={guide} />

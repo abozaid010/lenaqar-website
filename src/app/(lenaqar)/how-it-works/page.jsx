@@ -26,7 +26,7 @@ export default function HowItWorksPage() {
   return (
     <>
       <BreadcrumbSchema
-        items={[{ name: "كيف نعمل", url: `${SITE.url}/how-it-works` }]}
+        items={[{ name: "إزاي بنشتغل", url: `${SITE.url}/how-it-works` }]}
       />
       <FaqSchema />
       <HowItWorksContent />

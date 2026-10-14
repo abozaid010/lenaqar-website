@@ -3,7 +3,7 @@
 import { useI18n } from "@/hooks/useI18n";
 import { ANALYTICS } from "@/constants/analytics";
 import { addUnitForRequirementHref } from "@/lib/lenaqar/whatsapp";
-import { buildingTypeAr, placeAr } from "@/lib/lenaqar/listing-seo";
+import { buildingTypeAr, placeAr, roomsLabelAr } from "@/lib/lenaqar/listing-seo";
 import EgpAmount from "./egp-amount";
 import WhatsAppCta from "./whatsapp-cta";
 
@@ -62,10 +62,7 @@ export default function RequirementCard({ requirement }) {
         <ul className="mt-3 space-y-1.5 text-sm text-black/75">
           {requirement.roomsCount > 0 ? (
             <li>
-              {translate("lenaqar.marketplace.card.rooms", "{count} غرف").replace(
-                "{count}",
-                String(requirement.roomsCount),
-              )}
+              {roomsLabelAr(requirement.roomsCount)}
             </li>
           ) : null}
           {requirement.maxPrice || requirement.minPrice ? (

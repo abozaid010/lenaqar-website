@@ -6,13 +6,11 @@ import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 const guide = getBuyerGuide("resale-vs-new-launch");
 
 export const metadata = {
-  title: "إيه الفرق بين إعادة البيع والوحدات الجديدة؟",
-  description:
-    "شرح بسيط للفرق بين وحدات إعادة البيع (ريسيل) والإطلاق الجديد في مصر، وإزاي تختار حسب احتياجك وميزانيتك وموعد الاستلام.",
+  title: guide.title,
+  description: guide.description,
   openGraph: {
-    title: "إيه الفرق بين إعادة البيع والوحدات الجديدة؟",
-    description:
-      "شرح بسيط للفرق بين وحدات إعادة البيع (ريسيل) والإطلاق الجديد في مصر، وإزاي تختار حسب احتياجك وميزانيتك وموعد الاستلام.",
+    title: guide.title,
+    description: guide.description,
     url: `${SITE.url}${guide.href}`,
     locale: "ar_EG",
     siteName: SITE.name,
@@ -28,7 +26,7 @@ export default function BuyerGuidePage() {
       <BreadcrumbSchema
         items={[
           { name: "دليل المشتري", url: `${SITE.url}/guides` },
-          { name: "إعادة البيع ولا وحدة جديدة؟", url: `${SITE.url}${guide.href}` },
+          { name: guide.h1, url: `${SITE.url}${guide.href}` },
         ]}
       />
       <BuyerGuideContent guide={guide} />

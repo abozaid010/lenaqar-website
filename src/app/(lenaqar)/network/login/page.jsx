@@ -4,7 +4,8 @@ import NetworkLoginForm from "@/components/lenaqar/network-login-form";
 
 export const metadata = {
   title: "دخول شبكة لينا",
-  description: "سجّل دخولك لحساب شبكة لينا بعد تفعيل الحساب.",
+  description:
+    "ادخل على حساب الوسيط في شبكة لينا بعد ما الفريق يفعّل الحساب، عشان تشارك الوحدات وتتعاون مع وسطاء تانيين.",
   robots: { index: false, follow: false },
   openGraph: {
     title: "دخول شبكة لينا | لينا عقار",

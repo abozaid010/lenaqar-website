@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { AlertTriangle, RefreshCw, Home, ArrowLeft } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 
 export default function Error({
   error,
@@ -25,12 +25,11 @@ export default function Error({
         </div>
 
         {/* Title */}
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">مقدرناش نفتح الوحدة دي</h1>
         
         {/* Description */}
         <p className="text-gray-600 mb-6">
-          We encountered an error while loading this property. 
-          Please try again or contact support if the problem persists.
+          حصلت مشكلة وأحنا بنحمّل التفاصيل. جرّب تاني، أو ارجع للفرص.
         </p>
 
         {/* Error Details (Development Only) */}
@@ -38,7 +37,7 @@ export default function Error({
           <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded text-left">
             <p className="text-sm text-red-800 font-mono break-all">{error.message}</p>
             {error.digest && (
-              <p className="text-xs text-red-600 mt-2">Error ID: {error.digest}</p>
+              <p className="text-xs text-red-600 mt-2">رقم الخطأ: {error.digest}</p>
             )}
           </div>
         )}
@@ -50,15 +49,14 @@ export default function Error({
             className="w-full bg-blue-600 text-white rounded-lg py-3 px-4 font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
           >
             <RefreshCw className="w-5 h-5" />
-            Try Again
+            حاول تاني
           </button>
           
           <Link
-            href="/units"
+            href="/opportunities"
             className="w-full border border-gray-300 text-gray-700 rounded-lg py-3 px-4 font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
           >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Properties
+            ارجع للفرص
           </Link>
           
           <Link
@@ -66,14 +64,14 @@ export default function Error({
             className="w-full text-gray-600 hover:text-gray-800 transition-colors flex items-center justify-center gap-2 text-sm"
           >
             <Home className="w-4 h-4" />
-            Go Home
+            الرئيسية
           </Link>
         </div>
 
         {/* Additional Help */}
         <div className="mt-6 pt-6 border-t">
           <p className="text-sm text-gray-500">
-            If this error continues, please reference Error ID: {error.digest || 'N/A'} when contacting support.
+            لو المشكلة فضلت، اذكر الرقم ده لما تكلمنا: {error.digest || "—"}
           </p>
         </div>
       </div>

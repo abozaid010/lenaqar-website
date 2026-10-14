@@ -55,7 +55,7 @@ export default function LenaqarFooter() {
             <div>
               <p className="font-medium">{translate("lenaqar.footer.address")}</p>
               <p>
-                {LENAQAR_CONTACT.address}, {LENAQAR_CONTACT.city}
+                {LENAQAR_CONTACT.address}، {LENAQAR_CONTACT.city}
               </p>
             </div>
           </div>

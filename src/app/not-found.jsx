@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "الصفحة غير موجودة",
+  title: "الصفحة دي مش موجودة",
   robots: { index: false, follow: true },
 };
 

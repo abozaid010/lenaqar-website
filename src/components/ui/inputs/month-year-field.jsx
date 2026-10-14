@@ -237,7 +237,7 @@ export default function MonthYearField({
       {open && !disabled ? (
         <div
           role="dialog"
-          aria-label={label || (locale === "ar" ? "اختيار الشهر" : "Choose month")}
+          aria-label={label || (locale === "ar" ? "اختار الشهر" : "Choose month")}
           className="absolute z-[100] bottom-full mb-1 w-full rounded-md border border-gray-200 bg-white shadow-lg p-3"
         >
           <div className="flex items-center justify-between gap-2 mb-3">
@@ -246,7 +246,7 @@ export default function MonthYearField({
               disabled={!canPrevYear}
               onClick={() => setViewYear((y) => y - 1)}
               className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 disabled:opacity-40 hover:bg-gray-50"
-              aria-label={locale === "ar" ? "السنة السابقة" : "Previous year"}
+              aria-label={locale === "ar" ? "السنة اللي فاتت" : "Previous year"}
             >
               <ChevronLeft size={16} className="rtl:rotate-180" />
             </button>
@@ -258,7 +258,7 @@ export default function MonthYearField({
               disabled={!canNextYear}
               onClick={() => setViewYear((y) => y + 1)}
               className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 disabled:opacity-40 hover:bg-gray-50"
-              aria-label={locale === "ar" ? "السنة التالية" : "Next year"}
+              aria-label={locale === "ar" ? "السنة الجاية" : "Next year"}
             >
               <ChevronRight size={16} className="rtl:rotate-180" />
             </button>

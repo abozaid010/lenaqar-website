@@ -25,7 +25,7 @@ export default function SearchableProjectSelect({
   subDistrict = "",
   ...rest
 }) {
-  const { locale, translate } = useI18n();
+  const { translate } = useI18n();
   const allProjects = Array.isArray(projectsProp) ? projectsProp : [];
 
   const projects = useMemo(() => {
@@ -110,9 +110,9 @@ export default function SearchableProjectSelect({
       }}
       searchFields={["ar_name", "en_name"]}
       sortOptions={sortProjects}
-      loadingText={locale === "ar" ? "جاري التحميل..." : "Loading projects..."}
-      noResultsText={locale === "ar" ? "لا توجد نتائج" : "No projects found"}
-      searchPlaceholder={locale === "ar" ? "ابحث عن المشروع..." : "Search projects..."}
+      loadingText={translate("common.loading")}
+      noResultsText={translate("common.noResults")}
+      searchPlaceholder={translate("common.search")}
       className={className}
       disabled={disabled}
       isLoading={isLoading}

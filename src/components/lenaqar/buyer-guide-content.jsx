@@ -50,7 +50,7 @@ export default function BuyerGuideContent({ guide }) {
       </div>
 
       {others.length > 0 ? (
-        <nav className="mt-12 pt-8 border-t border-primary/10 space-y-3" aria-label="أدلة أخرى">
+        <nav className="mt-12 pt-8 border-t border-primary/10 space-y-3" aria-label={translate("lenaqar.guides.indexTitle")}>
           {others.map((item) => (
             <Link
               key={item.href}
