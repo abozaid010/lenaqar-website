@@ -33,6 +33,12 @@ export default function MarketplaceHowItWorks() {
           </li>
         ))}
       </ol>
+      <p className="mt-6 max-w-2xl text-sm leading-relaxed text-black/70">
+        {translate("lenaqar.marketplace.how.waitingNote")}
+      </p>
+      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-black/60">
+        {translate("lenaqar.marketplace.how.privacyNote")}
+      </p>
     </section>
   );
 }
