@@ -76,7 +76,7 @@ export default function NetworkLoginForm() {
         <p className="mt-2 text-sm leading-relaxed text-black/70">
           {translate("lenaqar.network.pending.body").replace(
             "{phone}",
-            LENAQAR_CONTACT.phoneDisplay,
+            LENAQAR_CONTACT.whatsappDisplay,
           )}
         </p>
         <NetworkActivationWhatsApp name={email} />

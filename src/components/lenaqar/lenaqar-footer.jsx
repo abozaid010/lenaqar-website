@@ -46,7 +46,7 @@ export default function LenaqarFooter() {
                   trackMetaContact();
                 }}
               >
-                {LENAQAR_CONTACT.phoneDisplay}
+                {LENAQAR_CONTACT.whatsappDisplay}
               </a>
             </div>
           </div>

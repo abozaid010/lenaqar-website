@@ -18,7 +18,7 @@ export default function NetworkPending() {
         <p className="mt-3 text-base leading-relaxed text-black/70">
           {translate("lenaqar.network.pending.body").replace(
             "{phone}",
-            LENAQAR_CONTACT.phoneDisplay,
+            LENAQAR_CONTACT.whatsappDisplay,
           )}
         </p>
         <NetworkActivationWhatsApp />
