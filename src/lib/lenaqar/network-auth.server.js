@@ -2,6 +2,10 @@
  * Server-only Lena Network broker signup/login against the existing API contract.
  * Does not create a session after signup — new clients are inactive until approved.
  *
+ * WhatsApp: this module never sends WhatsApp. Signup confirmation WhatsApp is
+ * frontend-only (network-signup-form + network-activation-whatsapp) so messages
+ * are not duplicated by the API.
+ *
  * Security: never forward browser-supplied `client_id` / `is_active`. The server
  * action may attach a fresh UUID `client_id` and `is_active: false` for older API
  * deployments that still require `client_id` and default `is_active` to true.

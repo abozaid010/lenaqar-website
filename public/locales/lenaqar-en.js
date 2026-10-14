@@ -257,7 +257,14 @@ export default {
     },
     signup: {
       title: "Create your Lena Network account",
-      intro: "Company basics only. New accounts are reviewed before activation.",
+      intro: "For company owners and independent brokers.",
+      benefitsTitle: "How you benefit",
+      benefit1Title: "Lena's buyer requests",
+      benefit1Body:
+        "We match those buyers with the right apartments quickly, and we share the commission.",
+      benefit2Title: "Apartments for your clients",
+      benefit2Body: "If you have clients, we share the network inventory with you.",
+      review: "We review the account before activation.",
       clientName: "Company name",
       fullName: "Full name",
       email: "Email",
@@ -275,6 +282,13 @@ export default {
       submit: "Submit application",
       sending: "Sending your application...",
       hasAccount: "Already have an account?",
+      whatsappFallbackIntro:
+        "I want to join Lena Network. Here are my application details:",
+      saveFailedTitle: "We can't complete signup right now",
+      saveFailedWhatsAppBody:
+        "No problem — we'll open WhatsApp so you can send your application details and we can continue with you.",
+      saveFailedWhatsAppCountdown: "Opening WhatsApp in {seconds} seconds…",
+      saveFailedWhatsAppCta: "Send on WhatsApp now",
       errors: {
         clientNameRequired: "Company name is required.",
         fullNameRequired: "Full name is required.",
@@ -307,12 +321,14 @@ export default {
     },
     pending: {
       title: "Your Lena Network application has been received",
-      body: "Your account still needs activation. Contact us on WhatsApp {phone} to activate it. Tap the button, or we'll open WhatsApp in 3 seconds with a message that includes your name.",
+      body: "Your account still needs activation. Contact us on WhatsApp {phone} to activate it. Tap the button, or we'll open WhatsApp in 3 seconds with a message that includes your application details.",
       back: "Back to Lena Network",
       whatsappCta: "WhatsApp us to activate your account",
       countdown: "Opening WhatsApp in {seconds} seconds…",
       whatsappMessage: "I'm {name}, and I want to activate my account.",
       whatsappMessageAnonymous: "I want to activate my account on Lena Network.",
+      whatsappMessageComplete:
+        "My Lena Network application was received, and I want to activate my account. Here are the details:",
     },
   },
   footer: {
