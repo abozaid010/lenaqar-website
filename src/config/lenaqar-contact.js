@@ -1,6 +1,6 @@
 /** Single place for every LenAqar contact detail. Replace here, nowhere else. */
 const PHONE_E164 = "+201036364340";
-const WHATSAPP_E164 = "+491745661918";
+const WHATSAPP_E164 = "+201002891933";
 /** Lena Network signup / activation only — do not reuse for other WhatsApp CTAs. */
 const NETWORK_SIGNUP_WHATSAPP_E164 = "+201016080323";
 
