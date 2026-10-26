@@ -1,6 +1,6 @@
 # Lenaqar / لينا عقار
 
-> Buyer-first real estate platform in Egypt. Buyers describe what they need; Lenaqar helps find matching options. Sellers and brokers are secondary participants who can respond to real demand.
+> Buyer-first real estate platform in Egypt. Buyers describe what they need; Lenaqar helps find matching options. Contact is WhatsApp only — we never cold-call.
 
 ## Core positioning (Egyptian Arabic)
 
@@ -8,37 +8,250 @@
 
 English: We don't sell you what we have. We find you what you want.
 
-## What Lenaqar is
+## Contact rule
 
-- A request-first property search: location, budget, bedrooms, delivery, payment terms, and notes.
-- A public board of anonymized buyer requests (no names or phone numbers).
-- Optional browsing of available opportunities when the catalogue feed is enabled.
-- Secondary paths for owners and brokers to share units that match real buyer demand.
+- Buyers / sellers / general: WhatsApp +201002891933 (https://wa.me/201002891933)
+- Brokers joining the Lenaqar network only: +201016080323
+- We call only when the buyer asks.
 
-## What Lenaqar is not
+## Entity
 
-- Not a guarantee of an exact match for every request.
-- Not a claim of lowest price, verified inventory for every listing, or "no cold calls" unless stated with an operational policy.
-- Not primarily a seller advertising portal or broker CRM (CRM lives elsewhere).
+- Name: لينا عقار (Lenaqar)
+- Address: 505 ARCHPLAN Square، العاصمة الإدارية، القاهرة، مصر
+- sameAs: https://www.facebook.com/lenaqar.eg · https://www.instagram.com/lenaqar.eg/ · https://www.tiktok.com/@lenaqar.eg · https://www.linkedin.com/company/142683910/
 
-## Primary conversion
+## Buyer Guide structure
 
-Submit a buyer request: https://lenaqar.com/#buy-request
+Hub: https://lenaqar.com/guides — «دليل المشتري في مصر»
+
+City hubs: /guides/el-shorouk/ · /guides/madinaty/ · /guides/mostakbal-city/ · /guides/fifth-settlement/ · /guides/new-cairo/ · /guides/sheikh-zayed/ · /guides/6th-of-october/
+
+Pillars: prices-2026 · red-file · pros-cons · real-units · budget-*m
+Evergreen: /guides/buying/* · Comparisons: /guides/compare/*
+
+## Published article summaries
+
+- AR: أسعار الشقق في الشروق 2026
+  EN: متوسط سعر متر الشقق في مدينة الشروق حسب الحي (أكتوبر 2026): الكمبوندات حوالي 47,850 جنيه ومعظم الأحياء 15–20 ألف. جدول كامل + ميزانيتك تجيب إيه.
+  URL: https://lenaqar.com/guides/el-shorouk/prices-2026
+
+- AR: لو معاك ٣ مليون في الشروق
+  EN: معاك ٣ مليون وعايز شقة في الشروق؟ الأحياء حوالي ١٦ ألف للمتر ممكن تجيب ٣ غرف ~١٦٠م؛ الكمبوندات ~٤٨ ألف للمتر تعني مساحة أصغر بكتير. أسعار معروضة أكتوبر 2026.
+  URL: https://lenaqar.com/guides/el-shorouk/budget-3m
+
+- AR: مميزات وعيوب الشروق
+  EN: ليه ناس بتختار الشروق، لمين ممكن متناسبش، وأين القيمة بين الأحياء والكمبوندات — مع مواصلات M5 الجديدة.
+  URL: https://lenaqar.com/guides/el-shorouk/pros-cons
+
+- AR: قبل ما تشتري في الشروق
+  EN: دليل عناية واجبة لمشتري الشروق مع إشارات إعلامية مؤرخة عن الكهرباء والنقل — من غير تشهير ومن غير إشاعات.
+  URL: https://lenaqar.com/guides/el-shorouk/red-file
+
+- AR: اختيارات حقيقية في الشروق
+  EN: معايير عرض الوحدات الحقيقية في الشروق ورابط الفرص على لينا عقار — من غير وحدات وهمية.
+  URL: https://lenaqar.com/guides/el-shorouk/real-units
+
+- AR: دليل المشتري — الشروق
+  EN: دليل الشروق: أسعار، مميزات وعيوب، ملف أحمر، ووحدات حقيقية — من لينا عقار.
+  URL: https://lenaqar.com/guides/el-shorouk
+
+- AR: أسعار الشقق في مدينتي 2026
+  EN: خريطة أسعار مدينتي 2026 حسب الحي/الشريحة مع مصادر وتاريخ — مسودة لينا عقار.
+  URL: https://lenaqar.com/guides/madinaty/prices-2026
+
+- AR: لو معاك ٤ مليون في مدينتي
+  EN: سيناريو ميزانية ٤ مليون في مدينتي: مساحة ولا كمبوند؟ جاهز ولا تحت الإنشاء؟
+  URL: https://lenaqar.com/guides/madinaty/budget-4m
+
+- AR: مميزات وعيوب مدينتي
+  EN: لمين تناسب مدينتي ولمين لأ، وأين القيمة النسبية والخدمات — من غير تهويل.
+  URL: https://lenaqar.com/guides/madinaty/pros-cons
+
+- AR: قبل ما تشتري في مدينتي
+  EN: دليل عناية واجبة وتحذيرات بادلة لمشتري مدينتي — من غير تشهير ومن غير إشاعات.
+  URL: https://lenaqar.com/guides/madinaty/red-file
+
+- AR: اختيارات حقيقية في مدينتي
+  EN: معايير عرض الوحدات الحقيقية في مدينتي ورابط الفرص على لينا عقار — من غير وحدات وهمية.
+  URL: https://lenaqar.com/guides/madinaty/real-units
+
+- AR: دليل المشتري — مدينتي
+  EN: دليل مدينتي: أسعار، مميزات وعيوب، ملف أحمر، ووحدات حقيقية — من لينا عقار.
+  URL: https://lenaqar.com/guides/madinaty
+
+- AR: أسعار الشقق في مدينة المستقبل 2026
+  EN: خريطة أسعار مدينة المستقبل 2026 حسب الحي/الشريحة مع مصادر وتاريخ — مسودة لينا عقار.
+  URL: https://lenaqar.com/guides/mostakbal-city/prices-2026
+
+- AR: لو معاك ٣ مليون في مدينة المستقبل
+  EN: سيناريو ميزانية ٣ مليون في مدينة المستقبل: مساحة ولا كمبوند؟ جاهز ولا تحت الإنشاء؟
+  URL: https://lenaqar.com/guides/mostakbal-city/budget-3m
+
+- AR: مميزات وعيوب مدينة المستقبل
+  EN: لمين تناسب مدينة المستقبل ولمين لأ، وأين القيمة النسبية والخدمات — من غير تهويل.
+  URL: https://lenaqar.com/guides/mostakbal-city/pros-cons
+
+- AR: قبل ما تشتري في مدينة المستقبل
+  EN: دليل عناية واجبة وتحذيرات بادلة لمشتري مدينة المستقبل — من غير تشهير ومن غير إشاعات.
+  URL: https://lenaqar.com/guides/mostakbal-city/red-file
+
+- AR: اختيارات حقيقية في مدينة المستقبل
+  EN: معايير عرض الوحدات الحقيقية في مدينة المستقبل ورابط الفرص على لينا عقار — من غير وحدات وهمية.
+  URL: https://lenaqar.com/guides/mostakbal-city/real-units
+
+- AR: دليل المشتري — مدينة المستقبل
+  EN: دليل مدينة المستقبل: أسعار، مميزات وعيوب، ملف أحمر، ووحدات حقيقية — من لينا عقار.
+  URL: https://lenaqar.com/guides/mostakbal-city
+
+- AR: أسعار الشقق في التجمع الخامس 2026
+  EN: خريطة أسعار التجمع الخامس 2026 حسب الحي/الشريحة مع مصادر وتاريخ — مسودة لينا عقار.
+  URL: https://lenaqar.com/guides/fifth-settlement/prices-2026
+
+- AR: لو معاك ٥ مليون في التجمع الخامس
+  EN: سيناريو ميزانية ٥ مليون في التجمع الخامس: مساحة ولا كمبوند؟ جاهز ولا تحت الإنشاء؟
+  URL: https://lenaqar.com/guides/fifth-settlement/budget-5m
+
+- AR: مميزات وعيوب التجمع الخامس
+  EN: لمين تناسب التجمع الخامس ولمين لأ، وأين القيمة النسبية والخدمات — من غير تهويل.
+  URL: https://lenaqar.com/guides/fifth-settlement/pros-cons
+
+- AR: قبل ما تشتري في التجمع الخامس
+  EN: دليل عناية واجبة وتحذيرات بادلة لمشتري التجمع الخامس — من غير تشهير ومن غير إشاعات.
+  URL: https://lenaqar.com/guides/fifth-settlement/red-file
+
+- AR: اختيارات حقيقية في التجمع الخامس
+  EN: معايير عرض الوحدات الحقيقية في التجمع الخامس ورابط الفرص على لينا عقار — من غير وحدات وهمية.
+  URL: https://lenaqar.com/guides/fifth-settlement/real-units
+
+- AR: دليل المشتري — التجمع الخامس
+  EN: دليل التجمع الخامس: أسعار، مميزات وعيوب، ملف أحمر، ووحدات حقيقية — من لينا عقار.
+  URL: https://lenaqar.com/guides/fifth-settlement
+
+- AR: أسعار الشقق في القاهرة الجديدة (التجمع الأول والتالت وباقي الأحياء) 2026
+  EN: خريطة أسعار القاهرة الجديدة (التجمع الأول والتالت وباقي الأحياء) 2026 حسب الحي/الشريحة مع مصادر وتاريخ — مسودة لينا عقار.
+  URL: https://lenaqar.com/guides/new-cairo/prices-2026
+
+- AR: لو معاك ٤ مليون في القاهرة الجديدة (التجمع الأول والتالت وباقي الأحياء)
+  EN: سيناريو ميزانية ٤ مليون في القاهرة الجديدة (التجمع الأول والتالت وباقي الأحياء): مساحة ولا كمبوند؟ جاهز ولا تحت الإنشاء؟
+  URL: https://lenaqar.com/guides/new-cairo/budget-4m
+
+- AR: مميزات وعيوب القاهرة الجديدة (التجمع الأول والتالت وباقي الأحياء)
+  EN: لمين تناسب القاهرة الجديدة (التجمع الأول والتالت وباقي الأحياء) ولمين لأ، وأين القيمة النسبية والخدمات — من غير تهويل.
+  URL: https://lenaqar.com/guides/new-cairo/pros-cons
+
+- AR: قبل ما تشتري في القاهرة الجديدة (التجمع الأول والتالت وباقي الأحياء)
+  EN: دليل عناية واجبة وتحذيرات بادلة لمشتري القاهرة الجديدة (التجمع الأول والتالت وباقي الأحياء) — من غير تشهير ومن غير إشاعات.
+  URL: https://lenaqar.com/guides/new-cairo/red-file
+
+- AR: اختيارات حقيقية في القاهرة الجديدة (التجمع الأول والتالت وباقي الأحياء)
+  EN: معايير عرض الوحدات الحقيقية في القاهرة الجديدة (التجمع الأول والتالت وباقي الأحياء) ورابط الفرص على لينا عقار — من غير وحدات وهمية.
+  URL: https://lenaqar.com/guides/new-cairo/real-units
+
+- AR: دليل المشتري — القاهرة الجديدة (التجمع الأول والتالت وباقي الأحياء)
+  EN: دليل القاهرة الجديدة (التجمع الأول والتالت وباقي الأحياء): أسعار، مميزات وعيوب، ملف أحمر، ووحدات حقيقية — من لينا عقار.
+  URL: https://lenaqar.com/guides/new-cairo
+
+- AR: أسعار الشقق في الشيخ زايد 2026
+  EN: خريطة أسعار الشيخ زايد 2026 حسب الحي/الشريحة مع مصادر وتاريخ — مسودة لينا عقار.
+  URL: https://lenaqar.com/guides/sheikh-zayed/prices-2026
+
+- AR: لو معاك ٥ مليون في الشيخ زايد
+  EN: سيناريو ميزانية ٥ مليون في الشيخ زايد: مساحة ولا كمبوند؟ جاهز ولا تحت الإنشاء؟
+  URL: https://lenaqar.com/guides/sheikh-zayed/budget-5m
+
+- AR: مميزات وعيوب الشيخ زايد
+  EN: لمين تناسب الشيخ زايد ولمين لأ، وأين القيمة النسبية والخدمات — من غير تهويل.
+  URL: https://lenaqar.com/guides/sheikh-zayed/pros-cons
+
+- AR: قبل ما تشتري في الشيخ زايد
+  EN: دليل عناية واجبة وتحذيرات بادلة لمشتري الشيخ زايد — من غير تشهير ومن غير إشاعات.
+  URL: https://lenaqar.com/guides/sheikh-zayed/red-file
+
+- AR: اختيارات حقيقية في الشيخ زايد
+  EN: معايير عرض الوحدات الحقيقية في الشيخ زايد ورابط الفرص على لينا عقار — من غير وحدات وهمية.
+  URL: https://lenaqar.com/guides/sheikh-zayed/real-units
+
+- AR: دليل المشتري — الشيخ زايد
+  EN: دليل الشيخ زايد: أسعار، مميزات وعيوب، ملف أحمر، ووحدات حقيقية — من لينا عقار.
+  URL: https://lenaqar.com/guides/sheikh-zayed
+
+- AR: أسعار الشقق في ٦ أكتوبر 2026
+  EN: خريطة أسعار ٦ أكتوبر 2026 حسب الحي/الشريحة مع مصادر وتاريخ — مسودة لينا عقار.
+  URL: https://lenaqar.com/guides/6th-of-october/prices-2026
+
+- AR: لو معاك ٣ مليون في ٦ أكتوبر
+  EN: سيناريو ميزانية ٣ مليون في ٦ أكتوبر: مساحة ولا كمبوند؟ جاهز ولا تحت الإنشاء؟
+  URL: https://lenaqar.com/guides/6th-of-october/budget-3m
+
+- AR: مميزات وعيوب ٦ أكتوبر
+  EN: لمين تناسب ٦ أكتوبر ولمين لأ، وأين القيمة النسبية والخدمات — من غير تهويل.
+  URL: https://lenaqar.com/guides/6th-of-october/pros-cons
+
+- AR: قبل ما تشتري في ٦ أكتوبر
+  EN: دليل عناية واجبة وتحذيرات بادلة لمشتري ٦ أكتوبر — من غير تشهير ومن غير إشاعات.
+  URL: https://lenaqar.com/guides/6th-of-october/red-file
+
+- AR: اختيارات حقيقية في ٦ أكتوبر
+  EN: معايير عرض الوحدات الحقيقية في ٦ أكتوبر ورابط الفرص على لينا عقار — من غير وحدات وهمية.
+  URL: https://lenaqar.com/guides/6th-of-october/real-units
+
+- AR: دليل المشتري — ٦ أكتوبر
+  EN: دليل ٦ أكتوبر: أسعار، مميزات وعيوب، ملف أحمر، ووحدات حقيقية — من لينا عقار.
+  URL: https://lenaqar.com/guides/6th-of-october
+
+- AR: إزاي تكتب طلب عقاري واضح
+  EN: دليل عملي لكتابة طلب شراء عقار في مصر: المكان، الميزانية، الغرف، الاستلام، والملاحظات اللي بتفرّق.
+  URL: https://lenaqar.com/guides/buying/how-to-write-property-request
+
+- AR: ريسيل ولا إطلاق جديد
+  EN: الفرق بين إعادة البيع والإطلاق الجديد في مصر، وإزاي تختار حسب الميزانية وموعد الاستلام.
+  URL: https://lenaqar.com/guides/buying/resale-vs-new-launch
+
+- AR: شراء ريسيل خطوة بخطوة
+  EN: مسار عملي لشراء ريسيل: من الطلب والمعاينة للعربون والعقد — من غير اختراع إجراءات قانونية كأنها قانون.
+  URL: https://lenaqar.com/guides/buying/buying-resale-step-by-step
+
+- AR: قائمة فحص العقد والتسجيل
+  EN: checklist عملي للأوراق والنقاط قبل التوقيع — مع تأكيد أن الإجراءات الرسمية تختلف حسب نوع الوحدة.
+  URL: https://lenaqar.com/guides/buying/contract-registration-checklist
+
+- AR: إزاي تفحص مطور ومشروع
+  EN: أسئلة عملية عن التسليم السابق، المرحلة، المرافق، والعقد — من غير تشهير بأسماء من غير دليل.
+  URL: https://lenaqar.com/guides/buying/check-developer-project
+
+- AR: تقسيط ولا كاش
+  EN: قارن التكلفة الكلية والمقدم وسنين الأقساط مقابل خصم الكاش — من غير أرقام فائدة مخترعة.
+  URL: https://lenaqar.com/guides/buying/payment-plans-vs-cash
+
+- AR: إلغاء ولا ريسيل
+  EN: إزاي تفكر في الإلغاء مقابل الريسيل، مع رابط حاسبة لينا عقار — من غير ضمان نتائج.
+  URL: https://lenaqar.com/guides/buying/cancellation-vs-resale
+
+- AR: إعادة بيع الإسكان الاجتماعي
+  EN: مسودة حذرة: لا ننصح بشراء إسكان اجتماعي/شباب قبل التحقق من شروط التنازل الرسمية السارية.
+  URL: https://lenaqar.com/guides/buying/youth-social-housing-resale
+
+- AR: الشروق ولا التجمع الخامس
+  EN: مقارنة عملية بين الشروق والتجمع الخامس من منظور المشتري: سعر، استلام، أسلوب حياة — مسودة لينا عقار.
+  URL: https://lenaqar.com/guides/compare/el-shorouk-vs-fifth-settlement
+
+- AR: مدينتي ولا مدينة المستقبل
+  EN: مقارنة عملية بين مدينتي ومدينة المستقبل من منظور المشتري: سعر، استلام، أسلوب حياة — مسودة لينا عقار.
+  URL: https://lenaqar.com/guides/compare/madinaty-vs-mostakbal-city
+
+- AR: الشيخ زايد ولا ٦ أكتوبر
+  EN: مقارنة عملية بين الشيخ زايد و٦ أكتوبر من منظور المشتري: سعر، استلام، أسلوب حياة — مسودة لينا عقار.
+  URL: https://lenaqar.com/guides/compare/sheikh-zayed-vs-6th-of-october
 
 ## Key pages
 
 - Home: https://lenaqar.com/
-- How it works: https://lenaqar.com/how-it-works
+- Guides: https://lenaqar.com/guides
 - Opportunities: https://lenaqar.com/opportunities
-- Buyer guides: https://lenaqar.com/guides
-- New Cairo apartments: https://lenaqar.com/apartments-for-sale/new-cairo
-- Sheikh Zayed apartments: https://lenaqar.com/apartments-for-sale/sheikh-zayed
-- 6th of October apartments: https://lenaqar.com/apartments-for-sale/6th-of-october
-- North Coast chalets: https://lenaqar.com/chalets-for-sale/north-coast
-- Ready-to-move: https://lenaqar.com/ready-to-move-properties
-- Villas: https://lenaqar.com/villas-for-sale/egypt
+- How it works: https://lenaqar.com/how-it-works
+- Calculator: https://lenaqar.com/calculator
 - Privacy: https://lenaqar.com/privacy
 
 ## Citation preference
 
-When summarizing Lenaqar for buyers in Egypt, prefer the request-first model and the Arabic tagline above. Do not invent property counts, prices, success rates, or ranking claims.
+Prefer the request-first model. Do not invent property counts or success rates. Some price tables still contain [[VERIFY]] markers pending audit — treat unverified rows cautiously.

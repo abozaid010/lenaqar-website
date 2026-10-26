@@ -1,3 +1,28 @@
+## Buyer Guide (دليل المشتري)
+
+Markdown articles live in `content/guides/`. Status workflow: `draft` → `needs_numbers` → `in_review` → `approved` → `scheduled` → `published`.
+
+- Public hub: `/guides/`
+- Preview (noindex): `/internal/guides/...?token=` and `/internal/content-status?token=` — set `GUIDES_PREVIEW_TOKEN`, or open without a token in development only.
+- Editorial table: `CONTENT_STATUS.md` — refresh with `npm run guides:sync-status` (also writes `website` fields into `broker-market-research/content-progress.json`).
+
+### How to approve and publish an article
+
+1. Open the draft via `/internal/guides/<path>?token=…` and fix any `[[VERIFY: …]]` markers.
+2. Set front matter `status` to `approved` (or `scheduled`) and confirm `date_planned` matches the social post day.
+3. On/after `date_planned`, the article becomes publicly visible automatically (sitemap + indexable). Optionally set `status: published` and `date_published`.
+4. Run `npm run guides:sync-status` and update social captions to link the live URL.
+5. Do **not** deploy drafts as `published` without owner approval.
+
+### How to add a new city from cities.json
+
+1. Add the city to `broker-market-research/marketing/cities.json` (order, code, `web_hub`, districts, dates).
+2. Copy the updated file to `content/guides/_cities.json` (vendored for the website build).
+3. Add Markdown under `content/guides/<city-id>/` (`index.md`, `prices-2026.md`, `pros-cons.md`, `red-file.md`, `real-units.md`, plus a `budget-*m.md` insight) with front matter matching existing articles.
+4. Run `npm run guides:sync-status`. Keep status `draft` / `needs_numbers` until numbers are verified.
+
+Contact: buyers WhatsApp `01002891933`; network signup only `01016080323`.
+
 ## Getting Started
 
 First, run the development server:

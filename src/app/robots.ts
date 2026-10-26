@@ -41,6 +41,7 @@ const PRIVATE_PATHS = [
   '/network/signup',
   '/network/login',
   '/network/pending',
+  '/internal/',
 ];
 
 function buildDisallow(): string[] {

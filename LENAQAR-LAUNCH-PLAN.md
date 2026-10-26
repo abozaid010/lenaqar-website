@@ -112,7 +112,7 @@ Publishing the raw object would leak a staff email into the page HTML. **Mandato
 | 3 | Payment-plan fields land soon | Already present on the public endpoint; optional-field rendering regardless |
 | 4 | **Simple URLs, no login.** Later login is for **end users**, not clients | `/opportunities/{code}`, no clientId segment. CRM `(auth)` flow is *not* the base for it |
 | 5 | Public requirements via `GET /public/v1/requirements` (API key) | No CRM username/password on the marketplace |
-| 6 | Contacts: phone + WhatsApp `01036364340`, `info@lenaqar.com`, rest same as LenaAI, **all in one file** | `src/config/lenaqar-contact.js` |
+| 6 | Contacts: phone + WhatsApp `01002891933`, `info@lenaqar.com`, network signup `01016080323`, **all in one file** | `src/config/lenaqar-contact.js` |
 | 7 | **One developer — TMG**, four projects: Noor · Madinaty · South Med · Celia. Pull from the `public` tenant | Token allowlist in config. **But see §2.2 — only 1 of the 1,783 units in that tenant qualifies** |
 | 8 | **No guarantee. No one fronts cash.** Promise = exit faster, get more money, backed by a signed contract | The word ضمان never appears. Single honest copy set — the dual "guarantee mode" flag is deleted as YAGNI |
 | 9 | A written seller agreement is signed | `/sell` trust block: "باتفاق مكتوب" |
@@ -197,18 +197,20 @@ Literals, not env — you asked for one file to edit later.
 /** ⚠️ Single place for every LenAqar contact detail. Replace here, nowhere else. */
 export const LENAQAR_CONTACT = {
   // E.164 is required — formatPhoneForWhatsApp() strips non-digits, so a local
-  // "01036364340" would build wa.me/01036364340 and fail.
-  phoneE164: "+201036364340",
-  phoneDisplay: "010 3646 4346",
-  whatsappE164: "+201036364340",
+  // "01002891933" would build wa.me/01002891933 and fail.
+  phoneE164: "+201002891933",
+  phoneDisplay: "+201002891933",
+  whatsappE164: "+201002891933",
+  networkActivationWhatsappE164: "+201016080323",
   // Not live yet (answer #12) — held behind SITE.showEmail, kept here for the flip.
   email: "info@lenaqar.com",
-  // Inherited from LenaAI until LenAqar has its own (LocalBusinessSchema.jsx:13)
-  address: "505 ARCHPLAN Square, New Capital",
-  city: "Cairo",
+  address: "505 ARCHPLAN Square، العاصمة الإدارية",
+  city: "القاهرة",
   country: "EG",
-  facebook: "https://www.facebook.com/profile.php?id=61587419182034",
-  linkedin: "https://www.linkedin.com/company/lenaai-net/",
+  facebook: "https://www.facebook.com/lenaqar.eg",
+  instagram: "https://www.instagram.com/lenaqar.eg/",
+  tiktok: "https://www.tiktok.com/@lenaqar.eg",
+  linkedin: "https://www.linkedin.com/company/142683910/",
 };
 ```
 

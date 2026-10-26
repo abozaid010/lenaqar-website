@@ -1,0 +1,160 @@
+{
+  "_readme": "Lenaqar city content order. Edit 'order', dates or 'status' here; cities.md is the human-readable view. Status: planned | research | in_progress | done | postponed. District 'status': confirmed | to_confirm | dropped.",
+  "version": 1,
+  "updated": "2026-10-26",
+  "rules": {
+    "one_city_per_week": true,
+    "min_price_points_per_district": 3,
+    "requires_real_units_for_p4": 6,
+    "lock_district_list_before": "Thursday of the previous week",
+    "pillars": ["P1 price map", "P2 red file", "P3 good side & opportunities", "P4 six real units"],
+    "lead_code_format": "<CITY_CODE>-<P1|P2|P3|P4|R|S|G>"
+  },
+  "cities": [
+    {
+      "order": 1,
+      "id": "el-shorouk",
+      "code": "SHR",
+      "name_ar": "الشروق",
+      "name_en": "El Shorouk",
+      "week": 1,
+      "start": "2026-10-26",
+      "end": "2026-11-01",
+      "lock_districts_by": "2026-10-26",
+      "status": "in_progress",
+      "web_hub": "/guides/el-shorouk/",
+      "price_source": "Aqarmap district averages (asking prices), viewed 2026-10-26",
+      "districts": [
+        {"name_ar": "كمبوندات الشروق", "type": "compounds", "status": "to_confirm"},
+        {"name_ar": "الحي الخامس – الجوهرة", "status": "to_confirm"},
+        {"name_ar": "الحي السابع – الزمرد", "status": "to_confirm"},
+        {"name_ar": "الحي التاسع – البرلنت", "status": "to_confirm"},
+        {"name_ar": "الإسكان العائلي", "status": "to_confirm"},
+        {"name_ar": "المنطقة السادسة – توليب", "status": "to_confirm"},
+        {"name_ar": "الحي الثالث شرق – ماربيلا", "status": "to_confirm"},
+        {"name_ar": "المنطقة الثامنة", "status": "to_confirm"},
+        {"name_ar": "الحي الأول غرب – الياقوت", "status": "to_confirm"},
+        {"name_ar": "الحي الثامن – الريماس", "status": "to_confirm"},
+        {"name_ar": "المنطقة التاسعة", "status": "to_confirm"},
+        {"name_ar": "المنطقة السابعة", "status": "to_confirm"},
+        {"name_ar": "المنطقة الأولى – الأوركيد", "status": "to_confirm"},
+        {"name_ar": "الحي الأول شرق – الأندلس", "status": "to_confirm"},
+        {"name_ar": "الحي الثاني غرب – الماسة", "status": "to_confirm"},
+        {"name_ar": "حي النادي – العقيق", "status": "to_confirm"},
+        {"name_ar": "المنطقة الثانية – الزهور", "status": "to_confirm"},
+        {"name_ar": "المنطقة الثالثة – الأشجار", "status": "to_confirm"},
+        {"name_ar": "الحي الثالث غرب – الفيروز", "status": "to_confirm"},
+        {"name_ar": "الحي الثاني شرق – غرناطة", "status": "to_confirm"},
+        {"name_ar": "المنطقة الخامسة", "status": "to_confirm"},
+        {"name_ar": "الحي السادس – اللؤلؤة", "status": "to_confirm"},
+        {"name_ar": "الحي الرابع – اللازورد", "status": "to_confirm"},
+        {"name_ar": "المنطقة الرابعة", "status": "to_confirm"},
+        {"name_ar": "إسكان الشباب / إسكان المستقبل", "type": "social housing — separate post, resale rules to verify", "status": "to_confirm"}
+      ]
+    },
+    {
+      "order": 2,
+      "id": "madinaty",
+      "code": "MDN",
+      "name_ar": "مدينتي",
+      "name_en": "Madinaty",
+      "week": 2,
+      "start": "2026-11-02",
+      "end": "2026-11-08",
+      "lock_districts_by": "2026-10-29",
+      "status": "planned",
+      "web_hub": "/guides/madinaty/",
+      "districts": [
+        {"name_ar": "مجموعات B (اختيار ٥–٦ بأكبر طلب وإعادة بيع)", "status": "to_confirm"},
+        {"name_ar": "مناطق الفيلات (VG)", "status": "to_confirm"},
+        {"name_ar": "المراحل المسلّمة vs الأحدث", "status": "to_confirm"},
+        {"name_ar": "الخدمات: أوبن إير مول، النوادي، المدارس", "status": "to_confirm"}
+      ]
+    },
+    {
+      "order": 3,
+      "id": "mostakbal-city",
+      "code": "MST",
+      "name_ar": "مدينة المستقبل",
+      "name_en": "Mostakbal City",
+      "week": 3,
+      "start": "2026-11-09",
+      "end": "2026-11-15",
+      "lock_districts_by": "2026-11-05",
+      "status": "planned",
+      "web_hub": "/guides/mostakbal-city/",
+      "districts": [
+        {"name_ar": "٤–٦ مشروعات/مراحل بمعدل تسليم حقيقي (حسب الأدلة)", "status": "to_confirm"}
+      ]
+    },
+    {
+      "order": 4,
+      "id": "fifth-settlement",
+      "code": "TG5",
+      "name_ar": "التجمع الخامس",
+      "name_en": "Fifth Settlement",
+      "week": 4,
+      "start": "2026-11-16",
+      "end": "2026-11-22",
+      "lock_districts_by": "2026-11-12",
+      "status": "planned",
+      "web_hub": "/guides/fifth-settlement/",
+      "districts": [
+        {"name_ar": "النرجس", "status": "to_confirm"},
+        {"name_ar": "اللوتس", "status": "to_confirm"},
+        {"name_ar": "البنفسج", "status": "to_confirm"},
+        {"name_ar": "الياسمين", "status": "to_confirm"},
+        {"name_ar": "جنوب الأكاديمية", "status": "to_confirm"},
+        {"name_ar": "بيت الوطن", "status": "to_confirm"},
+        {"name_ar": "المستثمرين الشمالية / الجنوبية", "status": "to_confirm"},
+        {"name_ar": "٣–٤ كمبوندات بإعادة بيع حقيقية", "status": "to_confirm"}
+      ]
+    },
+    {
+      "order": 5,
+      "id": "new-cairo",
+      "code": "NCR",
+      "name_ar": "القاهرة الجديدة (التجمع الأول والتالت وباقي الأحياء)",
+      "name_en": "New Cairo (1st & 3rd Settlement, other districts)",
+      "week": 5,
+      "start": "2026-11-23",
+      "end": "2026-11-29",
+      "lock_districts_by": "2026-11-19",
+      "status": "planned",
+      "web_hub": "/guides/new-cairo/",
+      "districts": [
+        {"name_ar": "التجمع الأول", "status": "to_confirm"},
+        {"name_ar": "التجمع التالت", "status": "to_confirm"},
+        {"name_ar": "أحياء أخرى بوحدات جاهزة (تُحدد)", "status": "to_confirm"}
+      ]
+    },
+    {
+      "order": 6,
+      "id": "sheikh-zayed",
+      "code": "ZYD",
+      "name_ar": "الشيخ زايد",
+      "name_en": "Sheikh Zayed",
+      "week": 6,
+      "start": "2026-11-30",
+      "end": "2026-12-06",
+      "lock_districts_by": "2026-11-26",
+      "status": "planned",
+      "web_hub": "/guides/sheikh-zayed/",
+      "districts": []
+    },
+    {
+      "order": 7,
+      "id": "6th-of-october",
+      "code": "OCT",
+      "name_ar": "٦ أكتوبر",
+      "name_en": "6th of October",
+      "week": 7,
+      "start": "2026-12-07",
+      "end": "2026-12-13",
+      "lock_districts_by": "2026-12-03",
+      "status": "planned",
+      "web_hub": "/guides/6th-of-october/",
+      "districts": []
+    }
+  ]
+}
