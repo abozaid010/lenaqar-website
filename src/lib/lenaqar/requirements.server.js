@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
 import { bffFetch, isCloudflareChallenge } from "@/lib/bffFetch";
+import { catalogPlaceAr } from "./arabic-labels.server";
 import { comparePublicRequirements } from "./to-public-requirement";
 
 const DEFAULT_LIMIT = 48;
@@ -40,11 +41,20 @@ function acceptPublicRequirement(raw) {
   for (const loc of row.locations) {
     if (!loc || typeof loc !== "object") continue;
     const entry = /** @type {Record<string, unknown>} */ (loc);
+    const city = typeof entry.city === "string" ? entry.city : "";
+    const district = typeof entry.district === "string" ? entry.district : "";
+    const subDistrict =
+      typeof entry.subDistrict === "string" ? entry.subDistrict : "";
+    const project = typeof entry.project === "string" ? entry.project : "";
     locations.push({
-      city: typeof entry.city === "string" ? entry.city : "",
-      district: typeof entry.district === "string" ? entry.district : "",
-      subDistrict: typeof entry.subDistrict === "string" ? entry.subDistrict : "",
-      project: typeof entry.project === "string" ? entry.project : "",
+      city,
+      district,
+      subDistrict,
+      project,
+      cityAr: catalogPlaceAr(city),
+      districtAr: catalogPlaceAr(district),
+      subDistrictAr: catalogPlaceAr(subDistrict),
+      projectAr: catalogPlaceAr(project),
     });
   }
   if (locations.length === 0) return null;

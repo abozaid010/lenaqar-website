@@ -3,7 +3,7 @@ import { SITE_URL } from './metadata';
 import { SITE } from '@/config/site';
 import { fetchOpportunities } from '@/lib/lenaqar/opportunities.server';
 import { BUYER_LANDINGS } from '@/lib/lenaqar/buyer-landings';
-import { BUYER_GUIDES } from '@/lib/lenaqar/buyer-guides';
+import { getGuidesForSitemap } from '@/lib/guides/load';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
@@ -30,7 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {
       url: `${SITE_URL}/guides`,
       lastModified: now,
-      changeFrequency: 'monthly',
+      changeFrequency: 'weekly',
       priority: 0.8,
     },
     {
@@ -68,17 +68,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  for (const guide of BUYER_GUIDES) {
+  // Published / auto-published guides only (drafts excluded by loader).
+  for (const guide of getGuidesForSitemap()) {
     staticPages.push({
-      url: `${SITE_URL}${guide.href}`,
-      lastModified: now,
-      changeFrequency: 'monthly',
+      url: `${SITE_URL}${guide.slug.replace(/\/$/, '')}`,
+      lastModified: guide.lastModified ? new Date(guide.lastModified) : now,
+      changeFrequency: 'weekly',
       priority: 0.75,
     });
   }
 
-  // robots.ts only allows /opportunities while the feed is on. Listing it here
-  // regardless would advertise a URL the same response tells crawlers to skip.
   if (!SITE.feed.enabled) {
     return staticPages.filter(
       (entry) => !entry.url.includes('/opportunities'),

@@ -10,11 +10,13 @@
     "start": "NODE_OPTIONS='--max-old-space-size=512' next start",
     "lint": "next lint",
     "lint:seo": "node scripts/check-seo.js",
-    "lint:all": "npm run lint && npm run lint:seo"
+    "lint:all": "npm run lint && npm run lint:seo",
+    "guides:sync-status": "node scripts/sync-guides-status.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.81.5",
     "axios": "^1.8.4",
+    "gray-matter": "^4.0.3",
     "js-cookie": "^3.0.5",
     "libphonenumber-js": "^1.13.1",
     "lucide-react": "^0.487.0",
@@ -22,7 +24,9 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",
+    "react-markdown": "^10.1.0",
     "react-phone-number-input": "^3.4.16",
+    "remark-gfm": "^4.0.1",
     "sharp": "^0.34.5"
   },
   "devDependencies": {

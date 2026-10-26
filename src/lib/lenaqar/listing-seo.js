@@ -1,4 +1,5 @@
 import ar from "../../../public/locales/ar.js";
+import { madinatyPhaseAr } from "./arabic-labels.js";
 import { formatEgpNumber } from "./metrics.js";
 
 /**
@@ -14,13 +15,13 @@ import { formatEgpNumber } from "./metrics.js";
 const BUILDING_TYPES_AR = ar?.property?.buildingTypes ?? {};
 
 /**
- * The API sends city and district as lowercase English tokens. Only the Egyptian
- * places the public feed actually returns are mapped, and anything unmapped falls
- * through to the raw value rather than being guessed at.
+ * The API sends city and district as lowercase English tokens. This map covers
+ * the names the feed uses most; the locations catalog fills the rest when a
+ * listing is enriched. Anything still unmapped falls through to the raw value.
  *
- * Project names are deliberately absent: `project` values like "madinaty b14"
- * carry phase codes that cannot be transliterated safely. Those need `project_ar`
- * from the API, not a lookup table here.
+ * Project and developer names are filled from the public catalogs before
+ * render (`projectAr` / `developerAr`). This map is only for places.
+ * A phase code such as "b14" or "mu-23" stays as sent when it is not a place.
  */
 const PLACES_AR = {
   // Cities
@@ -59,9 +60,19 @@ const PLACES_AR = {
   "alamein new city": "العلمين الجديدة",
   madinaty: "مدينتي",
   rehab: "الرحاب",
+  "el rehab": "الرحاب",
   montaza: "المنتزه",
   "al-abbaseya": "العباسية",
   marina: "مارينا",
+  // Same places under the spellings the feed actually sends.
+  alamein: "العلمين",
+  "new alamein": "العلمين الجديدة",
+  "mohamed naguib axis": "محور محمد نجيب",
+  r8: "حي R8",
+  "palm hills alexandria": "بالم هيلز الإسكندرية",
+  "gardenia heights 1": "جاردينيا هايتس",
+  "gardinia heights 1": "جاردينيا هايتس",
+  "town center mall": "تاون سنتر مول",
 };
 
 function clean(value) {
@@ -80,11 +91,16 @@ export function buildingTypeAr(buildingType) {
   return BUILDING_TYPES_AR[raw.toLowerCase()] || raw;
 }
 
-/** Arabic place name (city or district), falling back to the raw token. */
-export function placeAr(place) {
+/** Arabic place name when the token is in the map, otherwise "". */
+export function knownPlaceAr(place) {
   const raw = clean(place);
   if (!raw) return "";
-  return PLACES_AR[raw.toLowerCase()] || raw;
+  return PLACES_AR[raw.toLowerCase()] || "";
+}
+
+/** Arabic place name (city or district), falling back to the raw token. */
+export function placeAr(place) {
+  return knownPlaceAr(place) || clean(place);
 }
 
 /** Arabic room counts follow singular / dual / plural, not a single form. */
@@ -97,9 +113,18 @@ export function roomsLabelAr(roomsCount) {
   return `${n} غرفة`;
 }
 
-/** Project name as the API sends it — `projectAr` when present, never translated. */
+/**
+ * Project name in Arabic: the unit's `projectAr`, then a Madinaty phase,
+ * then a place name stored in the project field, then the raw value.
+ */
 export function projectLabel(unit) {
-  return clean(unit?.projectAr) || clean(unit?.project) || "";
+  return (
+    clean(unit?.projectAr) ||
+    madinatyPhaseAr(unit?.project) ||
+    knownPlaceAr(unit?.project) ||
+    clean(unit?.project) ||
+    ""
+  );
 }
 
 export function developerLabel(unit) {
@@ -135,8 +160,8 @@ export function buildListingDescription(unit) {
   const type = buildingTypeAr(unit.buildingType) || "وحدة";
   const rooms = roomsLabelAr(unit.roomsCount);
   const project = projectLabel(unit);
-  const city = placeAr(unit.city);
-  const district = placeAr(unit.district);
+  const city = clean(unit.cityAr) || placeAr(unit.city);
+  const district = clean(unit.districtAr) || placeAr(unit.district);
   const area = toPositive(unit.landArea);
   const cash = toPositive(unit.downPayment);
   const deliveryYear = toPositive(unit.deliveryYear);
@@ -178,8 +203,8 @@ export function buildListingSchema(unit, url) {
   const area = toPositive(unit.landArea);
   const totalPrice = toPositive(unit.totalPrice);
   const cash = toPositive(unit.downPayment);
-  const city = placeAr(unit.city);
-  const district = placeAr(unit.district);
+  const city = clean(unit.cityAr) || placeAr(unit.city);
+  const district = clean(unit.districtAr) || placeAr(unit.district);
   const developer = developerLabel(unit);
   const images = (unit.images || [])
     .map((image) => clean(image?.url))
@@ -226,7 +251,7 @@ export function buildListingSchema(unit, url) {
   if (toPositive(unit.installmentYears) != null) {
     additionalProperty.push({
       "@type": "PropertyValue",
-      name: "مدة الأقساط",
+      name: "مدة التقسيط",
       value: toPositive(unit.installmentYears),
       unitText: "ANN",
     });

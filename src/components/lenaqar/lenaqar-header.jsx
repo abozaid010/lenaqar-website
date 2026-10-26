@@ -26,14 +26,27 @@ export default function LenaqarHeader() {
   return (
     <header className="sticky top-0 z-40 bg-primary text-white">
       <div className="container flex flex-wrap items-center justify-between py-2 gap-2">
-        <Link href="/" className="flex items-center shrink-0">
+        <Link
+          href="/"
+          dir="ltr"
+          className="flex items-center gap-2 shrink-0"
+        >
           <Image
-            src="/images/logo-5.png"
-            alt={translate("lenaqar.header.logoAlt")}
-            width={120}
-            height={40}
+            src="/images/default_logo.jpg"
+            alt=""
+            width={48}
+            height={48}
+            className="h-12 w-12 rounded-xl"
             priority
           />
+          <span className="flex flex-col items-end gap-0.5">
+            <span className="lena-wordmark-ar text-base sm:text-lg" dir="rtl">
+              {translate("lenaqar.header.logoAr")}
+            </span>
+            <span className="lena-wordmark text-sm sm:text-base">
+              {translate("lenaqar.header.logoEn")}
+            </span>
+          </span>
         </Link>
 
         <nav className="hidden lg:flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-sm min-w-0">

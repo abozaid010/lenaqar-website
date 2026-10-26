@@ -8,7 +8,9 @@ import { formatDeliveryDate } from "@/lib/units/unit-formatters";
 import {
   buildingTypeAr,
   buildListingHeadline,
+  developerLabel,
   placeAr,
+  projectLabel,
   roomsLabelAr,
 } from "@/lib/lenaqar/listing-seo";
 import EgpAmount from "./egp-amount";
@@ -24,9 +26,12 @@ export default function OpportunityCard({ unit }) {
   if (!unit) return null;
 
   const imageUrl = firstImageUrl(unit);
-  const projectName = unit.projectAr || unit.project;
-  const developerName = unit.developerAr || unit.developer;
-  const location = [placeAr(unit.district), placeAr(unit.city)]
+  const projectName = projectLabel(unit);
+  const developerName = developerLabel(unit);
+  const location = [
+    unit.districtAr || placeAr(unit.district),
+    unit.cityAr || placeAr(unit.city),
+  ]
     .filter(Boolean)
     .join(" · ");
   const typeLabel = buildingTypeAr(unit.buildingType) || null;

@@ -44,8 +44,19 @@ const nextConfig = {
     return [
       { source: "/allProberties", destination: "/opportunities", permanent: true },
       { source: "/allProberties/:code", destination: "/opportunities/:code", permanent: true },
+      {
+        source: "/guides/how-to-write-property-request",
+        destination: "/guides/buying/how-to-write-property-request",
+        permanent: true,
+      },
+      {
+        source: "/guides/resale-vs-new-launch",
+        destination: "/guides/buying/resale-vs-new-launch",
+        permanent: true,
+      },
     ];
   },
+
   async headers() {
     const securityHeaders = [
       // Prevent the site from being framed by another origin (clickjacking).

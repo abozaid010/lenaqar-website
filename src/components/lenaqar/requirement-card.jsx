@@ -3,7 +3,8 @@
 import { useI18n } from "@/hooks/useI18n";
 import { ANALYTICS } from "@/constants/analytics";
 import { addUnitForRequirementHref } from "@/lib/lenaqar/whatsapp";
-import { buildingTypeAr, placeAr, roomsLabelAr } from "@/lib/lenaqar/listing-seo";
+import { buildingTypeAr, roomsLabelAr } from "@/lib/lenaqar/listing-seo";
+import { localizedPlaceName } from "@/lib/lenaqar/place-display";
 import EgpAmount from "./egp-amount";
 import WhatsAppCta from "./whatsapp-cta";
 
@@ -17,27 +18,27 @@ function deliveryLabel(value, translate) {
   return raw.replace(/_/g, " ");
 }
 
-function locationLine(requirement) {
+function locationLine(requirement, locale) {
   const loc = requirement?.locations?.[0];
   if (!loc) return "";
   return [
-    placeAr(loc.project) || loc.project,
-    placeAr(loc.subDistrict) || loc.subDistrict,
-    placeAr(loc.district),
+    localizedPlaceName(loc.project, loc.projectAr, locale),
+    localizedPlaceName(loc.subDistrict, loc.subDistrictAr, locale),
+    localizedPlaceName(loc.district, loc.districtAr, locale),
   ]
     .filter(Boolean)
     .join(" · ");
 }
 
 export default function RequirementCard({ requirement }) {
-  const { translate } = useI18n();
+  const { translate, locale } = useI18n();
   if (!requirement) return null;
 
   const typeLabel =
     buildingTypeAr(requirement.propertyTypes?.[0]) ||
     requirement.propertyTypes?.[0] ||
     null;
-  const location = locationLine(requirement);
+  const location = locationLine(requirement, locale);
   const delivery = deliveryLabel(requirement.deliveryDate, translate);
   const whatsappHref = addUnitForRequirementHref(requirement);
   const notes = String(requirement.notes || "").trim();

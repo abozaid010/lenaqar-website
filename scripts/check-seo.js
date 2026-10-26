@@ -60,11 +60,12 @@ function checkFile(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
   const relativePath = path.relative(process.cwd(), filePath);
 
-  // Skip API routes, error pages, and loading pages
+  // Skip API routes, error pages, loading pages, and internal noindex tools
   if (
     filePath.includes('/api/') ||
     filePath.includes('/error.') ||
-    filePath.includes('/loading.')
+    filePath.includes('/loading.') ||
+    filePath.includes('/internal/')
   ) {
     return;
   }
@@ -145,6 +146,9 @@ function checkFile(filePath) {
     }
     
     if (/buyerLandingMetadata\(\s*landing\s*\)/.test(content)) {
+      titleMatch = { 1: `Dynamic Title ${relativePath}` };
+    } else if (/guideMetadata\s*\(/.test(content)) {
+      // Buyer Guide MD pages — title/description/OG/canonical from guideMetadata()
       titleMatch = { 1: `Dynamic Title ${relativePath}` };
     } else if (titleMatch?.[1] === "guide") {
       titleMatch = { 1: `Dynamic Title ${relativePath}` };
@@ -248,6 +252,10 @@ function checkFile(filePath) {
         /getBuyerGuide\(/.test(content)
       ) {
         descriptionMatch = { 1: `Buyer guide description ${relativePath}` };
+      } else if (/guideMetadata\s*\(/.test(content)) {
+        descriptionMatch = {
+          1: `Buyer guide markdown description ${relativePath}`,
+        };
       }
     }
     
@@ -377,9 +385,10 @@ function checkFile(filePath) {
     }
 
     const usesLandingMetadata = /buyerLandingMetadata\(\s*landing\s*\)/.test(content);
+    const usesGuideMetadata = /guideMetadata\s*\(/.test(content);
 
     // Check for openGraph (optional for admin pages, but recommended)
-    if (!content.includes('openGraph:') && !usesLandingMetadata && !filePath.includes('layout.')) {
+    if (!content.includes('openGraph:') && !usesLandingMetadata && !usesGuideMetadata && !filePath.includes('layout.')) {
       if (isAdminPage) {
         warnings.push(`⚠️  ${relativePath}: Missing openGraph in metadata (recommended even for non-indexed pages)`);
       } else {
@@ -392,6 +401,7 @@ function checkFile(filePath) {
       !content.includes('alternates:') &&
       !content.includes('canonical:') &&
       !usesLandingMetadata &&
+      !usesGuideMetadata &&
       !filePath.includes('layout.')
     ) {
       if (isAdminPage) {

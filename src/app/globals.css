@@ -97,6 +97,22 @@ div {
   font-family: "Montserrat", "Cairo", sans-serif;
 }
 
+span.lena-wordmark,
+span.lena-wordmark-ar {
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+}
+
+span.lena-wordmark {
+  font-family: var(--font-logo), "Montserrat", sans-serif;
+  letter-spacing: -0.03em;
+}
+
+span.lena-wordmark-ar {
+  font-family: var(--font-logo-ar), "Cairo", sans-serif;
+}
+
 button {
   cursor: pointer;
   display: inline-flex;

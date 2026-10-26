@@ -12,6 +12,12 @@ import {
 test("buyer landings cover strategy priority URLs", () => {
   const hrefs = BUYER_LANDINGS.map((p) => p.href);
   assert.ok(hrefs.includes("/apartments-for-sale/new-cairo"));
+  assert.ok(hrefs.includes("/apartments-for-sale/fifth-settlement"));
+  assert.ok(hrefs.includes("/apartments-for-sale/madinaty"));
+  assert.ok(hrefs.includes("/apartments-for-sale/el-shorouk"));
+  assert.ok(hrefs.includes("/apartments-for-sale/mostakbal-city"));
+  assert.ok(hrefs.includes("/apartments-for-sale/noor-city"));
+  assert.ok(hrefs.includes("/apartments-for-sale/new-administrative-capital"));
   assert.ok(hrefs.includes("/chalets-for-sale/north-coast"));
   assert.ok(hrefs.includes("/ready-to-move-properties"));
 });
