@@ -24,6 +24,12 @@ const cairo = Cairo({
   subsets: ["latin"],
 });
 
+const cairoLogo = Cairo({
+  weight: "700",
+  subsets: ["arabic"],
+  variable: "--font-logo-ar",
+});
+
 const quicksand = Quicksand({
   subsets: ["latin"],
   weight: ["700"],
@@ -45,7 +51,7 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang={SITE.htmlLang}
-      className={`${montserrat.variable} ${quicksand.variable} ${cairo.className}`}
+      className={`${montserrat.variable} ${quicksand.variable} ${cairoLogo.variable} ${cairo.className}`}
       dir={SITE.dir}
     >
       <head>

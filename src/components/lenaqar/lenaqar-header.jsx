@@ -29,7 +29,6 @@ export default function LenaqarHeader() {
         <Link
           href="/"
           dir="ltr"
-          aria-label={translate("lenaqar.header.logoAlt")}
           className="flex items-center gap-2 shrink-0"
         >
           <Image
@@ -40,7 +39,14 @@ export default function LenaqarHeader() {
             className="h-12 w-12 rounded-xl"
             priority
           />
-          <span className="lena-wordmark text-[1.35rem] sm:text-2xl">Lena Aqar</span>
+          <span className="flex flex-col items-end gap-0.5">
+            <span className="lena-wordmark-ar text-base sm:text-lg" dir="rtl">
+              {translate("lenaqar.header.logoAr")}
+            </span>
+            <span className="lena-wordmark text-sm sm:text-base">
+              {translate("lenaqar.header.logoEn")}
+            </span>
+          </span>
         </Link>
 
         <nav className="hidden lg:flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-sm min-w-0">

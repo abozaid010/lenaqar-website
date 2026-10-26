@@ -10,6 +10,8 @@ export default {
     opportunities: "الفرص العقارية",
     howItWorks: "إزاي بنشتغل",
     logoAlt: "لينا عقار",
+    logoAr: "لينا عقار",
+    logoEn: "Lena Aqar",
     joinNetwork: "انضم لشبكة لينا",
     openMenu: "فتح القائمة",
     closeMenu: "إغلاق القائمة",
