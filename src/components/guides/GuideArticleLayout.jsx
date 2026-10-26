@@ -32,6 +32,9 @@ export default function GuideArticleLayout({
   const updated = formatArDate(guide.date_updated || guide.date_published);
   const faq = guide.faq || [];
   const sources = guide.sources || [];
+  const hasVerify =
+    (guide.body && guide.body.includes("[[VERIFY")) ||
+    (Array.isArray(guide.missing) && guide.missing.length > 0);
 
   return (
     <>
@@ -40,6 +43,14 @@ export default function GuideArticleLayout({
           <p className="mb-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-sm px-4 py-2">
             معاينة داخلية — الحالة: <strong>{guide.status}</strong> — لن تُفهرس
             ولن تظهر في السايت ماب.
+          </p>
+        ) : null}
+
+        {hasVerify && !preview ? (
+          <p className="mb-4 rounded-xl border border-primary/20 bg-primary/[0.03] text-sm text-black/75 px-4 py-3 leading-relaxed">
+            بعض الأرقام أو البنود في المقال معلّمة للتأكيد من مصادر حديثة. بنحدّث
+            الصفحة لما تتقفل البيانات — ومتعتمدش على أي صف فيه «للتأكيد» كسعر
+            نهائي.
           </p>
         ) : null}
 

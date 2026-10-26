@@ -19,6 +19,8 @@ export const ANALYTICS = {
     BUY_REQUEST_OPENED: 'buy_request_opened',
     BUY_REQUEST_SUBMITTED: 'buy_request_submitted',
     MARKETPLACE_WHATSAPP_CLICKED: 'marketplace_whatsapp_clicked',
+    /** Guide articles — include lead_code param when present. */
+    CLICK_WHATSAPP: 'click_whatsapp',
     NETWORK_JOIN_CLICKED: 'network_join_clicked',
     NETWORK_SIGNUP_SUBMITTED: 'network_signup_submitted',
     NETWORK_LOGIN_SUBMITTED: 'network_login_submitted',

@@ -1,9 +1,13 @@
 "use client";
 
 import { guideLeadWhatsAppHref } from "@/lib/guides/whatsapp";
+import { ANALYTICS } from "@/constants/analytics";
+import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 
 export default function GuideStickyWhatsApp({ leadCode }) {
   const href = guideLeadWhatsAppHref(leadCode);
+  const { trackEvent } = useGoogleAnalytics();
+
   return (
     <a
       href={href}
@@ -13,6 +17,12 @@ export default function GuideStickyWhatsApp({ leadCode }) {
       data-analytics="click_whatsapp"
       data-lead-code={leadCode || ""}
       aria-label="تواصل واتساب"
+      onClick={() =>
+        trackEvent(ANALYTICS.EVENTS.CLICK_WHATSAPP, {
+          lead_code: leadCode || "",
+          location: "guide_sticky",
+        })
+      }
     >
       واتساب
     </a>

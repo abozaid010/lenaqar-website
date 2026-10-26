@@ -43,9 +43,205 @@ export const BUYER_LANDINGS = [
       "تاج",
     ],
     related: [
-      "/apartments-for-sale/sheikh-zayed",
+      "/apartments-for-sale/fifth-settlement",
+      "/guides/new-cairo/",
+      "/guides/buying/how-to-write-property-request",
       "/ready-to-move-properties",
-      "/guides/how-to-write-property-request",
+    ],
+  },
+  {
+    slug: "apartments-for-sale/fifth-settlement",
+    href: "/apartments-for-sale/fifth-settlement",
+    labelKey: "lenaqar.marketplace.browse.fifthSettlement",
+    title: "شقق للبيع في التجمع الخامس — اكتب طلبك وميزانيتك",
+    description:
+      "بتدور على شقة في التجمع الخامس؟ اكتب الميزانية وعدد الغرف والاستلام. لينا عقار بتبدأ من طلبك — من غير مكالمات باردة.",
+    h1: "شقق للبيع في التجمع الخامس حسب طلبك",
+    intro:
+      "التجمع الخامس من أعلى مناطق البحث شرق القاهرة. ابدأ بطلب واضح (ميزانية، غرف، استلام، كمبوند أو حي) بدل التصفح العشوائي. للأسعار والأحياء شوف دليل التجمع لما يكون منشور.",
+    bullets: [
+      "حدد الحي أو الكمبوند لو عندك تفضيل (النرجس، اللوتس، …).",
+      "فرّق بين الكاش والمقدم والتقسيط.",
+      "وضّح جاهز للسكن ولا تحت الإنشاء.",
+    ],
+    faq: [
+      {
+        q: "التجمع الخامس ولا القاهرة الجديدة؟",
+        a: "التجمع الخامس جزء من القاهرة الجديدة إداريًا في أذهان كتير من المشترين، لكن ناس بتبحث بالاسمين بشكل مختلف. لو مرن، اكتب الاتنين كبدائل في الطلب.",
+      },
+      {
+        q: "فين خريطة الأسعار؟",
+        a: "في دليل المشتري: /guides/fifth-settlement/ — الأرقام بتاريخ ومصدر لما تكون مؤكدة.",
+      },
+    ],
+    initialValues: { buildingType: "apartment" },
+    matchKeywords: [
+      "fifth settlement",
+      "التجمع الخامس",
+      "تجمع خامس",
+      "tagamoa",
+      "tagammoa",
+    ],
+    related: [
+      "/apartments-for-sale/new-cairo",
+      "/guides/fifth-settlement/",
+      "/guides/compare/el-shorouk-vs-fifth-settlement",
+    ],
+  },
+  {
+    slug: "apartments-for-sale/madinaty",
+    href: "/apartments-for-sale/madinaty",
+    labelKey: "lenaqar.marketplace.browse.madinaty",
+    title: "شقق للبيع في مدينتي — ابدأ بطلبك العقاري",
+    description:
+      "عايز شقة في مدينتي؟ اكتب المجموعة أو المرحلة والميزانية وعدد الغرف والاستلام. لينا عقار بتدور حسب طلبك.",
+    h1: "شقق للبيع في مدينتي حسب احتياجك",
+    intro:
+      "مدينتي بتتكرر في طلبات المشترين (مجموعات B، فيلات، مراحل مسلّمة). اكتب طلبك بوضوح عشان المقارنة تبقى على مواصفاتك مش على أقرب إعلان.",
+    bullets: [
+      "اذكر المجموعة أو المرحلة لو تعرفها.",
+      "حدد الميزانية وهيكل الدفع.",
+      "وضّح الاستلام: جاهز أو أبعد.",
+    ],
+    faq: [
+      {
+        q: "لازم أعرف رقم المجموعة؟",
+        a: "لو مش عارف، اكتب الميزانية والغرف والاستلام — والمجموعة تبقى مرنة في الملاحظات.",
+      },
+    ],
+    initialValues: { buildingType: "apartment" },
+    matchKeywords: ["madinaty", "مدينتي", "madina ty"],
+    related: [
+      "/guides/madinaty/",
+      "/apartments-for-sale/new-cairo",
+      "/guides/compare/madinaty-vs-mostakbal-city",
+    ],
+  },
+  {
+    slug: "apartments-for-sale/el-shorouk",
+    href: "/apartments-for-sale/el-shorouk",
+    labelKey: "lenaqar.marketplace.browse.elShorouk",
+    title: "شقق للبيع في الشروق — اكتب ميزانيتك والحي",
+    description:
+      "بتدور على شقة في مدينة الشروق؟ اكتب الحي والميزانية وعدد الغرف. لينا عقار بتساعدك تلاقي اختيارات مناسبة لطلبك.",
+    h1: "شقق للبيع في الشروق حسب طلبك وميزانيتك",
+    intro:
+      "الشروق فيها فرق كبير بين أحياء وكمبوندات في سعر المتر. ابدأ بطلب واضح، وراجع خريطة الأسعار في دليل الشروق قبل ما تثبت توقعاتك.",
+    bullets: [
+      "حدد الحي أو «كمبوند» لو ده شرط.",
+      "اكتب الميزانية الكلية والمقدم.",
+      "وضّح عدد الغرف والاستلام.",
+    ],
+    faq: [
+      {
+        q: "أرخص من التجمع؟",
+        a: "في كتير من الأحياء متوسطات المعروض أقل من مؤشرات التجمع — لكن قارن حي بحي. شوف دليل الأسعار والمقارنة.",
+      },
+    ],
+    initialValues: { buildingType: "apartment" },
+    matchKeywords: ["shorouk", "el shorouk", "الشروق", "مدينة الشروق"],
+    related: [
+      "/guides/el-shorouk/",
+      "/guides/el-shorouk/prices-2026",
+      "/apartments-for-sale/fifth-settlement",
+    ],
+  },
+  {
+    slug: "apartments-for-sale/mostakbal-city",
+    href: "/apartments-for-sale/mostakbal-city",
+    labelKey: "lenaqar.marketplace.browse.mostakbalCity",
+    title: "شقق للبيع في مدينة المستقبل — اكتب مواصفاتك",
+    description:
+      "بتدور على شقة في مدينة المستقبل؟ وضّح الميزانية والاستلام (جاهز أو تحت الإنشاء). لينا عقار بتبدأ من طلبك مع فحص حذر للمشاريع.",
+    h1: "شقق للبيع في مدينة المستقبل حسب طلبك",
+    intro:
+      "مدينة المستقبل فيها شريحة كبيرة تحت الإنشاء. اكتب موعد الاستلام بوضوح، واقرأ دليل العناية الواجبة قبل أي مقدم.",
+    bullets: [
+      "فرّق بين جاهز وتحت الإنشاء من أول الطلب.",
+      "حدد الميزانية والمقدم وسنين القسط لو ينطبق.",
+      "اذكر مشروع أو مرحلة لو عندك تفضيل — من غير ما تقيّد نفسك لو مش شرط.",
+    ],
+    faq: [
+      {
+        q: "أنسب من مدينتي؟",
+        a: "مش قاعدة ثابتة — قارن الاستلام والسعر والمخاطر. شوف صفحة المقارنة في الدليل.",
+      },
+    ],
+    initialValues: { buildingType: "apartment" },
+    matchKeywords: [
+      "mostakbal",
+      "mostakbal city",
+      "مدينة المستقبل",
+      "المستقبل",
+    ],
+    related: [
+      "/guides/mostakbal-city/",
+      "/apartments-for-sale/madinaty",
+      "/guides/buying/check-developer-project",
+    ],
+  },
+  {
+    slug: "apartments-for-sale/noor-city",
+    href: "/apartments-for-sale/noor-city",
+    labelKey: "lenaqar.marketplace.browse.noorCity",
+    title: "شقق للبيع في مدينة نور — اكتب طلبك",
+    description:
+      "عايز شقة في مدينة نور؟ اكتب الميزانية والغرف والاستلام. لينا عقار بتدور حسب طلبك — من غير اختراع أسعار أو وعود تسليم.",
+    h1: "شقق للبيع في مدينة نور حسب طلبك",
+    intro:
+      "مدينة نور تظهر في طلبات شرق القاهرة. لسه بنبني خريطة أسعار منشورة بمصادر مؤكدة؛ ابدأ بطلب واضح وهنطابق المتاح بدون أرقام مخترعة على الصفحة.",
+    bullets: [
+      "اكتب الميزانية وهيكل الدفع.",
+      "حدد الاستلام المطلوب.",
+      "أي مشروع مفضّل اكتبه في الملاحظات.",
+    ],
+    faq: [
+      {
+        q: "في جدول أسعار هنا؟",
+        a: "لأ حاليًا — مش هننشر متوسطات من غير مصدر وتاريخ. ابعت الطلب ونراجع المتاح.",
+      },
+    ],
+    initialValues: { buildingType: "apartment" },
+    matchKeywords: ["noor", "noor city", "نور", "مدينة نور"],
+    related: [
+      "/apartments-for-sale/new-cairo",
+      "/apartments-for-sale/madinaty",
+      "/guides/buying/how-to-write-property-request",
+    ],
+  },
+  {
+    slug: "apartments-for-sale/new-administrative-capital",
+    href: "/apartments-for-sale/new-administrative-capital",
+    labelKey: "lenaqar.marketplace.browse.newCapital",
+    title: "شقق للبيع في العاصمة الإدارية — اكتب مواصفاتك",
+    description:
+      "بتدور على شقة في العاصمة الإدارية الجديدة؟ حدد الميزانية والحي/المشروع والاستلام. لينا عقار بتبدأ من طلبك.",
+    h1: "شقق للبيع في العاصمة الإدارية حسب طلبك",
+    intro:
+      "العاصمة الإدارية سوق واسع (أحياء ومشاريع متعددة). من غير ما نخترع سعر متر موحّد، اكتب طلبك بالمرونة بتاعتك وهنساعدك تقارن اختيارات حقيقية.",
+    bullets: [
+      "حدد الحي أو المحور لو بيفرق.",
+      "اكتب الميزانية والاستلام بوضوح.",
+      "فرّق بين ريسيل وطرح مطور في الملاحظات لو عندك تفضيل.",
+    ],
+    faq: [
+      {
+        q: "ليكم مقر هناك؟",
+        a: "عنوان الشركة: 505 ARCHPLAN Square، العاصمة الإدارية، القاهرة — التواصل مع المشترين واتساب.",
+      },
+    ],
+    initialValues: { buildingType: "apartment" },
+    matchKeywords: [
+      "new capital",
+      "administrative capital",
+      "العاصمة",
+      "العاصمة الإدارية",
+      "العاصمه",
+    ],
+    related: [
+      "/apartments-for-sale/new-cairo",
+      "/guides/buying/how-to-write-property-request",
+      "/ready-to-move-properties",
     ],
   },
   {
@@ -73,8 +269,9 @@ export const BUYER_LANDINGS = [
     matchKeywords: ["sheikh zayed", "الشيخ زايد", "زايد"],
     related: [
       "/apartments-for-sale/6th-of-october",
-      "/apartments-for-sale/new-cairo",
-      "/guides/how-to-write-property-request",
+      "/guides/sheikh-zayed/",
+      "/guides/buying/how-to-write-property-request",
+      "/guides/compare/sheikh-zayed-vs-6th-of-october",
     ],
   },
   {
@@ -102,8 +299,9 @@ export const BUYER_LANDINGS = [
     matchKeywords: ["6 october", "أكتوبر", "اكتوبر", "october", "توسعات"],
     related: [
       "/apartments-for-sale/sheikh-zayed",
+      "/guides/6th-of-october/",
+      "/guides/buying/resale-vs-new-launch",
       "/villas-for-sale/egypt",
-      "/guides/resale-vs-new-launch",
     ],
   },
   {
@@ -131,7 +329,7 @@ export const BUYER_LANDINGS = [
     matchKeywords: ["north coast", "الساحل", "ساحل", "علمين", "alamein"],
     related: [
       "/ready-to-move-properties",
-      "/guides/how-to-write-property-request",
+      "/guides/buying/how-to-write-property-request",
       "/apartments-for-sale/new-cairo",
     ],
   },
@@ -161,7 +359,7 @@ export const BUYER_LANDINGS = [
     matchDeliveryReady: true,
     related: [
       "/apartments-for-sale/new-cairo",
-      "/guides/resale-vs-new-launch",
+      "/guides/buying/resale-vs-new-launch",
       "/opportunities",
     ],
   },
@@ -191,7 +389,7 @@ export const BUYER_LANDINGS = [
     related: [
       "/apartments-for-sale/sheikh-zayed",
       "/apartments-for-sale/6th-of-october",
-      "/guides/how-to-write-property-request",
+      "/guides/buying/how-to-write-property-request",
     ],
   },
 ];

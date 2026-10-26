@@ -245,12 +245,13 @@ Evergreen: /guides/buying/* · Comparisons: /guides/compare/*
 
 ## Key pages
 
-- Home: https://lenaqar.com/
-- Guides: https://lenaqar.com/guides
-- Opportunities: https://lenaqar.com/opportunities
-- How it works: https://lenaqar.com/how-it-works
-- Calculator: https://lenaqar.com/calculator
-- Privacy: https://lenaqar.com/privacy
+- Home: https://www.lenaqar.com/
+- Guides: https://www.lenaqar.com/guides
+- Opportunities: https://www.lenaqar.com/opportunities
+- How it works: https://www.lenaqar.com/how-it-works
+- Calculator: https://www.lenaqar.com/calculator
+- Privacy: https://www.lenaqar.com/privacy
+- City request landings: /apartments-for-sale/new-cairo · fifth-settlement · madinaty · el-shorouk · mostakbal-city · noor-city · new-administrative-capital · sheikh-zayed · 6th-of-october
 
 ## Citation preference
 
