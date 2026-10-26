@@ -10,7 +10,9 @@ import ListingSchema from "@/components/schema/ListingSchema";
 import {
   buildingTypeAr,
   buildListingHeadline,
+  developerLabel,
   placeAr,
+  projectLabel,
 } from "@/lib/lenaqar/listing-seo";
 import { SITE } from "@/config/site";
 import EgpAmount from "@/components/lenaqar/egp-amount";
@@ -19,10 +21,10 @@ import UnitViewTracker from "@/components/lenaqar/unit-view-tracker";
 
 export default function OpportunityDetailContent({ unit }) {
   const { translate } = useI18n();
-  const projectName = unit.projectAr || unit.project || unit.code;
+  const projectName = projectLabel(unit) || unit.code;
   const headline = buildListingHeadline(unit);
   const canonicalUrl = `${SITE.url}/opportunities/${encodeURIComponent(unit.code)}`;
-  const developerName = unit.developerAr || unit.developer;
+  const developerName = developerLabel(unit);
   const deliveryLabel = formatDeliveryDate(unit.deliveryDate, "ar");
   const priceDate = formatDate(unit.updatedAt, "ar");
   const meterPrice = pricePerMeter(unit.totalPrice, unit.landArea);
@@ -38,7 +40,7 @@ export default function OpportunityDetailContent({ unit }) {
       <BreadcrumbSchema
         items={[
           {
-            name: translate("lenaqar.opportunities.title"),
+            name: translate("lenaqar.header.opportunities"),
             url: `${SITE.url}/opportunities`,
           },
           {
@@ -53,7 +55,11 @@ export default function OpportunityDetailContent({ unit }) {
         {headline}
       </h1>
       <p className="mt-2 text-black/70">
-        {[developerName, placeAr(unit.district), placeAr(unit.city)]
+        {[
+          developerName,
+          unit.districtAr || placeAr(unit.district),
+          unit.cityAr || placeAr(unit.city),
+        ]
           .filter(Boolean)
           .join(" · ")}
       </p>

@@ -25,9 +25,6 @@ export default function OpportunitiesPageContent({
       <h1 className="text-3xl font-bold text-primary leading-snug mb-3">
         {translate("lenaqar.opportunities.title")}
       </h1>
-      <p className="text-base text-black/70 mb-4 max-w-2xl">
-        {translate("lenaqar.opportunities.sub")}
-      </p>
       <p className="text-sm text-black/60 mb-4 max-w-2xl">
         {translate("lenaqar.opportunities.buyRequestHint")}
       </p>

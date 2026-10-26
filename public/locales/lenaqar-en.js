@@ -1,4 +1,6 @@
 export default {
+  slogan:
+    "We don't sell you what we have. We bring you what you want — an apartment tailored to your request.",
   header: {
     home: "Home",
     sell: "Sell your unit",
@@ -143,7 +145,7 @@ export default {
     a5: "Send the complete unit details from the sell page or on WhatsApp. We review them, and after that review we share the unit with buyers whose request fits. Buyer details stay private, and a match is a chance to connect, not a guaranteed sale. If you are a broker, join Lena Network.",
   },
   opportunities: {
-    title: "What can the cash you have buy today?",
+    title: "These aren't ads. These are apartments for sale, ready to view.",
     sub: "Developer prices, dated, with a clear payment plan.",
     filterArea: "Location / project",
     filterCash: "Cash",
@@ -188,7 +190,7 @@ export default {
     remaining: "Remaining",
     viewDetails: "View details",
     addDetails: "Sell a unit",
-    cta: "Ask Lena about this unit",
+    cta: "Learn more about this unit",
     honesty:
       "The cash multiple measures cash efficiency only — not a profit promise. The installment stays your responsibility until delivery.",
     notFound: "This unit was not found.",
@@ -540,7 +542,8 @@ export default {
       eyebrow: "A buyer-first property platform",
       eyebrowDetail:
         "We don't just sell what we have — we help you find what fits your needs and budget.",
-      title: "We don't sell you what we have. We find you what you want.",
+      title:
+        "We don't sell you what we have. We bring you what you want — an apartment tailored to your request.",
       sub: "Instead of endless listings, write your budget, location, and requirements. We'll help you reach options that match your request.",
       whatsappCta: "Share a unit that matches buyer demand",
       addUnitCta: "Add your unit on the website",

@@ -16,6 +16,9 @@ export default function LenaqarFooter() {
 
   return (
     <footer className="bg-primary text-white py-10 mt-12">
+      <p className="container mb-8 text-center text-base font-semibold leading-relaxed">
+        {translate("lenaqar.slogan")}
+      </p>
       <div className="container grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-4 text-sm">
           <div className="flex items-start gap-3">

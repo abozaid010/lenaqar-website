@@ -48,11 +48,8 @@ export default function MarketplaceHomeContent({
           <p className="text-xs font-semibold tracking-wide text-primary sm:text-sm">
             {translate("lenaqar.marketplace.hero.eyebrow")}
           </p>
-          <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-black/65 sm:text-sm">
-            {translate("lenaqar.marketplace.hero.eyebrowDetail")}
-          </p>
           <h1 className="mt-4 max-w-4xl text-3xl font-bold leading-[1.2] text-primary sm:mt-5 sm:text-5xl lg:text-6xl">
-            {translate("lenaqar.marketplace.hero.title")}
+            {translate("lenaqar.slogan")}
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-black/75 sm:text-xl">
             {translate("lenaqar.marketplace.hero.sub")}

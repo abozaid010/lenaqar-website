@@ -4,6 +4,11 @@ import { bffFetch, isCloudflareChallenge } from "@/lib/bffFetch";
 import { SITE, lenaqarInventoryQuery } from "@/config/site";
 import { mapSlimUnitToListItem } from "@/lib/units/slim-unit-list-mapper";
 import { toPublicOpportunity } from "./to-public-opportunity";
+import {
+  catalogPlaceAr,
+  getArabicLabelMaps,
+} from "./arabic-labels.server";
+import { applyArabicLabels } from "./arabic-labels";
 import { isListableOpportunity, validateUnit } from "./validate-unit";
 import {
   marketplaceCitiesMatch,
@@ -238,6 +243,11 @@ export function applyInProcessFilters(
   );
 }
 
+async function enrichLabeled(unit) {
+  const nameMaps = await getArabicLabelMaps();
+  return applyArabicLabels(unit, { ...nameMaps, placeAr: catalogPlaceAr });
+}
+
 function toFeedItem(raw) {
   const unit = toPublicOpportunity(mapSlimUnitToListItem(raw));
   if (!unit) return null;
@@ -256,7 +266,10 @@ function sortFeed(units) {
 
 const loadCatalog = cache(async (apiKey) => {
   const api = JSON.parse(apiKey);
-  const raw = await fetchBoundedPages(api);
+  const [raw, nameMaps] = await Promise.all([
+    fetchBoundedPages(api),
+    getArabicLabelMaps(),
+  ]);
   const seen = new Set();
   const validated = [];
 
@@ -264,7 +277,9 @@ const loadCatalog = cache(async (apiKey) => {
     const item = toFeedItem(row);
     if (!item || seen.has(item.code)) continue;
     seen.add(item.code);
-    validated.push(item);
+    validated.push(
+      applyArabicLabels(item, { ...nameMaps, placeAr: catalogPlaceAr }),
+    );
   }
 
   return sortFeed(validated).slice(0, SITE.feed.maxUnits);
@@ -349,7 +364,7 @@ export async function fetchOpportunityByCode(code) {
   // /public/unit-by-code/{code} returns the unit itself at `data`,
   // not the `data.units[]` envelope the list endpoint uses.
   const item = json?.data ? toFeedItem(json.data) : null;
-  if (item) return item;
+  if (item) return enrichLabeled(item);
 
   const units = await fetchOpportunities();
   return units.find((unit) => unit.code === needle) ?? null;
