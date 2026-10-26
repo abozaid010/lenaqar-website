@@ -371,10 +371,6 @@ export default {
     appendNote:
       "Figures and estimates shown on the platform are indicative and depend on the terms of each contract. They are not legal advice or a promise of a specific outcome. Final review is done on your actual contract with our team and qualified legal advisors.",
   },
-  legal: {
-    priceSource:
-      "Every price shown here comes from developer data, with the update date next to it. Financial figures appear only when they exist in the source — no estimates and no substitutes.",
-  },
   sticky: {
     whatsapp: "Message Lena on WhatsApp",
   },

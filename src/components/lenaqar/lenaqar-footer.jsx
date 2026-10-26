@@ -108,7 +108,6 @@ export default function LenaqarFooter() {
               {translate("lenaqar.footer.privacy")}
             </Link>
           </nav>
-          <p>{translate("lenaqar.legal.priceSource")}</p>
           <p className="text-white/70">{translate("lenaqar.footer.attribution")}</p>
         </div>
       </div>

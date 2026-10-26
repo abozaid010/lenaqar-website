@@ -1,6 +1,6 @@
 import { I18nProvider } from "@/context/translate-api";
 import TanStackQueryProvider from "@/providers/query-client-provider";
-import { Cairo, Montserrat } from "next/font/google";
+import { Cairo, Montserrat, Quicksand } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import { defaultMetadata } from "./metadata";
@@ -24,6 +24,12 @@ const cairo = Cairo({
   subsets: ["latin"],
 });
 
+const quicksand = Quicksand({
+  subsets: ["latin"],
+  weight: ["700"],
+  variable: "--font-logo",
+});
+
 export const metadata = defaultMetadata;
 
 /**
@@ -39,7 +45,7 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang={SITE.htmlLang}
-      className={`${montserrat.variable} ${cairo.className}`}
+      className={`${montserrat.variable} ${quicksand.variable} ${cairo.className}`}
       dir={SITE.dir}
     >
       <head>
