@@ -1,6 +1,7 @@
 import { SITE } from "@/config/site";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
-import { normalizeSlug } from "./load";
+import { publicGuidePath } from "./load";
+import { isSearchIndexable } from "./seo-trust";
 
 export function buildBreadcrumbList(items) {
   return {
@@ -32,7 +33,7 @@ export function buildFaqPage(faq = []) {
 }
 
 export function buildArticleSchema(guide, { placeName } = {}) {
-  const url = `${SITE.url}${normalizeSlug(guide.slug)}`;
+  const url = `${SITE.url}${publicGuidePath(guide.slug)}`;
   const schema = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -90,6 +91,8 @@ export function buildPlaceSchema(city) {
 }
 
 export function guideJsonLdScripts(guide, { breadcrumbs = [], city = null } = {}) {
+  // No JSON-LD on noindexed / unverified guides.
+  if (!isSearchIndexable(guide)) return [];
   const blocks = [];
   if (breadcrumbs.length) blocks.push(buildBreadcrumbList(breadcrumbs));
   if (guide.pillar === "hub" && city) {

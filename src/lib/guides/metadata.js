@@ -1,13 +1,15 @@
 import { SITE } from "@/config/site";
-import { normalizeSlug } from "./load";
+import { normalizeSlug, publicGuidePath } from "./load";
 import { isPreviewOnly } from "./status";
+import { isSearchIndexable } from "./seo-trust";
 
 export function guideMetadata(guide, { preview = false } = {}) {
   if (!guide) return { title: "دليل المشتري" };
-  const url = `${SITE.url}${normalizeSlug(guide.slug)}`;
+  const url = `${SITE.url}${publicGuidePath(guide.slug)}`;
   const title = guide.title;
   const description = guide.description || "";
-  const noindex = preview || isPreviewOnly(guide);
+  const previewOnly = preview || isPreviewOnly(guide);
+  const noindex = previewOnly || !isSearchIndexable(guide);
 
   return {
     title,
@@ -40,8 +42,12 @@ export function guideMetadata(guide, { preview = false } = {}) {
         "x-default": url,
       },
     },
-    robots: noindex
+    // Draft/VERIFY pages: noindex,follow (still crawlable for link equity).
+    // Preview-only editorial: noindex,nofollow.
+    robots: previewOnly
       ? { index: false, follow: false, nocache: true }
-      : { index: true, follow: true },
+      : noindex
+        ? { index: false, follow: true }
+        : { index: true, follow: true },
   };
 }

@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import { isPubliclyVisible, isPreviewOnly } from "./status";
+import { isSearchIndexable } from "./seo-trust";
 import { getCities } from "./cities";
 
 const CONTENT_ROOT = path.join(process.cwd(), "content", "guides");
@@ -68,6 +69,12 @@ export function normalizeSlug(slug) {
   return s;
 }
 
+/** Public URL path: no trailing slash (matches Next default trailingSlash=false). */
+export function publicGuidePath(slug) {
+  const s = normalizeSlug(slug);
+  return s.length > 1 ? s.replace(/\/$/, "") : s;
+}
+
 export function getCityHub(cityId, opts) {
   return getGuideBySlug(`/guides/${cityId}/`, opts);
 }
@@ -101,20 +108,24 @@ export function getCompareGuides(opts = {}) {
 }
 
 export function getGuidesForSitemap() {
-  return loadAllGuides().map((g) => ({
-    slug: normalizeSlug(g.slug),
-    lastModified: g.date_updated || g.date_published || g.date_planned,
-  }));
+  return loadAllGuides()
+    .filter((g) => isSearchIndexable(g))
+    .map((g) => ({
+      slug: publicGuidePath(g.slug),
+      lastModified: g.date_updated || g.date_published || g.date_planned,
+    }));
 }
 
 export function getPublishedSummariesForLlms() {
-  return loadAllGuides().map((g) => ({
-    title: g.title,
-    slug: normalizeSlug(g.slug),
-    description: g.description,
-    city_code: g.city_code || null,
-    pillar: g.pillar || null,
-  }));
+  return loadAllGuides()
+    .filter((g) => isSearchIndexable(g))
+    .map((g) => ({
+      title: g.title,
+      slug: publicGuidePath(g.slug),
+      description: g.description,
+      city_code: g.city_code || null,
+      pillar: g.pillar || null,
+    }));
 }
 
 export function getEditorialRows() {
