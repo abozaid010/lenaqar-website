@@ -9,7 +9,7 @@ import ar from "../../../public/locales/ar.js";
  *
  * The strings themselves live in the locale (`lenaqar.faq.q1` / `.a1`, ...).
  */
-export const FAQ_IDS = [1, 2, 3, 4, 5];
+export const FAQ_IDS = [1, 2, 3, 4, 5, 6, 7, 8];
 
 export const faqQuestionKey = (id) => `lenaqar.faq.q${id}`;
 export const faqAnswerKey = (id) => `lenaqar.faq.a${id}`;

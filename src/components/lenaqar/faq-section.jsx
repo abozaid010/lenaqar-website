@@ -8,7 +8,7 @@ import { FAQ_IDS, faqAnswerKey, faqQuestionKey } from "@/lib/lenaqar/faq";
  *
  * Plain headings and paragraphs rather than <details>: answer engines and
  * crawlers read the text either way, but collapsed content is weaker for both,
- * and there are only five entries.
+ * and the FAQ list stays short (eight entries).
  */
 export default function FaqSection() {
   const { translate } = useI18n();

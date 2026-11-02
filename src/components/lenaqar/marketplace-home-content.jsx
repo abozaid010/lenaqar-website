@@ -11,6 +11,7 @@ import {
 } from "@/lib/lenaqar/marketplace-city-filters";
 import { BUYER_LANDING_LINKS } from "@/lib/lenaqar/buyer-landings";
 import { BUYER_GUIDE_LINKS } from "@/lib/lenaqar/buyer-guides";
+import { DOORS } from "@/lib/lenaqar/doors";
 import WhatsAppCta from "./whatsapp-cta";
 import RequirementCard from "./requirement-card";
 import MarketplaceHowItWorks from "./marketplace-how-it-works";
@@ -48,8 +49,8 @@ export default function MarketplaceHomeContent({
           <p className="text-xs font-semibold tracking-wide text-primary sm:text-sm">
             {translate("lenaqar.marketplace.hero.eyebrow")}
           </p>
-          <h1 className="mt-4 max-w-4xl text-3xl font-bold leading-[1.2] text-primary sm:mt-5 sm:text-5xl lg:text-6xl">
-            {translate("lenaqar.slogan")}
+          <h1 className="mt-4 max-w-4xl text-3xl font-bold leading-[1.25] text-primary sm:mt-5 sm:text-4xl lg:text-5xl">
+            {translate("lenaqar.marketplace.hero.title")}
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-black/75 sm:text-xl">
             {translate("lenaqar.marketplace.hero.sub")}
@@ -104,6 +105,42 @@ export default function MarketplaceHomeContent({
               </p>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="container py-10 sm:py-14">
+        <h2 className="text-2xl font-bold text-primary sm:text-3xl">
+          {translate("lenaqar.doors.sectionTitle")}
+        </h2>
+        <p className="mt-2 max-w-2xl text-base text-black/70">
+          {translate("lenaqar.doors.sectionSub")}
+        </p>
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {DOORS.map((door) => {
+            const key = door.slug.replace(/-/g, "_");
+            return (
+              <Link
+                key={door.href}
+                href={door.href}
+                className="rounded-2xl border border-primary/10 bg-white p-5 transition-colors hover:bg-primary/[0.03]"
+              >
+                <h3 className="font-bold text-primary">
+                  {translate(`lenaqar.doors.${key}.cardTitle`)}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-black/70">
+                  {translate(`lenaqar.doors.${key}.cardBody`)}
+                </p>
+              </Link>
+            );
+          })}
+        </div>
+        <div className="mt-6">
+          <Link
+            href="/sell"
+            className="inline-flex min-h-11 items-center rounded-lg border border-primary/20 bg-white px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/5"
+          >
+            {translate("lenaqar.marketplace.closing.sellerTitle")}
+          </Link>
         </div>
       </section>
 

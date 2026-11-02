@@ -11,7 +11,7 @@ export default function SiteSlogan() {
 
   return (
     <p className="border-b border-primary/10 bg-primary/[0.06] px-4 py-3 text-center text-sm font-semibold leading-relaxed text-primary sm:text-base">
-      {translate("lenaqar.slogan")}
+      {translate("lenaqar.sloganShort")}
     </p>
   );
 }

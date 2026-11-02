@@ -1,0 +1,401 @@
+{
+  "$schema_note": "Single source of truth for the LenaQar SEO/GEO visibility program. Update this file at the end of every phase/task before stopping. Do not lose plan direction by relying on chat memory alone.",
+  "program": {
+    "name": "lenaqar-website-visibility",
+    "source_of_truth_prompt": "/Users/abozaid/workspace/broker-market-research/marketing/prompts/lenaqar-website-visibility-master-prompt.md",
+    "phase0_report": "/Users/abozaid/workspace/broker-market-research/REPORT/00-findings.md",
+    "phase1_report": "/Users/abozaid/workspace/broker-market-research/REPORT/01-phase1.md",
+    "missing_data_queue": "REPORT/missing.json",
+    "research_snapshot": "content/guides/_research/aqarmap-asking-2026-11-02.json",
+    "repo": "abozaid010/lenaqar-website",
+    "canonical_host": "https://www.lenaqar.com",
+    "updated_at": "2026-11-02T19:30:00+02:00",
+    "current_git": {
+      "branch": "seo-phase-2",
+      "main_tip_at_branch_cut": "c3b612a6",
+      "merged_prs": [
+        {
+          "number": 20,
+          "title": "SEO Phase 1 trust/crawl",
+          "merged": true
+        },
+        {
+          "number": 21,
+          "title": "Content complete zero-draft guides",
+          "merged": true
+        }
+      ],
+      "open_pr": null
+    },
+    "active_phase": "phase-2-implementation-complete-awaiting-pr-approval",
+    "next_gate": "Open PR for seo-phase-2 → owner review → merge/deploy only with approval. Do NOT start Phase 3.",
+    "do_not": [
+      "Merge or deploy Phase 2 without owner approval",
+      "Start Phase 3 without Phase 2 live + gate",
+      "Invent unit prices or auto-correct CRM payment fields",
+      "Index draft/VERIFY/مسودة/تحت-المراجعة content",
+      "Blindly change NEXT_PUBLIC_SITE_URL when production already serves www",
+      "Publish unverified developer accusations on delivery-delays"
+    ]
+  },
+  "phases": [
+    {
+      "id": "phase-0",
+      "name": "Baseline audit (TEST → ANALYZE → JUDGE)",
+      "status": "done",
+      "completed_at": "2026-11-02",
+      "deliverables": [
+        "REPORT/00-findings.md (F-01…F-16)",
+        "crawl-check baseline",
+        "competitor anatomy",
+        "ai-visibility harness scaffold (API engines skipped — no keys)"
+      ],
+      "notes": "Gate passed via GO PHASE 1"
+    },
+    {
+      "id": "phase-1",
+      "name": "Trust + crawl fixes",
+      "status": "done_production_verified",
+      "completed_at": "2026-11-02",
+      "branch": "seo-phase-1",
+      "pr": 20,
+      "items": [
+        {
+          "id": "F-01",
+          "status": "done",
+          "summary": "Strip VERIFY/مسودة; noindex unverified; seo-trust.js"
+        },
+        {
+          "id": "F-02",
+          "status": "done",
+          "summary": "Rewrite llms.txt / llms-full.txt — www, no drafts"
+        },
+        {
+          "id": "F-03",
+          "status": "done",
+          "summary": "Canonical host www (env + defaults); apex→www"
+        },
+        {
+          "id": "F-04",
+          "status": "done",
+          "summary": "robots: Claude-SearchBot + Claude-User"
+        },
+        {
+          "id": "F-05",
+          "status": "done",
+          "summary": "Hide invalid_key on requirement cards"
+        },
+        {
+          "id": "F-06",
+          "status": "done_in_phase_2",
+          "summary": "Golden footer — implemented in Phase 2"
+        },
+        {
+          "id": "F-07",
+          "status": "done",
+          "summary": "WhatsApp PAGE-CODE OPP-<CODE>"
+        },
+        {
+          "id": "F-08",
+          "status": "done_partial",
+          "summary": "Money consistency + hide splits; index on price/area/delivery. Paper/verification wait on API fields."
+        },
+        {
+          "id": "F-09",
+          "status": "done_in_phase_2",
+          "summary": "how-it-works approved 4-step flows + images — Phase 2"
+        },
+        {
+          "id": "F-10",
+          "status": "done",
+          "summary": "Guide path / trailing-slash consistency helpers"
+        },
+        {
+          "id": "F-11",
+          "status": "done",
+          "summary": "Sitemap indexable-only + stable static lastmod"
+        },
+        {
+          "id": "F-12",
+          "status": "done",
+          "summary": "El Shorouk VERIFY cleanup / index rules"
+        },
+        {
+          "id": "arith-false-noindex",
+          "status": "done",
+          "summary": "Fixed down+remaining ≈ total+over; stop noindex solely for over/أوفر"
+        }
+      ],
+      "production_validation": {
+        "validated_at": "2026-11-02T19:16+02:00",
+        "method": "Browser against https://www.lenaqar.com (CLI curl blocked by edge 403/tunnel). Vercel MCP team auth unavailable for deployment ID.",
+        "deployment_id": "unknown_cli_auth_blocked",
+        "commit_sha_expected": "c3b612a6 (main tip / PR #21 merge)",
+        "apex_to_www": "pass_prior_phase1_reconfirmed_via_www_serving",
+        "canonical_og_www": "pass",
+        "robots_claude_bots": "pass (Claude-SearchBot + Claude-User present; sitemap www)",
+        "sitemap_www": "pass",
+        "madinaty_prices": "pass — index,follow; 2 tables; 58,050; عقارماب; no VERIFY/مسودة; canonical www",
+        "mostakbal_real_units": "pass — robots noindex,follow; absent from sitemap",
+        "placeholder_pros_compare": "pass — sitemap only el-shorouk/pros-cons; 0 compare URLs",
+        "inconsistent_unit_LNk7qZIF": "pass — down/remaining/over hidden; notice shown; totalPrice still visible per policy",
+        "invalid_key_home": "pass",
+        "notes": "PR #21 content is live. Non-blocking observation: installment years display on LNk7qZIF looked corrupted (293000 سنين) — separate display bug, not a split leak."
+      }
+    },
+    {
+      "id": "content-complete",
+      "name": "Zero drafts / complete eligible guides (post Phase 1)",
+      "status": "done_production_verified",
+      "completed_at": "2026-11-02",
+      "branch": "content-complete-zero-drafts",
+      "pr": 21,
+      "items": [
+        {
+          "id": "city-price-maps",
+          "status": "done",
+          "summary": "Aqarmap asking averages for major cities with source URL + date"
+        },
+        {
+          "id": "hubs-budgets-redfiles-realunits",
+          "status": "done",
+          "summary": "Updated companion guides; real-units from catalog where ≥3 matches"
+        },
+        {
+          "id": "placeholder-noindex",
+          "status": "done",
+          "summary": "Pros/compare/buying pages with تحت المراجعة forced noindex via seo-trust"
+        },
+        {
+          "id": "mostakbal-real-units",
+          "status": "done_noindex",
+          "summary": "Explicit seo_index false until ≥3 genuine Mostakbal inventory units"
+        },
+        {
+          "id": "payment-split-everywhere",
+          "status": "done",
+          "summary": "Hide inconsistent splits on detail, cards, meta, schema; do not invent CRM values"
+        },
+        {
+          "id": "missing-json",
+          "status": "done",
+          "summary": "REPORT/missing.json queue for unresolved guides + units"
+        }
+      ],
+      "open_exceptions": {
+        "guides_noindex_approx": 12,
+        "units_inconsistent_money_approx": 77,
+        "policy": "Exceptions must not block release if incomplete content stays noindex / splits stay hidden"
+      },
+      "post_merge_todo": [
+        "DONE — Confirm production deploy of PR #21 via live content checks",
+        "DONE — Live-check Madinaty prices indexable with tables",
+        "DONE — Live-check sitemap excludes mostakbal-city/real-units and placeholder pros/compare"
+      ]
+    },
+    {
+      "id": "phase-2",
+      "name": "Homepage + IA (Arabic first)",
+      "status": "implemented_on_branch_seo-phase-2",
+      "gate": "GO PHASE 2 — received; implementation complete; NOT merged/deployed",
+      "branch": "seo-phase-2",
+      "build": {
+        "command": "npm run build",
+        "result": "pass",
+        "at": "2026-11-02"
+      },
+      "tests": {
+        "doors_unit": "pass (node --test src/lib/lenaqar/__tests__/doors.test.js)",
+        "lint_seo": "pass (0 errors; 4 pre-existing warnings on network/opportunities)"
+      },
+      "items": [
+        {
+          "id": "P2-H1",
+          "status": "done",
+          "ref": "F-15",
+          "summary": "Answer-first H1 + positioning intro on homepage; metadata updated"
+        },
+        {
+          "id": "P2-doors",
+          "status": "done",
+          "summary": "4 door landings /no-calls /verified-prices /before-you-pay /delivery-delays + /sell entry polish; FAQ + HowTo where applicable; sitemap+robots+llms"
+        },
+        {
+          "id": "P2-proof-strip",
+          "status": "done_empty",
+          "summary": "No fabricated proof numbers — strip omitted until real dated metrics exist"
+        },
+        {
+          "id": "P2-live-requests",
+          "status": "done_existing",
+          "summary": "Kept anonymized live buyer requests section on homepage"
+        },
+        {
+          "id": "P2-how-it-works",
+          "status": "done",
+          "ref": "F-09",
+          "summary": "Buyer 4 + seller 4 steps HTML + flow PNGs + HowTo JSON-LD"
+        },
+        {
+          "id": "P2-faq",
+          "status": "done",
+          "summary": "Expanded to 8 Masri FAQ aligned with Phase 0 intents"
+        },
+        {
+          "id": "P2-golden-footer",
+          "status": "done",
+          "ref": "F-06",
+          "summary": "Golden 3 points + WhatsApp + doors/guides/trust columns + LenaAI sibling line"
+        },
+        {
+          "id": "P2-en-mirrors",
+          "status": "deferred_late_phase_2",
+          "summary": "/en/ mirrors + hreflang can slip late Phase 2 per original roadmap — EN locale strings updated for existing locale switch; no /en routes yet"
+        }
+      ],
+      "files_touched_summary": [
+        "src/lib/lenaqar/doors.js",
+        "src/lib/lenaqar/door-metadata.js",
+        "src/app/(lenaqar)/{no-calls,verified-prices,before-you-pay,delivery-delays}/page.jsx",
+        "src/components/lenaqar/{door-landing-content,marketplace-home-content,how-it-works-content,lenaqar-footer,site-slogan}.jsx",
+        "src/components/schema/{HowToSchema,DoorFaqSchema}.jsx",
+        "src/app/(lenaqar)/{page,how-it-works/page,sell/page}.jsx",
+        "src/app/{sitemap.ts,robots.ts}",
+        "public/locales/lenaqar-{ar,en}.js",
+        "public/llms.txt",
+        "public/images/clients/lenaqar-flow-*.png",
+        "scripts/check-seo.js",
+        "feature-progress.json",
+        "CLAUDE.md"
+      ]
+    },
+    {
+      "id": "phase-3",
+      "name": "Citable data assets (what AI quotes)",
+      "status": "not_started",
+      "gate": "After Phase 2 merge+deploy + owner GO",
+      "items": [
+        {
+          "id": "P3-price-index",
+          "status": "todo",
+          "summary": "مؤشر أسعار لينا عقار — Dataset+Article, CSV, methodology"
+        },
+        {
+          "id": "P3-delivery-tracker",
+          "status": "todo",
+          "summary": "متتبّع تأخير التسليم — names hidden by default"
+        },
+        {
+          "id": "P3-before-you-pay",
+          "status": "todo",
+          "summary": "قبل ما تدفع HowTo + FAQPage (door page started in P2; full asset in P3)"
+        },
+        {
+          "id": "P3-verification-levels",
+          "status": "todo",
+          "summary": "Public verification level definitions ✅ / ✅✅ / ✅✅✅"
+        },
+        {
+          "id": "P3-commission",
+          "status": "todo_blocked_owner",
+          "summary": "Commission & independence page — needs owner text"
+        },
+        {
+          "id": "P3-about",
+          "status": "todo_blocked_owner",
+          "summary": "About/team — lawyer name TODO from owner"
+        },
+        {
+          "id": "P3-llms-assets",
+          "status": "todo",
+          "summary": "llms.txt/full link doors + data assets + update cadence"
+        }
+      ]
+    },
+    {
+      "id": "phase-4",
+      "name": "Re-test (14 days after deploy, then monthly)",
+      "status": "not_started",
+      "gate": "14 days after Phase 2/3 deploys",
+      "items": [
+        {
+          "id": "P4-rerun-phase0",
+          "status": "todo",
+          "summary": "Re-run Phase 0 prompts unchanged → before/after citation rates"
+        },
+        {
+          "id": "P4-next5",
+          "status": "todo",
+          "summary": "Next 5 changes from data only"
+        }
+      ]
+    }
+  ],
+  "owner_tasks": [
+    {
+      "id": "WEB1",
+      "status": "open",
+      "summary": "lenaai.net Cloudflare robots conflict"
+    },
+    {
+      "id": "WEB7",
+      "status": "open",
+      "summary": "GSC + Bing Webmaster + IndexNow"
+    },
+    {
+      "id": "WEB8",
+      "status": "open",
+      "summary": "Commission text + lawyer name"
+    },
+    {
+      "id": "WEB9",
+      "status": "open",
+      "summary": "Google Business Profile + Bing Places"
+    },
+    {
+      "id": "API-KEYS",
+      "status": "open",
+      "summary": "OpenAI/Anthropic/Gemini/Perplexity keys for ai-visibility harness"
+    },
+    {
+      "id": "CRM-MONEY",
+      "status": "open",
+      "summary": "Fix ~77 inconsistent unit payment breakdowns in CRM (see REPORT/missing.json)"
+    },
+    {
+      "id": "API-TRUST-FIELDS",
+      "status": "open",
+      "summary": "Expose paper status / verification level / last-checked on public unit API if door-2 strict noindex is required"
+    },
+    {
+      "id": "PHASE2-PR-REVIEW",
+      "status": "open",
+      "summary": "Review seo-phase-2 branch / approve PR + deploy"
+    }
+  ],
+  "done_means": [
+    "Raw HTML of every indexable page holds H1, intro answer, tables, FAQ (no JS needed)",
+    "0 public [[VERIFY]] / مسودة / تحت المراجعة on indexable pages",
+    "0 JSON-LD errors; robots/sitemap/canonicals consistent on www",
+    "Crawl-check bots get 200 on indexable pages",
+    "Phase 4 citation re-test shows measurable improvement"
+  ],
+  "pr_ready_decision": {
+    "status": "PR-READY",
+    "merge_deploy": "NOT without owner approval",
+    "blockers": [],
+    "non_blocking_exceptions": [
+      "~77 CRM payment mismatches (splits hidden)",
+      "~12 intentionally noindex guides",
+      "P2-en-mirrors deferred (roadmap allows late Phase 2)",
+      "Vercel deployment ID not retrieved (MCP/CLI auth)",
+      "Observed installment-years display glitch on sample inconsistent unit (pre-existing data/UI; not Phase 2 scope)"
+    ]
+  },
+  "maintenance_rules": [
+    "Update this file whenever a phase item status changes",
+    "Update program.updated_at and current_git on each session that advances the plan",
+    "Keep REPORT/missing.json in sync for unresolved data — never mark unresolved money as corrected",
+    "Chat summaries are secondary; this file + REPORT/* are durable progress"
+  ]
+}
