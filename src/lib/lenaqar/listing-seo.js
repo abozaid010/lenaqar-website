@@ -256,11 +256,13 @@ export function buildListingSchema(unit, url) {
       unitText: "EGP",
     });
   }
-  if (toPositive(unit.installmentYears) != null) {
+  // installmentYears already sanitized in toPublicOpportunity; still guard schema.
+  const years = toPositive(unit.installmentYears);
+  if (years != null && years <= 40) {
     additionalProperty.push({
       "@type": "PropertyValue",
       name: "مدة التقسيط",
-      value: toPositive(unit.installmentYears),
+      value: years,
       unitText: "ANN",
     });
   }

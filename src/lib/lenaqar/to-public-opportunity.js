@@ -1,3 +1,5 @@
+import { plausibleInstallmentYears } from "./unit-trust.js";
+
 function pickString(...vals) {
   for (const v of vals) {
     if (typeof v === "string" && v.trim()) return v.trim();
@@ -69,9 +71,8 @@ export function toPublicOpportunity(raw) {
     downPayment: pickNumber(raw.downPayment, raw.down_payment),
     overPrice: pickNumber(raw.overPrice, raw.over_price),
     remainingAmount: pickNumber(raw.remainingAmount, raw.remaining_amount),
-    installmentYears: pickNumber(
-      raw.installment_years,
-      raw.installmentYears
+    installmentYears: plausibleInstallmentYears(
+      pickNumber(raw.installment_years, raw.installmentYears)
     ),
     installmentAmountYearly: pickNumber(
       raw.installment_amount_yearly,

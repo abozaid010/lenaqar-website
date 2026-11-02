@@ -219,7 +219,7 @@ export default function OpportunityDetailContent({ unit }) {
         </p>
       ) : null}
 
-      {multipleLabel ? (
+      {showMoneySplit && multipleLabel ? (
         <p className="mt-6 font-semibold">
           {translate("lenaqar.unit.cashMultiple")}: ×{multipleLabel}
         </p>

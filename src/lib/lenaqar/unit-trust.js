@@ -14,6 +14,21 @@ function num(value) {
   return Number.isFinite(n) ? n : null;
 }
 
+/**
+ * Installment duration for public display. CRM sometimes stores money
+ * amounts in installment_years (e.g. 293000). Only whole years in a
+ * realistic Egyptian plan range are shown — never invent a replacement.
+ */
+export const INSTALLMENT_YEARS_MAX = 40;
+
+export function plausibleInstallmentYears(value) {
+  const n = num(value);
+  if (n == null) return null;
+  if (!Number.isInteger(n)) return null;
+  if (n < 1 || n > INSTALLMENT_YEARS_MAX) return null;
+  return n;
+}
+
 function withinPct(a, b, pct = 0.01) {
   if (a == null || b == null) return false;
   const denom = Math.max(Math.abs(a), Math.abs(b), 1);
