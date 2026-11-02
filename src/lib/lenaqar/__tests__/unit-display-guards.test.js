@@ -9,6 +9,7 @@ import {
   plausibleInstallmentYears,
 } from "../unit-trust.js";
 import { toPublicOpportunity } from "../to-public-opportunity.js";
+import { buildListingSchema } from "../listing-seo.js";
 
 describe("formatCashMultiple", () => {
   it("does not render Number(null) as 0.0", () => {
@@ -77,6 +78,71 @@ describe("toPublicOpportunity money-split redaction (LNk7qZIF)", () => {
     assert.equal(unit.installmentAmountYearly, null);
     assert.equal(unit.installmentYears, null);
     assert.equal(unit.totalPrice, 7677290);
+  });
+
+  it("nulls plausible installmentYears when the split is hidden (MguPxCF0)", () => {
+    // Plausible years alone must not survive redaction in RSC/HTML/JSON-LD.
+    const unit = toPublicOpportunity({
+      code: "MguPxCF0",
+      total_price: 7526640,
+      down_payment: 2100000,
+      remaining_amount: 6220000,
+      over_price: 450000,
+      installment_years: 10,
+      installment_amount_yearly: 500000,
+      land_area: 107,
+      delivery_date: "2025-01-01",
+    });
+    assert.equal(unit.paymentSplitHidden, true);
+    assert.equal(mayShowMoneySplit(unit), false);
+    assert.equal(unit.downPayment, null);
+    assert.equal(unit.remainingAmount, null);
+    assert.equal(unit.installmentAmountYearly, null);
+    assert.equal(unit.installmentYears, null);
+    assert.equal(unit.totalPrice, 7526640);
+    const schema = buildListingSchema(
+      unit,
+      "https://www.lenaqar.com/opportunities/MguPxCF0"
+    );
+    const props = schema.additionalProperty || [];
+    assert.equal(
+      props.some((p) => p.name === "مدة التقسيط"),
+      false
+    );
+    assert.equal(
+      props.some((p) => p.name === "المتبقي" || p.name === "الكاش المطلوب دلوقتي"),
+      false
+    );
+  });
+
+  it("keeps a consistent split including over/أوفر (kBqU7H1A-shaped)", () => {
+    // down+remaining = total+over; mirrors valid kBqU7H1A plan years
+    const unit = toPublicOpportunity({
+      code: "kBqU7H1A",
+      total_price: 6250000,
+      down_payment: 312000,
+      remaining_amount: 5938000,
+      over_price: 0,
+      installment_years: 9,
+      installment_amount_yearly: 659777.78,
+      land_area: 75,
+      delivery_date: "2029-01-01",
+    });
+    assert.equal(unit.paymentSplitHidden, undefined);
+    assert.equal(mayShowMoneySplit(unit), true);
+    assert.equal(unit.downPayment, 312000);
+    assert.equal(unit.remainingAmount, 5938000);
+    assert.equal(unit.overPrice, 0);
+    assert.equal(unit.installmentYears, 9);
+    assert.equal(unit.installmentAmountYearly, 659777.78);
+    const schema = buildListingSchema(
+      unit,
+      "https://www.lenaqar.com/opportunities/kBqU7H1A"
+    );
+    const yearsProp = (schema.additionalProperty || []).find(
+      (p) => p.name === "مدة التقسيط"
+    );
+    assert.equal(yearsProp?.value, 9);
   });
 
   it("keeps a consistent split including over/أوفر", () => {
