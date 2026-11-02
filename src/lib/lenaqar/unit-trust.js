@@ -16,8 +16,17 @@ function num(value) {
 
 /**
  * Installment duration for public display. CRM sometimes stores money
- * amounts in installment_years (e.g. 293000). Only whole years in a
- * realistic Egyptian plan range are shown — never invent a replacement.
+ * amounts in installment_years (e.g. LNk7qZIF → 293000). Only whole years
+ * in a realistic Egyptian residential plan range are shown — never invent
+ * a replacement.
+ *
+ * Ceiling evidence (independent of SITE.cashMultipleBounds, which is a
+ * price/cash *ratio* max of 40×, not years):
+ * - Catalog fixture TMG plan uses 11 years (validate-unit.test.js).
+ * - Egyptian primary/resale developer plans in market practice are
+ *   typically 3–15 years; values ≥100 are money-scale field pollution.
+ * - 40 is an absolute hard ceiling above any known residential plan so
+ *   valid 10–15y plans still show, while 293000-class typos do not.
  */
 export const INSTALLMENT_YEARS_MAX = 40;
 
@@ -27,6 +36,41 @@ export function plausibleInstallmentYears(value) {
   if (!Number.isInteger(n)) return null;
   if (n < 1 || n > INSTALLMENT_YEARS_MAX) return null;
   return n;
+}
+
+/**
+ * When down+remaining disagree with total(+over), strip split fields from
+ * the public payload so they cannot leak via RSC/HTML/JSON-LD. Keeps
+ * totalPrice. Sets paymentSplitHidden so UI can show the inconsistency
+ * notice even after fields are null (arith would otherwise look "skipped").
+ */
+export function applyPublicMoneyTrust(unit) {
+  if (!unit || typeof unit !== "object") return unit;
+  const arith = unitArithmetic(unit);
+  if (arith.skipped || arith.ok) {
+    if (unit.paymentSplitHidden) {
+      const { paymentSplitHidden: _drop, ...rest } = unit;
+      return rest;
+    }
+    return unit;
+  }
+  return {
+    ...unit,
+    paymentSplitHidden: true,
+    downPayment: null,
+    remainingAmount: null,
+    overPrice: null,
+    installmentAmountYearly: null,
+    cashMultiple: null,
+  };
+}
+
+/** True when public UI/meta may expose cash / remaining / plan amounts. */
+export function mayShowMoneySplit(unit) {
+  if (!unit) return false;
+  if (unit.paymentSplitHidden) return false;
+  const arith = unitArithmetic(unit);
+  return arith.skipped || arith.ok;
 }
 
 function withinPct(a, b, pct = 0.01) {

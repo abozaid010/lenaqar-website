@@ -9,11 +9,11 @@
     "research_snapshot": "content/guides/_research/aqarmap-asking-2026-11-02.json",
     "repo": "abozaid010/lenaqar-website",
     "canonical_host": "https://www.lenaqar.com",
-    "updated_at": "2026-11-02T19:35:03+02:00",
+    "updated_at": "2026-11-02T21:05:08+02:00",
     "current_git": {
       "branch": "seo-phase-2",
       "main_tip_at_branch_cut": "c3b612a6",
-      "head": "f8176624",
+      "head": "913e58d9",
       "merged_prs": [
         {
           "number": 20,
@@ -34,8 +34,8 @@
         "head": "seo-phase-2"
       }
     },
-    "active_phase": "phase-2-pr-open-awaiting-merge-approval",
-    "next_gate": "Owner review PR #22 → approve merge/deploy. Do NOT start Phase 3 until Phase 2 is live.",
+    "active_phase": "phase-2-independent-review-complete",
+    "next_gate": "Owner: preview SSO checklist on Vercel PR preview → approve MERGE. Do NOT start Phase 3 until Phase 2 is live.",
     "do_not": [
       "Merge or deploy Phase 2 without owner approval",
       "Start Phase 3 without Phase 2 live + gate",
@@ -278,14 +278,25 @@
       "pr": 22,
       "pr_url": "https://github.com/abozaid010/lenaqar-website/pull/22",
       "review": {
-        "prerendered_html": "pass",
-        "lint_seo": "pass_0_errors",
+        "independent_review_at": "2026-11-02T21:05+02:00",
+        "prerendered_html_local": "pass (http://127.0.0.1:3020 — doors/home/how-it-works/sell/LNk7qZIF)",
+        "vercel_preview_browser": "blocked — Vercel SSO login; MCP team website-9c0c 403; CLI curl HTTP 000",
+        "lint_seo": "pass_0_errors (4 pre-existing warnings)",
         "build": "pass",
-        "unit_tests": "pass",
-        "findings_fixed_before_pr": [
-          "Replaced before-you-pay related link from noindex buying-resale-step-by-step to indexable resale-vs-new-launch",
-          "Separate commit: suppress installmentYears outside 1–40; formatCashMultiple(null) no longer ×0.0; hide cash multiple when money split hidden"
-        ]
+        "unit_tests": "pass (unit-display-guards + doors + validate-unit)",
+        "missing_json_reconcile": {
+          "units_inconsistent_money": 77,
+          "guides_noindex": 12,
+          "unresolved_records": 89,
+          "source": "REPORT/missing.json summary"
+        },
+        "findings_fixed_on_branch": [
+          "before-you-pay → resale-vs-new-launch (noindex link)",
+          "plausibleInstallmentYears 1–40; formatCashMultiple null-safe",
+          "applyPublicMoneyTrust: strip inconsistent down/remaining/over/yearly from public payload + paymentSplitHidden; gate card/detail/schema plan fields",
+          "Remove accidental REPORT/phase2-verify dumps from PR (2e8656cf); gitignore local verify dir"
+        ],
+        "installment_years_max_evidence": "Independent of cashMultipleBounds ratio. Catalog TMG fixture=11y; market plans typically ≤15y; ≥100 = money-scale pollution (LNk7qZIF 293000). Ceiling 40 keeps valid plans visible."
       }
     },
     {
@@ -400,16 +411,26 @@
     "Phase 4 citation re-test shows measurable improvement"
   ],
   "pr_ready_decision": {
-    "status": "PR_OPEN",
+    "status": "DO_NOT_MERGE_UNTIL_OWNER_PREVIEW",
     "pr_url": "https://github.com/abozaid010/lenaqar-website/pull/22",
-    "merge_deploy": "NOT without owner approval",
-    "recommendation": "MERGE after owner preview checklist on PR #22",
-    "blockers": [],
+    "merge_deploy": "NOT without owner approval — agent must not merge/deploy/start Phase 3",
+    "recommendation": "CONDITIONAL MERGE: code+local QA pass after money-payload redaction; owner must confirm Vercel PR preview (SSO) for UX/RTL then MERGE",
+    "blockers_resolved_in_review": [
+      "RSC/HTML leaked inconsistent money values on LNk7qZIF (down/remaining/over) — fixed via applyPublicMoneyTrust",
+      "installmentAmountYearly/Years rendered without showMoneySplit gate — fixed",
+      "Accidental REPORT/phase2-verify binary dumps in PR tip 2e8656cf — removed from tree"
+    ],
+    "owner_must_verify": [
+      "Open https://lenaqar-website-279r-git-seo-phase-2-website-9c0c.vercel.app after SSO / share link",
+      "Spot-check / /no-calls /verified-prices /before-you-pay /delivery-delays /how-it-works footer + LNk7qZIF",
+      "Confirm LNk7qZIF HTML has null money splits, notice text, totalPrice only, no 293000/×0.0"
+    ],
     "non_blocking_exceptions": [
-      "~77 CRM payment mismatches (splits hidden)",
-      "~12 intentionally noindex guides",
+      "77 CRM payment mismatches (REPORT/missing.json) — values redacted; totalPrice remains",
+      "12 intentionally noindex guides — excluded from sitemap (verified local)",
       "P2-en-mirrors deferred",
-      "Vercel deployment ID not retrieved during Phase 1 gate (content verified live)"
+      "Door titles duplicate brand suffix «| لينا عقار | لينا عقار» (cosmetic)",
+      "Vercel preview inaccessible to agent (SSO / team scope)"
     ]
   },
   "maintenance_rules": [

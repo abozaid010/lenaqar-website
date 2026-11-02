@@ -253,6 +253,11 @@ function toFeedItem(raw) {
   if (!unit) return null;
   if (!isListableOpportunity(unit)) return null;
 
+  // Never attach cashMultiple when the payment split was redacted.
+  if (unit.paymentSplitHidden) {
+    return { ...unit, cashMultiple: null };
+  }
+
   const gate = validateUnit(unit);
   return {
     ...unit,

@@ -13,7 +13,7 @@ import {
   projectLabel,
   roomsLabelAr,
 } from "@/lib/lenaqar/listing-seo";
-import { unitArithmetic } from "@/lib/lenaqar/unit-trust";
+import { mayShowMoneySplit } from "@/lib/lenaqar/unit-trust";
 import EgpAmount from "./egp-amount";
 import OpportunityUnitActions from "./opportunity-unit-actions";
 
@@ -38,8 +38,7 @@ export default function OpportunityCard({ unit }) {
   const typeLabel = buildingTypeAr(unit.buildingType) || null;
   const deliveryLabel = formatDeliveryDate(unit.deliveryDate, "ar");
   const href = `/opportunities/${encodeURIComponent(unit.code)}`;
-  const arith = unitArithmetic(unit);
-  const showMoneySplit = arith.skipped || arith.ok;
+  const showMoneySplit = mayShowMoneySplit(unit);
   const showOffer = showMoneySplit && Number(unit.overPrice) > 0;
 
   return (
@@ -116,7 +115,7 @@ export default function OpportunityCard({ unit }) {
         ) : null}
 
         <dl className="grid grid-cols-1 gap-1 text-sm">
-          {unit.installmentAmountYearly != null ? (
+          {showMoneySplit && unit.installmentAmountYearly != null ? (
             <div className="flex justify-between gap-3">
               <dt className="text-black/60">
                 {translate("lenaqar.unit.installmentYearly")}
@@ -129,7 +128,7 @@ export default function OpportunityCard({ unit }) {
               </dd>
             </div>
           ) : null}
-          {unit.installmentYears != null ? (
+          {showMoneySplit && unit.installmentYears != null ? (
             <div className="flex justify-between gap-3">
               <dt className="text-black/60">
                 {translate("lenaqar.unit.duration")}

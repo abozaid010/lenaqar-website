@@ -1,4 +1,7 @@
-import { plausibleInstallmentYears } from "./unit-trust.js";
+import {
+  applyPublicMoneyTrust,
+  plausibleInstallmentYears,
+} from "./unit-trust.js";
 
 function pickString(...vals) {
   for (const v of vals) {
@@ -50,7 +53,7 @@ export function toPublicOpportunity(raw) {
   const code = pickString(raw.code);
   if (!code) return null;
 
-  return {
+  return applyPublicMoneyTrust({
     code,
     unitTitle: pickString(raw.unitTitle, raw.unit_title),
     project: pickString(raw.project),
@@ -90,5 +93,5 @@ export function toPublicOpportunity(raw) {
           : []
     ),
     updatedAt: raw.updatedAt || raw.updated_at || null,
-  };
+  });
 }
