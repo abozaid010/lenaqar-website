@@ -16,7 +16,7 @@ import {
 } from "@/lib/lenaqar/listing-seo";
 import {
   isOpportunityIndexable,
-  unitArithmetic,
+  mayShowMoneySplit,
   unitLastChecked,
   unitPaperStatus,
   unitVerificationLevel,
@@ -39,8 +39,7 @@ export default function OpportunityDetailContent({ unit }) {
   const verificationLevel = unitVerificationLevel(unit);
   const meterPrice = pricePerMeter(unit.totalPrice, unit.landArea);
   const multipleLabel = formatCashMultiple(unit.cashMultiple);
-  const arith = unitArithmetic(unit);
-  const showMoneySplit = arith.skipped || arith.ok;
+  const showMoneySplit = mayShowMoneySplit(unit);
   const indexable = isOpportunityIndexable(unit);
   const typeLabel = buildingTypeAr(unit.buildingType) || null;
   const images = (unit.images || [])
@@ -62,7 +61,7 @@ export default function OpportunityDetailContent({ unit }) {
           },
         ]}
       />
-      {indexable && showMoneySplit ? (
+      {indexable ? (
         <ListingSchema unit={unit} url={canonicalUrl} />
       ) : null}
 
@@ -130,7 +129,7 @@ export default function OpportunityDetailContent({ unit }) {
             <dd className="tabular-nums">{unit.landArea}</dd>
           </div>
         ) : null}
-        {unit.installmentAmountYearly != null ? (
+        {showMoneySplit && unit.installmentAmountYearly != null ? (
           <div className="flex justify-between gap-3">
             <dt className="text-black/60">
               {translate("lenaqar.unit.installmentYearly")}
@@ -140,7 +139,7 @@ export default function OpportunityDetailContent({ unit }) {
             </dd>
           </div>
         ) : null}
-        {unit.installmentYears != null ? (
+        {showMoneySplit && unit.installmentYears != null ? (
           <div className="flex justify-between gap-3">
             <dt className="text-black/60">{translate("lenaqar.unit.duration")}</dt>
             <dd className="tabular-nums">
@@ -219,7 +218,7 @@ export default function OpportunityDetailContent({ unit }) {
         </p>
       ) : null}
 
-      {multipleLabel ? (
+      {showMoneySplit && multipleLabel ? (
         <p className="mt-6 font-semibold">
           {translate("lenaqar.unit.cashMultiple")}: ×{multipleLabel}
         </p>

@@ -57,5 +57,8 @@ Every user-visible string uses `translate('lenaqar.…')`. Arabic source of trut
 Server components fetch data · Client components handle interactions · Prefer local state; React Query for sell-form catalogs and buy-request dialog
 No new patterns or dependencies without clear need — stability over experimentation
 
+## Plan progress (non-negotiable)
+`feature-progress.json` is the durable plan + progress file for the SEO/GEO visibility program. Keep the original phase plan and update item statuses there at the end of every task/session so direction and progress are never lost to chat. Do not start Phase 2+ without the gate recorded in that file.
+
 ## Cleanup tooling
 `scripts/orphan-scan.mjs` + `scripts/entrypoints.txt` — only approved way to verify orphaned files.

@@ -1,30 +1,55 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useI18n } from "@/hooks/useI18n";
-import HowItWorksSteps from "./how-it-works-steps";
 import BuyRequestCta from "./buy-request-cta";
 import FaqSection from "./faq-section";
 import NetworkBrokerCta from "./network-broker-cta";
+import { DOORS } from "@/lib/lenaqar/doors";
+import { actionButtonClass } from "@/components/ui/action-button-class";
+import ActionButtonArrow from "@/components/ui/action-button-arrow";
+import { ANALYTICS } from "@/constants/analytics";
+import { marketplaceAddUnitHref } from "@/lib/lenaqar/whatsapp";
+import WhatsAppCta from "./whatsapp-cta";
 
-function FlowSteps({ titleKey, steps, noteKey, cta }) {
+function FlowBlock({
+  titleKey,
+  steps,
+  noteKey,
+  imageSrc,
+  imageAltKey,
+  cta,
+}) {
   const { translate } = useI18n();
 
   return (
     <section className="space-y-6">
       <h2 className="text-2xl font-bold text-primary">{translate(titleKey)}</h2>
-      <ol className="space-y-4">
-        {steps.map((step) => (
-          <li
-            key={step.titleKey}
-            className="rounded-lg border border-black/10 p-5 bg-white"
-          >
-            <p className="text-xs text-black/50 mb-2 tabular-nums">{step.num}</p>
-            <h3 className="font-semibold mb-2">{translate(step.titleKey)}</h3>
-            <p className="text-sm text-black/70">{translate(step.bodyKey)}</p>
-          </li>
-        ))}
-      </ol>
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-start">
+        <ol className="space-y-4">
+          {steps.map((step) => (
+            <li
+              key={step.titleKey}
+              className="rounded-lg border border-black/10 bg-white p-5"
+            >
+              <p className="mb-2 text-xs tabular-nums text-black/50">{step.num}</p>
+              <h3 className="mb-2 font-semibold">{translate(step.titleKey)}</h3>
+              <p className="text-sm text-black/70">{translate(step.bodyKey)}</p>
+            </li>
+          ))}
+        </ol>
+        <div className="overflow-hidden rounded-2xl border border-primary/10 bg-[#f7f6f2]">
+          <Image
+            src={imageSrc}
+            alt={translate(imageAltKey)}
+            width={960}
+            height={1200}
+            className="h-auto w-full"
+            sizes="(max-width: 1024px) 100vw, 480px"
+          />
+        </div>
+      </div>
       {noteKey ? (
         <p className="max-w-2xl text-sm leading-relaxed text-black/70">
           {translate(noteKey)}
@@ -38,91 +63,90 @@ function FlowSteps({ titleKey, steps, noteKey, cta }) {
 export default function HowItWorksContent() {
   const { translate } = useI18n();
 
-  const buySteps = [
-    {
-      num: 1,
-      titleKey: "lenaqar.howItWorks.buyStep1Title",
-      bodyKey: "lenaqar.howItWorks.buyStep1Body",
-    },
-    {
-      num: 2,
-      titleKey: "lenaqar.howItWorks.buyStep2Title",
-      bodyKey: "lenaqar.howItWorks.buyStep2Body",
-    },
-    {
-      num: 3,
-      titleKey: "lenaqar.howItWorks.buyStep3Title",
-      bodyKey: "lenaqar.howItWorks.buyStep3Body",
-    },
-  ];
+  const buySteps = [1, 2, 3, 4].map((num) => ({
+    num,
+    titleKey: `lenaqar.howItWorks.buyStep${num}Title`,
+    bodyKey: `lenaqar.howItWorks.buyStep${num}Body`,
+  }));
 
-  const requestSteps = [
-    {
-      num: 1,
-      titleKey: "lenaqar.howItWorks.requestStep1Title",
-      bodyKey: "lenaqar.howItWorks.requestStep1Body",
-    },
-    {
-      num: 2,
-      titleKey: "lenaqar.howItWorks.requestStep2Title",
-      bodyKey: "lenaqar.howItWorks.requestStep2Body",
-    },
-    {
-      num: 3,
-      titleKey: "lenaqar.howItWorks.requestStep3Title",
-      bodyKey: "lenaqar.howItWorks.requestStep3Body",
-    },
-    {
-      num: 4,
-      titleKey: "lenaqar.howItWorks.requestStep4Title",
-      bodyKey: "lenaqar.howItWorks.requestStep4Body",
-    },
-  ];
+  const sellSteps = [1, 2, 3, 4].map((num) => ({
+    num,
+    titleKey: `lenaqar.howItWorks.sellerStep${num}Title`,
+    bodyKey: `lenaqar.howItWorks.sellerStep${num}Body`,
+  }));
 
   return (
-    <div className="container py-10 sm:py-14 space-y-14 pb-24 lg:pb-14">
+    <div className="container space-y-14 py-10 pb-24 sm:py-14 lg:pb-14">
       <header className="max-w-3xl space-y-3">
-        <h1 className="text-3xl sm:text-4xl font-bold text-primary">
+        <h1 className="text-3xl font-bold text-primary sm:text-4xl">
           {translate("lenaqar.howItWorks.pageTitle")}
         </h1>
-        <p className="text-base sm:text-lg text-black/70 leading-relaxed">
+        <p className="text-base leading-relaxed text-black/70 sm:text-lg">
           {translate("lenaqar.howItWorks.pageIntro")}
         </p>
         <BuyRequestCta variant="primary" />
       </header>
 
-      <FlowSteps
-        titleKey="lenaqar.howItWorks.requestSectionTitle"
-        steps={requestSteps}
+      <FlowBlock
+        titleKey="lenaqar.howItWorks.buySectionTitle"
+        steps={buySteps}
         noteKey="lenaqar.howItWorks.requestWaitingNote"
+        imageSrc="/images/clients/lenaqar-flow-buyer.png"
+        imageAltKey="lenaqar.howItWorks.buyFlowAlt"
         cta={
-          <div className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <BuyRequestCta variant="primary" />
+            <Link
+              href="/opportunities"
+              className={actionButtonClass({ variant: "secondary" })}
+            >
+              {translate("lenaqar.howItWorks.buyCta")}
+              <ActionButtonArrow />
+            </Link>
           </div>
         }
       />
 
-      <FlowSteps
-        titleKey="lenaqar.howItWorks.buySectionTitle"
-        steps={buySteps}
+      <FlowBlock
+        titleKey="lenaqar.howItWorks.sellerSectionTitle"
+        steps={sellSteps}
+        imageSrc="/images/clients/lenaqar-flow-seller-broker.png"
+        imageAltKey="lenaqar.howItWorks.sellerFlowAlt"
         cta={
-          <Link
-            href="/opportunities"
-            className="inline-flex items-center justify-center rounded-md bg-primary text-white font-medium px-4 py-3 text-sm min-h-11"
-          >
-            {translate("lenaqar.howItWorks.buyCta")}
-          </Link>
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Link href="/sell" className={actionButtonClass({ variant: "primary" })}>
+              {translate("lenaqar.howItWorks.sellCta")}
+              <ActionButtonArrow />
+            </Link>
+            <WhatsAppCta
+              href={marketplaceAddUnitHref()}
+              eventName={ANALYTICS.EVENTS.MARKETPLACE_WHATSAPP_CLICKED}
+              className="!bg-[#25D366] hover:!bg-[#20BA5A]"
+            >
+              {translate("lenaqar.marketplace.closing.sellerCta")}
+            </WhatsAppCta>
+          </div>
         }
       />
 
       <section className="space-y-4">
         <h2 className="text-2xl font-bold text-primary">
-          {translate("lenaqar.marketplace.closing.sellerTitle")}
+          {translate("lenaqar.doors.sectionTitle")}
         </h2>
-        <HowItWorksSteps variant="full" showSellLink={false} />
-        <NetworkBrokerCta compact />
+        <div className="flex flex-wrap gap-3">
+          {DOORS.map((door) => (
+            <Link
+              key={door.href}
+              href={door.href}
+              className="min-h-11 rounded-lg border border-primary/20 bg-white px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/5"
+            >
+              {translate(`lenaqar.doors.${door.slug.replace(/-/g, "_")}.cardTitle`)}
+            </Link>
+          ))}
+        </div>
       </section>
 
+      <NetworkBrokerCta />
       <FaqSection />
     </div>
   );

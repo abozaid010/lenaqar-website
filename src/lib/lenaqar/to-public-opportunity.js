@@ -1,3 +1,8 @@
+import {
+  applyPublicMoneyTrust,
+  plausibleInstallmentYears,
+} from "./unit-trust.js";
+
 function pickString(...vals) {
   for (const v of vals) {
     if (typeof v === "string" && v.trim()) return v.trim();
@@ -48,7 +53,7 @@ export function toPublicOpportunity(raw) {
   const code = pickString(raw.code);
   if (!code) return null;
 
-  return {
+  return applyPublicMoneyTrust({
     code,
     unitTitle: pickString(raw.unitTitle, raw.unit_title),
     project: pickString(raw.project),
@@ -69,9 +74,8 @@ export function toPublicOpportunity(raw) {
     downPayment: pickNumber(raw.downPayment, raw.down_payment),
     overPrice: pickNumber(raw.overPrice, raw.over_price),
     remainingAmount: pickNumber(raw.remainingAmount, raw.remaining_amount),
-    installmentYears: pickNumber(
-      raw.installment_years,
-      raw.installmentYears
+    installmentYears: plausibleInstallmentYears(
+      pickNumber(raw.installment_years, raw.installmentYears)
     ),
     installmentAmountYearly: pickNumber(
       raw.installment_amount_yearly,
@@ -89,5 +93,5 @@ export function toPublicOpportunity(raw) {
           : []
     ),
     updatedAt: raw.updatedAt || raw.updated_at || null,
-  };
+  });
 }

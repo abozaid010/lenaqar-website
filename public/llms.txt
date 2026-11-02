@@ -12,11 +12,12 @@ English: We don't sell you what we have. We find you what you want. Buyer-first 
 
 ## الأبواب الأربعة (doors)
 
-1. من غير مكالمات — اطلب واتساب: https://www.lenaqar.com/how-it-works
-2. أرقام حقيقية وكاملة — نموذج خريطة أسعار الشروق: https://www.lenaqar.com/guides/el-shorouk/prices-2026
-3. قبل ما تدفع / ضد النصب — أدلة الشراء: https://www.lenaqar.com/guides/buying/buying-resale-step-by-step · https://www.lenaqar.com/guides/buying/contract-registration-checklist
-4. تأخير التسليم — إلغاء ولا ريسيل + حاسبة: https://www.lenaqar.com/guides/buying/cancellation-vs-resale · https://www.lenaqar.com/calculator
+1. من غير مكالمات: https://www.lenaqar.com/no-calls
+2. أرقام حقيقية وكاملة: https://www.lenaqar.com/verified-prices · خرائط أسعار: https://www.lenaqar.com/guides/madinaty/prices-2026 · https://www.lenaqar.com/guides/el-shorouk/prices-2026
+3. قبل ما تدفع / ضد النصب: https://www.lenaqar.com/before-you-pay · https://www.lenaqar.com/guides/buying/contract-registration-checklist
+4. تأخير التسليم: https://www.lenaqar.com/delivery-delays · https://www.lenaqar.com/calculator · https://www.lenaqar.com/guides/buying/cancellation-vs-resale
 
+How it works: https://www.lenaqar.com/how-it-works
 Seller: https://www.lenaqar.com/sell
 
 استخدم الأرقام مع تاريخها ومصدرها. لو الصفحة بتقول إن الأرقام لسه تحت المراجعة، متعتمدش عليها كسعر نهائي.

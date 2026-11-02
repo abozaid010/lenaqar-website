@@ -3,6 +3,7 @@ import { SITE_URL } from './metadata';
 import { SITE } from '@/config/site';
 import { fetchOpportunities } from '@/lib/lenaqar/opportunities.server';
 import { BUYER_LANDINGS } from '@/lib/lenaqar/buyer-landings';
+import { DOORS } from '@/lib/lenaqar/doors';
 import { getGuidesForSitemap } from '@/lib/guides/load';
 import { isOpportunityIndexable } from '@/lib/lenaqar/unit-trust';
 
@@ -23,6 +24,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.9,
     },
+    ...DOORS.map((door) => ({
+      url: `${SITE_URL}${door.href}`,
+      lastModified: STATIC_LASTMOD,
+      changeFrequency: 'monthly' as const,
+      priority: 0.88,
+    })),
     {
       url: `${SITE_URL}/opportunities`,
       lastModified: STATIC_LASTMOD,

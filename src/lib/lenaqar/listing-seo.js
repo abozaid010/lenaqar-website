@@ -1,7 +1,7 @@
 import ar from "../../../public/locales/ar.js";
 import { madinatyPhaseAr } from "./arabic-labels.js";
 import { formatEgpNumber } from "./metrics.js";
-import { unitArithmetic } from "./unit-trust.js";
+import { mayShowMoneySplit } from "./unit-trust.js";
 
 /**
  * Arabic display strings for a public listing: H1, <title>, meta description.
@@ -164,8 +164,7 @@ export function buildListingDescription(unit) {
   const city = clean(unit.cityAr) || placeAr(unit.city);
   const district = clean(unit.districtAr) || placeAr(unit.district);
   const area = toPositive(unit.landArea);
-  const arith = unitArithmetic(unit);
-  const showMoneySplit = arith.skipped || arith.ok;
+  const showMoneySplit = mayShowMoneySplit(unit);
   const cash = showMoneySplit ? toPositive(unit.downPayment) : null;
   const deliveryYear = toPositive(unit.deliveryYear);
   const totalPrice = toPositive(unit.totalPrice);
@@ -208,8 +207,7 @@ export function buildListingSchema(unit, url) {
   const bathrooms = toPositive(unit.bathroomCount);
   const area = toPositive(unit.landArea);
   const totalPrice = toPositive(unit.totalPrice);
-  const arith = unitArithmetic(unit);
-  const showMoneySplit = arith.skipped || arith.ok;
+  const showMoneySplit = mayShowMoneySplit(unit);
   const cash = showMoneySplit ? toPositive(unit.downPayment) : null;
   const city = clean(unit.cityAr) || placeAr(unit.city);
   const district = clean(unit.districtAr) || placeAr(unit.district);
@@ -256,11 +254,14 @@ export function buildListingSchema(unit, url) {
       unitText: "EGP",
     });
   }
-  if (toPositive(unit.installmentYears) != null) {
+  // Plan duration only when the money split is trusted; years already
+  // sanitized via plausibleInstallmentYears in toPublicOpportunity.
+  const years = toPositive(unit.installmentYears);
+  if (showMoneySplit && years != null && years <= 40) {
     additionalProperty.push({
       "@type": "PropertyValue",
       name: "مدة التقسيط",
-      value: toPositive(unit.installmentYears),
+      value: years,
       unitText: "ANN",
     });
   }

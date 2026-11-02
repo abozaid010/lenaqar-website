@@ -15,7 +15,7 @@ export default function NotFound() {
         
         {/* Description */}
         <p className="text-gray-600 mb-6">
-          The property unit you're looking for doesn't exist or has been removed. 
+          The property unit you&apos;re looking for doesn&apos;t exist or has been removed. 
           Please check the URL or browse our available properties.
         </p>
 

@@ -10,8 +10,10 @@ export function cashMultiple(totalPrice, downPayment) {
 }
 
 export function formatCashMultiple(value) {
+  // Number(null) === 0 — treat null/blank as missing, never render ×0.0.
+  if (value == null || value === "") return null;
   const n = Number(value);
-  if (!Number.isFinite(n)) return null;
+  if (!Number.isFinite(n) || !(n > 0)) return null;
   return n.toFixed(1);
 }
 

@@ -147,6 +147,8 @@ function checkFile(filePath) {
     
     if (/buyerLandingMetadata\(\s*landing\s*\)/.test(content)) {
       titleMatch = { 1: `Dynamic Title ${relativePath}` };
+    } else if (/doorMetadata\(\s*door\s*\)/.test(content)) {
+      titleMatch = { 1: `Dynamic Title ${relativePath}` };
     } else if (/guideMetadata\s*\(/.test(content)) {
       // Buyer Guide MD pages — title/description/OG/canonical from guideMetadata()
       titleMatch = { 1: `Dynamic Title ${relativePath}` };
@@ -247,6 +249,11 @@ function checkFile(filePath) {
         /getBuyerLanding\(/.test(content)
       ) {
         descriptionMatch = { 1: `Buyer landing description ${relativePath}` };
+      } else if (
+        /doorMetadata\(\s*door\s*\)/.test(content) &&
+        /getDoor\(/.test(content)
+      ) {
+        descriptionMatch = { 1: `Door landing description ${relativePath}` };
       } else if (
         /description\s*:\s*guide\.description/.test(content) &&
         /getBuyerGuide\(/.test(content)
@@ -385,10 +392,11 @@ function checkFile(filePath) {
     }
 
     const usesLandingMetadata = /buyerLandingMetadata\(\s*landing\s*\)/.test(content);
+    const usesDoorMetadata = /doorMetadata\(\s*door\s*\)/.test(content);
     const usesGuideMetadata = /guideMetadata\s*\(/.test(content);
 
     // Check for openGraph (optional for admin pages, but recommended)
-    if (!content.includes('openGraph:') && !usesLandingMetadata && !usesGuideMetadata && !filePath.includes('layout.')) {
+    if (!content.includes('openGraph:') && !usesLandingMetadata && !usesDoorMetadata && !usesGuideMetadata && !filePath.includes('layout.')) {
       if (isAdminPage) {
         warnings.push(`⚠️  ${relativePath}: Missing openGraph in metadata (recommended even for non-indexed pages)`);
       } else {
@@ -401,6 +409,7 @@ function checkFile(filePath) {
       !content.includes('alternates:') &&
       !content.includes('canonical:') &&
       !usesLandingMetadata &&
+      !usesDoorMetadata &&
       !usesGuideMetadata &&
       !filePath.includes('layout.')
     ) {
