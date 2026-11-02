@@ -7,6 +7,9 @@ const VERIFY_RE = /\[\[\s*VERIFY\b/i;
 /** Editorial draft labels — not every casual use of the Arabic word. */
 const DRAFT_RE =
   /مسودة\s*لينا|مسودة\s*حذرة|مسودة\s*تحرير|جدول[^\n]{0,40}مسودة|##[^\n]{0,40}مسودة|description:[^\n]*مسودة/i;
+/** Incomplete editorial placeholders must never be indexed. */
+const PENDING_PLACEHOLDER_RE =
+  /البند ده لسه تحت المراجعة|لسه تحت المراجعة|مفيش جدول أسعار منشور|للتأكيد — مش للنشر/i;
 
 export function guideTextBlob(guide) {
   if (!guide) return "";
@@ -30,7 +33,11 @@ export function guideTextBlob(guide) {
 
 export function hasUnverifiedMarkers(guide) {
   const blob = guideTextBlob(guide);
-  return VERIFY_RE.test(blob) || DRAFT_RE.test(blob);
+  return (
+    VERIFY_RE.test(blob) ||
+    DRAFT_RE.test(blob) ||
+    PENDING_PLACEHOLDER_RE.test(blob)
+  );
 }
 
 /**

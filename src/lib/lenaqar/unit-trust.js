@@ -21,10 +21,10 @@ function withinPct(a, b, pct = 0.01) {
 }
 
 export function unitArithmetic(unit) {
-  const total = num(unit?.totalPrice);
-  const down = num(unit?.downPayment);
-  const remaining = num(unit?.remainingAmount);
-  const over = num(unit?.overPrice) ?? 0;
+  const total = num(unit?.totalPrice ?? unit?.total_price);
+  const down = num(unit?.downPayment ?? unit?.down_payment);
+  const remaining = num(unit?.remainingAmount ?? unit?.remaining_amount);
+  const over = num(unit?.overPrice ?? unit?.over_price) ?? 0;
   const paid = num(unit?.paidAmount ?? unit?.paid_amount);
 
   if (total == null || down == null || remaining == null) {

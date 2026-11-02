@@ -1,6 +1,7 @@
 import ar from "../../../public/locales/ar.js";
 import { madinatyPhaseAr } from "./arabic-labels.js";
 import { formatEgpNumber } from "./metrics.js";
+import { unitArithmetic } from "./unit-trust.js";
 
 /**
  * Arabic display strings for a public listing: H1, <title>, meta description.
@@ -163,8 +164,11 @@ export function buildListingDescription(unit) {
   const city = clean(unit.cityAr) || placeAr(unit.city);
   const district = clean(unit.districtAr) || placeAr(unit.district);
   const area = toPositive(unit.landArea);
-  const cash = toPositive(unit.downPayment);
+  const arith = unitArithmetic(unit);
+  const showMoneySplit = arith.skipped || arith.ok;
+  const cash = showMoneySplit ? toPositive(unit.downPayment) : null;
   const deliveryYear = toPositive(unit.deliveryYear);
+  const totalPrice = toPositive(unit.totalPrice);
 
   const place = [project, district, city].filter(Boolean).join("، ");
 
@@ -180,6 +184,8 @@ export function buildListingDescription(unit) {
       ? ` والباقي أقساط على المطور حتى ${deliveryYear}.`
       : " والباقي أقساط على المطور.";
     sentences.push(`الكاش المطلوب دلوقتي ${formatEgpNumber(cash)} ج.م${tail}`);
+  } else if (totalPrice) {
+    sentences.push(`السعر الإجمالي المعروض ${formatEgpNumber(totalPrice)} ج.م.`);
   }
 
   sentences.push("السعر من المطور بتاريخه.");
@@ -202,7 +208,9 @@ export function buildListingSchema(unit, url) {
   const bathrooms = toPositive(unit.bathroomCount);
   const area = toPositive(unit.landArea);
   const totalPrice = toPositive(unit.totalPrice);
-  const cash = toPositive(unit.downPayment);
+  const arith = unitArithmetic(unit);
+  const showMoneySplit = arith.skipped || arith.ok;
+  const cash = showMoneySplit ? toPositive(unit.downPayment) : null;
   const city = clean(unit.cityAr) || placeAr(unit.city);
   const district = clean(unit.districtAr) || placeAr(unit.district);
   const developer = developerLabel(unit);
@@ -240,7 +248,7 @@ export function buildListingSchema(unit, url) {
       unitText: "EGP",
     });
   }
-  if (toPositive(unit.remainingAmount) != null) {
+  if (showMoneySplit && toPositive(unit.remainingAmount) != null) {
     additionalProperty.push({
       "@type": "PropertyValue",
       name: "المتبقي",

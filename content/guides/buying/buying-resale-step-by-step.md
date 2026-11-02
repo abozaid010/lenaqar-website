@@ -10,13 +10,19 @@ description: >-
   إجراءات قانونية كأنها قانون.
 date_planned: '2026-12-15'
 date_published: '2026-10-26'
-date_updated: '2026-10-26'
+date_updated: '2026-11-02'
 status: published
 social_post_ids:
   - G-STEPS
 sources:
-  - name: ''
-    date: pending
+  - name: مركز خدمات مصر — خدمات الشهر العقاري والتوثيق
+    url: 'https://www.khadamatmisr.gov.eg/serviceslist'
+    date: '2026-11-02'
+    type: official
+  - name: منصة العقارات المصرية — تسجيل الشقة في الشهر العقاري
+    url: >-
+      https://blogs.realestate.gov.eg/ar/registering-the-apartment-in-the-real-estate-register/
+    date: '2026-11-02'
     type: official
 faq:
   - q: أبدأ بإيه؟
@@ -33,8 +39,7 @@ schema:
   - Article
   - FAQPage
 missing:
-  - مراجعة محامي لصياغة خطوات التسجيل
-  - روابط رسمية
+  - محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال
 seo_index: false
 ---
 **الإجابة السريعة:** مسار عملي: صفّى طلبك → اختيارات مكتوبة → معاينة → فحص أوراق → اتفاق مكتوب على العربون → تنازل/عقد حسب نوع الوحدة → تأكيد المرافق. التفاصيل القانونية تختلف — *(البند ده لسه تحت المراجعة)*.
@@ -49,3 +54,11 @@ seo_index: false
 
 ## إزاي تحمي نفسك؟
 متدفعش تحويلات لحسابات أفراد مجهولة من غير تحقق. متوقّعش «عرف السوق» يغني عن العقد.
+
+## مصادر رسمية للبدء
+
+- [مركز خدمات مصر — الشهر العقاري والتوثيق](https://www.khadamatmisr.gov.eg/serviceslist)
+- [تسجيل الشقة في الشهر العقاري (منصة العقارات المصرية)](https://blogs.realestate.gov.eg/ar/registering-the-apartment-in-the-real-estate-register/)
+
+> **تنويه:** المحتوى تعليمي للمشتري وليس استشارة قانونية. الإجراءات والرسوم تتغير — راجع الجهة الرسمية قبل التنفيذ.
+
