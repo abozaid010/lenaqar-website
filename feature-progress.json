@@ -9,11 +9,11 @@
     "research_snapshot": "content/guides/_research/aqarmap-asking-2026-11-02.json",
     "repo": "abozaid010/lenaqar-website",
     "canonical_host": "https://www.lenaqar.com",
-    "updated_at": "2026-11-02T21:16:03+02:00",
+    "updated_at": "2026-11-02T21:17:42+02:00",
     "current_git": {
       "branch": "seo-phase-2",
       "main_tip_at_branch_cut": "c3b612a6",
-      "head": "16b946ec",
+      "head": "5e34f664",
       "merged_prs": [
         {
           "number": 20,
@@ -319,7 +319,8 @@
           "at": "2026-11-02T21:16:03+02:00",
           "cause": "Node 20 npm ci required @emnapi/{runtime,core}@1.11.3 missing from lock (generated under newer npm)",
           "also_fixed": "next lint removed in Next 16.2 — lint script now eslint .; ignore .next; fix 4 unescaped-entity errors in legacy not-found pages",
-          "local_node20": "npm ci PASS; npm run lint PASS (0 errors); lint:seo PASS (4 pre-existing warnings)"
+          "local_node20": "npm ci PASS; npm run lint PASS (0 errors); lint:seo PASS (4 pre-existing warnings)",
+          "github_seo_audit": "pass run 41508353864"
         }
       }
     },
@@ -435,10 +436,10 @@
     "Phase 4 citation re-test shows measurable improvement"
   ],
   "pr_ready_decision": {
-    "status": "BLOCKED_PREVIEW_AUTH_AND_CI_RERUN",
+    "status": "BLOCKED_PREVIEW_SSO",
     "pr_url": "https://github.com/abozaid010/lenaqar-website/pull/22",
     "merge_deploy": "NOT without owner approval — agent must not merge/deploy/start Phase 3",
-    "recommendation": "DO NOT MERGE until: (1) SEO Audit CI green after lockfile/lint fix, (2) owner authenticates preview SSO and Preview QA is completed, (3) owner explicit MERGE approval",
+    "recommendation": "DO NOT MERGE — SEO Audit CI green; Preview QA blocked on Vercel SSO. Owner must authenticate preview, then agent resumes Preview QA before MERGE decision.",
     "blockers_resolved_in_review": [
       "RSC/HTML leaked inconsistent money values on LNk7qZIF (down/remaining/over) — fixed via applyPublicMoneyTrust",
       "installmentAmountYearly/Years rendered without showMoneySplit gate — fixed",
