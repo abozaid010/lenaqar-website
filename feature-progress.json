@@ -9,10 +9,11 @@
     "research_snapshot": "content/guides/_research/aqarmap-asking-2026-11-02.json",
     "repo": "abozaid010/lenaqar-website",
     "canonical_host": "https://www.lenaqar.com",
-    "updated_at": "2026-11-02T19:30:00+02:00",
+    "updated_at": "2026-11-02T19:35:03+02:00",
     "current_git": {
       "branch": "seo-phase-2",
       "main_tip_at_branch_cut": "c3b612a6",
+      "head": "f8176624",
       "merged_prs": [
         {
           "number": 20,
@@ -25,10 +26,16 @@
           "merged": true
         }
       ],
-      "open_pr": null
+      "open_pr": {
+        "number": 22,
+        "url": "https://github.com/abozaid010/lenaqar-website/pull/22",
+        "title": "SEO Phase 2: homepage, doors, golden footer, how-it-works",
+        "base": "main",
+        "head": "seo-phase-2"
+      }
     },
-    "active_phase": "phase-2-implementation-complete-awaiting-pr-approval",
-    "next_gate": "Open PR for seo-phase-2 → owner review → merge/deploy only with approval. Do NOT start Phase 3.",
+    "active_phase": "phase-2-pr-open-awaiting-merge-approval",
+    "next_gate": "Owner review PR #22 → approve merge/deploy. Do NOT start Phase 3 until Phase 2 is live.",
     "do_not": [
       "Merge or deploy Phase 2 without owner approval",
       "Start Phase 3 without Phase 2 live + gate",
@@ -196,8 +203,8 @@
     {
       "id": "phase-2",
       "name": "Homepage + IA (Arabic first)",
-      "status": "implemented_on_branch_seo-phase-2",
-      "gate": "GO PHASE 2 — received; implementation complete; NOT merged/deployed",
+      "status": "pr_open",
+      "gate": "Owner MERGE approval required — do not deploy without approval",
       "branch": "seo-phase-2",
       "build": {
         "command": "npm run build",
@@ -267,7 +274,19 @@
         "scripts/check-seo.js",
         "feature-progress.json",
         "CLAUDE.md"
-      ]
+      ],
+      "pr": 22,
+      "pr_url": "https://github.com/abozaid010/lenaqar-website/pull/22",
+      "review": {
+        "prerendered_html": "pass",
+        "lint_seo": "pass_0_errors",
+        "build": "pass",
+        "unit_tests": "pass",
+        "findings_fixed_before_pr": [
+          "Replaced before-you-pay related link from noindex buying-resale-step-by-step to indexable resale-vs-new-launch",
+          "Separate commit: suppress installmentYears outside 1–40; formatCashMultiple(null) no longer ×0.0; hide cash multiple when money split hidden"
+        ]
+      }
     },
     {
       "id": "phase-3",
@@ -370,7 +389,7 @@
     {
       "id": "PHASE2-PR-REVIEW",
       "status": "open",
-      "summary": "Review seo-phase-2 branch / approve PR + deploy"
+      "summary": "Review and approve https://github.com/abozaid010/lenaqar-website/pull/22 (merge/deploy)"
     }
   ],
   "done_means": [
@@ -381,15 +400,16 @@
     "Phase 4 citation re-test shows measurable improvement"
   ],
   "pr_ready_decision": {
-    "status": "PR-READY",
+    "status": "PR_OPEN",
+    "pr_url": "https://github.com/abozaid010/lenaqar-website/pull/22",
     "merge_deploy": "NOT without owner approval",
+    "recommendation": "MERGE after owner preview checklist on PR #22",
     "blockers": [],
     "non_blocking_exceptions": [
       "~77 CRM payment mismatches (splits hidden)",
       "~12 intentionally noindex guides",
-      "P2-en-mirrors deferred (roadmap allows late Phase 2)",
-      "Vercel deployment ID not retrieved (MCP/CLI auth)",
-      "Observed installment-years display glitch on sample inconsistent unit (pre-existing data/UI; not Phase 2 scope)"
+      "P2-en-mirrors deferred",
+      "Vercel deployment ID not retrieved during Phase 1 gate (content verified live)"
     ]
   },
   "maintenance_rules": [
