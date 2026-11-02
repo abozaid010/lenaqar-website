@@ -4,56 +4,58 @@ import { SITE } from '@/config/site';
 import { fetchOpportunities } from '@/lib/lenaqar/opportunities.server';
 import { BUYER_LANDINGS } from '@/lib/lenaqar/buyer-landings';
 import { getGuidesForSitemap } from '@/lib/guides/load';
+import { isOpportunityIndexable } from '@/lib/lenaqar/unit-trust';
+
+/** Stable lastmod for evergreen marketing pages (not build time). */
+const STATIC_LASTMOD = new Date('2026-11-02T00:00:00.000Z');
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
-
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: SITE_URL,
-      lastModified: now,
+      lastModified: STATIC_LASTMOD,
       changeFrequency: 'daily',
       priority: 1.0,
     },
     {
       url: `${SITE_URL}/how-it-works`,
-      lastModified: now,
+      lastModified: STATIC_LASTMOD,
       changeFrequency: 'monthly',
       priority: 0.9,
     },
     {
       url: `${SITE_URL}/opportunities`,
-      lastModified: now,
+      lastModified: STATIC_LASTMOD,
       changeFrequency: 'daily',
       priority: 0.85,
     },
     {
       url: `${SITE_URL}/guides`,
-      lastModified: now,
+      lastModified: STATIC_LASTMOD,
       changeFrequency: 'weekly',
       priority: 0.8,
     },
     {
       url: `${SITE_URL}/sell`,
-      lastModified: now,
+      lastModified: STATIC_LASTMOD,
       changeFrequency: 'weekly',
       priority: 0.6,
     },
     {
       url: `${SITE_URL}/calculator`,
-      lastModified: now,
+      lastModified: STATIC_LASTMOD,
       changeFrequency: 'weekly',
       priority: 0.5,
     },
     {
       url: `${SITE_URL}/privacy`,
-      lastModified: now,
+      lastModified: STATIC_LASTMOD,
       changeFrequency: 'yearly',
       priority: 0.3,
     },
     {
       url: `${SITE_URL}/network`,
-      lastModified: now,
+      lastModified: STATIC_LASTMOD,
       changeFrequency: 'weekly',
       priority: 0.5,
     },
@@ -62,17 +64,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const landing of BUYER_LANDINGS) {
     staticPages.push({
       url: `${SITE_URL}${landing.href}`,
-      lastModified: now,
+      lastModified: STATIC_LASTMOD,
       changeFrequency: 'weekly',
       priority: 0.85,
     });
   }
 
-  // Published / auto-published guides only (drafts excluded by loader).
+  // Indexable guides only (VERIFY/مسودة / seo_index:false excluded).
   for (const guide of getGuidesForSitemap()) {
     staticPages.push({
       url: `${SITE_URL}${guide.slug.replace(/\/$/, '')}`,
-      lastModified: guide.lastModified ? new Date(guide.lastModified) : now,
+      lastModified: guide.lastModified
+        ? new Date(guide.lastModified)
+        : STATIC_LASTMOD,
       changeFrequency: 'weekly',
       priority: 0.75,
     });
@@ -86,12 +90,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const units = await fetchOpportunities();
-    const unitPages: MetadataRoute.Sitemap = units.map((unit) => ({
-      url: `${SITE_URL}/opportunities/${encodeURIComponent(unit.code)}`,
-      lastModified: unit.updatedAt ? new Date(unit.updatedAt) : now,
-      changeFrequency: 'daily',
-      priority: 0.6,
-    }));
+    const unitPages: MetadataRoute.Sitemap = units
+      .filter((unit) => isOpportunityIndexable(unit))
+      .map((unit) => ({
+        url: `${SITE_URL}/opportunities/${encodeURIComponent(unit.code)}`,
+        lastModified: unit.updatedAt ? new Date(unit.updatedAt) : STATIC_LASTMOD,
+        changeFrequency: 'daily' as const,
+        priority: 0.6,
+      }));
     return [...staticPages, ...unitPages];
   } catch (error) {
     console.error("[lenaqar] sitemap units fetch failed", error);
