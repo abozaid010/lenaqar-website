@@ -9,11 +9,11 @@
     "research_snapshot": "content/guides/_research/aqarmap-asking-2026-11-02.json",
     "repo": "abozaid010/lenaqar-website",
     "canonical_host": "https://www.lenaqar.com",
-    "updated_at": "2026-11-02T21:08:52+02:00",
+    "updated_at": "2026-11-02T21:09:05+02:00",
     "current_git": {
       "branch": "seo-phase-2",
       "main_tip_at_branch_cut": "c3b612a6",
-      "head": "58885b2f",
+      "head": "61f94891",
       "merged_prs": [
         {
           "number": 20,
