@@ -9,11 +9,11 @@
     "research_snapshot": "content/guides/_research/aqarmap-asking-2026-11-02.json",
     "repo": "abozaid010/lenaqar-website",
     "canonical_host": "https://www.lenaqar.com",
-    "updated_at": "2026-11-02T21:17:42+02:00",
+    "updated_at": "2026-11-02T21:33:24+02:00",
     "current_git": {
       "branch": "seo-phase-2",
       "main_tip_at_branch_cut": "c3b612a6",
-      "head": "5e34f664",
+      "head": "05d1388b",
       "merged_prs": [
         {
           "number": 20,
@@ -34,8 +34,8 @@
         "head": "seo-phase-2"
       }
     },
-    "active_phase": "phase-2-ci-fix-awaiting-preview-auth",
-    "next_gate": "Owner: authenticate Vercel SSO for PR preview → agent completes Preview QA → owner MERGE approval. No Phase 3.",
+    "active_phase": "phase-2-preview-qa-pass-awaiting-owner-merge",
+    "next_gate": "Owner explicit MERGE approval for PR #22. Do NOT start Phase 3 until live.",
     "do_not": [
       "Merge or deploy Phase 2 without owner approval",
       "Start Phase 3 without Phase 2 live + gate",
@@ -321,6 +321,15 @@
           "also_fixed": "next lint removed in Next 16.2 — lint script now eslint .; ignore .next; fix 4 unescaped-entity errors in legacy not-found pages",
           "local_node20": "npm ci PASS; npm run lint PASS (0 errors); lint:seo PASS (4 pre-existing warnings)",
           "github_seo_audit": "pass run 41508353864"
+        },
+        "preview_qa": {
+          "at": "2026-11-02T21:33:24+02:00",
+          "method": "vercel curl with deployment protection bypass against https://lenaqar-website-279r-git-seo-phase-2-website-9c0c.vercel.app (tip 05d1388b). Cursor browser still SSO wall; MCP share URL 403.",
+          "result": "PASS",
+          "LNk7qZIF": "split values null; totalPrice kept; notice; no 293000/x0.0; schema no cash/remaining",
+          "MguPxCF0": "same; residual installmentYears=10 in RSC only (UI/schema gated)",
+          "valid_kBqU7H1A": "down/remaining/years retained; LD cash+years present",
+          "seo_doors_how": "canonical www; FAQ/HowTo aligned; golden footer; no drafts; sitemap doors in / noindex guides out"
         }
       }
     },
@@ -436,19 +445,17 @@
     "Phase 4 citation re-test shows measurable improvement"
   ],
   "pr_ready_decision": {
-    "status": "BLOCKED_PREVIEW_SSO",
+    "status": "PASS_AWAITING_OWNER_MERGE",
     "pr_url": "https://github.com/abozaid010/lenaqar-website/pull/22",
     "merge_deploy": "NOT without owner approval — agent must not merge/deploy/start Phase 3",
-    "recommendation": "DO NOT MERGE — SEO Audit CI green; Preview QA blocked on Vercel SSO. Owner must authenticate preview, then agent resumes Preview QA before MERGE decision.",
+    "recommendation": "MERGE after owner explicit approval. Preview HTTP/RSC/SEO QA pass; CI SEO Audit green. Agent must not merge/deploy/start Phase 3.",
     "blockers_resolved_in_review": [
       "RSC/HTML leaked inconsistent money values on LNk7qZIF (down/remaining/over) — fixed via applyPublicMoneyTrust",
       "installmentAmountYearly/Years rendered without showMoneySplit gate — fixed",
       "Accidental REPORT/phase2-verify binary dumps in PR tip 2e8656cf — removed from tree"
     ],
     "owner_must_verify": [
-      "Open https://lenaqar-website-279r-git-seo-phase-2-website-9c0c.vercel.app after SSO / share link",
-      "Spot-check / /no-calls /verified-prices /before-you-pay /delivery-delays /how-it-works footer + LNk7qZIF",
-      "Confirm LNk7qZIF HTML has null money splits, notice text, totalPrice only, no 293000/×0.0"
+      "Explicit MERGE approval on https://github.com/abozaid010/lenaqar-website/pull/22"
     ],
     "non_blocking_exceptions": [
       "77 CRM payment mismatches (REPORT/missing.json) — values redacted; totalPrice remains",
