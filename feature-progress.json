@@ -9,7 +9,7 @@
     "research_snapshot": "content/guides/_research/aqarmap-asking-2026-11-02.json",
     "repo": "abozaid010/lenaqar-website",
     "canonical_host": "https://www.lenaqar.com",
-    "updated_at": "2026-11-02T21:09:05+02:00",
+    "updated_at": "2026-11-02T21:16:03+02:00",
     "current_git": {
       "branch": "seo-phase-2",
       "main_tip_at_branch_cut": "c3b612a6",
@@ -34,8 +34,8 @@
         "head": "seo-phase-2"
       }
     },
-    "active_phase": "phase-2-independent-review-complete",
-    "next_gate": "Owner: preview SSO checklist on Vercel PR preview → approve MERGE. Do NOT start Phase 3 until Phase 2 is live.",
+    "active_phase": "phase-2-ci-fix-awaiting-preview-auth",
+    "next_gate": "Owner: authenticate Vercel SSO for PR preview → agent completes Preview QA → owner MERGE approval. No Phase 3.",
     "do_not": [
       "Merge or deploy Phase 2 without owner approval",
       "Start Phase 3 without Phase 2 live + gate",
@@ -280,7 +280,7 @@
       "review": {
         "independent_review_at": "2026-11-02T21:05+02:00",
         "prerendered_html_local": "pass (http://127.0.0.1:3020 — doors/home/how-it-works/sell/LNk7qZIF)",
-        "vercel_preview_browser": "blocked — Vercel SSO login; MCP team website-9c0c 403; CLI curl HTTP 000",
+        "vercel_preview_browser": "blocked — Vercel SSO login page; awaiting owner authentication before Preview QA",
         "lint_seo": "pass_0_errors (4 pre-existing warnings)",
         "build": "pass",
         "unit_tests": "pass (unit-display-guards + doors + validate-unit)",
@@ -314,6 +314,12 @@
           "FAQ_HowTo_aligned_visible": true,
           "sitemap_doors": true,
           "sitemap_noindex_excluded": true
+        },
+        "ci_lockfile_fix": {
+          "at": "2026-11-02T21:16:03+02:00",
+          "cause": "Node 20 npm ci required @emnapi/{runtime,core}@1.11.3 missing from lock (generated under newer npm)",
+          "also_fixed": "next lint removed in Next 16.2 — lint script now eslint .; ignore .next; fix 4 unescaped-entity errors in legacy not-found pages",
+          "local_node20": "npm ci PASS; npm run lint PASS (0 errors); lint:seo PASS (4 pre-existing warnings)"
         }
       }
     },
@@ -429,10 +435,10 @@
     "Phase 4 citation re-test shows measurable improvement"
   ],
   "pr_ready_decision": {
-    "status": "CONDITIONAL_MERGE_OWNER_PREVIEW",
+    "status": "BLOCKED_PREVIEW_AUTH_AND_CI_RERUN",
     "pr_url": "https://github.com/abozaid010/lenaqar-website/pull/22",
     "merge_deploy": "NOT without owner approval — agent must not merge/deploy/start Phase 3",
-    "recommendation": "CONDITIONAL MERGE after owner Vercel preview SSO checklist. Code+local QA pass (money redaction + absolute titles). Do not merge/deploy/start Phase 3 without owner approval.",
+    "recommendation": "DO NOT MERGE until: (1) SEO Audit CI green after lockfile/lint fix, (2) owner authenticates preview SSO and Preview QA is completed, (3) owner explicit MERGE approval",
     "blockers_resolved_in_review": [
       "RSC/HTML leaked inconsistent money values on LNk7qZIF (down/remaining/over) — fixed via applyPublicMoneyTrust",
       "installmentAmountYearly/Years rendered without showMoneySplit gate — fixed",

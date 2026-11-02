@@ -9,6 +9,10 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
-const eslintConfig = [...compat.extends("next/core-web-vitals")];
+const eslintConfig = [
+  // Next.js 16 removed `next lint`; ignore build output the way next lint did.
+  { ignores: [".next/**", "node_modules/**", "out/**", "build/**", "REPORT/**"] },
+  ...compat.extends("next/core-web-vitals"),
+];
 
 export default eslintConfig;
