@@ -2,8 +2,10 @@ import { SITE } from "@/config/site";
 
 export function doorMetadata(door) {
   const url = `${SITE.url}${door.href}`;
+  // Absolute title: door.title already includes «| لينا عقار»; the root
+  // template is `%s | لينا عقار` and would otherwise double the brand.
   return {
-    title: door.title,
+    title: { absolute: door.title },
     description: door.description,
     openGraph: {
       title: door.title,

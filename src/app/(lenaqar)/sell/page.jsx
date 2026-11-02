@@ -2,7 +2,7 @@ import { SITE } from "@/config/site";
 import SellPageContent from "./sell-page-content";
 
 export const metadata = {
-  title: "بيع وحدتك من غير طلبات وهمية | لينا عقار",
+  title: { absolute: "بيع وحدتك من غير طلبات وهمية | لينا عقار" },
   description:
     "بيع وحدتك من غير مكالمات كتير ومن غير طلبات وهمية — عندنا طلبات شراء حقيقية لايف. بنراجع وحدتك ونطابقها، وبيانات المشتري بتفضل خاصة.",
   openGraph: {

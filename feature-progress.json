@@ -9,11 +9,11 @@
     "research_snapshot": "content/guides/_research/aqarmap-asking-2026-11-02.json",
     "repo": "abozaid010/lenaqar-website",
     "canonical_host": "https://www.lenaqar.com",
-    "updated_at": "2026-11-02T21:05:08+02:00",
+    "updated_at": "2026-11-02T21:08:37+02:00",
     "current_git": {
       "branch": "seo-phase-2",
       "main_tip_at_branch_cut": "c3b612a6",
-      "head": "632419f2",
+      "head": "PENDING_TITLE_FIX",
       "merged_prs": [
         {
           "number": 20,
@@ -294,9 +294,27 @@
           "before-you-pay → resale-vs-new-launch (noindex link)",
           "plausibleInstallmentYears 1–40; formatCashMultiple null-safe",
           "applyPublicMoneyTrust: strip inconsistent down/remaining/over/yearly from public payload + paymentSplitHidden; gate card/detail/schema plan fields",
-          "Remove accidental REPORT/phase2-verify dumps from PR (2e8656cf); gitignore local verify dir"
+          "Remove accidental REPORT/phase2-verify dumps from PR (2e8656cf); gitignore local verify dir",
+          "door+sell absolute titles — stop «| لينا عقار | لينا عقار» double brand"
         ],
-        "installment_years_max_evidence": "Independent of cashMultipleBounds ratio. Catalog TMG fixture=11y; market plans typically ≤15y; ≥100 = money-scale pollution (LNk7qZIF 293000). Ceiling 40 keeps valid plans visible."
+        "installment_years_max_evidence": "Independent of cashMultipleBounds ratio. Catalog TMG fixture=11y; market plans typically ≤15y; ≥100 = money-scale pollution (LNk7qZIF 293000). Ceiling 40 keeps valid plans visible.",
+        "independent_review_continued_at": "2026-11-02T21:08:37+02:00",
+        "production_browser_LNk7qZIF": {
+          "url": "https://www.lenaqar.com/opportunities/LNk7qZIF",
+          "visible_notice": true,
+          "visible_cash_multiple_x0": true,
+          "html_leaks_down_remaining_over_values": true,
+          "note": "Pre-Phase-2 production. Branch redaction not live until merge/deploy."
+        },
+        "local_qa_3012": {
+          "LNk7qZIF_values_null": true,
+          "LNk7qZIF_293000": 0,
+          "LNk7qZIF_x0": false,
+          "LNk7qZIF_totalPrice_kept": true,
+          "FAQ_HowTo_aligned_visible": true,
+          "sitemap_doors": true,
+          "sitemap_noindex_excluded": true
+        }
       }
     },
     {
@@ -411,10 +429,10 @@
     "Phase 4 citation re-test shows measurable improvement"
   ],
   "pr_ready_decision": {
-    "status": "DO_NOT_MERGE_UNTIL_OWNER_PREVIEW",
+    "status": "CONDITIONAL_MERGE_OWNER_PREVIEW",
     "pr_url": "https://github.com/abozaid010/lenaqar-website/pull/22",
     "merge_deploy": "NOT without owner approval — agent must not merge/deploy/start Phase 3",
-    "recommendation": "CONDITIONAL MERGE: code+local QA pass after money-payload redaction; owner must confirm Vercel PR preview (SSO) for UX/RTL then MERGE",
+    "recommendation": "CONDITIONAL MERGE after owner Vercel preview SSO checklist. Code+local QA pass (money redaction + absolute titles). Do not merge/deploy/start Phase 3 without owner approval.",
     "blockers_resolved_in_review": [
       "RSC/HTML leaked inconsistent money values on LNk7qZIF (down/remaining/over) — fixed via applyPublicMoneyTrust",
       "installmentAmountYearly/Years rendered without showMoneySplit gate — fixed",
@@ -429,7 +447,6 @@
       "77 CRM payment mismatches (REPORT/missing.json) — values redacted; totalPrice remains",
       "12 intentionally noindex guides — excluded from sitemap (verified local)",
       "P2-en-mirrors deferred",
-      "Door titles duplicate brand suffix «| لينا عقار | لينا عقار» (cosmetic)",
       "Vercel preview inaccessible to agent (SSO / team scope)"
     ]
   },
