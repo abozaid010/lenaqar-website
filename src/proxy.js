@@ -32,7 +32,7 @@ export function proxy(request) {
   // Handle API image requests — restrict CORS to own domain only.
   if (pathname.startsWith('/api/images/') || pathname.startsWith('/images/')) {
     const response = NextResponse.next();
-    const allowedOrigin = process.env.NEXT_PUBLIC_SITE_URL || "https://lenaqar.com";
+    const allowedOrigin = process.env.NEXT_PUBLIC_SITE_URL || "https://www.lenaqar.com";
     response.headers.set('Access-Control-Allow-Origin', allowedOrigin);
     response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
     response.headers.set('Vary', 'Origin');

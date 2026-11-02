@@ -4,6 +4,7 @@ import GuideWhatsAppCta from "./GuideWhatsAppCta";
 import GuideStickyWhatsApp from "./GuideStickyWhatsApp";
 import GuideShareButtons from "./GuideShareButtons";
 import { normalizeSlug } from "@/lib/guides/load";
+import { hasUnverifiedMarkers } from "@/lib/guides/seo-trust";
 import { actionButtonClass } from "@/components/ui/action-button-class";
 import ActionButtonArrow from "@/components/ui/action-button-arrow";
 
@@ -32,9 +33,7 @@ export default function GuideArticleLayout({
   const updated = formatArDate(guide.date_updated || guide.date_published);
   const faq = guide.faq || [];
   const sources = guide.sources || [];
-  const hasVerify =
-    (guide.body && guide.body.includes("[[VERIFY")) ||
-    (Array.isArray(guide.missing) && guide.missing.length > 0);
+  const hasVerify = hasUnverifiedMarkers(guide);
 
   return (
     <>

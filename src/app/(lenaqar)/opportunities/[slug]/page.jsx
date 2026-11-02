@@ -5,6 +5,7 @@ import {
   buildListingDescription,
   buildListingHeadline,
 } from "@/lib/lenaqar/listing-seo";
+import { isOpportunityIndexable } from "@/lib/lenaqar/unit-trust";
 import OpportunityDetailContent from "./opportunity-detail-content";
 
 export const revalidate = 900;
@@ -32,6 +33,8 @@ export async function generateMetadata({ params }) {
     ? buildListingDescription(unit)
     : "تفاصيل الوحدة غير متاحة حالياً على لينا عقار. راجع قائمة الفرص أو تواصل معنا على واتساب.";
 
+  const indexable = unit ? isOpportunityIndexable(unit) : false;
+
   return {
     title,
     description,
@@ -47,6 +50,9 @@ export async function generateMetadata({ params }) {
     alternates: {
       canonical: `${SITE.url}/opportunities/${encodeURIComponent(slug)}`,
     },
+    robots: indexable
+      ? { index: true, follow: true }
+      : { index: false, follow: true },
   };
 }
 

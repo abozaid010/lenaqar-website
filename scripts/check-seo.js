@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://lenaqar.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.lenaqar.com';
 const VALUE_KEYWORDS = [
   'لينا عقار',
   'عقار',

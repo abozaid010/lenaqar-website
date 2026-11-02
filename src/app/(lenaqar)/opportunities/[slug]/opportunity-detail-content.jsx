@@ -14,6 +14,13 @@ import {
   placeAr,
   projectLabel,
 } from "@/lib/lenaqar/listing-seo";
+import {
+  isOpportunityIndexable,
+  unitArithmetic,
+  unitLastChecked,
+  unitPaperStatus,
+  unitVerificationLevel,
+} from "@/lib/lenaqar/unit-trust";
 import { SITE } from "@/config/site";
 import EgpAmount from "@/components/lenaqar/egp-amount";
 import OpportunityUnitActions from "@/components/lenaqar/opportunity-unit-actions";
@@ -27,8 +34,14 @@ export default function OpportunityDetailContent({ unit }) {
   const developerName = developerLabel(unit);
   const deliveryLabel = formatDeliveryDate(unit.deliveryDate, "ar");
   const priceDate = formatDate(unit.updatedAt, "ar");
+  const lastCheckedLabel = formatDate(unitLastChecked(unit), "ar");
+  const paperStatus = unitPaperStatus(unit);
+  const verificationLevel = unitVerificationLevel(unit);
   const meterPrice = pricePerMeter(unit.totalPrice, unit.landArea);
   const multipleLabel = formatCashMultiple(unit.cashMultiple);
+  const arith = unitArithmetic(unit);
+  const showMoneySplit = arith.skipped || arith.ok;
+  const indexable = isOpportunityIndexable(unit);
   const typeLabel = buildingTypeAr(unit.buildingType) || null;
   const images = (unit.images || [])
     .map((img) => getDisplayImageUrl(img.url))
@@ -49,7 +62,9 @@ export default function OpportunityDetailContent({ unit }) {
           },
         ]}
       />
-      <ListingSchema unit={unit} url={canonicalUrl} />
+      {indexable && showMoneySplit ? (
+        <ListingSchema unit={unit} url={canonicalUrl} />
+      ) : null}
 
       <h1 className="text-3xl font-bold text-primary leading-snug">
         {headline}
@@ -78,14 +93,18 @@ export default function OpportunityDetailContent({ unit }) {
         </div>
       ) : null}
 
-      <div className="mt-8 border-t border-black/10 pt-6">
-        <p className="text-xs text-black/60 mb-1">
-          {translate("lenaqar.unit.cashRequired")}
-        </p>
-        <p className="text-3xl font-bold text-primary">
-          <EgpAmount value={unit.downPayment} translate={translate} />
-        </p>
-      </div>
+      {showMoneySplit && unit.downPayment != null ? (
+        <div className="mt-8 border-t border-black/10 pt-6">
+          <p className="text-xs text-black/60 mb-1">
+            {translate("lenaqar.unit.cashRequired")}
+          </p>
+          <p className="text-3xl font-bold text-primary">
+            <EgpAmount value={unit.downPayment} translate={translate} />
+          </p>
+        </div>
+      ) : (
+        <div className="mt-8 border-t border-black/10 pt-6" />
+      )}
 
       <dl className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
         {typeLabel ? (
@@ -146,7 +165,7 @@ export default function OpportunityDetailContent({ unit }) {
             </dd>
           </div>
         ) : null}
-        {Number(unit.overPrice) > 0 ? (
+        {Number(unit.overPrice) > 0 && showMoneySplit ? (
           <div className="flex justify-between gap-3">
             <dt className="text-black/60">{translate("lenaqar.unit.overPrice")}</dt>
             <dd>
@@ -154,7 +173,7 @@ export default function OpportunityDetailContent({ unit }) {
             </dd>
           </div>
         ) : null}
-        {unit.remainingAmount != null ? (
+        {unit.remainingAmount != null && showMoneySplit ? (
           <div className="flex justify-between gap-3">
             <dt className="text-black/60">
               {translate("lenaqar.unit.remaining")}
@@ -169,10 +188,36 @@ export default function OpportunityDetailContent({ unit }) {
             <dt className="text-black/60">{translate("lenaqar.unit.pricePerMeter")}</dt>
             <dd>
               <EgpAmount value={meterPrice} translate={translate} />
+              <span className="text-black/50"> /م²</span>
             </dd>
           </div>
         ) : null}
+        {paperStatus ? (
+          <div className="flex justify-between gap-3">
+            <dt className="text-black/60">حالة الورق</dt>
+            <dd>{String(paperStatus)}</dd>
+          </div>
+        ) : null}
+        {verificationLevel ? (
+          <div className="flex justify-between gap-3">
+            <dt className="text-black/60">مستوى التحقق</dt>
+            <dd>{String(verificationLevel)}</dd>
+          </div>
+        ) : null}
+        {lastCheckedLabel ? (
+          <div className="flex justify-between gap-3">
+            <dt className="text-black/60">آخر فحص</dt>
+            <dd className="tabular-nums">{lastCheckedLabel}</dd>
+          </div>
+        ) : null}
       </dl>
+
+      {!showMoneySplit ? (
+        <p className="mt-4 text-sm text-black/65">
+          أرقام المقدم والمتبقي مش متطابقة مع الإجمالي في البيانات دي — مخفيين لحد
+          المراجعة.
+        </p>
+      ) : null}
 
       {multipleLabel ? (
         <p className="mt-6 font-semibold">

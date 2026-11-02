@@ -31,8 +31,10 @@ export function marketplaceAddUnitMessage() {
  * Keep it short: welcome + anonymous ref only — the owner fills in their details.
  */
 export function addUnitForRequirementMessage(requirement) {
-  const ref = requirement?.id ? ` (مرجع: ${requirement.id})` : "";
-  return `مرحبا لينا عقار — عندي وحدة مناسبة للطلب ده${ref}:`;
+  const ref = requirement?.id
+    ? String(requirement.id).trim().toUpperCase()
+    : "HOME";
+  return `مرحبا لينا عقار، جاي من موقع لينا عقار — REQ-${ref}`;
 }
 
 export function addUnitForRequirementHref(requirement) {
@@ -43,10 +45,9 @@ export function addUnitForRequirementHref(requirement) {
 }
 
 export function buyerCtaMessage(unit) {
-  const project = unit?.projectAr || unit?.project || "";
-  const developer = unit?.developerAr || unit?.developer || "";
-  const code = unit?.code || "";
-  return `أهلاً، مهتم بالوحدة ${project} - ${developer} (${code}) من lenaqar.com`;
+  const code = String(unit?.code || "UNIT").trim().toUpperCase() || "UNIT";
+  // PAGE-CODE format (content-rules / contact-rules): route slug in caps.
+  return `مرحبا لينا عقار، جاي من موقع لينا عقار — OPP-${code}`;
 }
 
 export function buyerCtaHref(unit) {
