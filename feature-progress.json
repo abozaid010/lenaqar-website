@@ -9,11 +9,11 @@
     "research_snapshot": "content/guides/_research/aqarmap-asking-2026-11-02.json",
     "repo": "abozaid010/lenaqar-website",
     "canonical_host": "https://www.lenaqar.com",
-    "updated_at": "2026-11-02T21:33:24+02:00",
+    "updated_at": "2026-11-02T21:41:00+02:00",
     "current_git": {
-      "branch": "seo-phase-2",
-      "main_tip_at_branch_cut": "c3b612a6",
-      "head": "05d1388b",
+      "branch": "main",
+      "main_tip": "c8fe815e",
+      "head": "c8fe815e",
       "merged_prs": [
         {
           "number": 20,
@@ -24,18 +24,18 @@
           "number": 21,
           "title": "Content complete zero-draft guides",
           "merged": true
+        },
+        {
+          "number": 22,
+          "title": "SEO Phase 2: homepage, doors, golden footer, how-it-works",
+          "merged": true,
+          "merge_commit": "c8fe815e872128ce32fce31a920d3f560b3d730f"
         }
       ],
-      "open_pr": {
-        "number": 22,
-        "url": "https://github.com/abozaid010/lenaqar-website/pull/22",
-        "title": "SEO Phase 2: homepage, doors, golden footer, how-it-works",
-        "base": "main",
-        "head": "seo-phase-2"
-      }
+      "open_pr": null
     },
-    "active_phase": "phase-2-preview-qa-pass-awaiting-owner-merge",
-    "next_gate": "Owner explicit MERGE approval for PR #22. Do NOT start Phase 3 until live.",
+    "active_phase": "phase-2-merged-awaiting-production-deploy",
+    "next_gate": "Owner approval for production deploy of main c8fe815e. Do NOT start Phase 3 until Phase 2 is live on www.",
     "do_not": [
       "Merge or deploy Phase 2 without owner approval",
       "Start Phase 3 without Phase 2 live + gate",
@@ -203,7 +203,7 @@
     {
       "id": "phase-2",
       "name": "Homepage + IA (Arabic first)",
-      "status": "pr_open",
+      "status": "merged_awaiting_production",
       "gate": "Owner MERGE approval required — do not deploy without approval",
       "branch": "seo-phase-2",
       "build": {
@@ -331,7 +331,9 @@
           "valid_kBqU7H1A": "down/remaining/years retained; LD cash+years present",
           "seo_doors_how": "canonical www; FAQ/HowTo aligned; golden footer; no drafts; sitemap doors in / noindex guides out"
         }
-      }
+      },
+      "merged_at": "2026-11-02T21:41:00+02:00",
+      "merge_commit": "c8fe815e872128ce32fce31a920d3f560b3d730f"
     },
     {
       "id": "phase-3",
@@ -433,8 +435,8 @@
     },
     {
       "id": "PHASE2-PR-REVIEW",
-      "status": "open",
-      "summary": "Review and approve https://github.com/abozaid010/lenaqar-website/pull/22 (merge/deploy)"
+      "status": "done_merged",
+      "summary": "PR #22 merged to main as c8fe815e — production deploy still needs owner approval"
     }
   ],
   "done_means": [
@@ -445,23 +447,15 @@
     "Phase 4 citation re-test shows measurable improvement"
   ],
   "pr_ready_decision": {
-    "status": "PASS_AWAITING_OWNER_MERGE",
+    "status": "MERGED_AWAITING_PRODUCTION",
     "pr_url": "https://github.com/abozaid010/lenaqar-website/pull/22",
-    "merge_deploy": "NOT without owner approval — agent must not merge/deploy/start Phase 3",
-    "recommendation": "MERGE after owner explicit approval. Preview HTTP/RSC/SEO QA pass; CI SEO Audit green. Agent must not merge/deploy/start Phase 3.",
-    "blockers_resolved_in_review": [
-      "RSC/HTML leaked inconsistent money values on LNk7qZIF (down/remaining/over) — fixed via applyPublicMoneyTrust",
-      "installmentAmountYearly/Years rendered without showMoneySplit gate — fixed",
-      "Accidental REPORT/phase2-verify binary dumps in PR tip 2e8656cf — removed from tree"
-    ],
-    "owner_must_verify": [
-      "Explicit MERGE approval on https://github.com/abozaid010/lenaqar-website/pull/22"
-    ],
-    "non_blocking_exceptions": [
-      "77 CRM payment mismatches (REPORT/missing.json) — values redacted; totalPrice remains",
-      "12 intentionally noindex guides — excluded from sitemap (verified local)",
-      "P2-en-mirrors deferred",
-      "Vercel preview inaccessible to agent (SSO / team scope)"
+    "merge_commit": "c8fe815e872128ce32fce31a920d3f560b3d730f",
+    "merge_deploy": "Merged to main. Production deploy NOT without owner approval",
+    "recommendation": "STOP — wait for owner production deploy approval. Do not start Phase 3.",
+    "known_residuals": [
+      "installmentYears may remain in RSC when paymentSplitHidden and years are plausible (UI/schema gated)",
+      "~77 CRM payment mismatches (values redacted)",
+      "~12 intentionally noindex guides"
     ]
   },
   "maintenance_rules": [
