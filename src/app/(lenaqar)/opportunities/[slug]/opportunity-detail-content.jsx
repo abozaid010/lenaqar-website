@@ -62,7 +62,9 @@ export default function OpportunityDetailContent({ unit }) {
           },
         ]}
       />
-      {indexable ? <ListingSchema unit={unit} url={canonicalUrl} /> : null}
+      {indexable && showMoneySplit ? (
+        <ListingSchema unit={unit} url={canonicalUrl} />
+      ) : null}
 
       <h1 className="text-3xl font-bold text-primary leading-snug">
         {headline}
@@ -155,7 +157,7 @@ export default function OpportunityDetailContent({ unit }) {
             <dd className="tabular-nums">{deliveryLabel || unit.deliveryYear}</dd>
           </div>
         ) : null}
-        {unit.totalPrice != null && showMoneySplit ? (
+        {unit.totalPrice != null ? (
           <div className="flex justify-between gap-3">
             <dt className="text-black/60">{translate("lenaqar.unit.totalValue")}</dt>
             <dd>

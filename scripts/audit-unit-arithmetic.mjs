@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 /**
  * F-08: audit opportunity arithmetic + indexability against the live public catalog.
+ *
+ * Resale identity: down + remaining ≈ total + over (أوفر).
+ * Indexability: price + area + delivery (arithmetic does not noindex).
  */
 import fs from "fs";
 import path from "path";
@@ -29,11 +32,22 @@ function loadEnvFile(filePath) {
 loadEnvFile(path.join(root, ".env"));
 loadEnvFile(path.join(root, ".env.local"));
 
-const API_BASE = (
-  process.env.API_BASE_URL ||
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "https://api.lenaai.net"
-).replace(/\/$/, "");
+function resolveApiBase() {
+  const candidates = [
+    process.env.NEXT_PUBLIC_API_BASE_URL,
+    process.env.API_BASE_URL,
+    "https://api.lenaai.net",
+  ];
+  for (const raw of candidates) {
+    if (!raw) continue;
+    const base = String(raw).replace(/\/$/, "");
+    // Prefer public catalog for this audit — skip local/dev proxies.
+    if (/localhost|127\.0\.0\.1|0\.0\.0\.0|:3000|:8000/i.test(base)) continue;
+    return base;
+  }
+  return "https://api.lenaai.net";
+}
+const API_BASE = resolveApiBase();
 const API_KEY = (
   process.env.X_API_KEY ||
   process.env.NEXT_PUBLIC_X_API_KEY ||
@@ -44,6 +58,7 @@ const CLIENT_ID = (
 ).trim();
 
 function num(value) {
+  if (value == null || value === "") return null;
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
 }
@@ -55,12 +70,20 @@ function pick(unit, ...keys) {
   return null;
 }
 
+function withinPct(a, b, pct = 0.01) {
+  if (a == null || b == null) return false;
+  const denom = Math.max(Math.abs(a), Math.abs(b), 1);
+  return Math.abs(a - b) / denom <= pct;
+}
+
 function normalize(raw) {
   return {
     code: pick(raw, "code", "unit_code") || "",
     totalPrice: pick(raw, "totalPrice", "total_price", "price"),
     downPayment: pick(raw, "downPayment", "down_payment", "cash_required"),
     remainingAmount: pick(raw, "remainingAmount", "remaining_amount", "remaining"),
+    overPrice: pick(raw, "overPrice", "over_price"),
+    paidAmount: pick(raw, "paidAmount", "paid_amount"),
     landArea: pick(raw, "landArea", "land_area", "area", "meter"),
     deliveryDate: pick(raw, "deliveryDate", "delivery_date"),
     deliveryYear: pick(raw, "deliveryYear", "delivery_year"),
@@ -78,20 +101,51 @@ function arithmetic(unit) {
   const total = num(unit.totalPrice);
   const down = num(unit.downPayment);
   const remaining = num(unit.remainingAmount);
+  const over = num(unit.overPrice) ?? 0;
+  const paid = num(unit.paidAmount);
   if (total == null || down == null || remaining == null) {
-    return { ok: true, skipped: true, pct: "", total, down, remaining, sum: "" };
+    return {
+      ok: true,
+      skipped: true,
+      pct: "",
+      total,
+      down,
+      remaining,
+      over,
+      sum: "",
+      expected: "",
+    };
   }
+  if (down === 0 && remaining === 0) {
+    return {
+      ok: true,
+      skipped: true,
+      pct: "",
+      total,
+      down,
+      remaining,
+      over,
+      sum: "",
+      expected: "",
+    };
+  }
+  const expected = total + over;
   const sum = down + remaining;
-  const delta = Math.abs(total - sum);
-  const pct = total === 0 ? null : delta / Math.abs(total);
+  const okPrimary = withinPct(sum, expected);
+  const okPaid = paid != null ? withinPct(paid + remaining, total) : false;
+  const ok = okPrimary || okPaid;
+  const delta = Math.abs(expected - sum);
+  const pct = expected === 0 ? null : delta / Math.abs(expected);
   return {
-    ok: pct != null && pct <= 0.01,
+    ok,
     skipped: false,
     pct: pct == null ? "" : (pct * 100).toFixed(2),
     total,
     down,
     remaining,
+    over,
     sum,
+    expected,
   };
 }
 
@@ -99,8 +153,6 @@ function indexable(unit) {
   if (!(num(unit.totalPrice) > 0)) return false;
   if (!(num(unit.landArea) > 0)) return false;
   if (!(unit.deliveryDate || unit.deliveryYear)) return false;
-  const a = arithmetic(unit);
-  if (!a.skipped && !a.ok) return false;
   return true;
 }
 
@@ -143,7 +195,9 @@ async function main() {
     "total",
     "down",
     "remaining",
+    "over",
     "sum",
+    "expected",
     "delta_pct",
     "arith_ok",
     "has_area",
@@ -166,7 +220,9 @@ async function main() {
         a.total ?? "",
         a.down ?? "",
         a.remaining ?? "",
+        a.over ?? "",
         a.sum ?? "",
+        a.expected ?? "",
         a.pct,
         a.skipped ? "skipped" : a.ok,
         num(unit.landArea) > 0,

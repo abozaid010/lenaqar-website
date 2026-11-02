@@ -6,7 +6,7 @@
 const VERIFY_RE = /\[\[\s*VERIFY\b/i;
 /** Editorial draft labels — not every casual use of the Arabic word. */
 const DRAFT_RE =
-  /مسودة\s*لينا|مسودة\s*حذرة|جدول[^\n]{0,40}مسودة|##[^\n]{0,40}مسودة|description:[^\n]*مسودة/i;
+  /مسودة\s*لينا|مسودة\s*حذرة|مسودة\s*تحرير|جدول[^\n]{0,40}مسودة|##[^\n]{0,40}مسودة|description:[^\n]*مسودة/i;
 
 export function guideTextBlob(guide) {
   if (!guide) return "";
