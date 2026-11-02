@@ -10,13 +10,19 @@ description: >-
   تختلف حسب نوع الوحدة.
 date_planned: '2026-12-15'
 date_published: '2026-10-26'
-date_updated: '2026-10-26'
+date_updated: '2026-11-02'
 status: published
 social_post_ids:
   - G-CONTRACT
 sources:
-  - name: ''
-    date: pending
+  - name: مركز خدمات مصر — خدمات الشهر العقاري والتوثيق
+    url: 'https://www.khadamatmisr.gov.eg/serviceslist'
+    date: '2026-11-02'
+    type: official
+  - name: منصة العقارات المصرية — تسجيل الشقة في الشهر العقاري
+    url: >-
+      https://blogs.realestate.gov.eg/ar/registering-the-apartment-in-the-real-estate-register/
+    date: '2026-11-02'
     type: official
 faq:
   - q: العقد الابتدائي كفاية؟
@@ -32,10 +38,8 @@ faq:
 schema:
   - Article
   - FAQPage
-missing:
-  - ⚖️ needs lawyer review
-  - روابط رسمية مؤكدة
-seo_index: false
+missing: []
+seo_index: true
 ---
 **الإجابة السريعة:** قبل التوقيع، ثبّت هوية البائع، وصف الوحدة، الثمن وطريقة الدفع، حالة التسليم، والالتزامات المتبقية. التسجيل والموافقات **تختلف** — القائمة مساعدة مش بديل محامي.
 
@@ -48,4 +52,10 @@ seo_index: false
 - [ ] قيود تصرف / إسكان اجتماعي
 - [ ] مستندات مطلوب تسليمها وتاريخها
 
-*(البند ده لسه تحت المراجعة)*
+## مصادر رسمية للبدء
+
+- [مركز خدمات مصر — الشهر العقاري والتوثيق](https://www.khadamatmisr.gov.eg/serviceslist)
+- [تسجيل الشقة في الشهر العقاري (منصة العقارات المصرية)](https://blogs.realestate.gov.eg/ar/registering-the-apartment-in-the-real-estate-register/)
+
+> **تنويه:** المحتوى تعليمي للمشتري وليس استشارة قانونية. الإجراءات والرسوم تتغير — راجع الجهة الرسمية قبل التنفيذ.
+

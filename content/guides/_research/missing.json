@@ -1,0 +1,2445 @@
+{
+  "generated_at": "2026-11-02T16:29:59.104Z",
+  "policy": "No invented prices. Incomplete guides stay noindex. Inconsistent payment splits stay hidden publicly until CRM fix.",
+  "summary": {
+    "guides_total": 53,
+    "guides_indexable": 41,
+    "guides_noindex": 12,
+    "units_catalog": 480,
+    "units_inconsistent_money": 77,
+    "unresolved_records": 89
+  },
+  "unresolved": [
+    {
+      "type": "guide",
+      "id": "sheikh-zayed/pros-cons.md",
+      "slug": "/guides/sheikh-zayed/pros-cons/",
+      "missing_fields": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "available_values": {
+        "status": "published",
+        "seo_index": false,
+        "draft_marker": true
+      },
+      "research_attempted": [
+        "placeholder scan"
+      ],
+      "sources_checked": [],
+      "reason_unverified": "Contains pending-review placeholders",
+      "human_required": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "publication_status": "noindex_public_visible",
+      "indexing_status": "noindex,follow"
+    },
+    {
+      "type": "guide",
+      "id": "new-cairo/pros-cons.md",
+      "slug": "/guides/new-cairo/pros-cons/",
+      "missing_fields": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "available_values": {
+        "status": "published",
+        "seo_index": false,
+        "draft_marker": true
+      },
+      "research_attempted": [
+        "placeholder scan"
+      ],
+      "sources_checked": [],
+      "reason_unverified": "Contains pending-review placeholders",
+      "human_required": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "publication_status": "noindex_public_visible",
+      "indexing_status": "noindex,follow"
+    },
+    {
+      "type": "guide",
+      "id": "mostakbal-city/real-units.md",
+      "slug": "/guides/mostakbal-city/real-units/",
+      "missing_fields": [
+        "محتاج ≥3 وحدات كتالوج مطابقة لـ مدينة المستقبل (حالياً 1)"
+      ],
+      "available_values": {
+        "status": "published",
+        "seo_index": false,
+        "draft_marker": false
+      },
+      "research_attempted": [
+        "inventory/editorial"
+      ],
+      "sources_checked": [],
+      "reason_unverified": "Explicit seo_index false / incomplete inventory",
+      "human_required": [
+        "محتاج ≥3 وحدات كتالوج مطابقة لـ مدينة المستقبل (حالياً 1)"
+      ],
+      "publication_status": "noindex_public_visible",
+      "indexing_status": "noindex,follow"
+    },
+    {
+      "type": "guide",
+      "id": "mostakbal-city/pros-cons.md",
+      "slug": "/guides/mostakbal-city/pros-cons/",
+      "missing_fields": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "available_values": {
+        "status": "published",
+        "seo_index": false,
+        "draft_marker": true
+      },
+      "research_attempted": [
+        "placeholder scan"
+      ],
+      "sources_checked": [],
+      "reason_unverified": "Contains pending-review placeholders",
+      "human_required": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "publication_status": "noindex_public_visible",
+      "indexing_status": "noindex,follow"
+    },
+    {
+      "type": "guide",
+      "id": "madinaty/pros-cons.md",
+      "slug": "/guides/madinaty/pros-cons/",
+      "missing_fields": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "available_values": {
+        "status": "published",
+        "seo_index": false,
+        "draft_marker": true
+      },
+      "research_attempted": [
+        "placeholder scan"
+      ],
+      "sources_checked": [],
+      "reason_unverified": "Contains pending-review placeholders",
+      "human_required": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "publication_status": "noindex_public_visible",
+      "indexing_status": "noindex,follow"
+    },
+    {
+      "type": "guide",
+      "id": "fifth-settlement/pros-cons.md",
+      "slug": "/guides/fifth-settlement/pros-cons/",
+      "missing_fields": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "available_values": {
+        "status": "published",
+        "seo_index": false,
+        "draft_marker": true
+      },
+      "research_attempted": [
+        "placeholder scan"
+      ],
+      "sources_checked": [],
+      "reason_unverified": "Contains pending-review placeholders",
+      "human_required": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "publication_status": "noindex_public_visible",
+      "indexing_status": "noindex,follow"
+    },
+    {
+      "type": "guide",
+      "id": "compare/sheikh-zayed-vs-6th-of-october.md",
+      "slug": "/guides/compare/sheikh-zayed-vs-6th-of-october/",
+      "missing_fields": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "available_values": {
+        "status": "published",
+        "seo_index": false,
+        "draft_marker": true
+      },
+      "research_attempted": [
+        "placeholder scan"
+      ],
+      "sources_checked": [],
+      "reason_unverified": "Contains pending-review placeholders",
+      "human_required": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "publication_status": "noindex_public_visible",
+      "indexing_status": "noindex,follow"
+    },
+    {
+      "type": "guide",
+      "id": "compare/madinaty-vs-mostakbal-city.md",
+      "slug": "/guides/compare/madinaty-vs-mostakbal-city/",
+      "missing_fields": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "available_values": {
+        "status": "published",
+        "seo_index": false,
+        "draft_marker": true
+      },
+      "research_attempted": [
+        "placeholder scan"
+      ],
+      "sources_checked": [],
+      "reason_unverified": "Contains pending-review placeholders",
+      "human_required": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "publication_status": "noindex_public_visible",
+      "indexing_status": "noindex,follow"
+    },
+    {
+      "type": "guide",
+      "id": "compare/el-shorouk-vs-fifth-settlement.md",
+      "slug": "/guides/compare/el-shorouk-vs-fifth-settlement/",
+      "missing_fields": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "available_values": {
+        "status": "published",
+        "seo_index": false,
+        "draft_marker": true
+      },
+      "research_attempted": [
+        "placeholder scan"
+      ],
+      "sources_checked": [],
+      "reason_unverified": "Contains pending-review placeholders",
+      "human_required": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "publication_status": "noindex_public_visible",
+      "indexing_status": "noindex,follow"
+    },
+    {
+      "type": "guide",
+      "id": "buying/youth-social-housing-resale.md",
+      "slug": "/guides/buying/youth-social-housing-resale/",
+      "missing_fields": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "available_values": {
+        "status": "published",
+        "seo_index": false,
+        "draft_marker": true
+      },
+      "research_attempted": [
+        "placeholder scan"
+      ],
+      "sources_checked": [],
+      "reason_unverified": "Contains pending-review placeholders",
+      "human_required": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "publication_status": "noindex_public_visible",
+      "indexing_status": "noindex,follow"
+    },
+    {
+      "type": "guide",
+      "id": "buying/buying-resale-step-by-step.md",
+      "slug": "/guides/buying/buying-resale-step-by-step/",
+      "missing_fields": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "available_values": {
+        "status": "published",
+        "seo_index": false,
+        "draft_marker": true
+      },
+      "research_attempted": [
+        "placeholder scan"
+      ],
+      "sources_checked": [],
+      "reason_unverified": "Contains pending-review placeholders",
+      "human_required": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "publication_status": "noindex_public_visible",
+      "indexing_status": "noindex,follow"
+    },
+    {
+      "type": "guide",
+      "id": "6th-of-october/pros-cons.md",
+      "slug": "/guides/6th-of-october/pros-cons/",
+      "missing_fields": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "available_values": {
+        "status": "published",
+        "seo_index": false,
+        "draft_marker": true
+      },
+      "research_attempted": [
+        "placeholder scan"
+      ],
+      "sources_checked": [],
+      "reason_unverified": "Contains pending-review placeholders",
+      "human_required": [
+        "محتوى فيه عناصر «تحت المراجعة» — لا يُفهرس لحد الاكتمال"
+      ],
+      "publication_status": "noindex_public_visible",
+      "indexing_status": "noindex,follow"
+    },
+    {
+      "type": "unit",
+      "id": "LNk7qZIF",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 7677290,
+        "downPayment": 2100000,
+        "remainingAmount": 6220000,
+        "overPrice": 450000,
+        "paidAmount": 1650000,
+        "landArea": 107,
+        "delivery": "2029-01-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "MguPxCF0",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 7526640,
+        "downPayment": 1581500,
+        "remainingAmount": 6290140,
+        "overPrice": null,
+        "paidAmount": 1581500,
+        "landArea": 107,
+        "delivery": "2025-08-08T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "5LeonlAN",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 9140710,
+        "downPayment": 1760000,
+        "remainingAmount": 7500000,
+        "overPrice": 260000,
+        "paidAmount": 1500000,
+        "landArea": 123,
+        "delivery": "2028-01-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "c4a5uMaU",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 891000,
+        "downPayment": 880000,
+        "remainingAmount": 3400000,
+        "overPrice": 370000,
+        "paidAmount": 510000,
+        "landArea": 96,
+        "delivery": "2028-06-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "WqID7jY8",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 5000000,
+        "downPayment": 672000,
+        "remainingAmount": 3820473,
+        "overPrice": null,
+        "paidAmount": 672000,
+        "landArea": 101,
+        "delivery": "2029-09-17T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "in5oONFU",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 7890000,
+        "downPayment": 7100000,
+        "remainingAmount": 3311000,
+        "overPrice": 3000000,
+        "paidAmount": 4100000,
+        "landArea": 220,
+        "delivery": "2026-10-06T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "b9qfPfCR",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 13900000,
+        "downPayment": 1218000,
+        "remainingAmount": 7855000,
+        "overPrice": 1000000,
+        "paidAmount": 218000,
+        "landArea": 175,
+        "delivery": "2027-12-31T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "8nrHtiOr",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 11163070,
+        "downPayment": 2345560,
+        "remainingAmount": 9329250,
+        "overPrice": null,
+        "paidAmount": 2345560,
+        "landArea": 140,
+        "delivery": "2025-08-08T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "TDGA9RZ3",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 8057860,
+        "downPayment": 3005805,
+        "remainingAmount": 6677390,
+        "overPrice": 250000,
+        "paidAmount": 2755805,
+        "landArea": 109,
+        "delivery": "2028-10-23T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "UQDfGEBg",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 7920000,
+        "downPayment": 4050000,
+        "remainingAmount": 4420000,
+        "overPrice": 1000000,
+        "paidAmount": 3050000,
+        "landArea": 166,
+        "delivery": "2028-02-03T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "q2IIFhcz",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 6500000,
+        "downPayment": 1200000,
+        "remainingAmount": 5300000,
+        "overPrice": 1199994,
+        "paidAmount": 6,
+        "landArea": 113,
+        "delivery": "2028-09-11T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "eHI8R1Up",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 7677290,
+        "downPayment": 2100000,
+        "remainingAmount": 6220000,
+        "overPrice": 450000,
+        "paidAmount": 1650000,
+        "landArea": 107,
+        "delivery": "2029-01-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "qg5IyLgB",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 14300000,
+        "downPayment": 11000000,
+        "remainingAmount": 3300000,
+        "overPrice": 8130000,
+        "paidAmount": 2870000,
+        "landArea": 231,
+        "delivery": "2027-12-13T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "vhtW8RPZ",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 17340000,
+        "downPayment": 2550000,
+        "remainingAmount": 14870000,
+        "overPrice": 2550000,
+        "paidAmount": 2550000,
+        "landArea": 255,
+        "delivery": "2035-01-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "lLJQEpmX",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 4431800,
+        "downPayment": 3163430,
+        "remainingAmount": 1268370,
+        "overPrice": 950000,
+        "paidAmount": 2213430,
+        "landArea": 139,
+        "delivery": "2026-09-07T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "CBTghpne",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 7916766,
+        "downPayment": 1682764,
+        "remainingAmount": 5789132,
+        "overPrice": null,
+        "paidAmount": 2127634,
+        "landArea": 114,
+        "delivery": "2027-05-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "Zm0o27Bd",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 11532643,
+        "downPayment": 9700000,
+        "remainingAmount": 1832543,
+        "overPrice": 9700000,
+        "paidAmount": 9700000,
+        "landArea": 177,
+        "delivery": "2026-11-20T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "HPDrfY9H",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 18900000,
+        "downPayment": 8280000,
+        "remainingAmount": 6280000,
+        "overPrice": 2000000,
+        "paidAmount": 6280000,
+        "landArea": 320,
+        "delivery": "2026-09-12T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "Sc95rEyq",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 7500000,
+        "downPayment": 7200000,
+        "remainingAmount": 9000000,
+        "overPrice": 2000000,
+        "paidAmount": 5200000,
+        "landArea": 210,
+        "delivery": "2026-10-14T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "9P0u1uBw",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 3574000,
+        "downPayment": 1700000,
+        "remainingAmount": 2074000,
+        "overPrice": 500000,
+        "paidAmount": 1200000,
+        "landArea": 120,
+        "delivery": "2025-09-13T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "SzrKaLWi",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 3930000,
+        "downPayment": 445000,
+        "remainingAmount": 1570000,
+        "overPrice": 0,
+        "paidAmount": 2350000,
+        "landArea": 121,
+        "delivery": "2029-03-15T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "iHWV5Ifr",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 4300000,
+        "downPayment": 1720000,
+        "remainingAmount": 1850000,
+        "overPrice": null,
+        "paidAmount": 1720000,
+        "landArea": 183,
+        "delivery": "2027-12-15T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "2BpUqecx",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 1865000,
+        "downPayment": 3165000,
+        "remainingAmount": 1400000,
+        "overPrice": 1300000,
+        "paidAmount": 1865000,
+        "landArea": 67,
+        "delivery": "2027-01-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "BgCKKG4a",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 1150000,
+        "downPayment": 1400000,
+        "remainingAmount": 4300000,
+        "overPrice": 700000,
+        "paidAmount": 700000,
+        "landArea": 68,
+        "delivery": "2026-09-21T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "73DRwMeG",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 59000000,
+        "downPayment": 59000000,
+        "remainingAmount": 9000000,
+        "overPrice": null,
+        "paidAmount": 5000000,
+        "landArea": 681,
+        "delivery": "2026-10-19T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "MjkP6ywd",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 27500000,
+        "downPayment": 8500000,
+        "remainingAmount": 11500000,
+        "overPrice": 8500000,
+        "paidAmount": 8500000,
+        "landArea": 245,
+        "delivery": "2027-09-11T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "r7WP8X1y",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 11532643,
+        "downPayment": 9700000,
+        "remainingAmount": 1832543,
+        "overPrice": 9700000,
+        "paidAmount": 9700000,
+        "landArea": 177,
+        "delivery": "2026-11-20T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "DvrqopGi",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 13439000,
+        "downPayment": 2300000,
+        "remainingAmount": 11139000,
+        "overPrice": 563900,
+        "paidAmount": 1736100,
+        "landArea": 113,
+        "delivery": "2026-03-10T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "A6gL2rDY",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 7516530,
+        "downPayment": 2750000,
+        "remainingAmount": 5500000,
+        "overPrice": 1150000,
+        "paidAmount": 1600000,
+        "landArea": 123,
+        "delivery": "2027-01-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "ke69Ib8e",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 146000000,
+        "downPayment": 7046000,
+        "remainingAmount": 64400,
+        "overPrice": 46000,
+        "paidAmount": 7000000,
+        "landArea": 171,
+        "delivery": "2026-10-17T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "DiNhnPL4",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 13908809,
+        "downPayment": 971600,
+        "remainingAmount": 3,
+        "overPrice": 0,
+        "paidAmount": 2055000,
+        "landArea": 140,
+        "delivery": "2027-08-07T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "2c7PSv1o",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 6227350,
+        "downPayment": 2900000,
+        "remainingAmount": 3327350,
+        "overPrice": 1800000,
+        "paidAmount": 1100000,
+        "landArea": 123,
+        "delivery": "2027-06-24T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "gWzvpYY8",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 3500000,
+        "downPayment": 1500000,
+        "remainingAmount": 2000000,
+        "overPrice": 250000,
+        "paidAmount": 1250000,
+        "landArea": 110,
+        "delivery": "2026-09-17T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "1ejPVeEl",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 8055000,
+        "downPayment": 3300000,
+        "remainingAmount": 5430000,
+        "overPrice": 200000,
+        "paidAmount": 3100000,
+        "landArea": 111,
+        "delivery": "2024-09-10T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "QTZxLSQs",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 10000000,
+        "downPayment": 10000000,
+        "remainingAmount": 13000000,
+        "overPrice": 1000000,
+        "paidAmount": 9000000,
+        "landArea": 420,
+        "delivery": "2026-09-14T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "rl7R9J8R",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 3000000,
+        "downPayment": 834500,
+        "remainingAmount": 2000000,
+        "overPrice": 500,
+        "paidAmount": 834000,
+        "landArea": 66,
+        "delivery": "2028-01-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "Yq9x6fuJ",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 8000000,
+        "downPayment": 2000000,
+        "remainingAmount": 0,
+        "overPrice": 400000,
+        "paidAmount": 0,
+        "landArea": 108,
+        "delivery": "2028-04-26T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "olmi52Ut",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 5700000,
+        "downPayment": 3700000,
+        "remainingAmount": 2000000,
+        "overPrice": 2950000,
+        "paidAmount": 750000,
+        "landArea": 116,
+        "delivery": "2026-07-28T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "9xtcmD20",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 1890000,
+        "downPayment": 1750000,
+        "remainingAmount": 1000000,
+        "overPrice": 750000,
+        "paidAmount": 1000000,
+        "landArea": 86,
+        "delivery": "2027-04-13T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "SF3Qh8Xw",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 13908809,
+        "downPayment": 971600,
+        "remainingAmount": 11853809,
+        "overPrice": 0,
+        "paidAmount": 2055000,
+        "landArea": 140,
+        "delivery": "2029-09-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "aXcvoehA",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 6883570,
+        "downPayment": 1315000,
+        "remainingAmount": 0,
+        "overPrice": 250000,
+        "paidAmount": 1315000,
+        "landArea": 67,
+        "delivery": "2027-01-23T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "tbySEvGg",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 1120000,
+        "downPayment": 1120000,
+        "remainingAmount": 560000,
+        "overPrice": null,
+        "paidAmount": 1120000,
+        "landArea": 25,
+        "delivery": "2027-03-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "swCOkYNN",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 8707000,
+        "downPayment": 2690000,
+        "remainingAmount": 6217000,
+        "overPrice": 2000000,
+        "paidAmount": 2490000,
+        "landArea": 243,
+        "delivery": "2026-09-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "gSht9MA0",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 8400000,
+        "downPayment": 6000000,
+        "remainingAmount": 2400000,
+        "overPrice": 1400000,
+        "paidAmount": 4600000,
+        "landArea": 137,
+        "delivery": "2026-10-20T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "EwCZc8o6",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 5015690,
+        "downPayment": 897375,
+        "remainingAmount": 4181950,
+        "overPrice": 250000,
+        "paidAmount": 647375,
+        "landArea": 67,
+        "delivery": "2028-11-02T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "cFIv57bH",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 4430000,
+        "downPayment": 2000000,
+        "remainingAmount": 2430000,
+        "overPrice": 1000000,
+        "paidAmount": 1000000,
+        "landArea": 141,
+        "delivery": "2025-09-13T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "jLkiKytn",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 6500000,
+        "downPayment": 6500000,
+        "remainingAmount": 5100000,
+        "overPrice": 2874000,
+        "paidAmount": 3626000,
+        "landArea": 212,
+        "delivery": "2027-09-11T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "9Uqby6Fn",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 3800000,
+        "downPayment": 2500000,
+        "remainingAmount": 1300000,
+        "overPrice": 2500000,
+        "paidAmount": 2500000,
+        "landArea": 102,
+        "delivery": "2027-01-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "Nk7QuzKn",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 5700000,
+        "downPayment": 1200000,
+        "remainingAmount": 4500000,
+        "overPrice": 450000,
+        "paidAmount": 1200000,
+        "landArea": 67,
+        "delivery": "2028-12-28T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "8PTPiBtE",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 2685000,
+        "downPayment": 268500,
+        "remainingAmount": 2685000,
+        "overPrice": 200000,
+        "paidAmount": 0,
+        "landArea": 72,
+        "delivery": "2030-08-26T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "4ETezZWh",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 16195000,
+        "downPayment": 1300000,
+        "remainingAmount": 14895000,
+        "overPrice": 400000,
+        "paidAmount": 900000,
+        "landArea": 125,
+        "delivery": "2030-09-11T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "MCdcaOqW",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 16000000,
+        "downPayment": 1170000,
+        "remainingAmount": 4300000,
+        "overPrice": null,
+        "paidAmount": 1170000,
+        "landArea": 223,
+        "delivery": "2026-09-13T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "zvSanxkO",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 770000,
+        "downPayment": 780000,
+        "remainingAmount": 250000,
+        "overPrice": 10000,
+        "paidAmount": 780000,
+        "landArea": 90,
+        "delivery": "2026-10-18T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "NMHJLp5w",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 3286409,
+        "downPayment": 2300000,
+        "remainingAmount": 2133441,
+        "overPrice": 882032,
+        "paidAmount": 1417968,
+        "landArea": 112,
+        "delivery": "2026-10-10T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "fJKthJlq",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 2000000,
+        "downPayment": 2000000,
+        "remainingAmount": 415000,
+        "overPrice": 363000,
+        "paidAmount": 1637000,
+        "landArea": 100,
+        "delivery": "2028-11-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "szmSgE9B",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 7000000,
+        "downPayment": 4000000,
+        "remainingAmount": 1329220,
+        "overPrice": 2800000,
+        "paidAmount": 1200000,
+        "landArea": 96,
+        "delivery": "2026-01-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "D660FU4a",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 12400000,
+        "downPayment": 1820000,
+        "remainingAmount": 10380000,
+        "overPrice": null,
+        "paidAmount": 1820000,
+        "landArea": 162,
+        "delivery": "2028-09-13T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "baRn1dPX",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 9900000,
+        "downPayment": 500000,
+        "remainingAmount": 9900000,
+        "overPrice": null,
+        "paidAmount": 500000,
+        "landArea": 100,
+        "delivery": "2029-03-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "6dk8ymyQ",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 5710000,
+        "downPayment": 0,
+        "remainingAmount": 3811410,
+        "overPrice": 1000000,
+        "paidAmount": 1898590,
+        "landArea": 135,
+        "delivery": "2027-01-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "DirFaOe9",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 4200000,
+        "downPayment": 4165000,
+        "remainingAmount": 3000000,
+        "overPrice": 1200000,
+        "paidAmount": 2965000,
+        "landArea": 100,
+        "delivery": "2026-09-17T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "CAx52jvn",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 7350000,
+        "downPayment": 2000000,
+        "remainingAmount": 5350000,
+        "overPrice": 500000,
+        "paidAmount": 1500000,
+        "landArea": 112,
+        "delivery": "2029-01-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "sYo6dIJk",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 8200000,
+        "downPayment": 306250,
+        "remainingAmount": 6800000,
+        "overPrice": 300000,
+        "paidAmount": 1600000,
+        "landArea": 107,
+        "delivery": "2028-01-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "YH8g3EcJ",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 2100000,
+        "downPayment": 2150000,
+        "remainingAmount": 666000,
+        "overPrice": 300000,
+        "paidAmount": 1850000,
+        "landArea": 110,
+        "delivery": "2026-10-16T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "YHr1HQV4",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 11500000,
+        "downPayment": 7000000,
+        "remainingAmount": 5500000,
+        "overPrice": 2000000,
+        "paidAmount": 5000000,
+        "landArea": 175,
+        "delivery": "2027-01-10T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "T3k6oHWY",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 12673040,
+        "downPayment": 2667740,
+        "remainingAmount": 10692950,
+        "overPrice": 250000,
+        "paidAmount": 2417740,
+        "landArea": 141,
+        "delivery": "2028-11-19T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "alueST37",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 4070107,
+        "downPayment": 1517000,
+        "remainingAmount": 1000000,
+        "overPrice": 500000,
+        "paidAmount": 1017000,
+        "landArea": 33,
+        "delivery": "2029-07-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "wcU8tcbq",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 8300000,
+        "downPayment": 4000000,
+        "remainingAmount": 4300000,
+        "overPrice": 550000,
+        "paidAmount": 0,
+        "landArea": 139,
+        "delivery": "2026-07-29T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "sEnlvbVs",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 6900000,
+        "downPayment": 4250000,
+        "remainingAmount": 4000000,
+        "overPrice": 250000,
+        "paidAmount": 4000000,
+        "landArea": 135,
+        "delivery": "2026-10-18T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "vbzCC6sj",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 9300000,
+        "downPayment": 5850000,
+        "remainingAmount": 4500000,
+        "overPrice": 250000,
+        "paidAmount": 3850000,
+        "landArea": 150,
+        "delivery": "2026-07-28T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "BTYgYNRL",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 5169259,
+        "downPayment": 2000000,
+        "remainingAmount": 3876000,
+        "overPrice": 500000,
+        "paidAmount": 1500000,
+        "landArea": 111,
+        "delivery": "2024-09-21T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "mnUDiF13",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 3570000,
+        "downPayment": 1633632,
+        "remainingAmount": 2293368,
+        "overPrice": 0,
+        "paidAmount": 1276632,
+        "landArea": 68,
+        "delivery": "2028-07-30T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "rbUtArmJ",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 16000000,
+        "downPayment": 650000,
+        "remainingAmount": 15700000,
+        "overPrice": null,
+        "paidAmount": 650000,
+        "landArea": 102,
+        "delivery": "2026-09-28T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "zOHiXmp6",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 21600000,
+        "downPayment": 1080000,
+        "remainingAmount": 21600000,
+        "overPrice": null,
+        "landArea": 260,
+        "delivery": "2026-10-14T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "UcjCaf2J",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 4371380,
+        "downPayment": 3000000,
+        "remainingAmount": 1371380,
+        "overPrice": 1130000,
+        "paidAmount": 1870000,
+        "landArea": 140,
+        "delivery": "2026-10-14T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "ASYiERyG",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 19000000,
+        "downPayment": 19000000,
+        "remainingAmount": 6000000,
+        "overPrice": 16000000,
+        "paidAmount": 3000000,
+        "landArea": 103,
+        "delivery": "2028-01-01T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "ju9hcEUG",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 12430000,
+        "downPayment": 2400000,
+        "remainingAmount": 10030000,
+        "overPrice": 550000,
+        "paidAmount": 0,
+        "landArea": 108,
+        "delivery": "2026-06-20T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    },
+    {
+      "type": "unit",
+      "id": "zuDZh8GV",
+      "missing_fields": [
+        "payment_split_consistency"
+      ],
+      "available_values": {
+        "totalPrice": 15000000,
+        "downPayment": 13000000,
+        "remainingAmount": 2000000,
+        "overPrice": 2000000,
+        "paidAmount": 11000000,
+        "landArea": 222,
+        "delivery": "2026-10-31T00:00:00Z"
+      },
+      "research_attempted": [
+        "down+remaining ≈ total+over; paid+remaining ≈ total"
+      ],
+      "sources_checked": [
+        "public catalog via toPublicOpportunity"
+      ],
+      "reason_unverified": "Payment breakdown inconsistent; split fields hidden in detail/card/meta/schema — totalPrice may still show",
+      "human_required": [
+        "Correct CRM payment fields"
+      ],
+      "publication_status": "public_opportunity_page",
+      "indexing_status": "index (money split hidden)"
+    }
+  ]
+}

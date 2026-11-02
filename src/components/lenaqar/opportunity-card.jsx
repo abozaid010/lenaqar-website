@@ -13,6 +13,7 @@ import {
   projectLabel,
   roomsLabelAr,
 } from "@/lib/lenaqar/listing-seo";
+import { unitArithmetic } from "@/lib/lenaqar/unit-trust";
 import EgpAmount from "./egp-amount";
 import OpportunityUnitActions from "./opportunity-unit-actions";
 
@@ -37,7 +38,9 @@ export default function OpportunityCard({ unit }) {
   const typeLabel = buildingTypeAr(unit.buildingType) || null;
   const deliveryLabel = formatDeliveryDate(unit.deliveryDate, "ar");
   const href = `/opportunities/${encodeURIComponent(unit.code)}`;
-  const showOffer = Number(unit.overPrice) > 0;
+  const arith = unitArithmetic(unit);
+  const showMoneySplit = arith.skipped || arith.ok;
+  const showOffer = showMoneySplit && Number(unit.overPrice) > 0;
 
   return (
     <article className="rounded-lg border border-black/10 bg-white overflow-hidden flex flex-col">
@@ -98,7 +101,7 @@ export default function OpportunityCard({ unit }) {
           </div>
         ) : null}
 
-        {unit.downPayment != null ? (
+        {showMoneySplit && unit.downPayment != null ? (
           <p className="text-sm font-semibold text-emerald-700">
             {translate("lenaqar.unit.cashRequired")}{" "}
             <EgpAmount value={unit.downPayment} translate={translate} />
