@@ -8,14 +8,28 @@ import { localizedPlaceName } from "@/lib/lenaqar/place-display";
 import EgpAmount from "./egp-amount";
 import WhatsAppCta from "./whatsapp-cta";
 
+const KNOWN_DELIVERY = new Set([
+  "ready",
+  "immediate",
+  "delivered",
+  "less_than_1_year",
+  "less_than_2_years",
+  "less_than_3_years",
+  "less_than_4_years",
+  "less_than_5_years",
+]);
+
 function deliveryLabel(value, translate) {
   const raw = String(value || "").trim();
   if (!raw) return null;
-  const key = `lenaqar.marketplace.delivery.${raw}`;
-  const labeled = translate(key, "");
-  if (labeled && labeled !== key) return labeled;
+  if (KNOWN_DELIVERY.has(raw)) {
+    const key = `lenaqar.marketplace.delivery.${raw}`;
+    const labeled = translate(key, "");
+    if (labeled && labeled !== key && labeled !== "invalid_key") return labeled;
+  }
   if (/^\d{4}-\d{2}/.test(raw)) return raw.slice(0, 7);
-  return raw.replace(/_/g, " ");
+  // Unknown API token → hide the row (never render invalid_key or raw junk).
+  return null;
 }
 
 function locationLine(requirement, locale) {

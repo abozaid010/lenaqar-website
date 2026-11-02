@@ -133,7 +133,8 @@ export function validateTranslationKey(key, fallback = null) {
     return {
       isValid: false,
       safeKey: null,
-      fallback: fallback || 'invalid_key'
+      // Preserve empty-string fallbacks (callers use "" to mean "hide / missing").
+      fallback: fallback != null ? fallback : 'invalid_key'
     };
   }
 
