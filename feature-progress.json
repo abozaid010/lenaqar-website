@@ -453,7 +453,7 @@
     "merge_deploy": "Merged to main. Production deploy NOT without owner approval",
     "recommendation": "STOP — wait for owner production deploy approval. Do not start Phase 3.",
     "known_residuals": [
-      "installmentYears may remain in RSC when paymentSplitHidden and years are plausible (UI/schema gated)",
+      "installmentYears nullified with paymentSplitHidden — open PR fix/null-installment-years-when-split-hidden (await merge+prod)",
       "~77 CRM payment mismatches (values redacted)",
       "~12 intentionally noindex guides"
     ]

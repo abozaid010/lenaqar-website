@@ -41,8 +41,10 @@ export function plausibleInstallmentYears(value) {
 /**
  * When down+remaining disagree with total(+over), strip split fields from
  * the public payload so they cannot leak via RSC/HTML/JSON-LD. Keeps
- * totalPrice. Sets paymentSplitHidden so UI can show the inconsistency
- * notice even after fields are null (arith would otherwise look "skipped").
+ * totalPrice. Also nulls installmentYears — a lone duration without amounts
+ * still implies a plan in RSC. Sets paymentSplitHidden so UI can show the
+ * inconsistency notice even after fields are null (arith would otherwise
+ * look "skipped").
  */
 export function applyPublicMoneyTrust(unit) {
   if (!unit || typeof unit !== "object") return unit;
@@ -61,6 +63,7 @@ export function applyPublicMoneyTrust(unit) {
     remainingAmount: null,
     overPrice: null,
     installmentAmountYearly: null,
+    installmentYears: null,
     cashMultiple: null,
   };
 }
