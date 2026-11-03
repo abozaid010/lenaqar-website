@@ -1,5 +1,8 @@
 import { formatPhoneForWhatsApp } from "@/utils/phone-utils";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
+import { buyerPageCtaMessage } from "./whatsapp-intent.js";
+
+export { buyerPageCtaMessage } from "./whatsapp-intent.js";
 
 const SELLER_MESSAGE = "عندى وحده عايز ابيعها من غير اوفر";
 
@@ -54,5 +57,12 @@ export function buyerCtaHref(unit) {
   return formatPhoneForWhatsApp(
     LENAQAR_CONTACT.whatsappE164,
     buyerCtaMessage(unit)
+  );
+}
+
+export function buyerPageCtaHref(pathname = "/") {
+  return formatPhoneForWhatsApp(
+    LENAQAR_CONTACT.whatsappE164,
+    buyerPageCtaMessage(pathname),
   );
 }

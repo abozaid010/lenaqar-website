@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run Node regression tests
+        run: node --test src/lib/lenaqar/__tests__/*.test.js src/lib/__tests__/meta-contact-events.test.js
+
       - name: Run ESLint
         run: npm run lint
         continue-on-error: false

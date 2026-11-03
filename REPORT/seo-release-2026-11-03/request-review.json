@@ -1,0 +1,39 @@
+{
+  "observedAt": "2026-11-03T19:43:22.657Z",
+  "http": 200,
+  "publicRecords": 26,
+  "reviewed": [
+    {
+      "id": "61240565aa04",
+      "upstreamMonthly": 85000,
+      "upstreamDown": 1300000,
+      "upstreamMax": 4500000,
+      "noteHas8500": true,
+      "noteHas18750": false,
+      "redactedKeys": [
+        "minPrice",
+        "maxPrice",
+        "downPayment",
+        "monthlyInstallment",
+        "notes"
+      ],
+      "reviewMarker": true
+    },
+    {
+      "id": "f4eaaa7a591f",
+      "upstreamMonthly": 25000,
+      "upstreamDown": 500000,
+      "upstreamMax": 2000000,
+      "noteHas8500": false,
+      "noteHas18750": true,
+      "redactedKeys": [
+        "minPrice",
+        "maxPrice",
+        "downPayment",
+        "monthlyInstallment",
+        "notes"
+      ],
+      "reviewMarker": true
+    }
+  ]
+}

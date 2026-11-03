@@ -46,14 +46,10 @@ export function plausibleInstallmentYears(value) {
  * inconsistency notice even after fields are null (arith would otherwise
  * look "skipped").
  */
-export function applyPublicMoneyTrust(unit) {
+export function applyPublicMoneyTrust(unit, evidence = {}) {
   if (!unit || typeof unit !== "object") return unit;
-  const arith = unitArithmetic(unit);
-  if (arith.skipped || arith.ok) {
-    if (unit.paymentSplitHidden) {
-      const { paymentSplitHidden: _drop, ...rest } = unit;
-      return rest;
-    }
+  const assessment = assessPublicMoney(unit, evidence);
+  if (assessment.showSplit) {
     return unit;
   }
   return {
@@ -68,12 +64,40 @@ export function applyPublicMoneyTrust(unit) {
   };
 }
 
+/** Internal evidence never becomes part of the public object.
+ * A paid+remaining identity supports total, but cannot validate a conflicting
+ * cash/down field. Keep the whole split hidden until those claims reconcile.
+ */
+export function assessPublicMoney(unit, evidence = {}) {
+  const arithmetic = unitArithmetic({ ...unit, paidAmount: evidence.paidAmount ?? unit?.paidAmount });
+  if (unit?.paymentSplitHidden) return { showSplit: false, reason: "already_hidden" };
+  if (arithmetic.skipped) {
+    // A complete annual schedule can establish the split without a separate
+    // remaining-balance field. Do not infer any missing amount for publication.
+    const total = num(unit?.totalPrice);
+    const down = num(unit?.downPayment);
+    const yearly = num(unit?.installmentAmountYearly);
+    const years = plausibleInstallmentYears(unit?.installmentYears);
+    const remaining = num(unit?.remainingAmount);
+    const over = num(unit?.overPrice) ?? 0;
+    if (remaining == null && total > 0 && down >= 0 && yearly > 0 && years &&
+        withinPct(down + yearly * years, total + over)) {
+      return { showSplit: true, reason: "annual_identity" };
+    }
+    const hasClaims = [unit?.downPayment, unit?.remainingAmount, unit?.overPrice,
+      unit?.installmentAmountYearly, unit?.installmentYears, unit?.cashMultiple]
+      .some(value => num(value) != null && num(value) !== 0);
+    return { showSplit: !hasClaims, reason: hasClaims ? "incomplete_claims" : "no_split" };
+  }
+  if (arithmetic.okPrimary) return { showSplit: true, reason: "primary_identity" };
+  return { showSplit: false, reason: arithmetic.okPaid ? "paid_identity_only" : "inconsistent" };
+}
+
 /** True when public UI/meta may expose cash / remaining / plan amounts. */
 export function mayShowMoneySplit(unit) {
   if (!unit) return false;
   if (unit.paymentSplitHidden) return false;
-  const arith = unitArithmetic(unit);
-  return arith.skipped || arith.ok;
+  return assessPublicMoney(unit).showSplit;
 }
 
 function withinPct(a, b, pct = 0.01) {
@@ -109,6 +133,8 @@ export function unitArithmetic(unit) {
 
   return {
     ok,
+    okPrimary,
+    okPaid,
     skipped: false,
     delta,
     pct,

@@ -57,7 +57,7 @@ export default function OpportunityCard({ unit }) {
           </span>
         ) : unit.totalPrice != null ? (
           <span className="absolute top-2 end-2 text-xs bg-white/90 text-primary px-2 py-1 rounded">
-            {translate("lenaqar.unit.developerPrice")}
+            {translate("lenaqar.unit.askingPrice")}
           </span>
         ) : null}
       </Link>

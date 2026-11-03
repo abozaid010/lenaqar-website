@@ -141,6 +141,11 @@ export default function RequirementCard({ requirement }) {
             </li>
           ) : null}
         </ul>
+        {requirement.moneyReviewRequired ? (
+          <p className="mt-3 text-sm leading-relaxed text-black/70">
+            {translate("lenaqar.requirements.moneyReviewNotice")}
+          </p>
+        ) : null}
         {notes ? (
           <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-black/70">
             <span className="font-semibold text-primary/80">

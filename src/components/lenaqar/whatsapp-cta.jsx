@@ -1,7 +1,7 @@
 "use client";
 
 import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
-import { trackMetaContact } from "@/lib/meta-pixel";
+import { trackMetaContactForClick } from "@/lib/meta-pixel";
 
 const WHATSAPP_CLASS =
   "inline-flex items-center justify-center gap-2 rounded-md bg-[#25D366] hover:bg-[#20BA5A] text-white font-medium px-4 py-3 text-sm shadow-md transition-colors";
@@ -20,7 +20,7 @@ export default function WhatsAppCta({
 
   function handleClick(event) {
     if (eventName) trackEvent(eventName);
-    trackMetaContact();
+    trackMetaContactForClick(event);
     if (!href || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
       return;
     }

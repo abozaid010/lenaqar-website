@@ -144,10 +144,11 @@ test("opportunity prefill maps listing fields and drops identity", () => {
   assert.equal(prefill.images[0].fileId, undefined);
 });
 
-test("allowlist keeps overPrice and still drops cache_price", () => {
+test("allowlist keeps reconciled overPrice and still drops cache_price", () => {
   const mapped = toPublicOpportunity({
     ...cleanTmgUnit,
     over_price: 150000,
+    remaining_amount: cleanTmgUnit.totalPrice + 150000 - cleanTmgUnit.downPayment,
     cache_price: 1,
   });
   assert.equal(mapped.overPrice, 150000);

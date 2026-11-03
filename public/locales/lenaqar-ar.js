@@ -217,9 +217,9 @@ export default {
     delivery: "الاستلام",
     totalValue: "إجمالي العقد",
     cashMultiple: "مضاعف الكاش",
-    priceUpdated: "سعر المطور محدّث: {date}",
+    recordUpdated: "آخر تحديث للسجل: {date}",
     pricePerMeter: "سعر المتر",
-    developerPrice: "سعر من المطور",
+    askingPrice: "السعر المعروض",
     primary: "أساسي",
     resale: "إعادة بيع",
     rooms: "الغرف",
@@ -238,7 +238,7 @@ export default {
   network: {
     developer: "طلعت مصطفى — TMG",
     projects: "نور · مدينتي · ساوث ميد · سيليا",
-    pricesUpdated: "الأسعار محدّثة {date}",
+    recordUpdated: "آخر تحديث للسجل: {date}",
     brokerCta: {
       title: "أنت وسيط عقاري؟",
       body: "انضم لشبكة لينا عشان تشارك وحداتك وتتعاون مع وسطاء تانيين — من غير ما الطلب يظهر كطلب عميل.",
@@ -596,6 +596,9 @@ export default {
     sellerStep4Body: "فورًا لما يكون في مشترٍ عنده طلب فعلي — المطابقة فرصة تواصل مش ضمان بيع.",
     sellerFlowAlt:
       "خطوات البيع مع لينا عقار: ابعت بيانات شقتك، نراجع اكتمالها، نطابقها مع طلبات المشترين، ونبعتها للعميل المناسب",
+  },
+  requirements: {
+    moneyReviewNotice: "تفاصيل الميزانية قيد المراجعة — تواصل معنا لتأكيدها.",
   },
   marketplace: {
     hero: {

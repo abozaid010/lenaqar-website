@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { trackMetaContact } from "@/lib/meta-pixel";
+import { trackMetaContact, trackMetaContactForClick } from "@/lib/meta-pixel";
 import { getWhatsAppFallbackDelayMs } from "@/lib/lenaqar/whatsapp-fallback";
 
 /**
@@ -71,9 +71,9 @@ export default function SubmitWhatsAppFallback({
       <a
         href={href}
         className="inline-flex items-center justify-center gap-2 rounded-md bg-[#25D366] hover:bg-[#20BA5A] text-white font-medium px-4 py-2.5 text-sm shadow-sm transition-colors"
-        onClick={() => {
+        onClick={(event) => {
           redirectedRef.current = true;
-          trackMetaContact();
+          trackMetaContactForClick(event);
           onRedirect?.();
         }}
       >

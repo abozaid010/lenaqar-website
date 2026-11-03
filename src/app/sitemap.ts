@@ -95,19 +95,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     );
   }
 
-  try {
-    const units = await fetchOpportunities();
-    const unitPages: MetadataRoute.Sitemap = units
-      .filter((unit) => isOpportunityIndexable(unit))
-      .map((unit) => ({
-        url: `${SITE_URL}/opportunities/${encodeURIComponent(unit.code)}`,
-        lastModified: unit.updatedAt ? new Date(unit.updatedAt) : STATIC_LASTMOD,
-        changeFrequency: 'daily' as const,
-        priority: 0.6,
-      }));
-    return [...staticPages, ...unitPages];
-  } catch (error) {
-    console.error("[lenaqar] sitemap units fetch failed", error);
-    return staticPages;
-  }
+  // Let catalog failures fail sitemap generation/revalidation. Returning a
+  // successful static-only sitemap here would hide an incomplete refresh.
+  const units = await fetchOpportunities();
+  const unitPages: MetadataRoute.Sitemap = units
+    .filter((unit) => isOpportunityIndexable(unit))
+    .map((unit) => ({
+      url: `${SITE_URL}/opportunities/${encodeURIComponent(unit.code)}`,
+      lastModified: unit.updatedAt ? new Date(unit.updatedAt) : STATIC_LASTMOD,
+      changeFrequency: 'daily' as const,
+      priority: 0.6,
+    }));
+  return [...staticPages, ...unitPages];
 }

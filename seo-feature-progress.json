@@ -1,0 +1,251 @@
+{
+  "schema_version": 1,
+  "requirements": "seo-feature-req.json",
+  "plan": "SEO-PLAN.md",
+  "phase_summary": "feature-progress.json",
+  "updated_at": "2026-11-03T15:50:14.410004+00:00",
+  "status": "in_progress",
+  "target_date": "2026-11-03",
+  "timezone": "Africa/Cairo",
+  "target_cutoff": "2026-11-03T23:30:00+02:00",
+  "target_is": "best-effort release target; not a completion claim or guaranteed deadline",
+  "baseline": {
+    "main_sha": "ab0deed6a0193bad216215470c2e4b386f478ceb",
+    "documentation_head": "bab4092766428cbf1bd9fb8316ba3f43f7eb0bf1",
+    "open_prs": [],
+    "deployment_evidence": "REPORT/takeover-verification-2026-11-03.json",
+    "runtime_reverified_this_planning_turn": false
+  },
+  "state_machine": [
+    "planned",
+    "in_progress",
+    "blocked_owner",
+    "blocked_access",
+    "blocked_evidence",
+    "implemented",
+    "reviewed",
+    "merged",
+    "production_verified",
+    "deferred",
+    "blocked_release",
+    "ready_for_review"
+  ],
+  "completion_rule": "Runtime tasks only complete at production_verified with exact SHA and live evidence; measurement preparation may finish while account-dependent subtasks remain explicitly blocked.",
+  "tasks": [
+    {
+      "id": "SEO-00",
+      "status": "in_progress",
+      "owner": "lead",
+      "branch": "codex/seo-p0-p1-review",
+      "pr": null,
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": [],
+      "blocker": null,
+      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+    },
+    {
+      "id": "SEO-01",
+      "status": "in_progress",
+      "owner": "lead",
+      "branch": "codex/seo-p0-p1-review",
+      "pr": null,
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": [],
+      "blocker": null,
+      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+    },
+    {
+      "id": "SEO-02",
+      "status": "in_progress",
+      "owner": "lead",
+      "branch": "codex/seo-p0-p1-review",
+      "pr": null,
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": [],
+      "blocker": null,
+      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+    },
+    {
+      "id": "SEO-03",
+      "status": "in_progress",
+      "owner": "delegated",
+      "branch": "codex/seo-p0-p1-review",
+      "pr": null,
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": [],
+      "blocker": null,
+      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+    },
+    {
+      "id": "SEO-04",
+      "status": "in_progress",
+      "owner": "lead",
+      "branch": "codex/seo-p0-p1-review",
+      "pr": null,
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": [],
+      "blocker": null,
+      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+    },
+    {
+      "id": "SEO-05",
+      "status": "in_progress",
+      "owner": "delegated",
+      "branch": "codex/seo-p0-p1-review",
+      "pr": null,
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": [],
+      "blocker": null,
+      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+    },
+    {
+      "id": "SEO-06",
+      "status": "in_progress",
+      "owner": "delegated",
+      "branch": "codex/seo-p0-p1-review",
+      "pr": null,
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": [],
+      "blocker": null,
+      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+    },
+    {
+      "id": "SEO-07",
+      "status": "blocked_owner",
+      "owner": null,
+      "branch": "codex/seo-p0-p1-review",
+      "pr": null,
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": [],
+      "blocker": "Actual commission policy required from owner",
+      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+    },
+    {
+      "id": "SEO-08",
+      "status": "in_progress",
+      "owner": "delegated",
+      "branch": "codex/seo-p0-p1-review",
+      "pr": null,
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": [],
+      "blocker": null,
+      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+    },
+    {
+      "id": "SEO-09",
+      "status": "in_progress",
+      "owner": "delegated",
+      "branch": "codex/seo-p0-p1-review",
+      "pr": null,
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": [],
+      "blocker": null,
+      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+    },
+    {
+      "id": "SEO-10",
+      "status": "in_progress",
+      "owner": "lead",
+      "branch": "codex/seo-p0-p1-review",
+      "pr": null,
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": [],
+      "blocker": null,
+      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+    },
+    {
+      "id": "SEO-11",
+      "status": "in_progress",
+      "owner": "delegated",
+      "branch": "codex/seo-p0-p1-review",
+      "pr": null,
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": [],
+      "blocker": null,
+      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+    },
+    {
+      "id": "SEO-12",
+      "status": "planned",
+      "owner": null,
+      "branch": "codex/seo-p0-p1-review",
+      "pr": null,
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": [],
+      "blocker": null,
+      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+    },
+    {
+      "id": "SEO-13",
+      "status": "blocked_release",
+      "owner": null,
+      "branch": "codex/seo-p0-p1-review",
+      "pr": null,
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": [],
+      "blocker": "Latest user instruction: never merge; production verification of new changes cannot occur before approved merge/deploy.",
+      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+    },
+    {
+      "id": "SEO-14",
+      "status": "deferred",
+      "owner": null,
+      "branch": "codex/seo-p0-p1-review",
+      "pr": null,
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": [],
+      "blocker": null,
+      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+    },
+    {
+      "id": "SEO-15",
+      "status": "deferred",
+      "owner": null,
+      "branch": "codex/seo-p0-p1-review",
+      "pr": null,
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": [],
+      "blocker": null,
+      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+    },
+    {
+      "id": "SEO-16",
+      "status": "deferred",
+      "owner": null,
+      "branch": "codex/seo-p0-p1-review",
+      "pr": null,
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": [],
+      "blocker": null,
+      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+    }
+  ],
+  "history": [
+    {
+      "at": "2026-11-03T15:11:12.048969+00:00",
+      "event": "Plan drafted from existing tracker, original reports, underlying baseline data and live GitHub branch/PR status; no runtime implementation."
+    },
+    {
+      "at": "2026-11-03T15:50:14.410004+00:00",
+      "event": "Execution started in isolated worktrees; one PR only, no merge/deploy per latest instruction."
+    }
+  ],
+  "release_policy": "Single review PR; user explicitly prohibits merge and production deployment."
+}

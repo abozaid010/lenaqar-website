@@ -104,7 +104,7 @@ describe("toPublicOpportunity money-split redaction (LNk7qZIF)", () => {
       unit,
       "https://www.lenaqar.com/opportunities/MguPxCF0"
     );
-    const props = schema.additionalProperty || [];
+    const props = schema.mainEntity.additionalProperty || [];
     assert.equal(
       props.some((p) => p.name === "مدة التقسيط"),
       false
@@ -139,7 +139,7 @@ describe("toPublicOpportunity money-split redaction (LNk7qZIF)", () => {
       unit,
       "https://www.lenaqar.com/opportunities/kBqU7H1A"
     );
-    const yearsProp = (schema.additionalProperty || []).find(
+    const yearsProp = (schema.mainEntity.additionalProperty || []).find(
       (p) => p.name === "مدة التقسيط"
     );
     assert.equal(yearsProp?.value, 9);

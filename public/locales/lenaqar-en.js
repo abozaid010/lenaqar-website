@@ -216,9 +216,9 @@ export default {
     delivery: "Delivery",
     totalValue: "Total contract value",
     cashMultiple: "Cash multiple",
-    priceUpdated: "Developer price updated: {date}",
+    recordUpdated: "Record updated: {date}",
     pricePerMeter: "Price per m²",
-    developerPrice: "Developer price",
+    askingPrice: "Listed price",
     primary: "Primary",
     resale: "Resale",
     rooms: "Rooms",
@@ -237,7 +237,7 @@ export default {
   network: {
     developer: "Talaat Moustafa — TMG",
     projects: "Noor · Madinaty · South Med · Celia",
-    pricesUpdated: "Prices updated {date}",
+    recordUpdated: "Record updated: {date}",
     brokerCta: {
       title: "Are you a broker?",
       body: "Join Lena Network to share your properties and collaborate with other brokers — instead of submitting a customer requirement.",
@@ -595,6 +595,9 @@ export default {
     sellerStep4Body: "As soon as there is a real buyer request — a match is a chance to connect, not a guaranteed sale.",
     sellerFlowAlt:
       "Selling with Lenaqar: send unit details, we verify completeness, match to buyer requests, send to the right client",
+  },
+  requirements: {
+    moneyReviewNotice: "Budget details are under review — contact us to confirm them.",
   },
   marketplace: {
     hero: {
