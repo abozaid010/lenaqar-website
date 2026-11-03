@@ -1,0 +1,138 @@
+{
+  "triage_type": "seo_index_false_guides",
+  "created_at": "2026-11-03T22:15:00.000Z",
+  "total_excluded": 12,
+  "notes": "All 12 guides with seo_index: false are documented below with exact reason, missing evidence, owner assignment, and next action. None should be indexed until the condition is resolved.",
+  "excluded_guides": [
+    {
+      "slug": "/guides/sheikh-zayed/pros-cons/",
+      "title": "مميزات وعيوب الشيخ زايد",
+      "reason": "Content contains 'تحت المراجعة' (under review) placeholders — incomplete content not suitable for indexing",
+      "missing_evidence": "Complete pros/cons analysis without placeholder text; verified fact sheet or comparable evidence",
+      "owner": "content_team",
+      "next_action": "Replace 'تحت المراجعة' placeholders with complete, verified analysis; update status to published; set seo_index: true",
+      "blocking_type": "content_incomplete"
+    },
+    {
+      "slug": "/guides/new-cairo/pros-cons/",
+      "title": "مميزات وعيوب القاهرة الجديدة",
+      "reason": "Content contains 'تحت المراجعة' (under review) placeholders — incomplete content not suitable for indexing",
+      "missing_evidence": "Complete pros/cons analysis without placeholder text; verified fact sheet or comparable evidence",
+      "owner": "content_team",
+      "next_action": "Replace 'تحت المراجعة' placeholders with complete, verified analysis; update status to published; set seo_index: true",
+      "blocking_type": "content_incomplete"
+    },
+    {
+      "slug": "/guides/mostakbal-city/real-units/",
+      "title": "اختيارات حقيقية في مدينة المستقبل",
+      "reason": "Requires ≥3 genuine matched inventory units from catalog — currently only 1 unit available",
+      "missing_evidence": "At least 3 catalog units matching Mostakbal City criteria; verified unit data from CRM",
+      "owner": "catalog_team",
+      "next_action": "Wait for catalog to reach ≥3 Mostakbal City units; then update guide with actual unit list; set seo_index: true",
+      "blocking_type": "insufficient_inventory",
+      "current_inventory_count": 1,
+      "required_inventory_count": 3
+    },
+    {
+      "slug": "/guides/mostakbal-city/pros-cons/",
+      "title": "مميزات وعيوب مدينة المستقبل",
+      "reason": "Content contains 'تحت المراجعة' (under review) placeholders — incomplete content not suitable for indexing",
+      "missing_evidence": "Complete pros/cons analysis without placeholder text; verified fact sheet or comparable evidence",
+      "owner": "content_team",
+      "next_action": "Replace 'تحت المراجعة' placeholders with complete, verified analysis; update status to published; set seo_index: true",
+      "blocking_type": "content_incomplete"
+    },
+    {
+      "slug": "/guides/madinaty/pros-cons/",
+      "title": "مميزات وعيوب مدينتي",
+      "reason": "Content contains 'تحت المراجعة' (under review) placeholders — incomplete content not suitable for indexing",
+      "missing_evidence": "Complete pros/cons analysis without placeholder text; verified fact sheet or comparable evidence",
+      "owner": "content_team",
+      "next_action": "Replace 'تحت المراجعة' placeholders with complete, verified analysis; update status to published; set seo_index: true",
+      "blocking_type": "content_incomplete"
+    },
+    {
+      "slug": "/guides/fifth-settlement/pros-cons/",
+      "title": "مميزات وعيوب التجمع الخامس",
+      "reason": "Content contains 'تحت المراجعة' (under review) placeholders — incomplete content not suitable for indexing",
+      "missing_evidence": "Complete pros/cons analysis without placeholder text; verified fact sheet or comparable evidence",
+      "owner": "content_team",
+      "next_action": "Replace 'تحت المراجعة' placeholders with complete, verified analysis; update status to published; set seo_index: true",
+      "blocking_type": "content_incomplete"
+    },
+    {
+      "slug": "/guides/compare/sheikh-zayed-vs-6th-of-october/",
+      "title": "مقارنة الشيخ زايد و 6 أكتوبر",
+      "reason": "Comparison table marked as 'قيد المراجعة' (under review) — incomplete comparison not suitable for indexing",
+      "missing_evidence": "Complete comparison table with verified data; fact sheets for both cities",
+      "owner": "content_team",
+      "next_action": "Complete comparison table with verified data; remove 'قيد المراجعة' markers; set seo_index: true",
+      "blocking_type": "content_incomplete"
+    },
+    {
+      "slug": "/guides/compare/madinaty-vs-mostakbal-city/",
+      "title": "مقارنة مدينتي ومدينة المستقبل",
+      "reason": "Comparison table marked as 'قيد المراجعة' (under review) — incomplete comparison not suitable for indexing",
+      "missing_evidence": "Complete comparison table with verified data; fact sheets for both cities",
+      "owner": "content_team",
+      "next_action": "Complete comparison table with verified data; remove 'قيد المراجعة' markers; set seo_index: true",
+      "blocking_type": "content_incomplete"
+    },
+    {
+      "slug": "/guides/compare/el-shorouk-vs-fifth-settlement/",
+      "title": "مقارنة الشروق والتجمع الخامس",
+      "reason": "Comparison table marked as 'قيد المراجعة' (under review) — incomplete comparison not suitable for indexing",
+      "missing_evidence": "Complete comparison table with verified data; fact sheets for both cities",
+      "owner": "content_team",
+      "next_action": "Complete comparison table with verified data; remove 'قيد المراجعة' markers; set seo_index: true",
+      "blocking_type": "content_incomplete"
+    },
+    {
+      "slug": "/guides/buying/youth-social-housing-resale/",
+      "title": "إسكان اجتماعي ريسيل",
+      "reason": "Content contains 'تحت المراجعة' (under review) placeholders and lacks verified official policy source — incomplete legal guidance not suitable for indexing",
+      "missing_evidence": "Verified official source on youth/social housing resale rules, transfer eligibility, and constraints",
+      "owner": "content_team",
+      "next_action": "Obtain and cite official policy document; complete guidance with verified rules; set seo_index: true",
+      "blocking_type": "content_incomplete"
+    },
+    {
+      "slug": "/guides/buying/buying-resale-step-by-step/",
+      "title": "شراء ريسيل خطوة بخطوة",
+      "reason": "Content contains 'تحت المراجعة' (under review) placeholders in legal/procedural sections — incomplete guidance not suitable for indexing",
+      "missing_evidence": "Verified legal guidance on resale procedures, contract types, and documentation requirements",
+      "owner": "content_team",
+      "next_action": "Complete legal/procedural sections with verified information; remove 'تحت المراجعة' markers; set seo_index: true",
+      "blocking_type": "content_incomplete"
+    },
+    {
+      "slug": "/guides/6th-of-october/pros-cons/",
+      "title": "مميزات وعيوب 6 أكتوبر",
+      "reason": "Content contains 'تحت المراجعة' (under review) placeholders — incomplete content not suitable for indexing",
+      "missing_evidence": "Complete pros/cons analysis without placeholder text; verified fact sheet or comparable evidence",
+      "owner": "content_team",
+      "next_action": "Replace 'تحت المراجعة' placeholders with complete, verified analysis; update status to published; set seo_index: true",
+      "blocking_type": "content_incomplete"
+    }
+  ],
+  "blocking_type_summary": {
+    "content_incomplete": 11,
+    "insufficient_inventory": 1
+  },
+  "owner_summary": {
+    "content_team": 11,
+    "catalog_team": 1
+  },
+  "next_action_priority": [
+    "Complete Mostakbal City real-units guide when catalog reaches ≥3 units (catalog_team dependency)",
+    "Complete all pros/cons guides by replacing 'تحت المراجعة' placeholders with verified analysis (content_team)",
+    "Complete comparison guides by finishing tables with verified data (content_team)",
+    "Complete buying guides with verified legal/procedural information (content_team)"
+  ],
+  "policy_notes": [
+    "No guide with seo_index: false should be added to sitemap until the blocking condition is resolved",
+    "Guides remain crawlable (robots noindex,follow) for discovery, but not indexed in search results",
+    "When a guide is completed, seo_index must be set to true in frontmatter before sitemap inclusion",
+    "Do not set seo_index: true just to meet a publication target — content must be complete and verified"
+  ]
+}

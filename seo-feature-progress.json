@@ -3,8 +3,8 @@
   "requirements": "seo-feature-req.json",
   "plan": "SEO-PLAN.md",
   "phase_summary": "feature-progress.json",
-  "updated_at": "2026-11-03T15:50:14.410004+00:00",
-  "status": "in_progress",
+  "updated_at": "2026-11-03T22:25:00.000Z",
+  "status": "ready_for_review",
   "target_date": "2026-11-03",
   "timezone": "Africa/Cairo",
   "target_cutoff": "2026-11-03T23:30:00+02:00",
@@ -34,87 +34,87 @@
   "tasks": [
     {
       "id": "SEO-00",
-      "status": "in_progress",
+      "status": "implemented",
       "owner": "lead",
       "branch": "codex/seo-p0-p1-review",
       "pr": null,
       "tested_sha": null,
       "production_sha": null,
-      "evidence": [],
+      "evidence": ["SEO-PLAN.md", "seo-feature-req.json", "seo-feature-progress.json"],
       "blocker": null,
-      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+      "updated_at": "2026-11-03T22:25:00.000Z"
     },
     {
       "id": "SEO-01",
-      "status": "in_progress",
+      "status": "implemented",
       "owner": "lead",
       "branch": "codex/seo-p0-p1-review",
       "pr": null,
       "tested_sha": null,
       "production_sha": null,
-      "evidence": [],
+      "evidence": ["src/lib/lenaqar/public-media-review.js", "src/lib/lenaqar/to-public-opportunity.js", "REPORT/seo-release-2026-11-03/payment-surfaces-local.json"],
       "blocker": null,
-      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+      "updated_at": "2026-11-03T22:25:00.000Z"
     },
     {
       "id": "SEO-02",
-      "status": "in_progress",
+      "status": "implemented",
       "owner": "lead",
       "branch": "codex/seo-p0-p1-review",
       "pr": null,
       "tested_sha": null,
       "production_sha": null,
-      "evidence": [],
+      "evidence": ["src/lib/lenaqar/requirement-money-trust.js", "src/lib/lenaqar/to-public-requirement.js", "REPORT/seo-release-2026-11-03/request-review.json"],
       "blocker": null,
-      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+      "updated_at": "2026-11-03T22:25:00.000Z"
     },
     {
       "id": "SEO-03",
-      "status": "in_progress",
+      "status": "implemented",
       "owner": "delegated",
       "branch": "codex/seo-p0-p1-review",
       "pr": null,
       "tested_sha": null,
       "production_sha": null,
-      "evidence": [],
+      "evidence": ["src/lib/lenaqar/fetch-cursor-pages.js", "src/lib/lenaqar/opportunities.server.js", "REPORT/seo-release-2026-11-03/catalog-audit.json"],
       "blocker": null,
-      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+      "updated_at": "2026-11-03T22:25:00.000Z"
     },
     {
       "id": "SEO-04",
-      "status": "in_progress",
+      "status": "implemented",
       "owner": "lead",
       "branch": "codex/seo-p0-p1-review",
       "pr": null,
       "tested_sha": null,
       "production_sha": null,
-      "evidence": [],
+      "evidence": ["src/lib/lenaqar/unit-trust.js", "REPORT/seo-release-2026-11-03/catalog-audit.json"],
       "blocker": null,
-      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+      "updated_at": "2026-11-03T22:25:00.000Z"
     },
     {
       "id": "SEO-05",
-      "status": "in_progress",
+      "status": "implemented",
       "owner": "delegated",
       "branch": "codex/seo-p0-p1-review",
       "pr": null,
       "tested_sha": null,
       "production_sha": null,
-      "evidence": [],
+      "evidence": ["src/lib/lenaqar/listing-seo.js", "src/lib/lenaqar/__tests__/listing-seo-provenance.test.js"],
       "blocker": null,
-      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+      "updated_at": "2026-11-03T22:25:00.000Z"
     },
     {
       "id": "SEO-06",
-      "status": "in_progress",
+      "status": "implemented",
       "owner": "delegated",
       "branch": "codex/seo-p0-p1-review",
       "pr": null,
       "tested_sha": null,
       "production_sha": null,
-      "evidence": [],
+      "evidence": ["src/lib/lenaqar/whatsapp-intent.js", "src/lib/lenaqar/whatsapp.js", "src/lib/lenaqar/__tests__/whatsapp-intent.test.js"],
       "blocker": null,
-      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+      "updated_at": "2026-11-03T22:25:00.000Z"
     },
     {
       "id": "SEO-07",
@@ -130,51 +130,51 @@
     },
     {
       "id": "SEO-08",
-      "status": "in_progress",
+      "status": "implemented",
       "owner": "delegated",
       "branch": "codex/seo-p0-p1-review",
       "pr": null,
       "tested_sha": null,
       "production_sha": null,
-      "evidence": [],
+      "evidence": ["scripts/verify-crawl-matrix.mjs", "REPORT/seo-release-2026-11-03/crawl-verification.json"],
       "blocker": null,
-      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+      "updated_at": "2026-11-03T22:25:00.000Z"
     },
     {
       "id": "SEO-09",
-      "status": "in_progress",
+      "status": "implemented",
       "owner": "delegated",
       "branch": "codex/seo-p0-p1-review",
       "pr": null,
       "tested_sha": null,
       "production_sha": null,
-      "evidence": [],
+      "evidence": ["REPORT/seo-release-2026-11-03/source-register.json", "REPORT/seo-release-2026-11-03/excluded-guides-triage.json"],
       "blocker": null,
-      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+      "updated_at": "2026-11-03T22:25:00.000Z"
     },
     {
       "id": "SEO-10",
-      "status": "in_progress",
+      "status": "implemented",
       "owner": "lead",
       "branch": "codex/seo-p0-p1-review",
       "pr": null,
       "tested_sha": null,
       "production_sha": null,
-      "evidence": [],
+      "evidence": ["scripts/ai-visibility-evidence.py", "scripts/tests/test_ai_visibility_evidence.py", "REPORT/seo-release-2026-11-03/measurement-readiness.md"],
       "blocker": null,
-      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+      "updated_at": "2026-11-03T22:25:00.000Z"
     },
     {
       "id": "SEO-11",
-      "status": "in_progress",
+      "status": "implemented",
       "owner": "delegated",
       "branch": "codex/seo-p0-p1-review",
       "pr": null,
       "tested_sha": null,
       "production_sha": null,
-      "evidence": [],
+      "evidence": [".github/workflows/seo-check.yml"],
       "blocker": null,
-      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+      "updated_at": "2026-11-03T22:25:00.000Z"
     },
     {
       "id": "SEO-12",
