@@ -166,7 +166,6 @@ export function buildListingDescription(unit) {
   const area = toPositive(unit.landArea);
   const showMoneySplit = mayShowMoneySplit(unit);
   const cash = showMoneySplit ? toPositive(unit.downPayment) : null;
-  const deliveryYear = toPositive(unit.deliveryYear);
   const totalPrice = toPositive(unit.totalPrice);
 
   const place = [project, district, city].filter(Boolean).join("، ");
@@ -179,15 +178,13 @@ export function buildListingDescription(unit) {
   const sentences = [area ? `${first}، مساحة ${area} م².` : `${first}.`];
 
   if (cash) {
-    const tail = deliveryYear
-      ? ` والباقي أقساط على المطور حتى ${deliveryYear}.`
-      : " والباقي أقساط على المطور.";
+    // Delivery year is not a repayment end date.
+    const tail = " والباقي حسب خطة السداد المعروضة.";
     sentences.push(`الكاش المطلوب دلوقتي ${formatEgpNumber(cash)} ج.م${tail}`);
   } else if (totalPrice) {
     sentences.push(`السعر الإجمالي المعروض ${formatEgpNumber(totalPrice)} ج.م.`);
   }
 
-  sentences.push("السعر من المطور بتاريخه.");
   return sentences.join(" ");
 }
 
@@ -211,7 +208,6 @@ export function buildListingSchema(unit, url) {
   const cash = showMoneySplit ? toPositive(unit.downPayment) : null;
   const city = clean(unit.cityAr) || placeAr(unit.city);
   const district = clean(unit.districtAr) || placeAr(unit.district);
-  const developer = developerLabel(unit);
   const images = (unit.images || [])
     .map((image) => clean(image?.url))
     .filter(Boolean);
@@ -279,10 +275,13 @@ export function buildListingSchema(unit, url) {
     url,
     name,
     description: buildListingDescription(unit),
-    ...(unit.updatedAt && { datePosted: unit.updatedAt }),
+    ...(unit.datePosted && { datePosted: unit.datePosted }),
     ...(images.length > 0 && { image: images }),
-    ...(additionalProperty.length > 0 && { additionalProperty }),
-    mainEntity: accommodation,
+    // additionalProperty belongs to Accommodation (a Place), not WebPage.
+    mainEntity: {
+      ...accommodation,
+      ...(additionalProperty.length > 0 && { additionalProperty }),
+    },
     ...(totalPrice != null && {
       offers: {
         "@type": "Offer",
@@ -290,9 +289,6 @@ export function buildListingSchema(unit, url) {
         priceCurrency: "EGP",
         availability: "https://schema.org/InStock",
         url,
-        ...(developer && {
-          seller: { "@type": "Organization", name: developer },
-        }),
       },
     }),
   };

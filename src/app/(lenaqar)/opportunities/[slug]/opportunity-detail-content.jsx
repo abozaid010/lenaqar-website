@@ -33,7 +33,7 @@ export default function OpportunityDetailContent({ unit }) {
   const canonicalUrl = `${SITE.url}/opportunities/${encodeURIComponent(unit.code)}`;
   const developerName = developerLabel(unit);
   const deliveryLabel = formatDeliveryDate(unit.deliveryDate, "ar");
-  const priceDate = formatDate(unit.updatedAt, "ar");
+  const recordUpdatedDate = formatDate(unit.updatedAt, "ar");
   const lastCheckedLabel = formatDate(unitLastChecked(unit), "ar");
   const paperStatus = unitPaperStatus(unit);
   const verificationLevel = unitVerificationLevel(unit);
@@ -213,8 +213,7 @@ export default function OpportunityDetailContent({ unit }) {
 
       {!showMoneySplit ? (
         <p className="mt-4 text-sm text-black/65">
-          أرقام المقدم والمتبقي مش متطابقة مع الإجمالي في البيانات دي — مخفيين لحد
-          المراجعة.
+          تفاصيل السداد ناقصة أو مش متسقة مع الإجمالي — مخفيين لحد المراجعة.
         </p>
       ) : null}
 
@@ -226,9 +225,9 @@ export default function OpportunityDetailContent({ unit }) {
       <p className="text-sm text-black/60 mt-2">
         {translate("lenaqar.unit.honesty")}
       </p>
-      {priceDate ? (
+      {recordUpdatedDate ? (
         <p className="text-xs text-black/50 mt-2">
-          {translate("lenaqar.unit.priceUpdated").replace("{date}", priceDate)}
+          {translate("lenaqar.unit.recordUpdated").replace("{date}", recordUpdatedDate)}
         </p>
       ) : null}
 

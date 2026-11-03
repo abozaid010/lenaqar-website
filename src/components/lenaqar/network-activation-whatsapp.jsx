@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
-import { trackMetaContact } from "@/lib/meta-pixel";
+import { trackMetaContact, trackMetaContactForClick } from "@/lib/meta-pixel";
 import { ANALYTICS } from "@/constants/analytics";
 import { getWhatsAppFallbackDelayMs } from "@/lib/lenaqar/whatsapp-fallback";
 import {
@@ -79,9 +79,9 @@ export default function NetworkActivationWhatsApp({ name = "" }) {
     };
   }, [href, delayMs, trackEvent]);
 
-  const markOpened = () => {
+  const markOpened = (event) => {
     redirectedRef.current = true;
-    trackMetaContact();
+    trackMetaContactForClick(event);
     trackEvent(ANALYTICS.EVENTS.NETWORK_ACTIVATION_WHATSAPP_CLICKED);
   };
 

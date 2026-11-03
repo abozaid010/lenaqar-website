@@ -1,0 +1,698 @@
+{
+  "verified_at": "2026-11-03T14:56:49.667603+00:00",
+  "pr": {
+    "number": 23,
+    "head": "79613067ed422307c786883160fa4a35596ef655",
+    "merge": "ab0deed6a0193bad216215470c2e4b386f478ceb",
+    "merged_at": "2026-11-03T14:52:11Z",
+    "pr_ci": 41536454264,
+    "main_ci": 41657965586,
+    "reviews": 0,
+    "branch_protection": false,
+    "rulesets": []
+  },
+  "production": {
+    "verified_at": "2026-11-03T14:56:49.667603+00:00",
+    "deployment_id": "dpl_ADrQoQV3GV6kAm9t76PYFh4bsZp2",
+    "git_sha": "ab0deed6a0193bad216215470c2e4b386f478ceb",
+    "readyState": "READY",
+    "canonical": "https://www.lenaqar.com",
+    "method": "Existing Vercel Git integration after GitHub merge",
+    "main_ci_run": 41657965586
+  },
+  "previous_production": {
+    "id": "dpl_CLwC23vUHZRJ8teawgebaAKTZ1uJ",
+    "sha": "26445560610638566f77f2f6a28bae366d5f064e",
+    "state": "READY",
+    "MguPxCF0_years": 10
+  },
+  "local_checks": {
+    "tests": 87,
+    "failed": 0,
+    "lint_errors": 0,
+    "lint_warnings": 8,
+    "seo_errors": 0,
+    "seo_warnings": 4,
+    "build": "pass"
+  },
+  "http_qa": {
+    "checks": 326,
+    "pass": 326,
+    "failed": [],
+    "sitemapLocs": 545,
+    "guides": 53
+  },
+  "payment_checks": [
+    {
+      "check": "/opportunities/MguPxCF0 HTTP",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "/opportunities/MguPxCF0 canonical",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "/opportunities/MguPxCF0 no invalid markers",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "/opportunities/LNk7qZIF HTTP",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "/opportunities/LNk7qZIF canonical",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "/opportunities/LNk7qZIF no invalid markers",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "/opportunities/kBqU7H1A HTTP",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "/opportunities/kBqU7H1A canonical",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "/opportunities/kBqU7H1A no invalid markers",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "MguPxCF0 html years",
+      "pass": true,
+      "detail": {
+        "installmentYears": [
+          "null"
+        ],
+        "downPayment": [
+          "null"
+        ],
+        "remainingAmount": [
+          "null"
+        ],
+        "overPrice": [
+          "null"
+        ],
+        "installmentAmountYearly": [
+          "null"
+        ],
+        "paymentSplitHidden": [
+          "true"
+        ],
+        "totalPrice": [
+          "7526640"
+        ]
+      }
+    },
+    {
+      "check": "MguPxCF0 html split",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "MguPxCF0 schema years",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "MguPxCF0 WhatsApp",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "MguPxCF0 rsc years",
+      "pass": true,
+      "detail": {
+        "installmentYears": [
+          "null"
+        ],
+        "downPayment": [
+          "null"
+        ],
+        "remainingAmount": [
+          "null"
+        ],
+        "overPrice": [
+          "null"
+        ],
+        "installmentAmountYearly": [
+          "null"
+        ],
+        "paymentSplitHidden": [
+          "true"
+        ],
+        "totalPrice": [
+          "7526640"
+        ]
+      }
+    },
+    {
+      "check": "MguPxCF0 rsc split",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "LNk7qZIF html years",
+      "pass": true,
+      "detail": {
+        "installmentYears": [
+          "null"
+        ],
+        "downPayment": [
+          "null"
+        ],
+        "remainingAmount": [
+          "null"
+        ],
+        "overPrice": [
+          "null"
+        ],
+        "installmentAmountYearly": [
+          "null"
+        ],
+        "paymentSplitHidden": [
+          "true"
+        ],
+        "totalPrice": [
+          "7677290"
+        ]
+      }
+    },
+    {
+      "check": "LNk7qZIF html split",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "LNk7qZIF schema years",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "LNk7qZIF WhatsApp",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "LNk7qZIF rsc years",
+      "pass": true,
+      "detail": {
+        "installmentYears": [
+          "null"
+        ],
+        "downPayment": [
+          "null"
+        ],
+        "remainingAmount": [
+          "null"
+        ],
+        "overPrice": [
+          "null"
+        ],
+        "installmentAmountYearly": [
+          "null"
+        ],
+        "paymentSplitHidden": [
+          "true"
+        ],
+        "totalPrice": [
+          "7677290"
+        ]
+      }
+    },
+    {
+      "check": "LNk7qZIF rsc split",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "kBqU7H1A html years",
+      "pass": true,
+      "detail": {
+        "installmentYears": [
+          "9"
+        ],
+        "downPayment": [
+          "312000"
+        ],
+        "remainingAmount": [
+          "5938000"
+        ],
+        "overPrice": [
+          "0"
+        ],
+        "installmentAmountYearly": [
+          "659777.78"
+        ],
+        "paymentSplitHidden": [],
+        "totalPrice": [
+          "6250000"
+        ]
+      }
+    },
+    {
+      "check": "kBqU7H1A schema years",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "kBqU7H1A WhatsApp",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "kBqU7H1A rsc years",
+      "pass": true,
+      "detail": {
+        "installmentYears": [
+          "9"
+        ],
+        "downPayment": [
+          "312000"
+        ],
+        "remainingAmount": [
+          "5938000"
+        ],
+        "overPrice": [
+          "0"
+        ],
+        "installmentAmountYearly": [
+          "659777.78"
+        ],
+        "paymentSplitHidden": [],
+        "totalPrice": [
+          "6250000"
+        ]
+      }
+    }
+  ],
+  "inventory": {
+    "at": "2026-11-03T14:55:21.594Z",
+    "complete": true,
+    "pages": 39,
+    "rows": 613,
+    "unique": 613,
+    "full": {
+      "units": 613,
+      "rawFailures": 87,
+      "publicHidden": 102,
+      "mostakbal": 0
+    },
+    "first480": {
+      "units": 480,
+      "rawFailures": 65,
+      "publicHidden": 77,
+      "mostakbal": 0
+    },
+    "publicHiddenCodes": [
+      "LNk7qZIF",
+      "MguPxCF0",
+      "5LeonlAN",
+      "c4a5uMaU",
+      "WqID7jY8",
+      "in5oONFU",
+      "b9qfPfCR",
+      "8nrHtiOr",
+      "TDGA9RZ3",
+      "UQDfGEBg",
+      "q2IIFhcz",
+      "eHI8R1Up",
+      "qg5IyLgB",
+      "vhtW8RPZ",
+      "lLJQEpmX",
+      "CBTghpne",
+      "Zm0o27Bd",
+      "HPDrfY9H",
+      "Sc95rEyq",
+      "9P0u1uBw",
+      "SzrKaLWi",
+      "iHWV5Ifr",
+      "2BpUqecx",
+      "BgCKKG4a",
+      "73DRwMeG",
+      "MjkP6ywd",
+      "r7WP8X1y",
+      "DvrqopGi",
+      "A6gL2rDY",
+      "ke69Ib8e",
+      "DiNhnPL4",
+      "2c7PSv1o",
+      "gWzvpYY8",
+      "1ejPVeEl",
+      "QTZxLSQs",
+      "rl7R9J8R",
+      "Yq9x6fuJ",
+      "olmi52Ut",
+      "9xtcmD20",
+      "SF3Qh8Xw",
+      "aXcvoehA",
+      "tbySEvGg",
+      "swCOkYNN",
+      "gSht9MA0",
+      "EwCZc8o6",
+      "cFIv57bH",
+      "jLkiKytn",
+      "9Uqby6Fn",
+      "Nk7QuzKn",
+      "8PTPiBtE",
+      "4ETezZWh",
+      "MCdcaOqW",
+      "zvSanxkO",
+      "NMHJLp5w",
+      "fJKthJlq",
+      "szmSgE9B",
+      "D660FU4a",
+      "baRn1dPX",
+      "6dk8ymyQ",
+      "DirFaOe9",
+      "CAx52jvn",
+      "sYo6dIJk",
+      "YH8g3EcJ",
+      "YHr1HQV4",
+      "T3k6oHWY",
+      "alueST37",
+      "wcU8tcbq",
+      "sEnlvbVs",
+      "vbzCC6sj",
+      "BTYgYNRL",
+      "mnUDiF13",
+      "rbUtArmJ",
+      "zOHiXmp6",
+      "UcjCaf2J",
+      "ASYiERyG",
+      "ju9hcEUG",
+      "zuDZh8GV",
+      "T6sVss1q",
+      "sGqQtJJQ",
+      "lnK1eoJD",
+      "luEu1E4H",
+      "PwZ190JI",
+      "etOgDmob",
+      "GsId1Y6T",
+      "Kjyn1DaV",
+      "BiuXTkKk",
+      "2yAylf8u",
+      "aQXuPzjc",
+      "LszffX0r",
+      "G4tYwfkg",
+      "VDdg6sGJ",
+      "5zxS28l0",
+      "M3BBERfy",
+      "R9DLAZOI",
+      "HhWVdWZI",
+      "cDozw25Z",
+      "KIqgXPpV",
+      "HSSZ9nX4",
+      "RZ3w2lXj",
+      "ZonBl8j8",
+      "S8wDcwNO",
+      "EnIrCECu"
+    ]
+  },
+  "guides": [
+    {
+      "file": "content/guides/6th-of-october/budget-3m.md",
+      "slug": "/guides/6th-of-october/budget-3m/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/6th-of-october/index.md",
+      "slug": "/guides/6th-of-october/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/6th-of-october/prices-2026.md",
+      "slug": "/guides/6th-of-october/prices-2026/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/6th-of-october/pros-cons.md",
+      "slug": "/guides/6th-of-october/pros-cons/",
+      "indexable": false
+    },
+    {
+      "file": "content/guides/6th-of-october/real-units.md",
+      "slug": "/guides/6th-of-october/real-units/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/6th-of-october/red-file.md",
+      "slug": "/guides/6th-of-october/red-file/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/buying/buying-resale-step-by-step.md",
+      "slug": "/guides/buying/buying-resale-step-by-step/",
+      "indexable": false
+    },
+    {
+      "file": "content/guides/buying/cancellation-vs-resale.md",
+      "slug": "/guides/buying/cancellation-vs-resale/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/buying/check-developer-project.md",
+      "slug": "/guides/buying/check-developer-project/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/buying/contract-registration-checklist.md",
+      "slug": "/guides/buying/contract-registration-checklist/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/buying/how-to-write-property-request.md",
+      "slug": "/guides/buying/how-to-write-property-request/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/buying/payment-plans-vs-cash.md",
+      "slug": "/guides/buying/payment-plans-vs-cash/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/buying/resale-vs-new-launch.md",
+      "slug": "/guides/buying/resale-vs-new-launch/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/buying/youth-social-housing-resale.md",
+      "slug": "/guides/buying/youth-social-housing-resale/",
+      "indexable": false
+    },
+    {
+      "file": "content/guides/compare/el-shorouk-vs-fifth-settlement.md",
+      "slug": "/guides/compare/el-shorouk-vs-fifth-settlement/",
+      "indexable": false
+    },
+    {
+      "file": "content/guides/compare/madinaty-vs-mostakbal-city.md",
+      "slug": "/guides/compare/madinaty-vs-mostakbal-city/",
+      "indexable": false
+    },
+    {
+      "file": "content/guides/compare/sheikh-zayed-vs-6th-of-october.md",
+      "slug": "/guides/compare/sheikh-zayed-vs-6th-of-october/",
+      "indexable": false
+    },
+    {
+      "file": "content/guides/el-shorouk/budget-3m.md",
+      "slug": "/guides/el-shorouk/budget-3m/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/el-shorouk/index.md",
+      "slug": "/guides/el-shorouk/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/el-shorouk/prices-2026.md",
+      "slug": "/guides/el-shorouk/prices-2026/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/el-shorouk/pros-cons.md",
+      "slug": "/guides/el-shorouk/pros-cons/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/el-shorouk/real-units.md",
+      "slug": "/guides/el-shorouk/real-units/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/el-shorouk/red-file.md",
+      "slug": "/guides/el-shorouk/red-file/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/fifth-settlement/budget-5m.md",
+      "slug": "/guides/fifth-settlement/budget-5m/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/fifth-settlement/index.md",
+      "slug": "/guides/fifth-settlement/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/fifth-settlement/prices-2026.md",
+      "slug": "/guides/fifth-settlement/prices-2026/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/fifth-settlement/pros-cons.md",
+      "slug": "/guides/fifth-settlement/pros-cons/",
+      "indexable": false
+    },
+    {
+      "file": "content/guides/fifth-settlement/real-units.md",
+      "slug": "/guides/fifth-settlement/real-units/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/fifth-settlement/red-file.md",
+      "slug": "/guides/fifth-settlement/red-file/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/madinaty/budget-4m.md",
+      "slug": "/guides/madinaty/budget-4m/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/madinaty/index.md",
+      "slug": "/guides/madinaty/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/madinaty/prices-2026.md",
+      "slug": "/guides/madinaty/prices-2026/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/madinaty/pros-cons.md",
+      "slug": "/guides/madinaty/pros-cons/",
+      "indexable": false
+    },
+    {
+      "file": "content/guides/madinaty/real-units.md",
+      "slug": "/guides/madinaty/real-units/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/madinaty/red-file.md",
+      "slug": "/guides/madinaty/red-file/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/mostakbal-city/budget-3m.md",
+      "slug": "/guides/mostakbal-city/budget-3m/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/mostakbal-city/index.md",
+      "slug": "/guides/mostakbal-city/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/mostakbal-city/prices-2026.md",
+      "slug": "/guides/mostakbal-city/prices-2026/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/mostakbal-city/pros-cons.md",
+      "slug": "/guides/mostakbal-city/pros-cons/",
+      "indexable": false
+    },
+    {
+      "file": "content/guides/mostakbal-city/real-units.md",
+      "slug": "/guides/mostakbal-city/real-units/",
+      "indexable": false
+    },
+    {
+      "file": "content/guides/mostakbal-city/red-file.md",
+      "slug": "/guides/mostakbal-city/red-file/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/new-cairo/budget-4m.md",
+      "slug": "/guides/new-cairo/budget-4m/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/new-cairo/index.md",
+      "slug": "/guides/new-cairo/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/new-cairo/prices-2026.md",
+      "slug": "/guides/new-cairo/prices-2026/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/new-cairo/pros-cons.md",
+      "slug": "/guides/new-cairo/pros-cons/",
+      "indexable": false
+    },
+    {
+      "file": "content/guides/new-cairo/real-units.md",
+      "slug": "/guides/new-cairo/real-units/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/new-cairo/red-file.md",
+      "slug": "/guides/new-cairo/red-file/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/sheikh-zayed/budget-5m.md",
+      "slug": "/guides/sheikh-zayed/budget-5m/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/sheikh-zayed/index.md",
+      "slug": "/guides/sheikh-zayed/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/sheikh-zayed/prices-2026.md",
+      "slug": "/guides/sheikh-zayed/prices-2026/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/sheikh-zayed/pros-cons.md",
+      "slug": "/guides/sheikh-zayed/pros-cons/",
+      "indexable": false
+    },
+    {
+      "file": "content/guides/sheikh-zayed/real-units.md",
+      "slug": "/guides/sheikh-zayed/real-units/",
+      "indexable": true
+    },
+    {
+      "file": "content/guides/sheikh-zayed/red-file.md",
+      "slug": "/guides/sheikh-zayed/red-file/",
+      "indexable": true
+    }
+  ],
+  "limitations": [
+    "No Search Console or analytics account inspected",
+    "No real leads/messages sent",
+    "No complete external schema validator, CWV or accessibility audit",
+    "Historical price sources dated Nov 2; source values not re-researched",
+    "HTTP checks do not inspect payment text embedded in images"
+  ],
+  "local_raw_evidence": "/tmp/lenaqar-production-qa (ephemeral); regression script /tmp/lenaqar-qa.py"
+}

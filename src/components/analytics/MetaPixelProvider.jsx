@@ -4,7 +4,7 @@ import { META_PIXEL, isMetaPixelEnabled } from '@/constants/analytics';
 import {
   initMetaPixel,
   isWhatsAppClickTarget,
-  trackMetaContact,
+  trackMetaContactForClick,
   trackMetaPageView,
   trackMetaViewContent,
 } from '@/lib/meta-pixel';
@@ -43,7 +43,7 @@ export default function MetaPixelProvider({ children }) {
 
     const handleClick = (event) => {
       if (!isWhatsAppClickTarget(event.target)) return;
-      trackMetaContact();
+      trackMetaContactForClick(event);
     };
 
     document.addEventListener('click', handleClick, true);

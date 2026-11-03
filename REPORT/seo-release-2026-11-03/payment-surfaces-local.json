@@ -1,0 +1,254 @@
+{
+  "observedAt": "2026-11-03T19:50:31.896536+00:00",
+  "baseUrl": "http://localhost:3060",
+  "surface": "local/preview unless production origin explicitly supplied",
+  "checks": [
+    {
+      "check": "/opportunities/MguPxCF0 HTML HTTP",
+      "pass": true
+    },
+    {
+      "check": "MguPxCF0 HTML years",
+      "pass": true
+    },
+    {
+      "check": "MguPxCF0 HTML positive total",
+      "pass": true
+    },
+    {
+      "check": "MguPxCF0 HTML split redacted",
+      "pass": true
+    },
+    {
+      "check": "MguPxCF0 HTML reviewed image absent",
+      "pass": true
+    },
+    {
+      "check": "MguPxCF0 HTML schema duration",
+      "pass": true
+    },
+    {
+      "check": "MguPxCF0 HTML schema property placement",
+      "pass": true
+    },
+    {
+      "check": "MguPxCF0 HTML no inferred seller/date",
+      "pass": true
+    },
+    {
+      "check": "MguPxCF0 HTML canonical",
+      "pass": false
+    },
+    {
+      "check": "MguPxCF0 HTML WhatsApp attribution",
+      "pass": true
+    },
+    {
+      "check": "MguPxCF0 HTML no developer-price claim",
+      "pass": true
+    },
+    {
+      "check": "/opportunities/MguPxCF0 RSC HTTP",
+      "pass": true
+    },
+    {
+      "check": "/opportunities/MguPxCF0 RSC content type",
+      "pass": true
+    },
+    {
+      "check": "MguPxCF0 RSC years",
+      "pass": true
+    },
+    {
+      "check": "MguPxCF0 RSC positive total",
+      "pass": true
+    },
+    {
+      "check": "MguPxCF0 RSC split redacted",
+      "pass": true
+    },
+    {
+      "check": "MguPxCF0 RSC reviewed image absent",
+      "pass": true
+    },
+    {
+      "check": "/opportunities/LNk7qZIF HTML HTTP",
+      "pass": true
+    },
+    {
+      "check": "LNk7qZIF HTML years",
+      "pass": true
+    },
+    {
+      "check": "LNk7qZIF HTML positive total",
+      "pass": true
+    },
+    {
+      "check": "LNk7qZIF HTML split redacted",
+      "pass": true
+    },
+    {
+      "check": "LNk7qZIF HTML reviewed image absent",
+      "pass": true
+    },
+    {
+      "check": "LNk7qZIF HTML schema duration",
+      "pass": true
+    },
+    {
+      "check": "LNk7qZIF HTML schema property placement",
+      "pass": true
+    },
+    {
+      "check": "LNk7qZIF HTML no inferred seller/date",
+      "pass": true
+    },
+    {
+      "check": "LNk7qZIF HTML canonical",
+      "pass": false
+    },
+    {
+      "check": "LNk7qZIF HTML WhatsApp attribution",
+      "pass": true
+    },
+    {
+      "check": "LNk7qZIF HTML no developer-price claim",
+      "pass": true
+    },
+    {
+      "check": "/opportunities/LNk7qZIF RSC HTTP",
+      "pass": true
+    },
+    {
+      "check": "/opportunities/LNk7qZIF RSC content type",
+      "pass": true
+    },
+    {
+      "check": "LNk7qZIF RSC years",
+      "pass": true
+    },
+    {
+      "check": "LNk7qZIF RSC positive total",
+      "pass": true
+    },
+    {
+      "check": "LNk7qZIF RSC split redacted",
+      "pass": true
+    },
+    {
+      "check": "LNk7qZIF RSC reviewed image absent",
+      "pass": true
+    },
+    {
+      "check": "/opportunities/kBqU7H1A HTML HTTP",
+      "pass": true
+    },
+    {
+      "check": "kBqU7H1A HTML years",
+      "pass": true
+    },
+    {
+      "check": "kBqU7H1A HTML positive total",
+      "pass": true
+    },
+    {
+      "check": "kBqU7H1A HTML valid down/remaining preserved",
+      "pass": true
+    },
+    {
+      "check": "kBqU7H1A HTML reviewed image absent",
+      "pass": true
+    },
+    {
+      "check": "kBqU7H1A HTML schema duration",
+      "pass": true
+    },
+    {
+      "check": "kBqU7H1A HTML schema property placement",
+      "pass": true
+    },
+    {
+      "check": "kBqU7H1A HTML no inferred seller/date",
+      "pass": true
+    },
+    {
+      "check": "kBqU7H1A HTML canonical",
+      "pass": false
+    },
+    {
+      "check": "kBqU7H1A HTML WhatsApp attribution",
+      "pass": true
+    },
+    {
+      "check": "kBqU7H1A HTML no developer-price claim",
+      "pass": true
+    },
+    {
+      "check": "/opportunities/kBqU7H1A RSC HTTP",
+      "pass": true
+    },
+    {
+      "check": "/opportunities/kBqU7H1A RSC content type",
+      "pass": true
+    },
+    {
+      "check": "kBqU7H1A RSC years",
+      "pass": true
+    },
+    {
+      "check": "kBqU7H1A RSC positive total",
+      "pass": true
+    },
+    {
+      "check": "kBqU7H1A RSC valid down/remaining preserved",
+      "pass": true
+    },
+    {
+      "check": "kBqU7H1A RSC reviewed image absent",
+      "pass": true
+    },
+    {
+      "check": "/ HTML HTTP",
+      "pass": true
+    },
+    {
+      "check": "61240565aa04 HTML request redaction",
+      "pass": true
+    },
+    {
+      "check": "f4eaaa7a591f HTML request redaction",
+      "pass": true
+    },
+    {
+      "check": "/ RSC HTTP",
+      "pass": true
+    },
+    {
+      "check": "/ RSC content type",
+      "pass": true
+    },
+    {
+      "check": "61240565aa04 RSC request redaction",
+      "pass": true
+    },
+    {
+      "check": "f4eaaa7a591f RSC request redaction",
+      "pass": true
+    }
+  ],
+  "passed": 55,
+  "failed": [
+    {
+      "check": "MguPxCF0 HTML canonical",
+      "pass": false
+    },
+    {
+      "check": "LNk7qZIF HTML canonical",
+      "pass": false
+    },
+    {
+      "check": "kBqU7H1A HTML canonical",
+      "pass": false
+    }
+  ]
+}

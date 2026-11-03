@@ -2,14 +2,15 @@
 
 import { Phone, MessageCircle, Building2, Mail } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useI18n } from "@/hooks/useI18n";
 import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { SITE } from "@/config/site";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
-import { sellerCtaHref } from "@/lib/lenaqar/whatsapp";
+import { buyerPageCtaHref, sellerCtaHref } from "@/lib/lenaqar/whatsapp";
 import { DOORS } from "@/lib/lenaqar/doors";
 import { ANALYTICS } from "@/constants/analytics";
-import { trackMetaContact } from "@/lib/meta-pixel";
+import { trackMetaContactForClick } from "@/lib/meta-pixel";
 
 const GUIDE_LINKS = [
   { href: "/guides/madinaty/prices-2026", label: "أسعار مدينتي" },
@@ -22,6 +23,12 @@ const GUIDE_LINKS = [
 export default function LenaqarFooter() {
   const { translate } = useI18n();
   const { trackEvent } = useGoogleAnalytics();
+  const pathname = usePathname();
+  const isSellPage = pathname === "/sell" || pathname?.startsWith("/sell/");
+  const contactHref = isSellPage ? sellerCtaHref() : buyerPageCtaHref(pathname);
+  const contactEvent = isSellPage
+    ? ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED
+    : ANALYTICS.EVENTS.BUYER_WHATSAPP_CLICKED;
 
   return (
     <footer className="bg-primary text-white py-10 mt-12">
@@ -36,17 +43,17 @@ export default function LenaqarFooter() {
             <li>{translate("lenaqar.footer.golden3")}</li>
           </ul>
           <a
-            href={sellerCtaHref()}
+            href={contactHref}
             target="_blank"
             rel="noopener noreferrer"
             dir="ltr"
             className="inline-block font-semibold underline underline-offset-2 hover:text-white/80"
-            onClick={() => {
-              trackEvent(ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED);
-              trackMetaContact();
+            onClick={(event) => {
+              trackEvent(contactEvent);
+              trackMetaContactForClick(event);
             }}
           >
-            📲 واتساب {LENAQAR_CONTACT.whatsappDisplay}
+            📲 {translate("lenaqar.footer.whatsapp")} {LENAQAR_CONTACT.whatsappDisplay}
           </a>
         </div>
 
@@ -103,14 +110,14 @@ export default function LenaqarFooter() {
                 <div>
                   <p className="font-medium">{translate("lenaqar.footer.whatsapp")}</p>
                   <a
-                    href={sellerCtaHref()}
+                    href={contactHref}
                     target="_blank"
                     rel="noopener noreferrer"
                     dir="ltr"
                     className="inline-block hover:text-white/80 underline"
-                    onClick={() => {
-                      trackEvent(ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED);
-                      trackMetaContact();
+                    onClick={(event) => {
+                      trackEvent(contactEvent);
+                      trackMetaContactForClick(event);
                     }}
                   >
                     {LENAQAR_CONTACT.whatsappDisplay}

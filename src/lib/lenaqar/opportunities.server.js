@@ -10,6 +10,7 @@ import {
 } from "./arabic-labels.server";
 import { applyArabicLabels } from "./arabic-labels";
 import { isListableOpportunity, validateUnit } from "./validate-unit";
+import { fetchCursorPages } from "./fetch-cursor-pages";
 import {
   marketplaceCitiesMatch,
   resolveMarketplaceCityToken,
@@ -110,10 +111,15 @@ async function fetchPage(query) {
   }
 
   const json = await publicApiGet(`/public/v1/units?${qs}`);
-  if (!json) return { units: [], pagination: {} };
+  if (!json) {
+    throw new Error("Catalog page request failed; refusing to use incomplete catalog data");
+  }
 
-  const units = json?.data?.units ?? json?.units ?? [];
-  const pagination = json?.data?.pagination ?? json?.pagination ?? {};
+  const units = json?.data?.units ?? json?.units;
+  const pagination = json?.data?.pagination ?? json?.pagination;
+  if (!Array.isArray(units) || typeof pagination?.has_more_next !== "boolean") {
+    throw new Error("Catalog page response did not match the cursor pagination contract");
+  }
   return {
     units: Array.isArray(units) ? units : [],
     pagination,
@@ -129,31 +135,32 @@ async function fetchBoundedPages({
   maxPrice,
   bedrooms,
 } = {}) {
-  const collected = [];
-  let cursor = null;
-
-  for (let page = 0; page < SITE.feed.maxPages; page += 1) {
-    const query = {
-      ...lenaqarInventoryQuery(),
-      page_size: SITE.feed.pageSize,
-      city,
-      district,
-      sub_district: subDistrict,
-      project_name: project,
-      min_price: minPrice,
-      max_price: maxPrice,
-      bedrooms,
-      cursor,
-    };
-
-    const { units, pagination } = await fetchPage(query);
-    collected.push(...units);
-
-    if (!pagination?.has_more_next || !pagination?.next_cursor) break;
-    cursor = pagination.next_cursor;
-  }
-
-  return collected;
+  return fetchCursorPages({
+    fetchPage: async (cursor) => {
+      const query = {
+        ...lenaqarInventoryQuery(),
+        page_size: SITE.feed.pageSize,
+        city,
+        district,
+        sub_district: subDistrict,
+        project_name: project,
+        min_price: minPrice,
+        max_price: maxPrice,
+        bedrooms,
+        cursor,
+      };
+      const { units, pagination } = await fetchPage(query);
+      return {
+        records: units,
+        hasMore: pagination.has_more_next,
+        nextCursor: pagination.next_cursor,
+      };
+    },
+    getRecordKey: (unit) => unit?.code,
+    maxPages: SITE.feed.maxPages,
+    maxRecords: SITE.feed.maxUnits,
+    maxDurationMs: SITE.feed.maxDurationMs,
+  });
 }
 
 function matchesExact(value, needle) {
@@ -287,7 +294,7 @@ const loadCatalog = cache(async (apiKey) => {
     );
   }
 
-  return sortFeed(validated).slice(0, SITE.feed.maxUnits);
+  return sortFeed(validated);
 });
 
 function catalogApiKey({

@@ -43,14 +43,16 @@ export const SITE = {
    * stops as soon as the API reports `has_more_next: false`, so the whole
    * catalogue is published and only a broken/looping API hits these numbers.
    *
-   * Sized against a measured catalogue of 135 sell/resale units (2026-08-21),
-   * which is 3 pages at this page size. Set FEED_ENABLED=false to pause fetching.
+   * Runaway guards only: fetching stops on the API's explicit final-page flag.
+   * Exceeding any guard fails the catalog refresh rather than publishing partial
+   * results. Set FEED_ENABLED=false to pause fetching.
    */
   feed: {
     enabled: process.env.NEXT_PUBLIC_LENAQAR_FEED_ENABLED !== "false",
-    maxPages: 30,
+    maxPages: 100,
     pageSize: 50,
-    maxUnits: 1500,
+    maxUnits: 5000,
+    maxDurationMs: 120_000,
   },
   /** Cards per page on /opportunities. Bounds document size, not the catalogue. */
   pageSize: 24,

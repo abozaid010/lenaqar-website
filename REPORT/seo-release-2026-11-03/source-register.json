@@ -1,0 +1,105 @@
+{
+  "register_type": "price_source_evidence",
+  "created_at": "2026-11-03T22:10:00.000Z",
+  "scope": "priority_city_guides_with_price_claims",
+  "notes": "Register records source evidence for price claims in guides. Claims are based on asking averages, not confirmed sale prices. Sample sizes are not uniformly reported by sources.",
+  "sources": [
+    {
+      "source_name": "عقارماب — مدينتي",
+      "source_url": "https://aqarmap.com.eg/ar/neighborhood/cairo/new-cairo/madinaty/",
+      "source_type": "asking_average",
+      "property_category": "apartments",
+      "geography": "مدينتي - New Cairo",
+      "sample_size": "unknown",
+      "source_date": "2026-11-02",
+      "retrieval_date": "2026-11-02",
+      "price_type": "EGP per m² (asking average)",
+      "city_avg_value": 58050,
+      "methodology": "Neighborhood-level asking averages from public listing platform. Not confirmed sale prices. Negotiation affects final price.",
+      "disclaimer": "متوسطات أسعار معروضة في الإعلانات — مش أسعار بيع فعلي. سعر القفل بيتحدد بعد التفاوض."
+    },
+    {
+      "source_name": "عقارماب — الشيخ زايد",
+      "source_url": "https://aqarmap.com.eg/ar/neighborhood/cairo/el-sheikh-zayed-city/",
+      "source_type": "asking_average",
+      "property_category": "apartments",
+      "geography": "الشيخ زايد - Giza",
+      "sample_size": "unknown",
+      "source_date": "2026-11-02",
+      "retrieval_date": "2026-11-02",
+      "price_type": "EGP per m² (asking average)",
+      "city_avg_value": 62000,
+      "methodology": "Neighborhood-level asking averages from public listing platform. Not confirmed sale prices. Negotiation affects final price.",
+      "disclaimer": "متوسطات أسعار معروضة في الإعلانات — مش أسعار بيع فعلي. سعر القفل بيتحدد بعد التفاوض."
+    },
+    {
+      "source_name": "عقارماب — الشروق",
+      "source_url": "https://aqarmap.com.eg/ar/neighborhood/cairo/el-shorouk-city/",
+      "source_type": "asking_average",
+      "property_category": "apartments",
+      "geography": "الشروق - Cairo",
+      "sample_size": "unknown",
+      "source_date": "2026-11-02",
+      "retrieval_date": "2026-11-02",
+      "price_type": "EGP per m² (asking average)",
+      "city_avg_value": 52500,
+      "methodology": "Neighborhood-level asking averages from public listing platform. Not confirmed sale prices. Negotiation affects final price.",
+      "disclaimer": "متوسطات أسعار معروضة في الإعلانات — مش أسعار بيع فعلي. سعر القفل بيتحدد بعد التفاوض."
+    },
+    {
+      "source_name": "عقارماب — التجمع الخامس",
+      "source_url": "https://aqarmap.com.eg/ar/neighborhood/cairo/new-cairo/fifth-settlement/",
+      "source_type": "asking_average",
+      "property_category": "apartments",
+      "geography": "التجمع الخامس - New Cairo",
+      "sample_size": "unknown",
+      "source_date": "2026-11-02",
+      "retrieval_date": "2026-11-02",
+      "price_type": "EGP per m² (asking average)",
+      "city_avg_value": 56500,
+      "methodology": "Neighborhood-level asking averages from public listing platform. Not confirmed sale prices. Negotiation affects final price.",
+      "disclaimer": "متوسطات أسعار معروضة في الإعلانات — مش أسعار بيع فعلي. سعر القفل بيتحدد بعد التفاوض."
+    },
+    {
+      "source_name": "عقارماب — 6 أكتوبر",
+      "source_url": "https://aqarmap.com.eg/ar/neighborhood/cairo/6th-of-october-city/",
+      "source_type": "asking_average",
+      "property_category": "apartments",
+      "geography": "6 أكتوبر - Giza",
+      "sample_size": "unknown",
+      "source_date": "2026-11-02",
+      "retrieval_date": "2026-11-02",
+      "price_type": "EGP per m² (asking average)",
+      "city_avg_value": 53000,
+      "methodology": "Neighborhood-level asking averages from public listing platform. Not confirmed sale prices. Negotiation affects final price.",
+      "disclaimer": "متوسطات أسعار معروضة في الإعلانات — مش أسعار بيع فعلي. سعر القفل بيتحدد بعد التفاوض."
+    },
+    {
+      "source_name": "عقارماب — مدينة المستقبل",
+      "source_url": "https://aqarmap.com.eg/ar/neighborhood/cairo/new-cairo/mostakbal-city/",
+      "source_type": "asking_average",
+      "property_category": "apartments",
+      "geography": "مدينة المستقبل - New Cairo",
+      "sample_size": "unknown",
+      "source_date": "2026-11-02",
+      "retrieval_date": "2026-11-02",
+      "price_type": "EGP per m² (asking average)",
+      "city_avg_value": 49000,
+      "methodology": "Neighborhood-level asking averages from public listing platform. Not confirmed sale prices. Negotiation affects final price.",
+      "disclaimer": "متوسطات أسعار معروضة في الإعلانات — مش أسعار بيع فعلي. سعر القفل بيتحدد بعد التفاوض."
+    }
+  ],
+  "unknown_fields": {
+    "sample_size": "Sources do not consistently report sample size (number of listings used to calculate averages). This remains unknown for all Aqarmap neighborhood averages.",
+    "price_change methodology": "No longitudinal methodology provided. Single-date snapshot only.",
+    "unit_type_breakdown": "Averages may mix apartment configurations (1BR, 2BR, etc.) without separation.",
+    "amenity_impact": "Impact of amenities (furnished, finishing, view) on price not quantified."
+  },
+  "data_quality_notes": [
+    "All sources are asking-price averages from public listing platforms, not confirmed transaction prices.",
+    "Sample sizes are not reported by Aqarmap, making statistical confidence unknown.",
+    "Prices vary by negotiation; the listed average is not a guaranteed transaction price.",
+    "Neighborhood averages may mask significant price variation within the area.",
+    "Data is a single-date snapshot (2026-11-02); no historical trend analysis is available."
+  ]
+}

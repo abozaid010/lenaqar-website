@@ -1,0 +1,376 @@
+{
+  "schema_version": 1,
+  "program": "lenaqar-seo-continuation",
+  "plan": "SEO-PLAN.md",
+  "phase_summary": "feature-progress.json",
+  "task_status_authority": "seo-feature-progress.json",
+  "created_at": "2026-11-03T15:11:12.048969+00:00",
+  "timezone": "Africa/Cairo",
+  "approval": {
+    "source": "User message 2026-11-03 approving next-step P0/P1 and PR merges, requesting plan-only output now",
+    "current_turn": "Planning and tracking files only; no implementation or merge executed",
+    "execution": "Approved scoped P0/P1 implementation, reviewed PR merges and established deployment workflow in the subsequent execution turn",
+    "does_not_supply": [
+      "Commission terms",
+      "Private account access",
+      "Property/payment facts",
+      "API spend budget",
+      "Legal review approval"
+    ]
+  },
+  "requirements": [
+    {
+      "id": "SEO-00",
+      "priority": "P0",
+      "title": "Release baseline and durable tracking",
+      "scope": "Record HEAD/main/PR/deployment; preserve stash; preserve dated evidence; publish documentation via a reviewed PR.",
+      "owner_role": "lead",
+      "depends_on": [],
+      "estimated_active_hours": 0.5,
+      "acceptance_criteria": [
+        "Current main and production SHA recorded",
+        "All task IDs and dependency links validate",
+        "Existing PRs checked; only scoped green PRs merged"
+      ],
+      "verification": "See SEO-PLAN.md task and release QA sections",
+      "rollback": "Scoped revert or removal from public discovery; do not restore known misleading data; never reset main",
+      "scope_window": "tonight"
+    },
+    {
+      "id": "SEO-01",
+      "priority": "P0",
+      "title": "Contain payment information in unreviewed financial images",
+      "scope": "Identify exact payment-document image URLs/hashes; add narrowly scoped public-media review handling across HTML/RSC/gallery/schema/social image surfaces without hiding ordinary property photographs.",
+      "owner_role": "lead",
+      "depends_on": [
+        "SEO-00"
+      ],
+      "estimated_active_hours": 1.5,
+      "acceptance_criteria": [
+        "Known MguPxCF0 schedule excluded from every public image reference after review",
+        "Valid property photos retained",
+        "Unknown image classification is not represented as verified",
+        "Negative and valid media fixtures pass"
+      ],
+      "verification": "See SEO-PLAN.md task and release QA sections",
+      "rollback": "Scoped revert or removal from public discovery; do not restore known misleading data; never reset main",
+      "scope_window": "tonight"
+    },
+    {
+      "id": "SEO-02",
+      "priority": "P0",
+      "title": "Remove contradictory public buyer-request money claims",
+      "scope": "Trace field mapping and free-text provenance; correct proven mapping bugs only. Quarantine only confirmed conflicting money claims with a neutral review notice; never guess the true amount.",
+      "owner_role": "lead",
+      "depends_on": [
+        "SEO-00"
+      ],
+      "estimated_active_hours": 2,
+      "acceptance_criteria": [
+        "REQ-61240565AA04 does not expose 85000 and 8500 as concurrent authoritative amounts",
+        "Other confirmed contradictory records reviewed",
+        "Valid requirements and contact privacy preserved",
+        "HTML/RSC/UI regressions pass"
+      ],
+      "verification": "See SEO-PLAN.md task and release QA sections",
+      "rollback": "Scoped revert or removal from public discovery; do not restore known misleading data; never reset main",
+      "scope_window": "tonight"
+    },
+    {
+      "id": "SEO-03",
+      "priority": "P1",
+      "title": "Fetch the complete eligible catalog safely",
+      "scope": "Honor cursor pagination to exhaustion under an explicit safety bound; deduplicate; detect repeated cursors and failures; report incomplete fetches instead of treating them as complete.",
+      "owner_role": "executor-a",
+      "depends_on": [
+        "SEO-00"
+      ],
+      "estimated_active_hours": 1.5,
+      "acceptance_criteria": [
+        "Frozen 613-record fixture yields 613 unique fetched records across 39 pages before explicit eligibility filters",
+        "Live counts recomputed; never hardcode 613",
+        "Every excluded listing has a reason",
+        "No repeated-cursor loop, unbounded retries, or silent partial sitemap"
+      ],
+      "verification": "See SEO-PLAN.md task and release QA sections",
+      "rollback": "Scoped revert or removal from public discovery; do not restore known misleading data; never reset main",
+      "scope_window": "tonight"
+    },
+    {
+      "id": "SEO-04",
+      "priority": "P1",
+      "title": "Reconcile raw and public arithmetic without exposing private data",
+      "scope": "Validate raw paid-amount evidence internally before allowlisting; distinguish which payment fields are actually supported. Do not automatically restore contradictory down payments simply because an alternate total identity passes.",
+      "owner_role": "lead",
+      "depends_on": [
+        "SEO-00"
+      ],
+      "estimated_active_hours": 2,
+      "acceptance_criteria": [
+        "65/77 and 87/102 historical definitions explained",
+        "Per-field decisions have evidence and tests",
+        "No paidAmount/owner/author/internal-note leakage",
+        "Three PR23 fixtures retain expected redaction/valid-plan behavior",
+        "Unproven CRM corrections remain blocked"
+      ],
+      "verification": "See SEO-PLAN.md task and release QA sections",
+      "rollback": "Scoped revert or removal from public discovery; do not restore known misleading data; never reset main",
+      "scope_window": "tonight"
+    },
+    {
+      "id": "SEO-05",
+      "priority": "P1",
+      "title": "Remove unsupported price-source and freshness claims",
+      "scope": "Separate source type, price-as-of and generic record-update dates; no fallback to today; neutral asking-price/unknown-source wording where provenance is absent.",
+      "owner_role": "executor-b",
+      "depends_on": [
+        "SEO-00"
+      ],
+      "estimated_active_hours": 1,
+      "acceptance_criteria": [
+        "Seller page does not invent a price verification date",
+        "Resale records not automatically described as developer prices",
+        "HTML metadata schema and visible wording agree",
+        "Known genuine price-as-of values preserved"
+      ],
+      "verification": "See SEO-PLAN.md task and release QA sections",
+      "rollback": "Scoped revert or removal from public discovery; do not restore known misleading data; never reset main",
+      "scope_window": "tonight"
+    },
+    {
+      "id": "SEO-06",
+      "priority": "P1",
+      "title": "Correct buyer and seller WhatsApp intent",
+      "scope": "Use shared contact helpers with route/intent-aware prefills and stable page codes; preserve unit OPP codes and network contact exception.",
+      "owner_role": "executor-b",
+      "depends_on": [
+        "SEO-05"
+      ],
+      "estimated_active_hours": 0.75,
+      "acceptance_criteria": [
+        "Buyer pages never prefill seller intent",
+        "Seller pages retain seller intent",
+        "Links encode correct number/page code without PII",
+        "No messages sent during QA"
+      ],
+      "verification": "See SEO-PLAN.md task and release QA sections",
+      "rollback": "Scoped revert or removal from public discovery; do not restore known misleading data; never reset main",
+      "scope_window": "tonight"
+    },
+    {
+      "id": "SEO-07",
+      "priority": "P1",
+      "title": "Resolve commission-policy contradiction",
+      "scope": "Inventory 0.75% each-side and 1.25% buyer-only claims. Apply one policy only after owner supplies the actual terms; prepare exact copy diff in advance.",
+      "owner_role": "lead",
+      "depends_on": [
+        "SEO-00"
+      ],
+      "estimated_active_hours": 0.5,
+      "acceptance_criteria": [
+        "Owner-approved policy recorded",
+        "Classic/privacy/locale/schema references consistent",
+        "No invented fee or legal promise",
+        "Absent owner answer: blocked, not complete"
+      ],
+      "verification": "See SEO-PLAN.md task and release QA sections",
+      "rollback": "Scoped revert or removal from public discovery; do not restore known misleading data; never reset main",
+      "scope_window": "tonight"
+    },
+    {
+      "id": "SEO-08",
+      "priority": "P1",
+      "title": "Reconcile crawl, internal links, sitemap and schema",
+      "scope": "Audit the 53 guides and eligible listing sitemap, priority landings, canonical/robots/noindex, orphan links and structured data; retain original baseline matrix and append new routes separately.",
+      "owner_role": "executor-c",
+      "depends_on": [
+        "SEO-00"
+      ],
+      "estimated_active_hours": 1.5,
+      "acceptance_criteria": [
+        "41 eligible and 12 excluded historical guides reconciled to fresh rules",
+        "No incomplete guide accidentally indexed",
+        "Priority Madinaty/New Cairo/Shorouk pages reachable via useful internal links",
+        "Raw HTML and bot-token matrix checked; simulated tokens not claimed as real crawler access",
+        "JSON parsing and schema vocabulary validation distinguished"
+      ],
+      "verification": "See SEO-PLAN.md task and release QA sections",
+      "rollback": "Scoped revert or removal from public discovery; do not restore known misleading data; never reset main",
+      "scope_window": "tonight"
+    },
+    {
+      "id": "SEO-09",
+      "priority": "P1",
+      "title": "Source freshness and incomplete-guide triage",
+      "scope": "Produce source/type/as-of/retrieved/sample/method register; inspect 12 excluded guides and six-city snapshot; only make editorial changes supported by primary evidence.",
+      "owner_role": "executor-c",
+      "depends_on": [
+        "SEO-08"
+      ],
+      "estimated_active_hours": 1,
+      "acceptance_criteria": [
+        "Every priority price claim has recorded evidence or remains excluded/qualified",
+        "Missing sample size explicitly unknown",
+        "Mostakbal real-units stays noindex until at least 3 genuine matched units",
+        "No requirement to publish 12 guides tonight"
+      ],
+      "verification": "See SEO-PLAN.md task and release QA sections",
+      "rollback": "Scoped revert or removal from public discovery; do not restore known misleading data; never reset main",
+      "scope_window": "tonight"
+    },
+    {
+      "id": "SEO-10",
+      "priority": "P1",
+      "title": "Repair measurement readiness and capture available baselines",
+      "scope": "Audit harness citation extraction, engine distinctions, skipped rows and output preservation; inventory existing analytics before adding events. Capture GSC/Bing/analytics baselines only with authorized access.",
+      "owner_role": "lead",
+      "depends_on": [
+        "SEO-00"
+      ],
+      "estimated_active_hours": 1,
+      "acceptance_criteria": [
+        "Search results/retrieved sources are not counted as generated-answer citations",
+        "Skipped/error runs excluded from success denominators",
+        "40 prompt IDs retained; engine/model/date/measurement type recorded",
+        "No PII or duplicate Lead events",
+        "Unavailable account metrics and API keys remain explicit blockers"
+      ],
+      "verification": "See SEO-PLAN.md task and release QA sections",
+      "rollback": "Scoped revert or removal from public discovery; do not restore known misleading data; never reset main",
+      "scope_window": "tonight"
+    },
+    {
+      "id": "SEO-11",
+      "priority": "P1",
+      "title": "Add targeted regression checks to CI",
+      "scope": "Run relevant Node regression tests alongside existing ESLint/SEO lint; keep Vercel build and explicit local build evidence; do not silently require production secrets in CI.",
+      "owner_role": "executor-a",
+      "depends_on": [
+        "SEO-03"
+      ],
+      "estimated_active_hours": 0.75,
+      "acceptance_criteria": [
+        "New trust/pagination regression failures fail CI",
+        "Existing checks stay enabled",
+        "No secrets printed or production lead submissions",
+        "GitHub branch protection unchanged unless separately approved"
+      ],
+      "verification": "See SEO-PLAN.md task and release QA sections",
+      "rollback": "Scoped revert or removal from public discovery; do not restore known misleading data; never reset main",
+      "scope_window": "tonight"
+    },
+    {
+      "id": "SEO-12",
+      "priority": "P0",
+      "title": "Integrate, review and merge release PRs",
+      "scope": "Review combined tree, run focused and full relevant tests/lint/build, verify head-specific CI and merge safely. SEO-07 may remain an explicitly documented owner blocker; do not label its work complete.",
+      "owner_role": "lead",
+      "depends_on": [
+        "SEO-01",
+        "SEO-02",
+        "SEO-03",
+        "SEO-04",
+        "SEO-05",
+        "SEO-06",
+        "SEO-08",
+        "SEO-09",
+        "SEO-10",
+        "SEO-11"
+      ],
+      "estimated_active_hours": 1,
+      "acceptance_criteria": [
+        "No unrelated diff or conflict",
+        "Matching tested SHA and PR head",
+        "Trusted valid data retained",
+        "Full critical payment/media/UI/SEO matrix passes",
+        "Only approved scoped PRs merged with merge commits; no branch/stash deletion"
+      ],
+      "verification": "See SEO-PLAN.md task and release QA sections",
+      "rollback": "Scoped revert or removal from public discovery; do not restore known misleading data; never reset main",
+      "scope_window": "tonight"
+    },
+    {
+      "id": "SEO-13",
+      "priority": "P0",
+      "title": "Verify exact production release and publish handover",
+      "scope": "Wait for existing Git integration; confirm exact READY SHA and www alias, then run production-only HTTP/RSC/mobile tests and record results.",
+      "owner_role": "lead",
+      "depends_on": [
+        "SEO-12"
+      ],
+      "estimated_active_hours": 1,
+      "acceptance_criteria": [
+        "Deployment SHA equals approved main",
+        "All three unit fixtures checked on actual live data",
+        "Media/requests/WhatsApp/freshness fixes verified",
+        "Sitemap count derives from fresh eligible data",
+        "No unresolved P0 labelled done; failed gate leaves release incomplete",
+        "Progress and owner blockers persisted"
+      ],
+      "verification": "See SEO-PLAN.md task and release QA sections",
+      "rollback": "Scoped revert or removal from public discovery; do not restore known misleading data; never reset main",
+      "scope_window": "tonight"
+    },
+    {
+      "id": "SEO-14",
+      "priority": "P2",
+      "title": "Next original Phase 3: citable price-index pilot",
+      "scope": "Use original Phase 3 plan for a sourced El Shorouk pilot, followed by Madinaty/New Cairo when evidence supports it; Dataset/Article/CSV must match visible facts.",
+      "owner_role": "lead",
+      "depends_on": [
+        "SEO-13"
+      ],
+      "estimated_active_hours": null,
+      "acceptance_criteria": [
+        "Evidence and methodology approved",
+        "No invented sample size or completed-sale data",
+        "Date/source/type and update owner for every row",
+        "Publish only after independent content/schema review"
+      ],
+      "verification": "See SEO-PLAN.md task and release QA sections",
+      "rollback": "Scoped revert or removal from public discovery; do not restore known misleading data; never reset main",
+      "scope_window": "later"
+    },
+    {
+      "id": "SEO-15",
+      "priority": "P2",
+      "title": "Phase 3 trust assets and deferred mirrors",
+      "scope": "Verification definitions, commission/about, checklist refinement and evidence-backed delivery tracker; EN mirrors only with accurate translations and maintenance ownership.",
+      "owner_role": "lead",
+      "depends_on": [
+        "SEO-14"
+      ],
+      "estimated_active_hours": null,
+      "acceptance_criteria": [
+        "Legal/team/commission facts supplied",
+        "No named developer allegations without approved evidence",
+        "Names hidden by default for tracker",
+        "Existing before-you-pay reused; no duplicate content system"
+      ],
+      "verification": "See SEO-PLAN.md task and release QA sections",
+      "rollback": "Scoped revert or removal from public discovery; do not restore known misleading data; never reset main",
+      "scope_window": "later"
+    },
+    {
+      "id": "SEO-16",
+      "priority": "P1",
+      "title": "Phase 4 longitudinal SEO/GEO measurement",
+      "scope": "Repeat preserved baseline after 14 days and monthly; compare like-for-like prompts/models and search metrics; log changes and next five actions.",
+      "owner_role": "lead",
+      "depends_on": [
+        "SEO-13"
+      ],
+      "estimated_active_hours": null,
+      "acceptance_criteria": [
+        "No claimed causal SEO gain from a one-night release",
+        "Missing original baseline acknowledged",
+        "Successful versus skipped runs separately reported",
+        "No automation scheduled without explicit request"
+      ],
+      "verification": "See SEO-PLAN.md task and release QA sections",
+      "rollback": "Scoped revert or removal from public discovery; do not restore known misleading data; never reset main",
+      "scope_window": "later"
+    }
+  ],
+  "effort_note": "Task-level estimates include lead review and can overlap; 12–18 aggregate engineering hours, approximately 6–9 elapsed with three implementation lanes. Deadline remains conditional."
+}

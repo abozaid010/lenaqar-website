@@ -1,3 +1,4 @@
+import { applyRequirementMoneyTrust } from "./requirement-money-trust.js";
 import { createHash } from "crypto";
 
 const ALLOWED_INTENTS = new Set(["buy"]);
@@ -276,7 +277,7 @@ export function toPublicRequirement(raw) {
   }
   if (notes) publicRow.notes = notes;
 
-  return publicRow;
+  return applyRequirementMoneyTrust(publicRow);
 }
 
 /**

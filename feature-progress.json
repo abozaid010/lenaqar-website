@@ -9,11 +9,11 @@
     "research_snapshot": "content/guides/_research/aqarmap-asking-2026-11-02.json",
     "repo": "abozaid010/lenaqar-website",
     "canonical_host": "https://www.lenaqar.com",
-    "updated_at": "2026-11-02T21:41:00+02:00",
+    "updated_at": "2026-11-03T15:11:12.048969+00:00",
     "current_git": {
-      "branch": "main",
-      "main_tip": "c8fe815e",
-      "head": "c8fe815e",
+      "branch": "codex/takeover-verification-2026-11-03",
+      "main_tip": "ab0deed6a0193bad216215470c2e4b386f478ceb",
+      "head": "bab4092766428cbf1bd9fb8316ba3f43f7eb0bf1",
       "merged_prs": [
         {
           "number": 20,
@@ -30,12 +30,19 @@
           "title": "SEO Phase 2: homepage, doors, golden footer, how-it-works",
           "merged": true,
           "merge_commit": "c8fe815e872128ce32fce31a920d3f560b3d730f"
+        },
+        {
+          "number": 23,
+          "merged": true,
+          "merge_commit": "ab0deed6a0193bad216215470c2e4b386f478ceb",
+          "title": "Null installmentYears when payment split is hidden"
         }
       ],
-      "open_pr": null
+      "open_pr": null,
+      "head_note": "Observed HEAD before uncommitted planning files; use Git for current revision."
     },
-    "active_phase": "phase-2-merged-awaiting-production-deploy",
-    "next_gate": "Owner approval for production deploy of main c8fe815e. Do NOT start Phase 3 until Phase 2 is live on www.",
+    "active_phase": "seo-p0-p1-single-pr-execution",
+    "next_gate": "Finish local/preview verification, commit and push one PR; do not merge or deploy.",
     "do_not": [
       "Merge or deploy Phase 2 without owner approval",
       "Start Phase 3 without Phase 2 live + gate",
@@ -203,8 +210,8 @@
     {
       "id": "phase-2",
       "name": "Homepage + IA (Arabic first)",
-      "status": "merged_awaiting_production",
-      "gate": "Owner MERGE approval required — do not deploy without approval",
+      "status": "done_production_verified_with_deferred_items",
+      "gate": "PR #23 merged/deployed under explicit takeover authorization; Phase 3 still requires owner approval.",
       "branch": "seo-phase-2",
       "build": {
         "command": "npm run build",
@@ -333,7 +340,67 @@
         }
       },
       "merged_at": "2026-11-02T21:41:00+02:00",
-      "merge_commit": "c8fe815e872128ce32fce31a920d3f560b3d730f"
+      "merge_commit": "c8fe815e872128ce32fce31a920d3f560b3d730f",
+      "historical_stash_evidence": {
+        "source": "stash 796d32105e1959b3c6bfb97933967dc5a07e3436 (preserved, not applied)",
+        "production_deploy": {
+          "at": "2026-11-02T22:03:38Z",
+          "method": "vercel deploy --prod --yes --scope website-9c0c",
+          "deployment_id": "dpl_CLwC23vUHZRJ8teawgebaAKTZ1uJ",
+          "url": "https://lenaqar-website-279r-rtilq1kyz-website-9c0c.vercel.app",
+          "aliased": "https://www.lenaqar.com",
+          "readyState": "READY",
+          "git_sha": "26445560610638566f77f2f6a28bae366d5f064e",
+          "includes_phase2_merge": "c8fe815e872128ce32fce31a920d3f560b3d730f",
+          "note": "Earlier tip deploy mt0lr9r5s (same SHA) Error on next/font; successful redeploy owns www alias",
+          "NEXT_PUBLIC_SITE_URL": "https://www.lenaqar.com",
+          "ci_main": {
+            "merge_run": "41512007480 success (c8fe815e)",
+            "tip_run": "41512217421 success (26445560)"
+          }
+        },
+        "production_qa": {
+          "at": "2026-11-02T22:12:00+02:00",
+          "method": "Independent curl against https://www.lenaqar.com (public prod; not localhost/preview)",
+          "result": "PRODUCTION PASS",
+          "checklist_pass": 72,
+          "checklist_fail": 0,
+          "home_doors_footer_how": "PASS",
+          "canonical_og_www": "PASS",
+          "robots_sitemap_llms": "PASS (545 www locs; Sitemap www; llms + llms-full)",
+          "twelve_noindex_guides": "PASS (noindex,follow; absent from sitemap)",
+          "global_leaks_293000_x0_invalid_key": "PASS none",
+          "units": {
+            "LNk7qZIF": "split null; installmentYears null; paymentSplitHidden true; totalPrice kept; notice; WA ok",
+            "MguPxCF0": "split null; paymentSplitHidden true; totalPrice kept; notice; residual installmentYears=10 in RSC only (not visible UI/schema plan)",
+            "kBqU7H1A": "valid plan intact (down/remaining/years/yearly); JSON-LD plan fields present; WA ok"
+          },
+          "installmentYears_verdict": "When paymentSplitHidden, installmentYears SHOULD be nullified in applyPublicMoneyTrust (debt). Not a prod blocker: UI+schema gate on mayShowMoneySplit; MguPxCF0 shows no '10 سنوات' plan UI."
+        },
+        "caution": "Historical 72-pass claim not rerun as that exact checklist. Prior deployment SHA/READY independently confirmed via Vercel API. Historical QA timestamp precedes deployment in UTC and must not be relied on for chronology."
+      },
+      "production_deploy": {
+        "verified_at": "2026-11-03T14:56:49.667603+00:00",
+        "deployment_id": "dpl_ADrQoQV3GV6kAm9t76PYFh4bsZp2",
+        "git_sha": "ab0deed6a0193bad216215470c2e4b386f478ceb",
+        "readyState": "READY",
+        "canonical": "https://www.lenaqar.com",
+        "method": "Existing Vercel Git integration after GitHub merge",
+        "main_ci_run": 41657965586
+      },
+      "production_qa": {
+        "automated_http_checks": 326,
+        "pass": 326,
+        "fail": 0,
+        "scope": "70 HTML/text endpoints including all 53 guides; separate RSC for 3 units; canonical, index directives, JSON parsing and selected listing schema fields. Not full Schema.org validation or a full property crawl.",
+        "unit_years": {
+          "MguPxCF0": null,
+          "LNk7qZIF": null,
+          "kBqU7H1A": 9
+        },
+        "browser": "Three property UIs; 390x844 homepage/menu/buyer form opening/seller page; no lead submitted or messages sent.",
+        "remaining_risk": "Payment schedule photograph on MguPxCF0 remains visible; PR #23 redacts serialized fields, not images."
+      }
     },
     {
       "id": "phase-3",
@@ -426,7 +493,7 @@
     {
       "id": "CRM-MONEY",
       "status": "open",
-      "summary": "Fix ~77 inconsistent unit payment breakdowns in CRM (see REPORT/missing.json)"
+      "summary": "2026-11-03 full 613-record public catalog: 87 raw arithmetic failures, 102 public-serializer hidden splits; first 480: 65/77. Source REPORT/takeover-verification-2026-11-03.json."
     },
     {
       "id": "API-TRUST-FIELDS",
@@ -435,8 +502,8 @@
     },
     {
       "id": "PHASE2-PR-REVIEW",
-      "status": "done_merged",
-      "summary": "PR #22 merged to main as c8fe815e — production deploy still needs owner approval"
+      "status": "done_production_verified",
+      "summary": "PR #22 and #23 merged; ab0deed6 production READY and focused QA passed; separate debt recorded."
     }
   ],
   "done_means": [
@@ -447,15 +514,19 @@
     "Phase 4 citation re-test shows measurable improvement"
   ],
   "pr_ready_decision": {
-    "status": "MERGED_AWAITING_PRODUCTION",
-    "pr_url": "https://github.com/abozaid010/lenaqar-website/pull/22",
-    "merge_commit": "c8fe815e872128ce32fce31a920d3f560b3d730f",
-    "merge_deploy": "Merged to main. Production deploy NOT without owner approval",
-    "recommendation": "STOP — wait for owner production deploy approval. Do not start Phase 3.",
+    "status": "PR23_PRODUCTION_VERIFIED_WITH_SEPARATE_FINDINGS",
+    "pr_url": "https://github.com/abozaid010/lenaqar-website/pull/23",
+    "merge_commit": "ab0deed6a0193bad216215470c2e4b386f478ceb",
+    "production_deployment": "dpl_ADrQoQV3GV6kAm9t76PYFh4bsZp2",
+    "recommendation": "PR23 remains production-verified. User approved next P0/P1 work and scoped merges; current turn writes plan only.",
     "known_residuals": [
-      "installmentYears nullified with paymentSplitHidden — open PR fix/null-installment-years-when-split-hidden (await merge+prod)",
-      "~77 CRM payment mismatches (values redacted)",
-      "~12 intentionally noindex guides"
+      "Payment schedule image bypasses field redaction",
+      "Catalog 30-page cap truncates 613 units to 480 at actual 16/page",
+      "Public serializer drops paidAmount before alternate arithmetic validation",
+      "Buyer request structured fields can conflict with notes",
+      "Commission text conflicts on classic/privacy",
+      "Unverified freshness/source labels",
+      "12 intentionally noindex guides; /en mirrors deferred"
     ]
   },
   "maintenance_rules": [
@@ -463,5 +534,36 @@
     "Update program.updated_at and current_git on each session that advances the plan",
     "Keep REPORT/missing.json in sync for unresolved data — never mark unresolved money as corrected",
     "Chat summaries are secondary; this file + REPORT/* are durable progress"
-  ]
+  ],
+  "takeover_verification": {
+    "date": "2026-11-03",
+    "report": "docs/buyer-first-implementation-log.md",
+    "evidence": "REPORT/takeover-verification-2026-11-03.json",
+    "stash_reconciliation": "Reviewed complete stash diff; retained historical deployment/QA under historical_stash_evidence, superseded obsolete statuses using fresh evidence. All 12 stashes preserved; no stash apply/pop/drop.",
+    "guide_counts": {
+      "total": 53,
+      "indexable": 41,
+      "noindex": 12
+    },
+    "phase3": "Original plan verified. Next-step continuation approved 2026-11-03; original Phase3 assets sequenced after P0/P1, not implemented."
+  },
+  "seo_execution": {
+    "plan": "SEO-PLAN.md",
+    "requirements": "seo-feature-req.json",
+    "task_progress": "seo-feature-progress.json",
+    "relationship": "This file remains phase/history authority; task statuses live only in seo-feature-progress.json; shared task IDs prevent duplicate sources of truth.",
+    "approval_record": {
+      "source": "User message 2026-11-03 approving next-step P0/P1 and PR merges, requesting plan-only output now",
+      "current_turn": "Planning and tracking files only; no implementation or merge executed",
+      "execution": "Implement and verify all feasible planned work; single PR; never merge or deploy per latest user override.",
+      "does_not_supply": [
+        "Commission terms",
+        "Private account access",
+        "Property/payment facts",
+        "API spend budget",
+        "Legal review approval"
+      ]
+    },
+    "state": "in_progress"
+  }
 }

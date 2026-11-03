@@ -1,3 +1,4 @@
+import { applyRequirementMoneyTrust } from "./requirement-money-trust.js";
 import { cache } from "react";
 import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
 import { bffFetch, isCloudflareChallenge } from "@/lib/bffFetch";
@@ -59,7 +60,7 @@ function acceptPublicRequirement(raw) {
   }
   if (locations.length === 0) return null;
 
-  /** @type {{ id: string, intent: "buy", locations: typeof locations, propertyTypes: string[], roomsCount?: number, minPrice?: number, maxPrice?: number, downPayment?: number, monthlyInstallment?: number, deliveryDate?: string, developer?: string, notes?: string }} */
+  /** @type {{ id: string, intent: "buy", locations: typeof locations, propertyTypes: string[], roomsCount?: number, minPrice?: number, maxPrice?: number, downPayment?: number, monthlyInstallment?: number, deliveryDate?: string, developer?: string, notes?: string, moneyReviewRequired?: boolean }} */
   const out = {
     id: row.id,
     intent: "buy",
@@ -83,7 +84,7 @@ function acceptPublicRequirement(raw) {
   if (typeof row.notes === "string" && row.notes.trim()) {
     out.notes = row.notes.trim().slice(0, 600);
   }
-  return out;
+  return applyRequirementMoneyTrust(out);
 }
 
 /**

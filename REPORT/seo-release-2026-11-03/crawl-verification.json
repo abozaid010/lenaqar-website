@@ -1,0 +1,47 @@
+{
+  "verified_at": "2026-11-03T22:20:00.000Z",
+  "verification_type": "crawl_discoverability_schema",
+  "script": "scripts/verify-crawl-matrix.mjs",
+  "summary": {
+    "total_guides": 53,
+    "excluded_from_index": 12,
+    "indexable_guides": 41,
+    "checks_passed": 200,
+    "warnings": 12,
+    "errors": 0
+  },
+  "findings": {
+    "canonical_urls": "All guides have slug frontmatter - canonical URLs generated correctly in code",
+    "schema_types": "Schema is generated dynamically in code, not required in frontmatter - no errors",
+    "seo_index_status": "12 guides correctly marked seo_index: false with documented reasons",
+    "priority_city_links": "Internal links verified for Madinaty, New Cairo, El Shorouk guides",
+    "orphan_pages": "No orphaned guide pages detected - all have internal navigation"
+  },
+  "excluded_guides_confirmed": [
+    "/guides/6th-of-october/pros-cons/",
+    "/guides/buying/buying-resale-step-by-step/",
+    "/guides/buying/youth-social-housing-resale/",
+    "/guides/compare/el-shorouk-vs-fifth-settlement/",
+    "/guides/compare/madinaty-vs-mostakbal-city/",
+    "/guides/compare/sheikh-zayed-vs-6th-of-october/",
+    "/guides/fifth-settlement/pros-cons/",
+    "/guides/madinaty/pros-cons/",
+    "/guides/mostakbal-city/pros-cons/",
+    "/guides/mostakbal-city/real-units/",
+    "/guides/new-cairo/pros-cons/",
+    "/guides/sheikh-zayed/pros-cons/"
+  ],
+  "sitemap_consistency": {
+    "expected_indexable": 41,
+    "expected_excluded": 12,
+    "status": "consistent"
+  },
+  "notes": [
+    "All 53 guides have proper frontmatter with slug and status",
+    "Schema generation is handled dynamically in code - frontmatter schema field is optional",
+    "12 guides with seo_index: false are correctly excluded and documented in triage",
+    "Priority city guides (Madinaty, New Cairo, El Shorouk) have internal link structure",
+    "No canonical URL errors detected",
+    "No orphaned guide pages found"
+  ]
+}

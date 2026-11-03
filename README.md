@@ -1,3 +1,7 @@
+# Lenaqar — buyer-first Egyptian property marketplace
+
+Current architecture: [WEBSITE_ARCHITECTURE.md](WEBSITE_ARCHITECTURE.md). Verified progress and approval gates: [feature-progress.json](feature-progress.json). Latest takeover findings: [implementation log](docs/buyer-first-implementation-log.md#takeover-verification--2026-11-03).
+
 ## Buyer Guide (دليل المشتري)
 
 Markdown articles live in `content/guides/`. Status workflow: `draft` → `needs_numbers` → `in_review` → `approved` → `scheduled` → `published`.
@@ -72,7 +76,7 @@ npm run lint:all
 
 See [SEO_RULES.md](./SEO_RULES.md) for complete SEO guidelines and requirements.
 
-**Core Value Proposition**: LenaAI is like ChatGPT for real estate — an autonomous AI sales agent that talks to customers, recommends properties, shows master plans, explains payment plans, qualifies leads, scores clients, and closes sales.
+**Core Value Proposition**: Lenaqar starts with the buyer’s needs, supports informed property comparisons, and connects buyers through WhatsApp. The separate LenaAI CRM is not this application.
 
 ## Learn More
 

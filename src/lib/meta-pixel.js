@@ -5,6 +5,7 @@ import {
   getMetaPixelId,
   isMetaPixelEnabled,
 } from '@/constants/analytics';
+import { trackOncePerEvent } from './meta-contact-events';
 
 const INIT_FLAG = '__lenaMetaPixelInitialized';
 
@@ -74,6 +75,13 @@ export async function trackMetaContact(params = {}) {
   if (!isMetaPixelEnabled()) return;
   await initMetaPixel();
   runFbq('track', META_PIXEL.EVENTS.CONTACT, params);
+}
+
+/** Deduplicate global capture and component handlers for the same click. */
+export function trackMetaContactForClick(event, params = {}) {
+  return trackOncePerEvent(event, () => {
+    trackMetaContact(params);
+  });
 }
 
 export async function trackMetaLead(params = {}) {

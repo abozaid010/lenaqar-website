@@ -62,3 +62,9 @@ No new patterns or dependencies without clear need — stability over experiment
 
 ## Cleanup tooling
 `scripts/orphan-scan.mjs` + `scripts/entrypoints.txt` — only approved way to verify orphaned files.
+
+## Verified takeover context
+Read `WEBSITE_ARCHITECTURE.md` and the 2026-11-03 section in `docs/buyer-first-implementation-log.md` before using older plans. `feature-progress.json` remains the canonical phase tracker; verify claims against Git/CI/Vercel evidence. Phase 3 and newly proposed remediation require explicit owner approval. Preserve all stashes and unrelated work. Never infer verified prices from `updatedAt` or the current date.
+
+## Active SEO continuation
+For the approved 2026-11-03 P0/P1 continuation, read `SEO-PLAN.md` and `seo-feature-req.json`; task states are authoritative in `seo-feature-progress.json`. Keep `feature-progress.json` as the phase/release history, not a duplicate task list. Latest user approval supersedes prior stop gates for this scoped work. Planning-only turns do not imply implementation or deployment. The lead alone reconciles trackers during parallel execution.

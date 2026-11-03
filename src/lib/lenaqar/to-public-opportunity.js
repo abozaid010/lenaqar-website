@@ -1,3 +1,4 @@
+import { mayPublishImage } from "./public-media-review.js";
 import {
   applyPublicMoneyTrust,
   plausibleInstallmentYears,
@@ -34,7 +35,7 @@ function mapImages(raw) {
       typeof img === "string"
         ? img.trim()
         : pickString(img?.url, img?.image_url);
-    if (url) out.push({ url });
+    if (url && mayPublishImage(url)) out.push({ url });
   }
   return out;
 }
@@ -92,6 +93,7 @@ export function toPublicOpportunity(raw) {
           ? [raw.image]
           : []
     ),
+    datePosted: raw.datePosted || raw.date_posted || null,
     updatedAt: raw.updatedAt || raw.updated_at || null,
-  });
+  }, { paidAmount: pickNumber(raw.paidAmount, raw.paid_amount) });
 }
