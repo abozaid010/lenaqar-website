@@ -221,22 +221,28 @@ export default function StorytellingHomepage({ requirements = [], error = null }
             </h2>
           </ScrollReveal>
 
-          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-6 space-y-4">
             {[1, 2, 3, 4].map((step) => (
               <ScrollReveal key={step} delay={step * 0.1}>
-                <div className="rounded-lg border border-primary/10 bg-white/80 p-3 relative">
-                  <p className="text-xs font-semibold tabular-nums text-primary/50">
-                    {String(step).padStart(2, "0")}
-                  </p>
-                  <h3 className="mt-1.5 font-bold text-sm text-primary">
-                    {translate(`lenaqar.storytelling.how.step${step}Title`)}
-                  </h3>
-                  <p className="mt-1.5 text-xs leading-snug text-black/70 line-clamp-3">
-                    {translate(`lenaqar.storytelling.how.step${step}Body`)}
-                  </p>
-                  {/* Connector line */}
+                <div className="flex items-start gap-4 sm:gap-6">
+                  {/* Step Number Circle */}
+                  <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm sm:text-base">
+                    {step}
+                  </div>
+
+                  {/* Step Content */}
+                  <div className="flex-1 pt-1">
+                    <h3 className="font-bold text-base sm:text-lg text-primary">
+                      {translate(`lenaqar.storytelling.how.step${step}Title`)}
+                    </h3>
+                    <p className="mt-1 text-sm sm:text-base text-black/70 leading-relaxed">
+                      {translate(`lenaqar.storytelling.how.step${step}Body`)}
+                    </p>
+                  </div>
+
+                  {/* Connector Line */}
                   {step < 4 && (
-                    <div className="hidden lg:block absolute top-1/2 -right-2 w-4 h-0.5 bg-primary/20" />
+                    <div className="hidden sm:block flex-shrink-0 w-0.5 min-h-12 bg-primary/20 -mt-2" />
                   )}
                 </div>
               </ScrollReveal>
@@ -244,7 +250,7 @@ export default function StorytellingHomepage({ requirements = [], error = null }
           </div>
 
           <ScrollReveal delay={0.5}>
-            <div className="mt-6 text-center">
+            <div className="mt-8 text-center">
               <BuyRequestCta
                 variant="primary"
                 label={translate("lenaqar.storytelling.how.cta")}

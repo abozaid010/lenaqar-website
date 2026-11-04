@@ -28,14 +28,30 @@ function FlowBlock({
       <h2 className="text-2xl font-bold text-primary">{translate(titleKey)}</h2>
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-start">
         <ol className="space-y-4">
-          {steps.map((step) => (
+          {steps.map((step, index) => (
             <li
               key={step.titleKey}
-              className="rounded-lg border border-black/10 bg-white p-5"
+              className="flex items-start gap-4"
             >
-              <p className="mb-2 text-xs tabular-nums text-black/50">{step.num}</p>
-              <h3 className="mb-2 font-semibold">{translate(step.titleKey)}</h3>
-              <p className="text-sm text-black/70">{translate(step.bodyKey)}</p>
+              {/* Step Number Circle */}
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">
+                {step.num}
+              </div>
+
+              {/* Step Content */}
+              <div className="flex-1 pt-1">
+                <h3 className="font-bold text-base text-primary">
+                  {translate(step.titleKey)}
+                </h3>
+                <p className="mt-1 text-sm text-black/70 leading-relaxed">
+                  {translate(step.bodyKey)}
+                </p>
+              </div>
+
+              {/* Connector Line */}
+              {index < steps.length - 1 && (
+                <div className="hidden lg:block flex-shrink-0 w-0.5 min-h-12 bg-primary/20 -mt-2" />
+              )}
             </li>
           ))}
         </ol>
