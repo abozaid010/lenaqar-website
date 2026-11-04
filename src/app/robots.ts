@@ -29,15 +29,21 @@ const ADMIN_PATHS = [
   'admin',
 ];
 
-/** Non-CRM routes that must stay out of the index: internals, legacy, private links. */
+/**
+ * Non-CRM routes that must stay out of the index: internals, private links.
+ *
+ * Deliberately NOT disallowed:
+ * - `/_next/` serves CSS/JS and every listing/guide photo (`/_next/image`).
+ *   Blocking it hides all property images from image search and AI crawlers
+ *   and stops Google from rendering the page as users see it.
+ * - Legacy `/properties/`, `/property/`, `/unit/` answer 308 to
+ *   `/opportunities/<code>` (or 404 when the unit is gone). Crawlers must be
+ *   able to fetch them to follow the redirect and consolidate old links.
+ */
 const PRIVATE_PATHS = [
   '/api/',
-  '/_next/',
   '/lenaqar',
   '/match/',
-  '/properties/',
-  '/property/',
-  '/unit/',
   '/network/signup',
   '/network/login',
   '/network/pending',

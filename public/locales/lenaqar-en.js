@@ -1,6 +1,6 @@
 export default {
   slogan:
-    "Lenaqar: buy or sell your home in Egypt with complete, real numbers — no cold calls, no scams",
+    "Lenaqar: buy or sell your home in Egypt with clearer numbers, no cold calls, and steps that protect you from scams",
   sloganShort:
     "We don't sell you what we have. We bring you what you want — an apartment tailored to your request.",
   header: {
@@ -157,7 +157,7 @@ export default {
   doors: {
     sectionTitle: "Pick your door",
     sectionSub:
-      "Four clear paths: no cold calls, real numbers, paperwork safety, or delivery delays.",
+      "Four clear paths: no cold calls, clear numbers, paperwork safety, or delivery delays.",
     ctaBuy: "Write your property request",
     ctaHow: "How we work",
     ctaCalculator: "Open the cancel vs sell calculator",
@@ -171,7 +171,7 @@ export default {
       cardBody: "Send your request on WhatsApp and get written options — we call only if you ask.",
     },
     verified_prices: {
-      cardTitle: "Real numbers",
+      cardTitle: "Clear numbers",
       cardBody: "Price, area, and down payment shown when available — no “call for price”.",
     },
     before_you_pay: {
@@ -388,7 +388,7 @@ export default {
     golden1:
       "Buy with AI, no cold calls: send your WhatsApp request and get matching options — we call only if you ask.",
     golden2:
-      "We protect you: an honest adviser plus a lawyer who reviews paperwork on every resale unit.",
+      "We protect you: an honest adviser plus a legal review of the paperwork on the resale unit you choose.",
     golden3: "We serve your request — we don't chase the developer's commission.",
     siblingLine: "From the Lena AI family — lenaai.net",
   },
@@ -596,6 +596,13 @@ export default {
     sellerFlowAlt:
       "Selling with Lenaqar: send unit details, we verify completeness, match to buyer requests, send to the right client",
   },
+  legacyUnit: {
+    notFoundTitle: "This unit is no longer listed",
+    notFoundBody: "This is an old link and the unit is no longer offered on Lenaqar.",
+    unavailableTitle: "This page is unavailable right now",
+    unavailableBody: "We couldn't reach the unit details. Please try again shortly.",
+    browseCta: "Browse available opportunities",
+  },
   requirements: {
     moneyReviewNotice: "Budget details are under review — contact us to confirm them.",
   },
@@ -605,7 +612,7 @@ export default {
       eyebrowDetail:
         "We don't just sell what we have — we help you find what fits your needs and budget.",
       title:
-        "Lenaqar: buy or sell your home in Egypt with complete, real numbers — no cold calls, no scams",
+        "Lenaqar: buy or sell your home in Egypt with clearer numbers, no cold calls, and steps that protect you from scams",
       sub: "Send your WhatsApp request, AI searches for matches, and a lawyer reviews resale paperwork. We serve your request — not the developer's commission.",
       whatsappCta: "Share a unit that matches buyer demand",
       addUnitCta: "Add your unit on the website",
@@ -633,7 +640,7 @@ export default {
         "Send your WhatsApp request and get matching options — we call only if you ask.",
       point2Title: "We protect you: adviser + lawyer on resale",
       point2Body:
-        "An honest adviser plus a lawyer who reviews paperwork on every resale unit.",
+        "An honest adviser plus a legal review of the paperwork on the resale unit you choose.",
       point3Title: "We serve your request, not developer commission",
       point3Body: "We don't push launches for commission — we find what fits your request.",
     },
@@ -759,7 +766,7 @@ export default {
       },
     },
   onboarding: {
-    tagline: "Egypt's only buyer-first platform",
+    tagline: "A buyer-first property platform in Egypt",
     whoLine1:
       "Write your full request, and we start showing you the homes that fit — resale or primary.",
     whoLine2: "We don't sell you what we have. We find what you want.",
