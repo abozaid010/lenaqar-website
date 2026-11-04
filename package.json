@@ -16,6 +16,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.81.5",
     "axios": "^1.8.4",
+    "framer-motion": "^14.9.0",
     "gray-matter": "^4.0.3",
     "js-cookie": "^3.0.5",
     "libphonenumber-js": "^1.13.1",

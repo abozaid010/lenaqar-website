@@ -1,6 +1,6 @@
 import { SITE } from "@/config/site";
 import { fetchPublicRequirements } from "@/lib/lenaqar/requirements.server";
-import MarketplaceHomeContent from "@/components/lenaqar/marketplace-home-content";
+import StorytellingHomepage from "@/components/lenaqar/storytelling-homepage";
 import FaqSchema from "@/components/schema/FaqSchema";
 
 export const revalidate = 300;
@@ -39,7 +39,7 @@ export default async function LenaqarHomePage() {
   return (
     <>
       <FaqSchema />
-      <MarketplaceHomeContent requirements={requirements} error={error} />
+      <StorytellingHomepage requirements={requirements} error={error} />
     </>
   );
 }
