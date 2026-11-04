@@ -42,17 +42,17 @@ export default function StorytellingHomepage({ requirements = [], error = null }
 
       <section
         aria-labelledby="lq-requests-title"
-        className="border-t border-primary/10 bg-primary/[0.025] py-12 sm:py-16"
+        className="border-t border-primary/10 bg-primary/[0.025] pt-6 pb-12 sm:pt-8 sm:pb-16"
       >
         <div className="container">
           <div className="mx-auto max-w-3xl text-center">
             <h2
               id="lq-requests-title"
-              className="lq-display text-2xl font-bold text-primary sm:text-3xl"
+              className="lq-display text-xl font-bold text-primary sm:text-2xl"
             >
               {translate("lenaqar.onboarding.requestsTitle")}
             </h2>
-            <p className="mt-2 text-base text-black/60">
+            <p className="mt-1 text-sm text-black/60 sm:text-base">
               {translate("lenaqar.onboarding.requestsSub")}
             </p>
           </div>
@@ -80,7 +80,7 @@ export default function StorytellingHomepage({ requirements = [], error = null }
             </div>
           ) : (
             <>
-              <div className="-mb-4 mt-8 columns-1 gap-4 md:columns-2 xl:columns-3">
+              <div className="-mb-4 mt-5 columns-1 gap-4 md:columns-2 xl:columns-3">
                 {displayRequests.map((requirement) => (
                   <RequirementCard key={requirement.id} requirement={requirement} />
                 ))}

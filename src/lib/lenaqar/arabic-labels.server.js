@@ -35,9 +35,15 @@ async function fetchRows(path) {
   if (!PUBLIC_X_API_KEY) return [];
   const headers = { accept: "application/json", "X-API-Key": PUBLIC_X_API_KEY };
   try {
+    // Not `no-store`: these run inside ISR routes (/opportunities/[slug],
+    // sitemap). A no-store fetch at runtime turns a static route dynamic and
+    // Next answers HTTP 500 ("Page changed from static to dynamic at runtime")
+    // for every slug not prerendered at build. /public/projects (~4.5 MB) is
+    // over the 2 MB data-cache limit, so Next only warns and skips storing it;
+    // the in-memory TTL cache below still deduplicates.
     const response = await bffFetch(`${API_BASE_URL}${path}`, {
       headers,
-      cache: "no-store",
+      next: { revalidate: TTL_MS / 1000 },
       signal: AbortSignal.timeout(CATALOG_TIMEOUT_MS),
     });
     if (!response.ok) {

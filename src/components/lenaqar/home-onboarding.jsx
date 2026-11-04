@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Check, Pause, Play, RotateCcw, SendHorizontal } from "lucide-react";
+import { Check, MessageCircle, Pause, Play, RotateCcw } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import RequestComposer from "./request-composer";
 
@@ -187,10 +187,10 @@ function ExampleScene({ label, text, sendLabel, elapsed, reduced }) {
             initial={false}
             animate={done ? { opacity: 1, scale: [1, 1.06, 1] } : { opacity: 0.35, scale: 1 }}
             transition={{ duration: reduced ? 0 : 0.6, ease: EASE }}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-white shadow-lg shadow-primary/25"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#25D366] px-5 text-sm font-bold text-white shadow-lg shadow-[#25D366]/30"
           >
+            <MessageCircle aria-hidden="true" className="size-4" />
             {sendLabel}
-            <SendHorizontal aria-hidden="true" className="size-4 rtl:-scale-x-100" />
           </motion.span>
         </div>
       </div>
@@ -405,24 +405,30 @@ export default function HomeOnboarding() {
         );
       default:
         return (
+          // Compact on purpose: the composer takes ~half the screen so the
+          // other buyers' requests start in the first view.
           <div className="mx-auto w-full max-w-3xl">
-            <h2 className="lq-display text-center text-[clamp(1.75rem,5vw,3.25rem)] font-bold leading-tight text-primary">
+            <h2 className="lq-display text-center text-[clamp(1.5rem,4vw,2.5rem)] font-bold leading-tight text-primary">
               {t("composerTitle")}
             </h2>
-            <p className="mx-auto mt-3 max-w-xl text-center text-base text-black/60 sm:text-lg">
+            <p className="mx-auto mt-1.5 max-w-xl text-center text-sm text-black/60 sm:text-base">
               {t("composerSub")}
             </p>
-            <RequestComposer ref={composerRef} autoFocus={focusComposer} className="mt-7 sm:mt-9" />
-            <div className="mt-6 text-center">
-              <button
-                type="button"
-                onClick={() => goTo(0)}
-                className="compact-btn inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-primary/70 transition-colors hover:bg-primary/5 hover:text-primary"
-              >
-                <RotateCcw aria-hidden="true" className="size-4" />
-                {t("replay")}
-              </button>
-            </div>
+            <RequestComposer
+              ref={composerRef}
+              autoFocus={focusComposer}
+              className="mt-3 sm:mt-4"
+              labelAside={
+                <button
+                  type="button"
+                  onClick={() => goTo(0)}
+                  className="compact-btn inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium text-primary/60 transition-colors hover:bg-primary/5 hover:text-primary"
+                >
+                  <RotateCcw aria-hidden="true" className="size-3.5" />
+                  {t("replay")}
+                </button>
+              }
+            />
           </div>
         );
     }
@@ -511,7 +517,7 @@ export default function HomeOnboarding() {
         aria-hidden={intro ? true : undefined}
         onClick={intro ? () => goTo(scene + 1) : undefined}
         className={`flex flex-1 items-center justify-center px-4 outline-none ${
-          intro ? "cursor-pointer select-none py-10" : "py-12 sm:py-16"
+          intro ? "cursor-pointer select-none py-10" : "pt-4 pb-4 sm:pt-5 sm:pb-5"
         }`}
       >
         {intro ? (

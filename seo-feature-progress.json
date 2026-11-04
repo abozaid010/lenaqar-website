@@ -257,6 +257,14 @@
     {
       "at": "2026-11-04T19:00:00.000Z",
       "event": "Legacy /properties, /property, /unit now route handlers: 308 to /opportunities/<code>, 404+noindex when gone, 503 on lookup failure. Verified on local next start against the production API (kBqU7H1A). Tests 139/139, build exit 0. Uncommitted, not deployed."
+    },
+    {
+      "at": "2026-11-04T20:00:00.000Z",
+      "event": "Drafted content/guides/buying/stop-real-estate-marketing-calls.md (status in_review, seo_index false; verified absent from sitemap/llms/index, preview noindex). Facts sourced (NTRA 155 + complaints portal, Youm7 19 Aug 2025, Law 151/2020 arts 17/43, Apple). New P1: unknown/removed /opportunities codes return HTTP 500 in production (static-to-dynamic runtime error). See report section 8."
+    },
+    {
+      "at": "2026-11-04T21:00:00.000Z",
+      "event": "Fixed listing 500s (no-store label fetch inside ISR route -> next.revalidate 3600; explicit API not-found short-circuit; param decode) and site-wide soft 404s (removed root/opportunities loading.jsx Suspense boundaries). Verified locally: unknown listing/guide/page 404, runtime-rendered and all 613 prerendered listings 200. Tests 149/149, build exit 0. Uncommitted, not deployed. Report section 9."
     }
   ],
   "release_policy": "Single review PR; user explicitly prohibits merge and production deployment.",
