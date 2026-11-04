@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node -e \"const fs=require('fs');if(fs.existsSync('.next/BUILD_ID')){fs.rmSync('.next',{recursive:true,force:true});console.log('[predev] removed production .next so Turbopack dev starts clean')}\"",
     "dev": "NODE_OPTIONS='--max-old-space-size=4096 --no-deprecation' next dev --turbopack",
     "dev:trace-deprecations": "NODE_OPTIONS='--trace-deprecation' next dev",
     "prebuild": "npm rebuild lightningcss",
