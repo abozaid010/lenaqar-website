@@ -10,7 +10,6 @@ import BuyRequestCta from "./buy-request-cta";
 import RequirementCard from "./requirement-card";
 import WhatsAppCta from "./whatsapp-cta";
 import { useTypingEffect } from "./animations/use-typing-effect";
-import { useAutoScroll } from "./animations/use-auto-scroll";
 import { ScrollReveal } from "./animations/scroll-reveal";
 import { actionButtonClass } from "@/components/ui/action-button-class";
 import ActionButtonArrow from "@/components/ui/action-button-arrow";
@@ -18,13 +17,6 @@ import ActionButtonArrow from "@/components/ui/action-button-arrow";
 export default function StorytellingHomepage({ requirements = [], error = null }) {
   const { translate } = useI18n();
   const [cityFilter, setCityFilter] = useState("");
-
-  // Auto-scroll to Section 2 after 5 seconds
-  useAutoScroll({
-    delay: 5000,
-    targetId: "who-we-are",
-    enabled: true,
-  });
 
   const filtered = requirements.filter((row) =>
     requirementMatchesCity(row, cityFilter)
@@ -104,29 +96,6 @@ export default function StorytellingHomepage({ requirements = [], error = null }
               {translate("lenaqar.storytelling.hero.secondaryCta")}
               <ActionButtonArrow />
             </Link>
-          </motion.div>
-
-          {/* Scroll indicator */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 1.5 }}
-            className="mt-12 flex flex-col items-center gap-2"
-          >
-            <span className="text-sm text-black/50">
-              {translate("lenaqar.storytelling.hero.scrollHint")}
-            </span>
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-              className="w-6 h-10 border-2 border-primary/30 rounded-full flex justify-center pt-2"
-            >
-              <motion.div
-                animate={{ y: [0, 12, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-                className="w-1.5 h-1.5 bg-primary rounded-full"
-              />
-            </motion.div>
           </motion.div>
         </div>
       </section>
