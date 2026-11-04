@@ -37,7 +37,7 @@ export default function LenaqarLocale({ children }) {
     if (locale !== desired) {
       changeLanguage(desired);
     }
-  }, [locale, changeLanguage]);
+  }, []); // Run once on mount only
 
   return children;
 }
