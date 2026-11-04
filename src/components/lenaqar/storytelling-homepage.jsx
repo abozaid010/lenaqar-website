@@ -100,16 +100,7 @@ export default function StorytellingHomepage({ requirements = [], error = null }
         </div>
       </section>
 
-      {/* Section 2 - Who We Are (placeholder for auto-scroll) */}
-      <section id="who-we-are" className="container py-8 sm:py-10">
-        <ScrollReveal>
-          <h2 className="text-2xl font-bold text-primary sm:text-3xl">
-            إزاي بنساعدك؟
-          </h2>
-        </ScrollReveal>
-      </section>
-
-      {/* Section 3 - Why LenaQar */}
+      {/* Section 2 - Why LenaQar */}
       <section id="why-lenaqar" className="container py-8 sm:py-10">
         <ScrollReveal>
           <h2 className="text-2xl font-bold text-primary sm:text-3xl">
