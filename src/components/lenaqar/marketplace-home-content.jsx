@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { MessageCircle, ShieldCheck, Target, UserCheck, FileCheck } from "lucide-react";
+import { MessageCircle, ShieldCheck, Target, UserCheck } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { ANALYTICS } from "@/constants/analytics";
 import { marketplaceAddUnitHref } from "@/lib/lenaqar/whatsapp";
@@ -128,19 +128,6 @@ export default function MarketplaceHomeContent({
                 </h3>
                 <p className="mt-1 text-xs leading-relaxed text-black/70 line-clamp-2">
                   {translate("lenaqar.marketplace.why.point3Body")}
-                </p>
-              </div>
-            </div>
-          </article>
-          <article className="rounded-xl border border-primary/10 bg-white p-4">
-            <div className="flex items-start gap-3">
-              <FileCheck className="size-5 shrink-0 text-primary" aria-hidden="true" />
-              <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-sm text-primary">
-                  {translate("lenaqar.marketplace.why.point4Title")}
-                </h3>
-                <p className="mt-1 text-xs leading-relaxed text-black/70 line-clamp-2">
-                  {translate("lenaqar.marketplace.why.point4Body")}
                 </p>
               </div>
             </div>

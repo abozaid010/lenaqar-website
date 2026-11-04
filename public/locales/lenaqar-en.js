@@ -650,6 +650,12 @@ export default {
       typesTitle: "Browse by property type",
       typesSub: "Start with the type of home, then add the details in your request.",
       newCairo: "Apartments in New Cairo",
+      fifthSettlement: "Apartments in Fifth Settlement",
+      madinaty: "Apartments in Madinaty",
+      elShorouk: "Apartments in El Shorouk",
+      mostakbalCity: "Apartments in Mostakbal City",
+      noorCity: "Apartments in Noor City",
+      newCapital: "Apartments in the New Administrative Capital",
       sheikhZayed: "Apartments in Sheikh Zayed",
       october: "Apartments in 6th of October",
       northCoast: "North Coast chalets",
@@ -730,9 +736,7 @@ export default {
   },
   storytelling: {
       hero: {
-        eyebrow: "A buyer-first property platform",
         headline: "We don't sell you what we have. We find what you want.",
-        subtext: "Lenaqar is a property platform that starts with your request. Tell us what you're looking for, and we help you find what fits.",
         primaryCta: "Write your request",
         secondaryCta: "See how it works",
         scrollHint: "Scroll down to learn more",
