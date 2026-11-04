@@ -67,21 +67,38 @@ export default function BuyRequestCta({
   initialValues,
   className = "",
   label,
+  // Controlled mode (homepage composer): the parent owns `open`, renders its
+  // own trigger, passes a free-text `prefill`, and handles success itself.
+  open: controlledOpen,
+  onOpenChange,
+  hideTrigger = false,
+  prefill,
+  onSubmitted,
 }) {
   const { translate } = useI18n();
   const { trackEvent } = useGoogleAnalytics();
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const isControlled = typeof controlledOpen === "boolean";
+  const open = isControlled ? controlledOpen : uncontrolledOpen;
+  const setOpen = useCallback(
+    (next) => {
+      if (!isControlled) setUncontrolledOpen(next);
+      onOpenChange?.(next);
+    },
+    [isControlled, onOpenChange],
+  );
   const [userId, setUserId] = useState("");
 
   useEffect(() => {
     setUserId(readStoredUserId());
+    if (isControlled) return;
     if (buyRequestHashHandled) return;
     if (window.location.hash !== "#buy-request") return;
     buyRequestHashHandled = true;
     setOpen(true);
     trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_OPENED);
-  }, [trackEvent]);
+  }, [trackEvent, isControlled, setOpen]);
 
   const handleUserId = useCallback((nextId) => {
     const id = String(nextId || "").trim();
@@ -125,17 +142,19 @@ export default function BuyRequestCta({
 
   return (
     <>
-      <button
-        type="button"
-        className={actionButtonClass({ variant, tone, size, className })}
-        onClick={() => {
-          trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_OPENED);
-          setOpen(true);
-        }}
-      >
-        {label || translate("lenaqar.actions.buyUnit", "Buy Unit")}
-        <ActionButtonArrow size={size} />
-      </button>
+      {hideTrigger ? null : (
+        <button
+          type="button"
+          className={actionButtonClass({ variant, tone, size, className })}
+          onClick={() => {
+            trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_OPENED);
+            setOpen(true);
+          }}
+        >
+          {label || translate("lenaqar.actions.buyUnit", "Buy Unit")}
+          <ActionButtonArrow size={size} />
+        </button>
+      )}
       <BuyRequestDialog
         open={open}
         onClose={() => setOpen(false)}
@@ -146,6 +165,7 @@ export default function BuyRequestCta({
         intro={translate("lenaqar.buyRequest.intro")}
         successMessage={translate("lenaqar.buyRequest.saved")}
         initialValues={initialValues}
+        prefill={prefill}
         showContactFields
         overlayClassName="!z-[70]"
         loadRequirement={loadRequirement}
@@ -158,7 +178,12 @@ export default function BuyRequestCta({
             ...requirement,
             purpose: "buy",
           });
-          router.push(qs ? `/opportunities?${qs}` : "/opportunities");
+          const href = qs ? `/opportunities?${qs}` : "/opportunities";
+          if (onSubmitted) {
+            onSubmitted({ requirement, opportunitiesHref: href });
+            return;
+          }
+          router.push(href);
         }}
       />
     </>

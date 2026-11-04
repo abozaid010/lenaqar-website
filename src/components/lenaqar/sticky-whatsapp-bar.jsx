@@ -8,7 +8,7 @@ export default function StickyActionsBar() {
   if (String(pathname || "").startsWith("/network")) return null;
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 lg:hidden border-t border-black/10 bg-white px-4 py-3">
+    <div className="lq-sticky-actions fixed bottom-0 inset-x-0 z-50 lg:hidden border-t border-black/10 bg-white px-4 py-3">
       <CoreActions layout="row" className="w-full" />
     </div>
   );

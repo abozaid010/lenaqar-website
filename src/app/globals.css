@@ -113,6 +113,78 @@ span.lena-wordmark-ar {
   font-family: var(--font-logo-ar), "Cairo", sans-serif;
 }
 
+/* Homepage onboarding: keep the stage clean while the intro plays (mobile bar). */
+html:has([data-lq-stage="intro"]) .lq-sticky-actions {
+  display: none;
+}
+
+/* Display type for the homepage onboarding (Cairo 700 Arabic, Montserrat Latin). */
+.lq-display,
+.lq-display * {
+  font-family: var(--font-logo-ar), var(--font-montserrat), "Cairo", sans-serif;
+}
+
+html[lang="en"] .lq-display,
+html[lang="en"] .lq-display * {
+  font-family: var(--font-montserrat), "Montserrat", sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* Tagline reveal: CSS-only so it plays from first paint (no hydration wait). */
+@keyframes lq-word-in {
+  from { opacity: 0; filter: blur(10px); transform: translateY(0.35em); }
+  to { opacity: 1; filter: blur(0); transform: none; }
+}
+
+@keyframes lq-underline-in {
+  from { opacity: 0; transform: scaleX(0); }
+  to { opacity: 1; transform: scaleX(1); }
+}
+
+.lq-word {
+  display: inline-block;
+  opacity: 0;
+  animation: lq-word-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.lq-underline {
+  opacity: 0;
+  animation: lq-underline-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes lq-fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+.lq-fade-up {
+  animation: lq-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lq-fade-up,
+  .lq-word,
+  .lq-underline {
+    animation: none;
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+}
+
+@keyframes lq-caret-blink {
+  0%, 45% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.lq-caret {
+  animation: lq-caret-blink 1s steps(1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lq-caret { animation: none; }
+}
+
 button {
   cursor: pointer;
   display: inline-flex;

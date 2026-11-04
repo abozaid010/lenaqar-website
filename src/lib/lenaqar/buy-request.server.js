@@ -1,5 +1,8 @@
 import axiosInstance from "@/utils/axiosInstance";
-import { buildPublicBuyRequirement } from "@/lib/lenaqar/buy-request-payload";
+import {
+  buildPublicBuyRequirement,
+  formFromBuiltRequirement,
+} from "@/lib/lenaqar/buy-request-payload";
 
 function apiMessage(error, fallback) {
   return (
@@ -57,7 +60,7 @@ export async function saveBuyRequestRequirement({ userId, contact, payload }) {
     throw error;
   }
 
-  const built = buildPublicBuyRequirement(payload);
+  const built = buildPublicBuyRequirement(formFromBuiltRequirement(payload));
   if (!built.ok) {
     const error = new Error("validation_failed");
     error.code = "validation_failed";

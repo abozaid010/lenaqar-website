@@ -48,9 +48,12 @@ export default function RequirementCard({ requirement }) {
   const { translate, locale } = useI18n();
   if (!requirement) return null;
 
+  const rawType = requirement.propertyTypes?.[0];
   const typeLabel =
-    buildingTypeAr(requirement.propertyTypes?.[0]) ||
-    requirement.propertyTypes?.[0] ||
+    (locale === "en"
+      ? rawType && translate(`buildingTypes.${rawType}`, rawType)
+      : buildingTypeAr(rawType)) ||
+    rawType ||
     null;
   const location = locationLine(requirement, locale);
   const delivery = deliveryLabel(requirement.deliveryDate, translate);
@@ -77,7 +80,12 @@ export default function RequirementCard({ requirement }) {
         <ul className="mt-3 space-y-1.5 text-sm text-black/75">
           {requirement.roomsCount > 0 ? (
             <li>
-              {roomsLabelAr(requirement.roomsCount)}
+              {locale === "en"
+                ? translate("lenaqar.marketplace.card.rooms").replace(
+                    "{count}",
+                    String(requirement.roomsCount),
+                  )
+                : roomsLabelAr(requirement.roomsCount)}
             </li>
           ) : null}
           {requirement.maxPrice || requirement.minPrice ? (

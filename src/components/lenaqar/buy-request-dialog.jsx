@@ -16,6 +16,7 @@ import {
   buildPublicBuyRequirement,
   inferBuyRequestPaymentMode,
   normalizeBuyRequestPaymentMode,
+  normalizeLoadedBuyRequest,
 } from "@/lib/lenaqar/buy-request-payload";
 import {
   getBuyRequestDeliveryOptions,
@@ -110,7 +111,9 @@ function createEmptyForm(initialValues = {}) {
   };
 }
 
-function mapLoadedRequirement(raw) {
+function mapLoadedRequirement(loaded) {
+  // API returns preferred_locations / preferred_property_types (CRM shape).
+  const raw = normalizeLoadedBuyRequest(loaded);
   const paymentMode = inferBuyRequestPaymentMode(raw);
   return {
     paymentMode,
@@ -131,6 +134,40 @@ function mapLoadedRequirement(raw) {
   };
 }
 
+/**
+ * Overlay a free-text prefill (homepage composer) on a base form. Only fields
+ * the prefill actually carries win; everything else (e.g. a returning buyer's
+ * saved location) is kept.
+ */
+function applyPrefill(base, prefill) {
+  if (!prefill || typeof prefill !== "object") return base;
+  const seeded = createEmptyForm(prefill);
+  const next = { ...base };
+  for (const key of [
+    "buildingType",
+    "roomsCount",
+    "max_price",
+    "downPayment",
+    "monthlyInstallment",
+    "notes",
+  ]) {
+    if (seeded[key] !== "") next[key] = seeded[key];
+  }
+  if (prefill.paymentMode) {
+    next.paymentMode = seeded.paymentMode;
+    if (seeded.paymentMode === "cash") {
+      next.downPayment = "";
+      next.monthlyInstallment = "";
+      next.deliveryDate = "ready";
+    } else if (seeded.deliveryDate) {
+      next.deliveryDate = seeded.deliveryDate;
+    } else if (base.paymentMode === "cash") {
+      next.deliveryDate = "";
+    }
+  }
+  return next;
+}
+
 export default function BuyRequestDialog({
   open,
   onClose,
@@ -143,6 +180,7 @@ export default function BuyRequestDialog({
   successMessage,
   clientId,
   initialValues,
+  prefill,
   showContactFields = false,
   overlayClassName,
   loadRequirement,
@@ -206,7 +244,7 @@ export default function BuyRequestDialog({
   useEffect(() => {
     if (!open) return undefined;
     if (!userId) {
-      setForm(createEmptyForm(initialValues));
+      setForm(applyPrefill(createEmptyForm(initialValues), prefill));
       setContactName("");
       setPhoneNumber("");
       setPhonePayload(null);
@@ -221,10 +259,10 @@ export default function BuyRequestDialog({
         if (cancelled) return;
         if (raw?.error || !raw || typeof raw !== "object") {
           if (raw?.error) toast.error(String(raw.error));
-          setForm(createEmptyForm(initialValues));
+          setForm(applyPrefill(createEmptyForm(initialValues), prefill));
           return;
         }
-        setForm(mapLoadedRequirement(raw));
+        setForm(applyPrefill(mapLoadedRequirement(raw), prefill));
       } catch (e) {
         if (!cancelled) {
           toast.error(
@@ -239,7 +277,7 @@ export default function BuyRequestDialog({
     return () => {
       cancelled = true;
     };
-  }, [open, userId, loadRequirement, initialValues, tr]);
+  }, [open, userId, loadRequirement, initialValues, prefill, tr]);
 
   const handleFieldChange = (e) => {
     const { name, value } = e.target;
