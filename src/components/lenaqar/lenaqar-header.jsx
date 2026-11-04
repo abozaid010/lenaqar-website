@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import BuyRequestCta from "./buy-request-cta";
+import LanguageSwitch from "./language-switch";
 
 export default function LenaqarHeader() {
   const { translate } = useI18n();
@@ -65,21 +66,25 @@ export default function LenaqarHeader() {
             size="compact"
             label={translate("lenaqar.header.buyUnit")}
           />
+          <LanguageSwitch />
         </nav>
 
-        <button
-          type="button"
-          className="lg:hidden p-2"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          aria-label={
-            open
-              ? translate("lenaqar.header.closeMenu")
-              : translate("lenaqar.header.openMenu")
-          }
-        >
-          {open ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        <div className="flex items-center gap-1 lg:hidden">
+          <LanguageSwitch />
+          <button
+            type="button"
+            className="lg:hidden p-2"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-label={
+              open
+                ? translate("lenaqar.header.closeMenu")
+                : translate("lenaqar.header.openMenu")
+            }
+          >
+            {open ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
 
       {open ? (

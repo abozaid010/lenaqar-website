@@ -240,3 +240,98 @@ test("converts Arabic digits in money and rooms before API payload", () => {
   assert.equal(result.requirement.monthlyInstallment, 15000);
   assert.equal(result.requirement.deliveryDate, "less_than_1_year");
 });
+
+import { formFromBuiltRequirement } from "../buy-request-payload.js";
+
+const INSTALLMENT_FORM = {
+  paymentMode: "installment",
+  city: "new cairo",
+  district: "fifth settlement",
+  buildingType: "apartment",
+  roomsCount: "3",
+  downPayment: "3,000,000",
+  monthlyInstallment: "50,000",
+  max_price: "",
+  deliveryDate: "ready",
+  notes: "شقة تلت غرف، استلام فوري",
+};
+
+test("server re-validation keeps an instalment request valid (no max price)", () => {
+  const client = buildPublicBuyRequirement(INSTALLMENT_FORM);
+  assert.equal(client.ok, true);
+  // Before the fix the server rebuilt this as cash → maxPriceRequired.
+  assert.equal(buildPublicBuyRequirement(client.requirement).ok, false);
+  const server = buildPublicBuyRequirement(formFromBuiltRequirement(client.requirement));
+  assert.equal(server.ok, true);
+  assert.deepEqual(server.requirement, client.requirement);
+});
+
+test("server re-validation keeps the notes (additionalFeatures)", () => {
+  const client = buildPublicBuyRequirement({
+    ...INSTALLMENT_FORM,
+    paymentMode: "cash",
+    max_price: "5000000",
+  });
+  const server = buildPublicBuyRequirement(formFromBuiltRequirement(client.requirement));
+  assert.equal(server.ok, true);
+  assert.deepEqual(server.requirement.additionalFeatures, ["شقة تلت غرف، استلام فوري"]);
+  assert.deepEqual(server.requirement, client.requirement);
+});
+
+test("formFromBuiltRequirement tolerates empty input", () => {
+  assert.deepEqual(formFromBuiltRequirement(null), {});
+  assert.equal(formFromBuiltRequirement({ max_price: 1 }).paymentMode, "cash");
+});
+
+import { normalizeLoadedBuyRequest } from "../buy-request-payload.js";
+
+// Shape returned by GET /public/v1/buy-request/{user_id} (live API, Nov 4).
+const LOADED = {
+  monthlyInstallment: 50000,
+  downPayment: 3000000,
+  deliveryDate: "ready",
+  roomsCount: 3,
+  max_price: null,
+  additionalFeatures: ["شقة تلت غرف"],
+  preferred_locations: [
+    { district: null, city: "cairo", sub_district: null, project: null },
+    { district: "fifth settlement", city: "new cairo", sub_district: null, project: null },
+  ],
+  preferred_property_types: ["apartment"],
+};
+
+test("saved request: newest location with a district fills city/district", () => {
+  const out = normalizeLoadedBuyRequest(LOADED);
+  assert.equal(out.city, "new cairo");
+  assert.equal(out.district, "fifth settlement");
+  assert.equal(out.sub_district, "");
+  assert.equal(out.buildingType, "apartment");
+  assert.equal(inferBuyRequestPaymentMode(out), "installment");
+});
+
+test("saved request: falls back to the last city-only location", () => {
+  const out = normalizeLoadedBuyRequest({
+    preferred_locations: [{ city: "cairo", district: null }],
+  });
+  assert.equal(out.city, "cairo");
+  assert.equal(out.district, "");
+});
+
+test("saved request: flat fields from the API still win", () => {
+  const out = normalizeLoadedBuyRequest({
+    ...LOADED,
+    city: "madinaty",
+    district: "b1",
+    buildingType: "villa",
+  });
+  assert.equal(out.city, "madinaty");
+  assert.equal(out.district, "b1");
+  assert.equal(out.buildingType, "villa");
+});
+
+test("saved request: tolerates missing/odd shapes", () => {
+  assert.equal(normalizeLoadedBuyRequest(null), null);
+  const out = normalizeLoadedBuyRequest({ preferred_locations: [null, {}], preferred_property_types: [""] });
+  assert.equal(out.city, undefined);
+  assert.equal(out.buildingType, undefined);
+});

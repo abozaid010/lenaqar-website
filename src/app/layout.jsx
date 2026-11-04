@@ -43,9 +43,9 @@ export const metadata = defaultMetadata;
  *
  * Reading the `lang` cookie here opted every route into dynamic rendering, which
  * cost TTFB on the listing pages and made `notFound()` resolve after the stream
- * had already committed HTTP 200. The cookie no longer decides anything: the CRM
- * (the only English consumer) is gone, there is no language switcher, and
- * `LenaqarLocale` forces `ar` on every public page.
+ * had already committed HTTP 200. The cookie no longer decides anything: server
+ * HTML is always Arabic. The header language switch flips to English on the
+ * client only, and `LenaqarLocale` keeps `ar` unless the visitor picked `en`.
  */
 export default function RootLayout({ children }) {
   return (

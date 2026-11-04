@@ -3,8 +3,8 @@
   "requirements": "seo-feature-req.json",
   "plan": "SEO-PLAN.md",
   "phase_summary": "feature-progress.json",
-  "updated_at": "2026-11-03T22:25:00.000Z",
-  "status": "ready_for_review",
+  "updated_at": "2026-11-04T16:30:00.000Z",
+  "status": "merged_partially_verified",
   "target_date": "2026-11-03",
   "timezone": "Africa/Cairo",
   "target_cutoff": "2026-11-03T23:30:00+02:00",
@@ -34,87 +34,87 @@
   "tasks": [
     {
       "id": "SEO-00",
-      "status": "implemented",
+      "status": "in_progress",
       "owner": "lead",
       "branch": "codex/seo-p0-p1-review",
       "pr": null,
       "tested_sha": null,
       "production_sha": null,
       "evidence": ["SEO-PLAN.md", "seo-feature-req.json", "seo-feature-progress.json"],
-      "blocker": null,
-      "updated_at": "2026-11-03T22:25:00.000Z"
+      "blocker": "Trackers lagged Git: PR #24 merged c17ae0de but tracker said never merge/pr null; corrected by 2026-11-04 audit",
+      "updated_at": "2026-11-04T16:30:00.000Z"
     },
     {
       "id": "SEO-01",
-      "status": "implemented",
+      "status": "merged",
       "owner": "lead",
       "branch": "codex/seo-p0-p1-review",
-      "pr": null,
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/24",
       "tested_sha": null,
       "production_sha": null,
       "evidence": ["src/lib/lenaqar/public-media-review.js", "src/lib/lenaqar/to-public-opportunity.js", "REPORT/seo-release-2026-11-03/payment-surfaces-local.json"],
-      "blocker": null,
-      "updated_at": "2026-11-03T22:25:00.000Z"
+      "blocker": "Live: quarantined asset absent on MguPxCF0; deployment SHA unverified; audit of other hidden-split images not evidenced",
+      "updated_at": "2026-11-04T16:30:00.000Z"
     },
     {
       "id": "SEO-02",
-      "status": "implemented",
+      "status": "merged",
       "owner": "lead",
       "branch": "codex/seo-p0-p1-review",
-      "pr": null,
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/24",
       "tested_sha": null,
       "production_sha": null,
       "evidence": ["src/lib/lenaqar/requirement-money-trust.js", "src/lib/lenaqar/to-public-requirement.js", "REPORT/seo-release-2026-11-03/request-review.json"],
-      "blocker": null,
-      "updated_at": "2026-11-03T22:25:00.000Z"
+      "blocker": "Live REQ-61240565AA04 no longer displayed; only 2/26 requests reviewed; no generic conflict detection",
+      "updated_at": "2026-11-04T16:30:00.000Z"
     },
     {
       "id": "SEO-03",
-      "status": "implemented",
+      "status": "merged",
       "owner": "delegated",
       "branch": "codex/seo-p0-p1-review",
-      "pr": null,
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/24",
       "tested_sha": null,
       "production_sha": null,
       "evidence": ["src/lib/lenaqar/fetch-cursor-pages.js", "src/lib/lenaqar/opportunities.server.js", "REPORT/seo-release-2026-11-03/catalog-audit.json"],
-      "blocker": null,
-      "updated_at": "2026-11-03T22:25:00.000Z"
+      "blocker": "Live sitemap 611 listings; /opportunities maxDuration 20s vs 120s loader budget; build fails when API unreachable",
+      "updated_at": "2026-11-04T16:30:00.000Z"
     },
     {
       "id": "SEO-04",
-      "status": "implemented",
+      "status": "merged",
       "owner": "lead",
       "branch": "codex/seo-p0-p1-review",
-      "pr": null,
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/24",
       "tested_sha": null,
       "production_sha": null,
       "evidence": ["src/lib/lenaqar/unit-trust.js", "REPORT/seo-release-2026-11-03/catalog-audit.json"],
-      "blocker": null,
-      "updated_at": "2026-11-03T22:25:00.000Z"
+      "blocker": "OWNER DECISION: publicHidden rose 102 -> 391/613 (incomplete_claims 289); live sample 19/30 hidden; not previously disclosed",
+      "updated_at": "2026-11-04T16:30:00.000Z"
     },
     {
       "id": "SEO-05",
-      "status": "implemented",
+      "status": "merged",
       "owner": "delegated",
       "branch": "codex/seo-p0-p1-review",
-      "pr": null,
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/24",
       "tested_sha": null,
       "production_sha": null,
       "evidence": ["src/lib/lenaqar/listing-seo.js", "src/lib/lenaqar/__tests__/listing-seo-provenance.test.js"],
-      "blocker": null,
-      "updated_at": "2026-11-03T22:25:00.000Z"
+      "blocker": "Residual claims: /opportunities description developer-price claim; homepage/verified-prices \"أرقام حقيقية\"; lawyer promise without identity",
+      "updated_at": "2026-11-04T16:30:00.000Z"
     },
     {
       "id": "SEO-06",
-      "status": "implemented",
+      "status": "merged",
       "owner": "delegated",
       "branch": "codex/seo-p0-p1-review",
-      "pr": null,
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/24",
       "tested_sha": null,
       "production_sha": null,
       "evidence": ["src/lib/lenaqar/whatsapp-intent.js", "src/lib/lenaqar/whatsapp.js", "src/lib/lenaqar/__tests__/whatsapp-intent.test.js"],
       "blocker": null,
-      "updated_at": "2026-11-03T22:25:00.000Z"
+      "updated_at": "2026-11-04T16:30:00.000Z"
     },
     {
       "id": "SEO-07",
@@ -130,75 +130,75 @@
     },
     {
       "id": "SEO-08",
-      "status": "implemented",
+      "status": "in_progress",
       "owner": "delegated",
       "branch": "codex/seo-p0-p1-review",
-      "pr": null,
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/24",
       "tested_sha": null,
       "production_sha": null,
       "evidence": ["scripts/verify-crawl-matrix.mjs", "REPORT/seo-release-2026-11-03/crawl-verification.json"],
-      "blocker": null,
-      "updated_at": "2026-11-03T22:25:00.000Z"
+      "blocker": "crawl-verification.json is static frontmatter only (no HTTP/bot matrix/robots parser/JSON-LD); robots disallows /_next/ (blocks listing photos)",
+      "updated_at": "2026-11-04T16:30:00.000Z"
     },
     {
       "id": "SEO-09",
-      "status": "implemented",
+      "status": "merged",
       "owner": "delegated",
       "branch": "codex/seo-p0-p1-review",
-      "pr": null,
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/24",
       "tested_sha": null,
       "production_sha": null,
       "evidence": ["REPORT/seo-release-2026-11-03/source-register.json", "REPORT/seo-release-2026-11-03/excluded-guides-triage.json"],
       "blocker": null,
-      "updated_at": "2026-11-03T22:25:00.000Z"
+      "updated_at": "2026-11-04T16:30:00.000Z"
     },
     {
       "id": "SEO-10",
-      "status": "implemented",
+      "status": "merged",
       "owner": "lead",
       "branch": "codex/seo-p0-p1-review",
-      "pr": null,
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/24",
       "tested_sha": null,
       "production_sha": null,
       "evidence": ["scripts/ai-visibility-evidence.py", "scripts/tests/test_ai_visibility_evidence.py", "REPORT/seo-release-2026-11-03/measurement-readiness.md"],
-      "blocker": null,
-      "updated_at": "2026-11-03T22:25:00.000Z"
+      "blocker": "No GSC/Bing/GA4/engine baseline: blocked_access/owner",
+      "updated_at": "2026-11-04T16:30:00.000Z"
     },
     {
       "id": "SEO-11",
-      "status": "implemented",
+      "status": "merged",
       "owner": "delegated",
       "branch": "codex/seo-p0-p1-review",
-      "pr": null,
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/24",
       "tested_sha": null,
       "production_sha": null,
       "evidence": [".github/workflows/seo-check.yml"],
-      "blocker": null,
-      "updated_at": "2026-11-03T22:25:00.000Z"
+      "blocker": "CI has no build step; python tests not in CI",
+      "updated_at": "2026-11-04T16:30:00.000Z"
     },
     {
       "id": "SEO-12",
-      "status": "planned",
+      "status": "merged",
       "owner": null,
       "branch": "codex/seo-p0-p1-review",
-      "pr": null,
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/24",
       "tested_sha": null,
       "production_sha": null,
       "evidence": [],
-      "blocker": null,
-      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+      "blocker": "PR #24 merged c17ae0de 2026-11-04 00:14 +02 (tracker had not recorded it); included .pyc files",
+      "updated_at": "2026-11-04T16:30:00.000Z"
     },
     {
       "id": "SEO-13",
-      "status": "blocked_release",
+      "status": "in_progress",
       "owner": null,
       "branch": "codex/seo-p0-p1-review",
-      "pr": null,
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/24",
       "tested_sha": null,
       "production_sha": null,
       "evidence": [],
-      "blocker": "Latest user instruction: never merge; production verification of new changes cannot occur before approved merge/deploy.",
-      "updated_at": "2026-11-03T15:11:12.048969+00:00"
+      "blocker": "PR #24 behavior observed live 2026-11-04; Vercel deployment ID/SHA not verified",
+      "updated_at": "2026-11-04T16:30:00.000Z"
     },
     {
       "id": "SEO-14",
@@ -245,7 +245,28 @@
     {
       "at": "2026-11-03T15:50:14.410004+00:00",
       "event": "Execution started in isolated worktrees; one PR only, no merge/deploy per latest instruction."
+    },
+    {
+      "at": "2026-11-04T16:30:00.000Z",
+      "event": "Independent audit: PR #24 found merged (c17ae0de) and live by behavior; statuses corrected to merged/in_progress; findings in REPORT/seo-audit-2026-11-04.md. Nothing committed."
+    },
+    {
+      "at": "2026-11-04T17:30:00.000Z",
+      "event": "Owner-approved fixes applied (uncommitted): robots no longer disallows /_next/ or legacy unit paths; unsupported real-numbers/only-platform/every-unit-lawyer/developer-price claims removed (SEO-05 residuals). Tests 128/128, lint 0 errors, build exit 0. Not deployed. New: legacy unit URLs return 200+noindex instead of redirecting (report section 7)."
+    },
+    {
+      "at": "2026-11-04T19:00:00.000Z",
+      "event": "Legacy /properties, /property, /unit now route handlers: 308 to /opportunities/<code>, 404+noindex when gone, 503 on lookup failure. Verified on local next start against the production API (kBqU7H1A). Tests 139/139, build exit 0. Uncommitted, not deployed."
+    },
+    {
+      "at": "2026-11-04T20:00:00.000Z",
+      "event": "Drafted content/guides/buying/stop-real-estate-marketing-calls.md (status in_review, seo_index false; verified absent from sitemap/llms/index, preview noindex). Facts sourced (NTRA 155 + complaints portal, Youm7 19 Aug 2025, Law 151/2020 arts 17/43, Apple). New P1: unknown/removed /opportunities codes return HTTP 500 in production (static-to-dynamic runtime error). See report section 8."
+    },
+    {
+      "at": "2026-11-04T21:00:00.000Z",
+      "event": "Fixed listing 500s (no-store label fetch inside ISR route -> next.revalidate 3600; explicit API not-found short-circuit; param decode) and site-wide soft 404s (removed root/opportunities loading.jsx Suspense boundaries). Verified locally: unknown listing/guide/page 404, runtime-rendered and all 613 prerendered listings 200. Tests 149/149, build exit 0. Uncommitted, not deployed. Report section 9."
     }
   ],
-  "release_policy": "Single review PR; user explicitly prohibits merge and production deployment."
+  "release_policy": "Single review PR; user explicitly prohibits merge and production deployment.",
+  "audit_2026_11_04": "REPORT/seo-audit-2026-11-04.md — independent audit: 4 PASS, 8 PARTIAL, 1 FAIL (SEO-08), 1 blocked_owner (SEO-07), 3 deferred. No task production_verified (deployment SHA unverified)."
 }

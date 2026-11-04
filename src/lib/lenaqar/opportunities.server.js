@@ -11,6 +11,7 @@ import {
 import { applyArabicLabels } from "./arabic-labels";
 import { isListableOpportunity, validateUnit } from "./validate-unit";
 import { fetchCursorPages } from "./fetch-cursor-pages";
+import { isExplicitUnitNotFound, normalizeOpportunityCode } from "./unit-lookup.js";
 import {
   marketplaceCitiesMatch,
   resolveMarketplaceCityToken,
@@ -367,7 +368,7 @@ export async function fetchOpportunities({
 }
 
 export async function fetchOpportunityByCode(code) {
-  const needle = String(code || "").trim();
+  const needle = normalizeOpportunityCode(code);
   if (!needle) return null;
 
   const json = await publicApiGet(
@@ -378,6 +379,12 @@ export async function fetchOpportunityByCode(code) {
   const item = json?.data ? toFeedItem(json.data) : null;
   if (item) return enrichLabeled(item);
 
+  // The backend answered "no such public unit" (HTTP 200, body code 404):
+  // answer not-found directly instead of crawling the whole catalog, which can
+  // only fail or come back empty for this code.
+  if (isExplicitUnitNotFound(json)) return null;
+
+  // Lookup failed, or the single-unit shape was rejected: try the catalog.
   const units = await fetchOpportunities();
   return units.find((unit) => unit.code === needle) ?? null;
 }

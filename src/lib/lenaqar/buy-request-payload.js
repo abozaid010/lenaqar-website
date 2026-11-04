@@ -90,6 +90,76 @@ export function inferBuyRequestPaymentMode(raw) {
   return "cash";
 }
 
+function cleanText(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+/**
+ * GET /public/v1/buy-request/{user_id} returns the stored requirement in the
+ * CRM shape: `preferred_locations` (array, newest last) and
+ * `preferred_property_types`, not the flat `city` / `district` /
+ * `buildingType` the form uses. Fill the flat fields from those so a returning
+ * buyer sees their saved location and property type. Flat fields win when the
+ * API already sends them.
+ * @param {Record<string, unknown> | null | undefined} raw
+ */
+export function normalizeLoadedBuyRequest(raw) {
+  if (!raw || typeof raw !== "object") return raw;
+  const out = { ...raw };
+
+  if (!cleanText(out.city)) {
+    const locations = Array.isArray(raw.preferred_locations)
+      ? raw.preferred_locations.filter(
+          (loc) => loc && typeof loc === "object" && cleanText(loc.city),
+        )
+      : [];
+    // Newest, most specific entry: last one with a district, else last with a city.
+    const pick =
+      [...locations].reverse().find((loc) => cleanText(loc.district)) ||
+      locations[locations.length - 1];
+    if (pick) {
+      out.city = cleanText(pick.city);
+      out.district = cleanText(pick.district);
+      out.sub_district = cleanText(pick.sub_district);
+      if (!cleanText(out.project)) out.project = cleanText(pick.project);
+    }
+  }
+
+  const hasBuildingType = Array.isArray(out.buildingType)
+    ? out.buildingType.some((item) => cleanText(item))
+    : cleanText(out.buildingType);
+  if (!hasBuildingType && Array.isArray(raw.preferred_property_types)) {
+    const types = raw.preferred_property_types.map(cleanText).filter(Boolean);
+    if (types.length) out.buildingType = types[0];
+  }
+
+  return out;
+}
+
+/**
+ * The dialog sends the already-built requirement to the server action, which
+ * re-validates it with `buildPublicBuyRequirement`. A built requirement has no
+ * `paymentMode` and keeps notes under `additionalFeatures`, so re-validating it
+ * as-is turned every instalment request into "cash, max price required" and
+ * dropped the notes. Recover both before re-validating.
+ * @param {Record<string, unknown> | null | undefined} payload
+ */
+export function formFromBuiltRequirement(payload) {
+  if (!payload || typeof payload !== "object") return {};
+  const features = payload.additionalFeatures;
+  const notes =
+    typeof payload.notes === "string"
+      ? payload.notes
+      : Array.isArray(features)
+        ? features.map((item) => String(item || "").trim()).filter(Boolean).join("\n")
+        : "";
+  return {
+    ...payload,
+    paymentMode: inferBuyRequestPaymentMode(payload),
+    notes,
+  };
+}
+
 /**
  * Public `/public/v1/buy-request/submit` requirement body.
  * Only the keys the API documents — extra CRM fields are dropped.
