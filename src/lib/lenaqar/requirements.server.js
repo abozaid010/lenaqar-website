@@ -119,6 +119,7 @@ export const fetchPublicRequirements = cache(async function fetchPublicRequireme
           "X-API-Key": PUBLIC_X_API_KEY,
         },
         next: { revalidate: 300 },
+        signal: AbortSignal.timeout(30_000),
       },
     );
 
