@@ -11,6 +11,7 @@ const INIT_FLAG = '__lenaMetaPixelInitialized';
 
 function runFbq(...args) {
   if (typeof window === 'undefined' || typeof window.fbq !== 'function') return;
+  if (process.env.NEXT_PUBLIC_ANALYTICS_DEBUG === '1') console.info('[analytics:meta]', ...args);
   window.fbq(...args);
 }
 
@@ -88,6 +89,18 @@ export async function trackMetaLead(params = {}) {
   if (!isMetaPixelEnabled()) return;
   await initMetaPixel();
   runFbq('track', META_PIXEL.EVENTS.LEAD, params);
+}
+
+export async function trackMetaCustom(name, params = {}) {
+  if (!isMetaPixelEnabled()) return;
+  await initMetaPixel();
+  runFbq('trackCustom', name, params);
+}
+
+export async function trackMetaCompleteRegistration(params = {}) {
+  if (!isMetaPixelEnabled()) return;
+  await initMetaPixel();
+  runFbq('track', META_PIXEL.EVENTS.COMPLETE_REGISTRATION, params);
 }
 
 /** True when the element is a WhatsApp CTA (link or child of one). */

@@ -25,6 +25,17 @@ export const ANALYTICS = {
     NETWORK_SIGNUP_SUBMITTED: 'network_signup_submitted',
     NETWORK_LOGIN_SUBMITTED: 'network_login_submitted',
     NETWORK_ACTIVATION_WHATSAPP_CLICKED: 'network_activation_whatsapp_clicked',
+    WHATSAPP_CLICK: 'whatsapp_click',
+    SELL_REQUEST_OPENED: 'sell_request_opened',
+    SELL_REQUEST_SUBMITTED: 'sell_request_submitted',
+    FORM_FALLBACK_SHOWN: 'form_fallback_shown',
+    CTA_CLICK: 'cta_click',
+    OPPORTUNITY_FILTER_APPLIED: 'opportunity_filter_applied',
+    PHONE_CLICK: 'phone_click',
+    EMAIL_CLICK: 'email_click',
+    SHARE: 'share',
+    LANGUAGE_SWITCHED: 'language_switched',
+    ONBOARDING_SKIPPED: 'onboarding_skipped',
   },
 };
 
@@ -54,6 +65,7 @@ export const META_PIXEL = {
     VIEW_CONTENT: 'ViewContent',
     CONTACT: 'Contact',
     LEAD: 'Lead',
+    COMPLETE_REGISTRATION: 'CompleteRegistration',
   },
 };
 
@@ -72,3 +84,16 @@ export const getGAScriptUrl = () => `${ANALYTICS.GTM_SCRIPT_URL}${ANALYTICS.MEAS
 
 // Helper function to get GA config
 export const getGAConfig = () => ANALYTICS.MEASUREMENT_ID;
+
+export const FORM_IDS = {
+  BUY_REQUEST: 'buy_request',
+  SELL_REQUEST: 'sell_request',
+  NETWORK_SIGNUP: 'network_signup',
+};
+
+/** form_id -> cta_intent used when that form's WhatsApp fallback is opened. */
+export const FORM_INTENT = {
+  buy_request: 'buy',
+  sell_request: 'sell',
+  network_signup: 'network',
+};

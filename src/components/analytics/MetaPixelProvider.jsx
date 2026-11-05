@@ -3,8 +3,6 @@
 import { META_PIXEL, isMetaPixelEnabled } from '@/constants/analytics';
 import {
   initMetaPixel,
-  isWhatsAppClickTarget,
-  trackMetaContactForClick,
   trackMetaPageView,
   trackMetaViewContent,
 } from '@/lib/meta-pixel';
@@ -37,18 +35,6 @@ export default function MetaPixelProvider({ children }) {
       trackMetaViewContent({ content_name: pathname });
     }
   }, [pathname]);
-
-  useEffect(() => {
-    if (!isMetaPixelEnabled()) return;
-
-    const handleClick = (event) => {
-      if (!isWhatsAppClickTarget(event.target)) return;
-      trackMetaContactForClick(event);
-    };
-
-    document.addEventListener('click', handleClick, true);
-    return () => document.removeEventListener('click', handleClick, true);
-  }, []);
 
   return children;
 }
