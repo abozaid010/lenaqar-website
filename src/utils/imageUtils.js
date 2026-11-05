@@ -337,7 +337,7 @@ export function getFallbackImage(context = 'default') {
   const fallbacks = {
     property: '/images/property_placeholder.jpg',
     user: '/images/defaultImage.jpg',
-    logo: '/images/logo.png',
+    logo: '/images/default_logo.jpg',
     dashboard: '/images/dasbordDesctop.png',
     mobile: '/images/dashbordmobile.png',
     default: '/images/defaultImage.jpg'

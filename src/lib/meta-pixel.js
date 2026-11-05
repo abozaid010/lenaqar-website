@@ -5,12 +5,12 @@ import {
   getMetaPixelId,
   isMetaPixelEnabled,
 } from '@/constants/analytics';
-import { trackOncePerEvent } from './meta-contact-events';
 
 const INIT_FLAG = '__lenaMetaPixelInitialized';
 
 function runFbq(...args) {
   if (typeof window === 'undefined' || typeof window.fbq !== 'function') return;
+  if (process.env.NEXT_PUBLIC_ANALYTICS_DEBUG === '1') console.info('[analytics:meta]', ...args);
   window.fbq(...args);
 }
 
@@ -77,24 +77,20 @@ export async function trackMetaContact(params = {}) {
   runFbq('track', META_PIXEL.EVENTS.CONTACT, params);
 }
 
-/** Deduplicate global capture and component handlers for the same click. */
-export function trackMetaContactForClick(event, params = {}) {
-  return trackOncePerEvent(event, () => {
-    trackMetaContact(params);
-  });
-}
-
 export async function trackMetaLead(params = {}) {
   if (!isMetaPixelEnabled()) return;
   await initMetaPixel();
   runFbq('track', META_PIXEL.EVENTS.LEAD, params);
 }
 
-/** True when the element is a WhatsApp CTA (link or child of one). */
-export function isWhatsAppClickTarget(target) {
-  if (!(target instanceof Element)) return false;
-  const anchor = target.closest('a[href]');
-  if (!anchor) return false;
-  const href = anchor.getAttribute('href') || '';
-  return /wa\.me|whatsapp\.com/i.test(href);
+export async function trackMetaCustom(name, params = {}) {
+  if (!isMetaPixelEnabled()) return;
+  await initMetaPixel();
+  runFbq('trackCustom', name, params);
+}
+
+export async function trackMetaCompleteRegistration(params = {}) {
+  if (!isMetaPixelEnabled()) return;
+  await initMetaPixel();
+  runFbq('track', META_PIXEL.EVENTS.COMPLETE_REGISTRATION, params);
 }

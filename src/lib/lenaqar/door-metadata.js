@@ -16,7 +16,7 @@ export function doorMetadata(door) {
       type: "website",
       images: [
         {
-          url: `${SITE.url}/images/logo.png`,
+          url: `${SITE.url}/images/default_logo.jpg`,
           width: 1200,
           height: 630,
           alt: SITE.name,
@@ -27,7 +27,7 @@ export function doorMetadata(door) {
       card: "summary_large_image",
       title: door.title,
       description: door.description,
-      images: [`${SITE.url}/images/logo.png`],
+      images: [`${SITE.url}/images/default_logo.jpg`],
     },
     alternates: { canonical: url },
   };

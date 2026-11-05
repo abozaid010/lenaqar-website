@@ -7,7 +7,7 @@ import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { ANALYTICS } from "@/constants/analytics";
 import { SITE } from "@/config/site";
 import { requirementToUnitsFilter } from "@/lib/match/requirement-to-units-filter";
-import { trackMetaLead } from "@/lib/meta-pixel";
+import { trackBuyRequestSubmitted } from "@/lib/analytics";
 import BuyRequestDialog from "./buy-request-dialog";
 import {
   loadPublicBuyRequest,
@@ -74,6 +74,7 @@ export default function BuyRequestCta({
   hideTrigger = false,
   prefill,
   onSubmitted,
+  trackingLocation = "unknown",
 }) {
   const { translate } = useI18n();
   const { trackEvent } = useGoogleAnalytics();
@@ -97,8 +98,8 @@ export default function BuyRequestCta({
     if (window.location.hash !== "#buy-request") return;
     buyRequestHashHandled = true;
     setOpen(true);
-    trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_OPENED);
-  }, [trackEvent, isControlled, setOpen]);
+    trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_OPENED, { cta_location: trackingLocation });
+  }, [trackEvent, isControlled, setOpen, trackingLocation]);
 
   const handleUserId = useCallback((nextId) => {
     const id = String(nextId || "").trim();
@@ -147,7 +148,7 @@ export default function BuyRequestCta({
           type="button"
           className={actionButtonClass({ variant, tone, size, className })}
           onClick={() => {
-            trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_OPENED);
+            trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_OPENED, { cta_location: trackingLocation });
             setOpen(true);
           }}
         >
@@ -171,9 +172,8 @@ export default function BuyRequestCta({
         loadRequirement={loadRequirement}
         saveRequirement={saveRequirement}
         onSuccess={(requirement) => {
-          trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_SUBMITTED);
           // Ads conversion: Lead = successful buyer request (no PII in payload).
-          trackMetaLead({ content_name: "buyer_request", content_category: "buy" });
+          trackBuyRequestSubmitted({ location: trackingLocation, city: requirement?.city });
           const qs = opportunityQueryFromRequirement({
             ...requirement,
             purpose: "buy",

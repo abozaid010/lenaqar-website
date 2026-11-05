@@ -5,6 +5,8 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useI18n } from "@/hooks/useI18n";
 import { SITE } from "@/config/site";
+import { ANALYTICS } from "@/constants/analytics";
+import { trackGa } from "@/lib/analytics";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { submitNetworkLogin } from "@/app/(lenaqar)/_actions/network-auth";
@@ -29,10 +31,12 @@ export default function NetworkLoginForm() {
     try {
       const result = await submitNetworkLogin({ email, password });
       if (result?.ok) {
+        trackGa(ANALYTICS.EVENTS.NETWORK_LOGIN_SUBMITTED, { result: "active" });
         setActive(true);
         return;
       }
       if (result?.code === "pending") {
+        trackGa(ANALYTICS.EVENTS.NETWORK_LOGIN_SUBMITTED, { result: "pending" });
         saveNetworkActivationName(email);
         setPending(true);
         return;

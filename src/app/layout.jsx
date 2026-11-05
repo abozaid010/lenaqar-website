@@ -10,6 +10,7 @@ import WebSiteSchema from "@/components/schema/WebSiteSchema";
 import { getGAScriptUrl, getGAConfig } from '@/constants/analytics';
 import MetaPixelNoscript from "@/components/analytics/MetaPixelNoscript";
 import MetaPixelProvider from "@/components/analytics/MetaPixelProvider";
+import ClickTracker from "@/components/analytics/ClickTracker";
 import Script from "next/script";
 import { SITE } from "@/config/site";
 
@@ -79,6 +80,7 @@ export default function RootLayout({ children }) {
         <I18nProvider initialLocal="ar">
           <Toaster position="top-center" reverseOrder={false} />
           <TanStackQueryProvider>
+            <ClickTracker />
             <MetaPixelProvider>{children}</MetaPixelProvider>
           </TanStackQueryProvider>
         </I18nProvider>

@@ -8,6 +8,8 @@ import { useI18n } from "@/hooks/useI18n";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { PhoneField } from "@/components/phone/PhoneField";
 import SubmitWhatsAppFallback from "@/components/lenaqar/submit-whatsapp-fallback";
+import { FORM_IDS } from "@/constants/analytics";
+import { trackNetworkSignup } from "@/lib/analytics";
 import { submitNetworkSignup } from "@/app/(lenaqar)/_actions/network-auth";
 import { actionButtonClass } from "@/components/ui/action-button-class";
 import { buildNetworkSignupPayload } from "@/lib/lenaqar/network-signup-payload";
@@ -127,6 +129,7 @@ export default function NetworkSignupForm() {
       }
 
       saveNetworkSignupSnapshot(snapshot);
+      trackNetworkSignup();
       router.push("/network/pending");
     } finally {
       setSaving(false);
@@ -138,6 +141,7 @@ export default function NetworkSignupForm() {
       {whatsappFallbackHrefState ? (
         <SubmitWhatsAppFallback
           href={whatsappFallbackHrefState}
+          formId={FORM_IDS.NETWORK_SIGNUP}
           title={translate("lenaqar.network.signup.saveFailedTitle")}
           body={translate("lenaqar.network.signup.saveFailedWhatsAppBody")}
           countdownLabel={translate(

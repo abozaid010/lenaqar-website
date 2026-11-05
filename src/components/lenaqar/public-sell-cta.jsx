@@ -4,7 +4,8 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useI18n } from "@/hooks/useI18n";
 import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
-import { ANALYTICS } from "@/constants/analytics";
+import { trackSellRequestSubmitted } from "@/lib/analytics";
+import { ANALYTICS, FORM_IDS } from "@/constants/analytics";
 import { getBuildingTypeOptions } from "@/lib/enums/buildingTypes";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
@@ -53,6 +54,7 @@ export default function PublicSellCta({
   size = "default",
   className = "",
   label,
+  trackingLocation = "unknown",
 }) {
   const { locale, translate } = useI18n();
   const { trackEvent } = useGoogleAnalytics();
@@ -158,7 +160,7 @@ export default function PublicSellCta({
         setWhatsappFallbackHrefState(whatsappFallbackHref(message));
         return;
       }
-      trackEvent(ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED);
+      trackSellRequestSubmitted({ location: trackingLocation, city: form.city });
       toast.success(tr("lenaqar.sellRequest.saved"));
       resetAndClose();
     } finally {
@@ -171,7 +173,10 @@ export default function PublicSellCta({
       <button
         type="button"
         className={actionButtonClass({ variant, tone, size, className })}
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          trackEvent(ANALYTICS.EVENTS.SELL_REQUEST_OPENED, { cta_location: trackingLocation });
+          setOpen(true);
+        }}
       >
         {label || translate("lenaqar.actions.sellUnit", "Sell Unit")}
         <ActionButtonArrow size={size} />
@@ -193,6 +198,7 @@ export default function PublicSellCta({
         {whatsappFallbackHrefState ? (
           <SubmitWhatsAppFallback
             href={whatsappFallbackHrefState}
+            formId={FORM_IDS.SELL_REQUEST}
             title={tr("lenaqar.sellRequest.saveFailedTitle")}
             body={tr("lenaqar.sellRequest.saveFailedWhatsAppBody")}
             countdownLabel={tr("lenaqar.sellRequest.saveFailedWhatsAppCountdown")}

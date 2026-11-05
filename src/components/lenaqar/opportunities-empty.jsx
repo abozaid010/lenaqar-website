@@ -25,6 +25,7 @@ export default function OpportunitiesEmpty({
         {translate("lenaqar.opportunities.buyRequestHint")}
       </p>
       <BuyRequestCta
+        trackingLocation="opportunities_empty"
         className="w-full sm:w-auto"
         initialValues={cash ? { downPayment: cash } : undefined}
         label={translate("lenaqar.actions.buyUnit", "Buy Unit")}

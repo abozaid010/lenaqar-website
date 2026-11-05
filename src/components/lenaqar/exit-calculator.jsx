@@ -155,7 +155,8 @@ export default function ExitCalculator() {
           </p>
           <WhatsAppCta
             href={sellerCtaHref()}
-            eventName={ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED}
+            intent="sell"
+            location="calculator"
             className="w-full sm:w-auto"
           >
             {translate("lenaqar.calculator.cta")}

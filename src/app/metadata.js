@@ -15,9 +15,9 @@ export const defaultMetadata = {
     template: "%s | لينا عقار",
   },
   icons: {
-    icon: "/images/logo-5.png",
-    shortcut: "/images/logo-5.png",
-    apple: "/images/logo-5.png",
+    icon: "/images/default_logo.jpg",
+    shortcut: "/images/default_logo.jpg",
+    apple: "/images/default_logo.jpg",
   },
   description: LENAQAR_DESCRIPTION,
   openGraph: {
@@ -29,7 +29,7 @@ export const defaultMetadata = {
     locale: "ar_EG",
     images: [
       {
-        url: `${SITE_URL}/images/logo.png`,
+        url: `${SITE_URL}/images/default_logo.jpg`,
         width: 1200,
         height: 630,
         alt: "لينا عقار",
@@ -40,7 +40,7 @@ export const defaultMetadata = {
     card: "summary_large_image",
     title: LENAQAR_TITLE,
     description: LENAQAR_DESCRIPTION,
-    images: [`${SITE_URL}/images/logo.png`],
+    images: [`${SITE_URL}/images/default_logo.jpg`],
   },
   robots: {
     index: true,

@@ -2,9 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
-import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
-import { trackMetaContact, trackMetaContactForClick } from "@/lib/meta-pixel";
-import { ANALYTICS } from "@/constants/analytics";
+import { trackWhatsAppClick } from "@/lib/analytics";
 import { getWhatsAppFallbackDelayMs } from "@/lib/lenaqar/whatsapp-fallback";
 import {
   composeNetworkActivationMessage,
@@ -16,7 +14,6 @@ import {
 
 export default function NetworkActivationWhatsApp({ name = "" }) {
   const { translate } = useI18n();
-  const { trackEvent } = useGoogleAnalytics();
   const [storedName, setStoredName] = useState(null);
   const [snapshot, setSnapshot] = useState(null);
   const redirectedRef = useRef(false);
@@ -68,8 +65,11 @@ export default function NetworkActivationWhatsApp({ name = "" }) {
     const redirectId = window.setTimeout(() => {
       if (redirectedRef.current) return;
       redirectedRef.current = true;
-      trackMetaContact();
-      trackEvent(ANALYTICS.EVENTS.NETWORK_ACTIVATION_WHATSAPP_CLICKED);
+      trackWhatsAppClick({
+        intent: "network",
+        location: "network_activation",
+        source: "auto_redirect",
+      });
       window.location.assign(href);
     }, delayMs);
 
@@ -77,12 +77,10 @@ export default function NetworkActivationWhatsApp({ name = "" }) {
       window.clearInterval(tickId);
       window.clearTimeout(redirectId);
     };
-  }, [href, delayMs, trackEvent]);
+  }, [href, delayMs]);
 
-  const markOpened = (event) => {
+  const markOpened = () => {
     redirectedRef.current = true;
-    trackMetaContactForClick(event);
-    trackEvent(ANALYTICS.EVENTS.NETWORK_ACTIVATION_WHATSAPP_CLICKED);
   };
 
   if (!href) return null;
@@ -98,6 +96,8 @@ export default function NetworkActivationWhatsApp({ name = "" }) {
       <a
         href={href}
         className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#25D366] px-5 py-3 text-sm font-semibold text-white shadow-md transition-colors hover:bg-[#20BA5A] min-h-11"
+        data-cta-intent="network"
+        data-cta-location="network_activation"
         onClick={markOpened}
       >
         {translate("lenaqar.network.pending.whatsappCta")}

@@ -15,6 +15,7 @@ export default function CoreActions({
   size: sizeProp,
   showSell = true,
   showBuy = true,
+  location = "core_actions",
 }) {
   const { translate } = useI18n();
   const size = sizeProp || (compact ? "compact" : "default");
@@ -23,6 +24,7 @@ export default function CoreActions({
 
   const sell = showSell ? (
     <PublicSellCta
+      trackingLocation={location}
       key="sell"
       label={translate("lenaqar.actions.sellUnit", "Sell Unit")}
       variant={emphasis === "sell" ? "primary" : "secondary"}
@@ -34,6 +36,7 @@ export default function CoreActions({
 
   const buy = showBuy ? (
     <BuyRequestCta
+      trackingLocation={location}
       key="buy"
       variant={emphasis === "buy" ? "primary" : "secondary"}
       tone={tone}

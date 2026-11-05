@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { MessageCircle, ShieldCheck, Target, UserCheck } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
-import { ANALYTICS } from "@/constants/analytics";
 import { marketplaceAddUnitHref } from "@/lib/lenaqar/whatsapp";
 import {
   MARKETPLACE_CITY_FILTERS,
@@ -343,7 +342,8 @@ export default function MarketplaceHomeContent({
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <WhatsAppCta
                 href={marketplaceAddUnitHref()}
-                eventName={ANALYTICS.EVENTS.MARKETPLACE_WHATSAPP_CLICKED}
+                intent="sell"
+                location="classic_home"
                 className="!bg-[#25D366] hover:!bg-[#20BA5A]"
               >
                 {translate("lenaqar.marketplace.closing.sellerCta")}

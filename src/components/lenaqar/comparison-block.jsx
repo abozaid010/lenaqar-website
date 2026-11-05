@@ -68,6 +68,8 @@ export default function ComparisonBlock() {
         {translate("lenaqar.comparison.disclaimer")}{" "}
         <Link
           href="/calculator"
+          data-track="calculator_link"
+          data-cta-location="comparison_block"
           className="text-primary font-medium underline-offset-2 hover:underline"
         >
           {translate("lenaqar.home.primaryCta")}

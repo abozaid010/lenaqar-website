@@ -11,6 +11,7 @@ import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-s
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import { PhoneField } from "@/components/phone/PhoneField";
 import SubmitWhatsAppFallback from "@/components/lenaqar/submit-whatsapp-fallback";
+import { FORM_IDS } from "@/constants/analytics";
 import NetworkBrokerCta from "@/components/lenaqar/network-broker-cta";
 import {
   buildPublicBuyRequirement,
@@ -494,6 +495,7 @@ export default function BuyRequestDialog({
           {whatsappFallbackHrefState ? (
             <SubmitWhatsAppFallback
               href={whatsappFallbackHrefState}
+              formId={FORM_IDS.BUY_REQUEST}
               title={tr("lenaqar.buyRequest.saveFailedTitle")}
               body={tr("lenaqar.buyRequest.saveFailedWhatsAppBody")}
               countdownLabel={tr("lenaqar.buyRequest.saveFailedWhatsAppCountdown")}

@@ -55,12 +55,15 @@ export default function LenaqarHeader() {
             <Link
               key={link.href}
               href={link.href}
+              data-track="nav_link"
+              data-cta-location="header"
               className="hover:text-white/80 transition-colors whitespace-nowrap"
             >
               {link.label}
             </Link>
           ))}
           <BuyRequestCta
+            trackingLocation="header_desktop"
             variant="primary"
             tone="onPrimary"
             size="compact"
@@ -93,6 +96,8 @@ export default function LenaqarHeader() {
             <Link
               key={link.href}
               href={link.href}
+              data-track="nav_link"
+              data-cta-location="header"
               className="py-1"
               onClick={() => setOpen(false)}
             >
@@ -100,6 +105,7 @@ export default function LenaqarHeader() {
             </Link>
           ))}
           <BuyRequestCta
+            trackingLocation="header_mobile"
             variant="primary"
             tone="onPrimary"
             label={translate("lenaqar.header.buyUnit")}

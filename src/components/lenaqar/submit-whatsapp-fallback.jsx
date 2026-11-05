@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { trackMetaContact, trackMetaContactForClick } from "@/lib/meta-pixel";
+import { ANALYTICS, FORM_INTENT } from "@/constants/analytics";
+import { trackGa, trackWhatsAppClick } from "@/lib/analytics";
 import { getWhatsAppFallbackDelayMs } from "@/lib/lenaqar/whatsapp-fallback";
 
 /**
@@ -14,6 +15,7 @@ export default function SubmitWhatsAppFallback({
   countdownLabel,
   ctaLabel,
   delayMs = getWhatsAppFallbackDelayMs(),
+  formId,
   onRedirect,
 }) {
   const panelRef = useRef(null);
@@ -21,6 +23,10 @@ export default function SubmitWhatsAppFallback({
   const [secondsLeft, setSecondsLeft] = useState(() =>
     Math.max(1, Math.ceil(delayMs / 1000)),
   );
+
+  useEffect(() => {
+    if (href) trackGa(ANALYTICS.EVENTS.FORM_FALLBACK_SHOWN, { form_id: formId });
+  }, [href, formId]);
 
   useEffect(() => {
     panelRef.current?.scrollIntoView?.({ behavior: "smooth", block: "nearest" });
@@ -42,7 +48,11 @@ export default function SubmitWhatsAppFallback({
     const redirectId = window.setTimeout(() => {
       if (redirectedRef.current) return;
       redirectedRef.current = true;
-      trackMetaContact();
+      trackWhatsAppClick({
+        intent: FORM_INTENT[formId] || "general",
+        location: "form_fallback",
+        source: "auto_redirect",
+      });
       onRedirect?.();
       window.location.assign(href);
     }, delayMs);
@@ -51,7 +61,7 @@ export default function SubmitWhatsAppFallback({
       window.clearInterval(tickId);
       window.clearTimeout(redirectId);
     };
-  }, [href, delayMs, onRedirect]);
+  }, [href, delayMs, onRedirect, formId]);
 
   if (!href) return null;
 
@@ -71,9 +81,10 @@ export default function SubmitWhatsAppFallback({
       <a
         href={href}
         className="inline-flex items-center justify-center gap-2 rounded-md bg-[#25D366] hover:bg-[#20BA5A] text-white font-medium px-4 py-2.5 text-sm shadow-sm transition-colors"
-        onClick={(event) => {
+        data-cta-intent={FORM_INTENT[formId] || "general"}
+        data-cta-location="form_fallback"
+        onClick={() => {
           redirectedRef.current = true;
-          trackMetaContactForClick(event);
           onRedirect?.();
         }}
       >

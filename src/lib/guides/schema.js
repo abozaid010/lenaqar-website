@@ -54,10 +54,10 @@ export function buildArticleSchema(guide, { placeName } = {}) {
       alternateName: "Lenaqar",
       logo: {
         "@type": "ImageObject",
-        url: `${SITE.url}/images/logo.png`,
+        url: `${SITE.url}/images/default_logo.jpg`,
       },
     },
-    image: `${SITE.url}/images/logo.png`,
+    image: `${SITE.url}/images/default_logo.jpg`,
     mainEntityOfPage: url,
     url,
   };

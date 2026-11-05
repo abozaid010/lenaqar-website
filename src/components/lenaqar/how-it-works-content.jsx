@@ -9,7 +9,6 @@ import NetworkBrokerCta from "./network-broker-cta";
 import { DOORS } from "@/lib/lenaqar/doors";
 import { actionButtonClass } from "@/components/ui/action-button-class";
 import ActionButtonArrow from "@/components/ui/action-button-arrow";
-import { ANALYTICS } from "@/constants/analytics";
 import { marketplaceAddUnitHref } from "@/lib/lenaqar/whatsapp";
 import WhatsAppCta from "./whatsapp-cta";
 
@@ -100,7 +99,7 @@ export default function HowItWorksContent() {
         <p className="text-base leading-relaxed text-black/70 sm:text-lg">
           {translate("lenaqar.howItWorks.pageIntro")}
         </p>
-        <BuyRequestCta variant="primary" />
+        <BuyRequestCta trackingLocation="how_it_works_hero" variant="primary" />
       </header>
 
       <FlowBlock
@@ -111,7 +110,7 @@ export default function HowItWorksContent() {
         imageAltKey="lenaqar.howItWorks.buyFlowAlt"
         cta={
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <BuyRequestCta variant="primary" />
+            <BuyRequestCta trackingLocation="how_it_works_mid" variant="primary" />
             <Link
               href="/opportunities"
               className={actionButtonClass({ variant: "secondary" })}
@@ -136,7 +135,8 @@ export default function HowItWorksContent() {
             </Link>
             <WhatsAppCta
               href={marketplaceAddUnitHref()}
-              eventName={ANALYTICS.EVENTS.MARKETPLACE_WHATSAPP_CLICKED}
+              intent="sell"
+              location="how_it_works"
               className="!bg-[#25D366] hover:!bg-[#20BA5A]"
             >
               {translate("lenaqar.marketplace.closing.sellerCta")}

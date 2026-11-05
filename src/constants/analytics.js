@@ -1,38 +1,34 @@
-// Analytics configuration (GA + Meta Pixel). Prefer NEXT_PUBLIC_* env vars in production.
+// Analytics configuration (GA + Meta Pixel).
+// These IDs are public (they ship in the client bundle), so they live here, not in env.
 
 export const ANALYTICS = {
-  MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-L76Z647950',
+  MEASUREMENT_ID: 'G-3QC63HK3DQ', // GA4 property "lenaqar" (abozaid.ibrahim11 account), stream lenaqar.com
   GTM_SCRIPT_URL: 'https://www.googletagmanager.com/gtag/js?id=',
 
   // Event names for consistent tracking
   EVENTS: {
-    DEEP_LINK_ATTEMPT: 'deep_link_attempt',
-    DOWNLOAD_CLICK: 'download_click',
-    DOWNLOAD_PAGE_VIEW: 'download_page_view',
-    CAMPAIGN_ARRIVAL: 'campaign_arrival',
-    APP_STORE_CLICK: 'app_store_click',
     CALCULATOR_USED: 'calculator_used',
-    SELLER_WHATSAPP_CLICKED: 'seller_whatsapp_clicked',
-    CASH_ENTERED: 'cash_entered',
     UNIT_VIEWED: 'unit_viewed',
-    BUYER_WHATSAPP_CLICKED: 'buyer_whatsapp_clicked',
     BUY_REQUEST_OPENED: 'buy_request_opened',
     BUY_REQUEST_SUBMITTED: 'buy_request_submitted',
-    MARKETPLACE_WHATSAPP_CLICKED: 'marketplace_whatsapp_clicked',
-    /** Guide articles — include lead_code param when present. */
-    CLICK_WHATSAPP: 'click_whatsapp',
-    NETWORK_JOIN_CLICKED: 'network_join_clicked',
     NETWORK_SIGNUP_SUBMITTED: 'network_signup_submitted',
     NETWORK_LOGIN_SUBMITTED: 'network_login_submitted',
-    NETWORK_ACTIVATION_WHATSAPP_CLICKED: 'network_activation_whatsapp_clicked',
+    WHATSAPP_CLICK: 'whatsapp_click',
+    SELL_REQUEST_OPENED: 'sell_request_opened',
+    SELL_REQUEST_SUBMITTED: 'sell_request_submitted',
+    FORM_FALLBACK_SHOWN: 'form_fallback_shown',
+    CTA_CLICK: 'cta_click',
+    OPPORTUNITY_FILTER_APPLIED: 'opportunity_filter_applied',
+    PHONE_CLICK: 'phone_click',
+    EMAIL_CLICK: 'email_click',
+    SHARE: 'share',
+    LANGUAGE_SWITCHED: 'language_switched',
+    ONBOARDING_SKIPPED: 'onboarding_skipped',
   },
 };
 
-/** Meta (Facebook) Pixel — override with NEXT_PUBLIC_META_PIXEL_ID in .env */
-const META_PIXEL_DEFAULT_ID = '846747935139647';
-
 export const META_PIXEL = {
-  PIXEL_ID: (process.env.NEXT_PUBLIC_META_PIXEL_ID || META_PIXEL_DEFAULT_ID).trim(),
+  PIXEL_ID: '846747935139647',
   SCRIPT_URL: 'https://connect.facebook.net/en_US/fbevents.js',
   NOSCRIPT_BASE: 'https://www.facebook.com/tr',
   /**
@@ -54,6 +50,7 @@ export const META_PIXEL = {
     VIEW_CONTENT: 'ViewContent',
     CONTACT: 'Contact',
     LEAD: 'Lead',
+    COMPLETE_REGISTRATION: 'CompleteRegistration',
   },
 };
 
@@ -72,3 +69,16 @@ export const getGAScriptUrl = () => `${ANALYTICS.GTM_SCRIPT_URL}${ANALYTICS.MEAS
 
 // Helper function to get GA config
 export const getGAConfig = () => ANALYTICS.MEASUREMENT_ID;
+
+export const FORM_IDS = {
+  BUY_REQUEST: 'buy_request',
+  SELL_REQUEST: 'sell_request',
+  NETWORK_SIGNUP: 'network_signup',
+};
+
+/** form_id -> cta_intent used when that form's WhatsApp fallback is opened. */
+export const FORM_INTENT = {
+  buy_request: 'buy',
+  sell_request: 'sell',
+  network_signup: 'network',
+};

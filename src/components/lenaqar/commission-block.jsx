@@ -56,7 +56,7 @@ export default function CommissionBlock() {
           ))}
         </ul>
 
-        <CoreActions className="mt-7 max-w-md" />
+        <CoreActions location="commission_block" className="mt-7 max-w-md" />
 
         <p className="mt-4 text-xs text-black/50">
           {translate("lenaqar.commission.note")}
