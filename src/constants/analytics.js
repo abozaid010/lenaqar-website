@@ -1,7 +1,8 @@
-// Analytics configuration (GA + Meta Pixel). Prefer NEXT_PUBLIC_* env vars in production.
+// Analytics configuration (GA + Meta Pixel).
+// These IDs are public (they ship in the client bundle), so they live here, not in env.
 
 export const ANALYTICS = {
-  MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-L76Z647950',
+  MEASUREMENT_ID: 'G-3QC63HK3DQ', // GA4 property "lenaqar" (abozaid.ibrahim11 account), stream lenaqar.com
   GTM_SCRIPT_URL: 'https://www.googletagmanager.com/gtag/js?id=',
 
   // Event names for consistent tracking
@@ -26,11 +27,8 @@ export const ANALYTICS = {
   },
 };
 
-/** Meta (Facebook) Pixel — override with NEXT_PUBLIC_META_PIXEL_ID in .env */
-const META_PIXEL_DEFAULT_ID = '846747935139647';
-
 export const META_PIXEL = {
-  PIXEL_ID: (process.env.NEXT_PUBLIC_META_PIXEL_ID || META_PIXEL_DEFAULT_ID).trim(),
+  PIXEL_ID: '846747935139647',
   SCRIPT_URL: 'https://connect.facebook.net/en_US/fbevents.js',
   NOSCRIPT_BASE: 'https://www.facebook.com/tr',
   /**
