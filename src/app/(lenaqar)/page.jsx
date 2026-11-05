@@ -20,14 +20,14 @@ export const metadata = {
     locale: "ar_EG",
     siteName: SITE.name,
     type: "website",
-    images: [{ url: `${SITE.url}/images/logo.png`, width: 1200, height: 630, alt: SITE.name }],
+    images: [{ url: `${SITE.url}/images/default_logo.jpg`, width: 1200, height: 630, alt: SITE.name }],
   },
   twitter: {
     card: "summary_large_image",
     title: "لينا عقار | اشتري أو بيع بيتك بأرقام أوضح ومن غير مكالمات",
     description:
       "ابعت طلبك واتساب، والذكاء الاصطناعي يدوّرلك على وحدات مناسبة، ومراجعة قانونية لورق وحدة الريسيل اللي تختارها. أرقام أوضح لما تكون متاحة — ومش هنتصل إلا لو طلبت.",
-    images: [`${SITE.url}/images/logo.png`],
+    images: [`${SITE.url}/images/default_logo.jpg`],
   },
   alternates: {
     canonical: SITE.url,

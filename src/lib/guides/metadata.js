@@ -23,7 +23,7 @@ export function guideMetadata(guide, { preview = false } = {}) {
       type: "article",
       images: [
         {
-          url: `${SITE.url}/images/logo.png`,
+          url: `${SITE.url}/images/default_logo.jpg`,
           width: 1200,
           height: 630,
           alt: SITE.name,

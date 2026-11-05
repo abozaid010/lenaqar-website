@@ -6,7 +6,7 @@ export default function LocalBusinessSchema() {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: SITE_NAME,
-    image: `${SITE_URL}/images/logo.png`,
+    image: `${SITE_URL}/images/default_logo.jpg`,
     address: {
       "@type": "PostalAddress",
       addressCountry: LENAQAR_CONTACT.country,

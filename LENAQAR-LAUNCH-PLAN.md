@@ -119,7 +119,7 @@ Publishing the raw object would leak a staff email into the page HTML. **Mandato
 | 10 | Capacity ≈ 100 units | Internal cap, not published |
 | 11 | `presentValue` stays hidden behind a flag | `SITE.showPresentValue = false`; `سعر المتر` only |
 | 12 | `info@lenaqar.com` **is not live yet** | Kept in the contact file, **not rendered in the footer**. Footer shows phone + WhatsApp until the mailbox answers — a bouncing address costs more trust than an absent one. One boolean flips it on |
-| 13 | Keep the LenaAI logo for now | Reuse `/images/logo.png` + `/images/logo-5.png` for header, favicon and OG. **No new asset blocks launch** |
+| 13 | Keep the LenaAI logo for now | Reuse `/images/default_logo.jpg` for header, favicon and OG. **No new asset blocks launch** |
 
 **Copy consequence of #8 — the headline changes.** Strategy §16's winner ("اخرج في 45 يوم") is a guarantee and is now off the table. Launch copy leads on speed + amount + a contract, with no date promise:
 
@@ -372,7 +372,7 @@ Middleware runs before `next.config.mjs` rewrites, so #3 also neutralises the `/
 | 20 | `src/app/robots.ts` | EDIT — brand-aware | P0 |
 | 21 | `src/app/sitemap.ts` | EDIT — brand-aware | P0 |
 | 22 | `src/constants/analytics.js` | EDIT — env GA id + 5 events | P0 |
-| 23 | ~~LenAqar logo / favicon / OG asset~~ | **Dropped** (answer #13) — reuse `/images/logo.png` + `/images/logo-5.png`; no design asset blocks launch | — |
+| 23 | ~~LenAqar logo / favicon / OG asset~~ | **Dropped** (answer #13) — reuse `/images/default_logo.jpg`; no design asset blocks launch | — |
 | 24 | `src/app/globals.css` | EDIT — `[data-brand]` token scope | P0 |
 | 25 | `.env.example` | EDIT — document LenAqar vars | P0 |
 | 26 | `src/lib/lenaqar/__tests__/validate-unit.test.js` | NEW — `node --test` | P1 |
