@@ -26,6 +26,7 @@ export default function BuyerLandingContent({ landing, matchedRequirements = [] 
         </p>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <BuyRequestCta
+            trackingLocation="buyer_landing_hero"
             variant="primary"
             label={translate("lenaqar.landings.cta")}
             initialValues={landing.initialValues}
@@ -70,6 +71,7 @@ export default function BuyerLandingContent({ landing, matchedRequirements = [] 
             </p>
             <div className="mt-4">
               <BuyRequestCta
+                trackingLocation="buyer_landing_requests"
                 variant="primary"
                 initialValues={landing.initialValues}
                 label={translate("lenaqar.landings.cta")}

@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Check, MessageCircle, Pause, Play, RotateCcw } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
+import { ANALYTICS } from "@/constants/analytics";
+import { trackGa } from "@/lib/analytics";
 import RequestComposer from "./request-composer";
 
 /**
@@ -301,7 +303,10 @@ export default function HomeOnboarding() {
     setScene(next);
   }, []);
 
-  const skip = useCallback(() => goTo(COMPOSE, { focus: true }), [goTo]);
+  const skip = useCallback(() => {
+    trackGa(ANALYTICS.EVENTS.ONBOARDING_SKIPPED, { scene });
+    goTo(COMPOSE, { focus: true });
+  }, [goTo, scene]);
 
   // First visit plays the intro; returning visitors (or #request) start on the composer.
   useEffect(() => {

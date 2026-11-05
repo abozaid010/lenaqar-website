@@ -5,6 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useI18n } from "@/hooks/useI18n";
 import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { ANALYTICS } from "@/constants/analytics";
+import { cashBucket } from "@/lib/analytics-utils";
 import UnitLocationSearch from "@/components/ui/unit-forms/unit-location-search";
 import { formatPrice, parseMoneyInput } from "@/utils/parse-amount";
 
@@ -89,16 +90,20 @@ export default function OpportunityFilters({ years = [] }) {
         event.preventDefault();
         const form = new FormData(event.currentTarget);
         const nextCash = cashFromParam(cash);
-        if (nextCash !== "") {
-          trackEvent(ANALYTICS.EVENTS.CASH_ENTERED, { cash: String(nextCash) });
-        }
+        const delivery = String(form.get("delivery") || "").trim();
+        trackEvent(ANALYTICS.EVENTS.OPPORTUNITY_FILTER_APPLIED, {
+          city: location.city,
+          district: location.district,
+          has_delivery: Boolean(delivery),
+          cash_bucket: cashBucket(nextCash),
+        });
         apply({
           city: location.city,
           district: location.district,
           sub_district: location.sub_district,
           project: location.project,
           cash: nextCash === "" ? "" : String(nextCash),
-          delivery: String(form.get("delivery") || "").trim(),
+          delivery,
         });
       }}
     >

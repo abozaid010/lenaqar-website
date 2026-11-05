@@ -30,6 +30,7 @@ export default function OpportunitiesPageContent({
       </p>
       <div className="mb-6">
         <BuyRequestCta
+          trackingLocation="opportunities_page"
           variant="primary"
           initialValues={cash ? { downPayment: cash } : undefined}
         />

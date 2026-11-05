@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { FORM_INTENT } from "@/constants/analytics";
-import { trackWhatsAppClick } from "@/lib/analytics";
+import { ANALYTICS, FORM_INTENT } from "@/constants/analytics";
+import { trackGa, trackWhatsAppClick } from "@/lib/analytics";
 import { getWhatsAppFallbackDelayMs } from "@/lib/lenaqar/whatsapp-fallback";
 
 /**
@@ -23,6 +23,10 @@ export default function SubmitWhatsAppFallback({
   const [secondsLeft, setSecondsLeft] = useState(() =>
     Math.max(1, Math.ceil(delayMs / 1000)),
   );
+
+  useEffect(() => {
+    if (href) trackGa(ANALYTICS.EVENTS.FORM_FALLBACK_SHOWN, { form_id: formId });
+  }, [href, formId]);
 
   useEffect(() => {
     panelRef.current?.scrollIntoView?.({ behavior: "smooth", block: "nearest" });

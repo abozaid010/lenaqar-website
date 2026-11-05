@@ -99,7 +99,7 @@ export default function HowItWorksContent() {
         <p className="text-base leading-relaxed text-black/70 sm:text-lg">
           {translate("lenaqar.howItWorks.pageIntro")}
         </p>
-        <BuyRequestCta variant="primary" />
+        <BuyRequestCta trackingLocation="how_it_works_hero" variant="primary" />
       </header>
 
       <FlowBlock
@@ -110,7 +110,7 @@ export default function HowItWorksContent() {
         imageAltKey="lenaqar.howItWorks.buyFlowAlt"
         cta={
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <BuyRequestCta variant="primary" />
+            <BuyRequestCta trackingLocation="how_it_works_mid" variant="primary" />
             <Link
               href="/opportunities"
               className={actionButtonClass({ variant: "secondary" })}

@@ -84,7 +84,7 @@ const RequestComposer = forwardRef(function RequestComposer(
   const handleForm = () => {
     if (!validate()) return;
     setPrefill(prefillFromRequestText(text));
-    trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_OPENED);
+    trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_OPENED, { cta_location: "home_composer" });
     setDialogOpen(true);
   };
 
@@ -227,6 +227,7 @@ const RequestComposer = forwardRef(function RequestComposer(
       </form>
 
       <BuyRequestCta
+        trackingLocation="home_composer"
         hideTrigger
         open={dialogOpen}
         onOpenChange={handleOpenChange}

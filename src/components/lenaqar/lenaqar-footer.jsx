@@ -74,7 +74,12 @@ export default function LenaqarFooter() {
                   {link.labelKey ? translate(link.labelKey) : link.label}
                 </Link>
               ))}
-              <Link href="/calculator" className="hover:text-white/80">
+              <Link
+                href="/calculator"
+                data-track="calculator_link"
+                data-cta-location="footer"
+                className="hover:text-white/80"
+              >
                 {translate("lenaqar.header.calculator")}
               </Link>
             </nav>
@@ -145,7 +150,12 @@ export default function LenaqarFooter() {
               <Link href="/#buy-request" className="hover:text-white/80">
                 {translate("lenaqar.header.buyUnit")}
               </Link>
-              <Link href="/network" className="hover:text-white/80">
+              <Link
+                href="/network"
+                data-track="network_join"
+                data-cta-location="footer"
+                className="hover:text-white/80"
+              >
                 {translate("lenaqar.header.joinNetwork")}
               </Link>
               <Link href="/privacy" className="hover:text-white/80">

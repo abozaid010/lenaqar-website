@@ -9,6 +9,7 @@ import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { PhoneField } from "@/components/phone/PhoneField";
 import SubmitWhatsAppFallback from "@/components/lenaqar/submit-whatsapp-fallback";
 import { FORM_IDS } from "@/constants/analytics";
+import { trackNetworkSignup } from "@/lib/analytics";
 import { submitNetworkSignup } from "@/app/(lenaqar)/_actions/network-auth";
 import { actionButtonClass } from "@/components/ui/action-button-class";
 import { buildNetworkSignupPayload } from "@/lib/lenaqar/network-signup-payload";
@@ -128,6 +129,7 @@ export default function NetworkSignupForm() {
       }
 
       saveNetworkSignupSnapshot(snapshot);
+      trackNetworkSignup();
       router.push("/network/pending");
     } finally {
       setSaving(false);

@@ -43,7 +43,13 @@ export default function OpportunityCard({ unit }) {
 
   return (
     <article className="rounded-lg border border-black/10 bg-white overflow-hidden flex flex-col">
-      <Link href={href} className="block relative aspect-[16/10] bg-gray-100">
+      <Link
+        href={href}
+        data-track="opportunity_card"
+        data-cta-location="opportunities_list"
+        data-unit-code={unit.code}
+        className="block relative aspect-[16/10] bg-gray-100"
+      >
         {imageUrl ? (
           <ImageWithLoader
             src={imageUrl}
@@ -66,7 +72,14 @@ export default function OpportunityCard({ unit }) {
         <div>
           {projectName ? (
             <h3 className="font-bold text-primary">
-              <Link href={href}>{projectName}</Link>
+              <Link
+                href={href}
+                data-track="opportunity_card"
+                data-cta-location="opportunities_list"
+                data-unit-code={unit.code}
+              >
+                {projectName}
+              </Link>
             </h3>
           ) : null}
           <p className="text-sm text-black/60">

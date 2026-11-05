@@ -42,7 +42,7 @@ export default function HomeContent({ units = [] }) {
           <p className="text-base sm:text-lg text-black/70 mb-5 max-w-2xl">
             {translate("lenaqar.actions.sub")}
           </p>
-          <CoreActions anchor size="large" />
+          <CoreActions location="classic_home" anchor size="large" />
         </section>
       </div>
 

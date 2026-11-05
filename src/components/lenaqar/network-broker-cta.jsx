@@ -30,6 +30,8 @@ export default function NetworkBrokerCta({
       </p>
       <Link
         href="/network"
+        data-track="network_join"
+        data-cta-location="broker_cta"
         onClick={onNavigate}
         className={`${actionButtonClass({
           variant: "secondary",

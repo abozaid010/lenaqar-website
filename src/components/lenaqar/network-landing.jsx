@@ -53,6 +53,8 @@ export default function NetworkLanding() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/network/signup"
+              data-track="network_signup"
+              data-cta-location="network_landing"
               className={actionButtonClass({ variant: "primary", size: "large" })}
             >
               {translate("lenaqar.header.joinNetwork")}
@@ -60,6 +62,8 @@ export default function NetworkLanding() {
             </Link>
             <Link
               href="/network/login"
+              data-track="network_login"
+              data-cta-location="network_landing"
               className={actionButtonClass({ variant: "secondary", size: "large" })}
             >
               {translate("lenaqar.network.landing.loginCta")}
@@ -184,6 +188,8 @@ export default function NetworkLanding() {
         <div className="mt-8">
           <Link
             href="/network/signup"
+            data-track="network_signup"
+            data-cta-location="network_landing"
             className={actionButtonClass({ variant: "primary" })}
           >
             {translate("lenaqar.network.how.cta")}

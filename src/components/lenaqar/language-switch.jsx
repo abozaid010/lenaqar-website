@@ -2,6 +2,8 @@
 
 import { Languages } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
+import { ANALYTICS } from "@/constants/analytics";
+import { trackGa } from "@/lib/analytics";
 import { writePublicLocale } from "./lenaqar-locale";
 
 /** Arabic ⇄ English toggle for the public header. Arabic is the default. */
@@ -14,6 +16,7 @@ export default function LanguageSwitch({ className = "" }) {
       type="button"
       lang={next === "ar" ? "ar" : "en"}
       onClick={() => {
+        trackGa(ANALYTICS.EVENTS.LANGUAGE_SWITCHED, { language: next });
         writePublicLocale(next);
         changeLanguage(next);
       }}

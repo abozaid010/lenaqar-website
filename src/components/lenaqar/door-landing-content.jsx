@@ -34,12 +34,18 @@ export default function DoorLandingContent({ door }) {
         </p>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           {door.primaryCta === "calculator" ? (
-            <Link href="/calculator" className={actionButtonClass({ variant: "primary" })}>
+            <Link
+              href="/calculator"
+              data-track="calculator_link"
+              data-cta-location="door_hero"
+              className={actionButtonClass({ variant: "primary" })}
+            >
               {translate("lenaqar.doors.ctaCalculator")}
               <ActionButtonArrow />
             </Link>
           ) : (
             <BuyRequestCta
+              trackingLocation="door_hero"
               variant="primary"
               label={translate("lenaqar.doors.ctaBuy")}
               className="!px-6 !py-3.5 !text-base font-bold"
@@ -158,6 +164,7 @@ export default function DoorLandingContent({ door }) {
         </p>
         <div className="mt-5">
           <BuyRequestCta
+            trackingLocation="door_closing"
             variant="primary"
             tone="onPrimary"
             label={translate("lenaqar.doors.ctaBuy")}

@@ -54,6 +54,7 @@ export default function SellPageContent() {
       <section className="container py-10 pb-24 lg:pb-10">
         <div className="flex flex-col gap-2 max-w-md">
           <PublicSellCta
+            trackingLocation="sell_page"
             label={translate("lenaqar.actions.sellUnit", "Sell Unit")}
             className="w-full"
           />
