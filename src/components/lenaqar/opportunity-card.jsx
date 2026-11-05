@@ -153,7 +153,7 @@ export default function OpportunityCard({ unit }) {
           ) : null}
         </dl>
 
-        <OpportunityUnitActions unit={unit} className="mt-auto" />
+        <OpportunityUnitActions unit={unit} location="opportunity_card" className="mt-auto" />
       </div>
     </article>
   );

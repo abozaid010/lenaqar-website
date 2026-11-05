@@ -9,7 +9,6 @@ import NetworkBrokerCta from "./network-broker-cta";
 import { DOORS } from "@/lib/lenaqar/doors";
 import { actionButtonClass } from "@/components/ui/action-button-class";
 import ActionButtonArrow from "@/components/ui/action-button-arrow";
-import { ANALYTICS } from "@/constants/analytics";
 import { marketplaceAddUnitHref } from "@/lib/lenaqar/whatsapp";
 import WhatsAppCta from "./whatsapp-cta";
 
@@ -136,7 +135,8 @@ export default function HowItWorksContent() {
             </Link>
             <WhatsAppCta
               href={marketplaceAddUnitHref()}
-              eventName={ANALYTICS.EVENTS.MARKETPLACE_WHATSAPP_CLICKED}
+              intent="sell"
+              location="how_it_works"
               className="!bg-[#25D366] hover:!bg-[#20BA5A]"
             >
               {translate("lenaqar.marketplace.closing.sellerCta")}

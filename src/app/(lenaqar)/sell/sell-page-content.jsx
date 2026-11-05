@@ -2,7 +2,6 @@
 
 import { useI18n } from "@/hooks/useI18n";
 import { sellerCtaHref } from "@/lib/lenaqar/whatsapp";
-import { ANALYTICS } from "@/constants/analytics";
 import NetworkStrip from "@/components/lenaqar/network-strip";
 import WhatsAppCta from "@/components/lenaqar/whatsapp-cta";
 import PublicSellCta from "@/components/lenaqar/public-sell-cta";
@@ -60,7 +59,8 @@ export default function SellPageContent() {
           />
           <WhatsAppCta
             href={sellerCtaHref()}
-            eventName={ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED}
+            intent="sell"
+            location="sell_page"
             className="w-full"
           >
             {translate("lenaqar.sell.cta")}

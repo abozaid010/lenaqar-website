@@ -4,13 +4,10 @@ import { Phone, MessageCircle, Building2, Mail } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useI18n } from "@/hooks/useI18n";
-import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { SITE } from "@/config/site";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
 import { buyerPageCtaHref, sellerCtaHref } from "@/lib/lenaqar/whatsapp";
 import { DOORS } from "@/lib/lenaqar/doors";
-import { ANALYTICS } from "@/constants/analytics";
-import { trackMetaContactForClick } from "@/lib/meta-pixel";
 
 const GUIDE_LINKS = [
   { href: "/guides/madinaty/prices-2026", label: "أسعار مدينتي" },
@@ -22,13 +19,9 @@ const GUIDE_LINKS = [
 
 export default function LenaqarFooter() {
   const { translate } = useI18n();
-  const { trackEvent } = useGoogleAnalytics();
   const pathname = usePathname();
   const isSellPage = pathname === "/sell" || pathname?.startsWith("/sell/");
   const contactHref = isSellPage ? sellerCtaHref() : buyerPageCtaHref(pathname);
-  const contactEvent = isSellPage
-    ? ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED
-    : ANALYTICS.EVENTS.BUYER_WHATSAPP_CLICKED;
 
   return (
     <footer className="bg-primary text-white py-10 mt-12">
@@ -48,10 +41,8 @@ export default function LenaqarFooter() {
             rel="noopener noreferrer"
             dir="ltr"
             className="inline-block font-semibold underline underline-offset-2 hover:text-white/80"
-            onClick={(event) => {
-              trackEvent(contactEvent);
-              trackMetaContactForClick(event);
-            }}
+            data-cta-intent={isSellPage ? "sell" : "buy"}
+            data-cta-location="footer"
           >
             📲 {translate("lenaqar.footer.whatsapp")} {LENAQAR_CONTACT.whatsappDisplay}
           </a>
@@ -115,10 +106,8 @@ export default function LenaqarFooter() {
                     rel="noopener noreferrer"
                     dir="ltr"
                     className="inline-block hover:text-white/80 underline"
-                    onClick={(event) => {
-                      trackEvent(contactEvent);
-                      trackMetaContactForClick(event);
-                    }}
+                    data-cta-intent={isSellPage ? "sell" : "buy"}
+                    data-cta-location="footer"
                   >
                     {LENAQAR_CONTACT.whatsappDisplay}
                   </a>

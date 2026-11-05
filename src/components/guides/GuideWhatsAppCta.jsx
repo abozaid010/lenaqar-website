@@ -2,19 +2,9 @@
 
 import { GUIDE_CTA_LINE, guideLeadWhatsAppHref } from "@/lib/guides/whatsapp";
 import { actionButtonClass } from "@/components/ui/action-button-class";
-import { ANALYTICS } from "@/constants/analytics";
-import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 
 export default function GuideWhatsAppCta({ leadCode, compact = false }) {
   const href = guideLeadWhatsAppHref(leadCode);
-  const { trackEvent } = useGoogleAnalytics();
-
-  const onClick = () => {
-    trackEvent(ANALYTICS.EVENTS.CLICK_WHATSAPP, {
-      lead_code: leadCode || "",
-      location: compact ? "guide_inline" : "guide_box",
-    });
-  };
 
   return (
     <div
@@ -32,9 +22,9 @@ export default function GuideWhatsAppCta({ leadCode, compact = false }) {
         target="_blank"
         rel="noopener noreferrer"
         className={actionButtonClass({ variant: "primary" })}
-        data-analytics="click_whatsapp"
+        data-cta-intent="guide"
+        data-cta-location={compact ? "guide_inline" : "guide_box"}
         data-lead-code={leadCode || ""}
-        onClick={onClick}
       >
         واتساب لينا عقار
       </a>

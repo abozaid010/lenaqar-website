@@ -6,7 +6,7 @@ import { CheckCircle2, ClipboardList, MessageCircle } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { ANALYTICS } from "@/constants/analytics";
-import { trackMetaContactForClick } from "@/lib/meta-pixel";
+import { trackWhatsAppClick } from "@/lib/analytics";
 import { formatPhoneForWhatsApp } from "@/utils/phone-utils";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
 import {
@@ -71,8 +71,7 @@ const RequestComposer = forwardRef(function RequestComposer(
     event?.preventDefault?.();
     if (!validate()) return;
     const href = whatsappHref();
-    trackEvent(ANALYTICS.EVENTS.BUYER_WHATSAPP_CLICKED);
-    trackMetaContactForClick(event);
+    trackWhatsAppClick({ intent: "buy", location: "home_composer" });
     setSentHref(href);
     // New tab keeps the site open on desktop; phones hand off to the app.
     // If a popup blocker refuses, fall back to the same tab.
@@ -202,6 +201,8 @@ const RequestComposer = forwardRef(function RequestComposer(
               href={sentHref}
               target="_blank"
               rel="noopener noreferrer"
+              data-cta-intent="buy"
+              data-cta-location="home_composer_resend"
               className="font-semibold underline underline-offset-4"
             >
               {t("sentRetry")}

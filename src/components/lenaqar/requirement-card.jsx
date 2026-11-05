@@ -1,7 +1,6 @@
 "use client";
 
 import { useI18n } from "@/hooks/useI18n";
-import { ANALYTICS } from "@/constants/analytics";
 import { addUnitForRequirementHref } from "@/lib/lenaqar/whatsapp";
 import { buildingTypeAr, roomsLabelAr } from "@/lib/lenaqar/listing-seo";
 import { localizedPlaceName } from "@/lib/lenaqar/place-display";
@@ -167,7 +166,9 @@ export default function RequirementCard({ requirement }) {
       <div className="pt-1">
         <WhatsAppCta
           href={whatsappHref}
-          eventName={ANALYTICS.EVENTS.MARKETPLACE_WHATSAPP_CLICKED}
+          intent="sell"
+          location="requirement_card"
+          requirementRef={requirement.id}
           className="w-full !text-sm"
         >
           {translate("lenaqar.marketplace.card.whatsapp")}

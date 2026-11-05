@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useI18n } from "@/hooks/useI18n";
 import { sellerCtaHref } from "@/lib/lenaqar/whatsapp";
-import { ANALYTICS } from "@/constants/analytics";
 import WhatsAppCta from "./whatsapp-cta";
 import ComparisonBlock from "./comparison-block";
 import WhyUsBlock from "./why-us-block";
@@ -91,7 +90,8 @@ export default function HomeContent({ units = [] }) {
         </h2>
         <WhatsAppCta
           href={sellerCtaHref()}
-          eventName={ANALYTICS.EVENTS.SELLER_WHATSAPP_CLICKED}
+          intent="sell"
+          location="classic_home"
         >
           {translate("lenaqar.home.lenaCta")}
         </WhatsAppCta>

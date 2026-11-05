@@ -51,6 +51,8 @@ export default function DoorLandingContent({ door }) {
             rel="noopener noreferrer"
             className={actionButtonClass({ variant: "secondary" })}
             dir="ltr"
+            data-cta-intent="sell"
+            data-cta-location="door_hero"
           >
             واتساب {LENAQAR_CONTACT.whatsappDisplay}
             <ActionButtonArrow />

@@ -232,7 +232,7 @@ export default function OpportunityDetailContent({ unit }) {
       ) : null}
 
       <div className="mt-8 max-w-md">
-        <OpportunityUnitActions unit={unit} />
+        <OpportunityUnitActions unit={unit} location="opportunity_detail" />
       </div>
     </article>
   );

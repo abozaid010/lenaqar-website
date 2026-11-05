@@ -1,8 +1,5 @@
 "use client";
 
-import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
-import { trackMetaContactForClick } from "@/lib/meta-pixel";
-
 const WHATSAPP_CLASS =
   "inline-flex items-center justify-center gap-2 rounded-md bg-[#25D366] hover:bg-[#20BA5A] text-white font-medium px-4 py-3 text-sm shadow-md transition-colors";
 
@@ -11,16 +8,15 @@ const PRIMARY_CLASS =
 
 export default function WhatsAppCta({
   href,
-  eventName,
+  intent = "general",
+  location,
+  unitCode,
+  requirementRef,
   children,
   variant = "whatsapp",
   className = "",
 }) {
-  const { trackEvent } = useGoogleAnalytics();
-
   function handleClick(event) {
-    if (eventName) trackEvent(eventName);
-    trackMetaContactForClick(event);
     if (!href || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
       return;
     }
@@ -37,6 +33,10 @@ export default function WhatsAppCta({
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleClick}
+      data-cta-intent={intent}
+      data-cta-location={location}
+      data-unit-code={unitCode}
+      data-requirement-ref={requirementRef}
       className={`${variant === "primary" ? PRIMARY_CLASS : WHATSAPP_CLASS} ${className}`}
     >
       {children}

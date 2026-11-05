@@ -14,6 +14,8 @@ export default function GuideShareButtons({ title, slug }) {
         href={wa}
         target="_blank"
         rel="noopener noreferrer"
+        data-share-method="whatsapp"
+        data-share-item={slug}
         className="rounded-full border border-primary/20 px-3 py-1.5 text-primary hover:bg-primary/[0.04]"
       >
         مشاركة واتساب
@@ -22,6 +24,8 @@ export default function GuideShareButtons({ title, slug }) {
         href={fb}
         target="_blank"
         rel="noopener noreferrer"
+        data-share-method="facebook"
+        data-share-item={slug}
         className="rounded-full border border-primary/20 px-3 py-1.5 text-primary hover:bg-primary/[0.04]"
       >
         مشاركة فيسبوك
