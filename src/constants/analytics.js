@@ -6,25 +6,12 @@ export const ANALYTICS = {
 
   // Event names for consistent tracking
   EVENTS: {
-    DEEP_LINK_ATTEMPT: 'deep_link_attempt',
-    DOWNLOAD_CLICK: 'download_click',
-    DOWNLOAD_PAGE_VIEW: 'download_page_view',
-    CAMPAIGN_ARRIVAL: 'campaign_arrival',
-    APP_STORE_CLICK: 'app_store_click',
     CALCULATOR_USED: 'calculator_used',
-    SELLER_WHATSAPP_CLICKED: 'seller_whatsapp_clicked',
-    CASH_ENTERED: 'cash_entered',
     UNIT_VIEWED: 'unit_viewed',
-    BUYER_WHATSAPP_CLICKED: 'buyer_whatsapp_clicked',
     BUY_REQUEST_OPENED: 'buy_request_opened',
     BUY_REQUEST_SUBMITTED: 'buy_request_submitted',
-    MARKETPLACE_WHATSAPP_CLICKED: 'marketplace_whatsapp_clicked',
-    /** Guide articles — include lead_code param when present. */
-    CLICK_WHATSAPP: 'click_whatsapp',
-    NETWORK_JOIN_CLICKED: 'network_join_clicked',
     NETWORK_SIGNUP_SUBMITTED: 'network_signup_submitted',
     NETWORK_LOGIN_SUBMITTED: 'network_login_submitted',
-    NETWORK_ACTIVATION_WHATSAPP_CLICKED: 'network_activation_whatsapp_clicked',
     WHATSAPP_CLICK: 'whatsapp_click',
     SELL_REQUEST_OPENED: 'sell_request_opened',
     SELL_REQUEST_SUBMITTED: 'sell_request_submitted',
