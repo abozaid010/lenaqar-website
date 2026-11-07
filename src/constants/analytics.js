@@ -28,7 +28,9 @@ export const ANALYTICS = {
 };
 
 export const META_PIXEL = {
-  PIXEL_ID: '846747935139647',
+  // Lenaqar's own dataset. 846747935139647 is the LenaAI pixel and stays on lenaai.net;
+  // sharing one dataset across both brands mixed the data. Owner decision 2026-11-08.
+  PIXEL_ID: '1515794237037991',
   SCRIPT_URL: 'https://connect.facebook.net/en_US/fbevents.js',
   NOSCRIPT_BASE: 'https://www.facebook.com/tr',
   /**
