@@ -1,3 +1,8 @@
+> **Inherited from the LenaAI repository — does NOT apply to lenaqar.com.**
+> This file was copied over when Lenaqar was cloned from LenaAI. Its domains, titles and
+> canonicals refer to `lenaai.net`, the separate broker CRM. For Lenaqar use `www.lenaqar.com`,
+> the brand name «لينا عقار», and the rules in `CLAUDE.md`. Kept for reference only.
+
 # Server-Side API Migration — Findings & Planning Context
 
 **Project:** LenaAI CRM (Next.js App Router)  
