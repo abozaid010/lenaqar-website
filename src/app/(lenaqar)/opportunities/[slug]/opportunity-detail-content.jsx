@@ -24,6 +24,7 @@ import {
 import { SITE } from "@/config/site";
 import EgpAmount from "@/components/lenaqar/egp-amount";
 import OpportunityUnitActions from "@/components/lenaqar/opportunity-unit-actions";
+import UnitVideo from "@/components/lenaqar/unit-video";
 import UnitViewTracker from "@/components/lenaqar/unit-view-tracker";
 
 export default function OpportunityDetailContent({ unit }) {
@@ -77,6 +78,10 @@ export default function OpportunityDetailContent({ unit }) {
           .filter(Boolean)
           .join(" · ")}
       </p>
+
+      {unit.video ? (
+        <UnitVideo video={unit.video} poster={images[0]} title={headline} />
+      ) : null}
 
       {images.length > 0 ? (
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
