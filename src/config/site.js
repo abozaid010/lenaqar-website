@@ -7,6 +7,8 @@ export const SITE = {
   name: "لينا عقار",
   // Prefer www — apex redirects to www in production; keep canonicals/sitemap aligned.
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://www.lenaqar.com",
+  /** Public host of re-hosted unit videos (Cloudflare R2); only MP4/WebM from this host play inline. */
+  videoBaseUrl: process.env.NEXT_PUBLIC_VIDEO_BASE_URL || "https://video.lenaai.net",
   /** Broker CRM — Lena Network members manage inventory here after approval. */
   crmUrl: process.env.NEXT_PUBLIC_CRM_URL || "https://lenaai.net",
   htmlLang: "ar-EG",

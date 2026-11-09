@@ -1,4 +1,6 @@
+import { SITE } from "../../config/site.js";
 import { mayPublishImage } from "./public-media-review.js";
+import { parseUnitVideo } from "./parse-unit-video.js";
 import {
   applyPublicMoneyTrust,
   plausibleInstallmentYears,
@@ -93,6 +95,7 @@ export function toPublicOpportunity(raw) {
           ? [raw.image]
           : []
     ),
+    video: parseUnitVideo(raw.video, { videoBaseUrl: SITE.videoBaseUrl }),
     datePosted: raw.datePosted || raw.date_posted || null,
     updatedAt: raw.updatedAt || raw.updated_at || null,
   }, { paidAmount: pickNumber(raw.paidAmount, raw.paid_amount) });
