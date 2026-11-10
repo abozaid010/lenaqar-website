@@ -10,6 +10,7 @@ import {
   trackWhatsAppClick,
 } from "@/lib/analytics";
 import { classifyWhatsAppHref } from "@/lib/analytics-utils";
+import { captureAttribution } from "@/lib/lenaqar/attribution";
 
 /**
  * Data attributes read from the clicked element (all optional):
@@ -17,6 +18,11 @@ import { classifyWhatsAppHref } from "@/lib/analytics-utils";
  *   data-requirement-ref, data-share-method, data-share-item, data-track (generic cta_click id)
  */
 export default function ClickTracker() {
+  // Site-wide mount = the landing page: keep its UTM / lead_code for the visit.
+  useEffect(() => {
+    captureAttribution();
+  }, []);
+
   useEffect(() => {
     const onClick = (event) => {
       if (!(event.target instanceof Element)) return;

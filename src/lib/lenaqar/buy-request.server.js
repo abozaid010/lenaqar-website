@@ -3,6 +3,7 @@ import {
   buildPublicBuyRequirement,
   formFromBuiltRequirement,
 } from "@/lib/lenaqar/buy-request-payload";
+import { sanitizeAttribution } from "@/lib/lenaqar/attribution";
 
 function apiMessage(error, fallback) {
   return (
@@ -50,7 +51,12 @@ export async function loadBuyRequestRequirement(userId) {
  * creates the lead (when new) and upserts the requirement on it, always
  * forcing identity server-side (client_id, platform, campaign_id).
  */
-export async function saveBuyRequestRequirement({ userId, contact, payload }) {
+export async function saveBuyRequestRequirement({
+  userId,
+  contact,
+  payload,
+  attribution,
+}) {
   const id = typeof userId === "string" ? userId.trim() : "";
   const name = String(contact?.name || "").trim();
   const phone = String(contact?.phone || "").trim();
@@ -67,6 +73,9 @@ export async function saveBuyRequestRequirement({ userId, contact, payload }) {
     throw error;
   }
 
+  // Ad attribution (utm_* / lead_code): whitelisted here too, sent only when present.
+  const ad = sanitizeAttribution(attribution);
+
   try {
     const response = await axiosInstance.post("/public/v1/buy-request/submit", {
       user_id: id || undefined,
@@ -78,6 +87,7 @@ export async function saveBuyRequestRequirement({ userId, contact, payload }) {
       // buyer lead exists (name, phone, last_action=new) before saving the requirement.
       source: "lenaaqar_forum",
       requirement: built.requirement,
+      attribution: Object.keys(ad).length > 0 ? ad : undefined,
     });
     const savedUserId = String(response.data?.data?.user_id || id || "").trim();
     return { userId: savedUserId };

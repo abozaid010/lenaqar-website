@@ -409,7 +409,7 @@ export default function BuyRequestDialog({
         successMessage ||
           tr("lenaqar.buyRequest.saved", "Request saved"),
       );
-      onSuccess?.(built.requirement);
+      onSuccess?.(built.requirement, saveResult);
       onClose();
     } catch (err) {
       const buildingTypeLabel = form.buildingType

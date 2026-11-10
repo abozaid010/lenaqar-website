@@ -27,6 +27,7 @@ export async function savePublicBuyRequest({
   contact,
   payload,
   notBrokerConfirmed,
+  attribution,
 }) {
   const headerStore = await headers();
   const ip = clientIpFromHeaders(headerStore);
@@ -40,7 +41,12 @@ export async function savePublicBuyRequest({
   }
 
   try {
-    const saved = await saveBuyRequestRequirement({ userId, contact, payload });
+    const saved = await saveBuyRequestRequirement({
+      userId,
+      contact,
+      payload,
+      attribution,
+    });
     return { ok: true, userId: saved.userId };
   } catch (error) {
     return { ok: false, code: error?.code || "save_failed" };

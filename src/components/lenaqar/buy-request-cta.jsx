@@ -8,6 +8,13 @@ import { ANALYTICS } from "@/constants/analytics";
 import { SITE } from "@/config/site";
 import { requirementToUnitsFilter } from "@/lib/match/requirement-to-units-filter";
 import { trackBuyRequestSubmitted } from "@/lib/analytics";
+import { readAttribution } from "@/lib/lenaqar/attribution";
+import {
+  buyRequestRepeatKey,
+  findRepeatSubmit,
+  readLastBuyRequestSubmit,
+  saveLastBuyRequestSubmit,
+} from "@/lib/lenaqar/buy-request-repeat";
 import BuyRequestDialog from "./buy-request-dialog";
 import {
   loadPublicBuyRequest,
@@ -121,11 +128,17 @@ export default function BuyRequestCta({
 
   const saveRequirement = useCallback(
     async (id, payload, extra) => {
+      // Same phone again within 5 minutes: reuse the first result, no second post.
+      const repeatKey = await buyRequestRepeatKey(extra?.contact?.phone);
+      const repeat = findRepeatSubmit(readLastBuyRequestSubmit(), repeatKey);
+      if (repeat) return { ok: true, userId: repeat.userId, repeated: true };
+
       const result = await savePublicBuyRequest({
         userId: id,
         contact: extra?.contact,
         payload,
         notBrokerConfirmed: extra?.notBrokerConfirmed === true,
+        attribution: readAttribution(),
       });
       if (!result?.ok) {
         const code = result?.code || "save_failed";
@@ -136,6 +149,7 @@ export default function BuyRequestCta({
           ),
         );
       }
+      saveLastBuyRequestSubmit({ key: repeatKey, userId: result.userId });
       return result;
     },
     [translate],
@@ -171,9 +185,12 @@ export default function BuyRequestCta({
         overlayClassName="!z-[70]"
         loadRequirement={loadRequirement}
         saveRequirement={saveRequirement}
-        onSuccess={(requirement) => {
+        onSuccess={(requirement, saveResult) => {
           // Ads conversion: Lead = successful buyer request (no PII in payload).
-          trackBuyRequestSubmitted({ location: trackingLocation, city: requirement?.city });
+          // A repeat of the same phone is not a second conversion.
+          if (!saveResult?.repeated) {
+            trackBuyRequestSubmitted({ location: trackingLocation, city: requirement?.city });
+          }
           const qs = opportunityQueryFromRequirement({
             ...requirement,
             purpose: "buy",
