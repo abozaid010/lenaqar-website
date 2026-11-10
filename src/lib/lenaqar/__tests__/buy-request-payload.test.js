@@ -31,6 +31,7 @@ const sampleCashForm = {
 };
 
 const sampleInstallmentForm = {
+  max_price: 3000000,
   paymentMode: "installment",
   city: "cairo",
   district: "new cairo",
@@ -80,6 +81,7 @@ test("cash mode sends max_price and forces ready delivery", () => {
   const result = buildPublicBuyRequirement(sampleCashForm);
   assert.equal(result.ok, true);
   assert.deepEqual(result.requirement, {
+    purpose: "buy",
     city: "cairo",
     district: "new cairo",
     buildingType: "apartment",
@@ -102,17 +104,19 @@ test("installment mode sends down payment fields and optional delivery", () => {
   const result = buildPublicBuyRequirement(sampleInstallmentForm);
   assert.equal(result.ok, true);
   assert.deepEqual(result.requirement, {
+    purpose: "buy",
     city: "cairo",
     district: "new cairo",
     buildingType: "apartment",
     roomsCount: 3,
+    max_price: 3000000,
     downPayment: 300000,
     monthlyInstallment: 15000,
     deliveryDate: "less_than_2_years",
     project: "Madinaty",
     additionalFeatures: ["عايز شقة قريبة من الخدمات"],
   });
-  assert.equal("max_price" in result.requirement, false);
+  assert.equal(result.requirement.max_price, 3000000);
 });
 
 test("installment mode allows empty delivery", () => {
@@ -139,6 +143,7 @@ test("defaults to cash when paymentMode is missing", () => {
   });
   assert.equal(result.ok, true);
   assert.deepEqual(result.requirement, {
+    purpose: "buy",
     city: "cairo",
     district: "new cairo",
     buildingType: "apartment",
@@ -166,7 +171,7 @@ test("rejects missing installment down payment", () => {
   assert.equal(result.ok, false);
   assert.equal(result.errors.downPayment, "downPaymentRequired");
   assert.equal(result.errors.monthlyInstallment, undefined);
-  assert.equal(result.errors.max_price, undefined);
+  assert.equal(result.errors.max_price, "maxPriceRequired");
 });
 
 test("installment mode allows down payment without monthly", () => {
@@ -175,6 +180,7 @@ test("installment mode allows down payment without monthly", () => {
     city: "cairo",
     district: "new cairo",
     buildingType: "apartment",
+    max_price: 3000000,
     downPayment: 400000,
   });
   assert.equal(result.ok, true);
@@ -251,16 +257,14 @@ const INSTALLMENT_FORM = {
   roomsCount: "3",
   downPayment: "3,000,000",
   monthlyInstallment: "50,000",
-  max_price: "",
+  max_price: "5000000",
   deliveryDate: "ready",
   notes: "شقة تلت غرف، استلام فوري",
 };
 
-test("server re-validation keeps an instalment request valid (no max price)", () => {
+test("server re-validation preserves installment budget and down payment", () => {
   const client = buildPublicBuyRequirement(INSTALLMENT_FORM);
   assert.equal(client.ok, true);
-  // Before the fix the server rebuilt this as cash → maxPriceRequired.
-  assert.equal(buildPublicBuyRequirement(client.requirement).ok, false);
   const server = buildPublicBuyRequirement(formFromBuiltRequirement(client.requirement));
   assert.equal(server.ok, true);
   assert.deepEqual(server.requirement, client.requirement);
@@ -334,4 +338,26 @@ test("saved request: tolerates missing/odd shapes", () => {
   const out = normalizeLoadedBuyRequest({ preferred_locations: [null, {}], preferred_property_types: [""] });
   assert.equal(out.city, undefined);
   assert.equal(out.buildingType, undefined);
+});
+
+for (const value of ["", null, undefined, 0, -1, "invalid"]) {
+  test(`installment budget rejects ${String(value)}`, () => {
+    const result = buildPublicBuyRequirement({ ...sampleInstallmentForm, max_price: value });
+    assert.equal(result.ok, false);
+    assert.ok(result.errors.max_price);
+  });
+}
+
+test("buyer purpose overrides caller input through server re-validation", () => {
+  const client = buildPublicBuyRequirement({ ...sampleInstallmentForm, purpose: "rent" });
+  assert.equal(client.ok, true);
+  assert.equal(client.requirement.purpose, "buy");
+  const server = buildPublicBuyRequirement(formFromBuiltRequirement({
+    ...client.requirement,
+    purpose: "sell",
+  }));
+  assert.equal(server.ok, true);
+  assert.equal(server.requirement.purpose, "buy");
+  assert.equal(server.requirement.max_price, 3000000);
+  assert.equal(server.requirement.downPayment, 300000);
 });
