@@ -427,7 +427,7 @@ export default {
     cta: "Write your property request",
     title: "What are you looking for?",
     intro:
-      "Describe the home you want — location, budget, and must-haves. We'll help find options that fit your request and contact you using the details you provide.",
+      "Choose your location, property type, and budget. Fields marked * are required.",
     notBrokerTitle: "This form is for buyer requirements",
     notBrokerBody:
       "If you are looking for a home for yourself, continue here. If you are a broker who wants to share inventory or collaborate with other brokers, Lena Network is the right place.",
@@ -452,10 +452,10 @@ export default {
     paymentModeInstallment: "Installments",
     paymentModeCashHint: "Enter your maximum cash budget. Delivery will be set to a completed / ready unit.",
     paymentModeInstallmentHint:
-      "Enter the down payment (required). The installment and delivery date are optional.",
+      "Total price budget and down payment are required. Monthly installment and delivery are optional.",
     selectType: "Select type",
     budgetLabel: "Budget",
-    maxPrice: "Maximum cash budget",
+    maxPrice: "Total price budget",
     maxPricePlaceholder: "Example: 3,000,000",
     contractPrice: "Contract price",
     downPayment: "Down payment",
@@ -504,7 +504,7 @@ export default {
       districtRequired: "District is required.",
       buildingTypeRequired: "Select a property type.",
       buildingTypeInvalid: "Select a valid property type.",
-      maxPriceRequired: "Maximum cash budget is required.",
+      maxPriceRequired: "Total price budget is required.",
       downPaymentRequired: "Down payment is required.",
       invalidNumber: "Enter a valid amount.",
       invalidRooms: "Rooms must be a whole number greater than zero.",

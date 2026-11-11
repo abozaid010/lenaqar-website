@@ -12,7 +12,6 @@ import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import { PhoneField } from "@/components/phone/PhoneField";
 import SubmitWhatsAppFallback from "@/components/lenaqar/submit-whatsapp-fallback";
 import { FORM_IDS } from "@/constants/analytics";
-import NetworkBrokerCta from "@/components/lenaqar/network-broker-cta";
 import {
   buildPublicBuyRequirement,
   inferBuyRequestPaymentMode,
@@ -481,17 +480,6 @@ export default function BuyRequestDialog({
         <>
           {intro ? <p className="text-sm text-gray-600 -mt-1">{intro}</p> : null}
 
-          <div className="rounded-xl border border-primary/15 bg-primary/[0.04] p-3.5">
-            <p className="font-semibold text-primary">
-              {tr("lenaqar.buyRequest.notBrokerTitle")}
-            </p>
-            <p className="mt-1.5 text-sm text-black/70 leading-relaxed">
-              {tr("lenaqar.buyRequest.notBrokerBody")}
-            </p>
-          </div>
-
-          <NetworkBrokerCta compact onNavigate={onClose} />
-
           {whatsappFallbackHrefState ? (
             <SubmitWhatsAppFallback
               href={whatsappFallbackHrefState}
@@ -637,31 +625,25 @@ export default function BuyRequestDialog({
                   );
                 })}
               </div>
-              <p className="text-xs text-gray-500">
-                {isCash
-                  ? tr("lenaqar.buyRequest.paymentModeCashHint")
-                  : tr("lenaqar.buyRequest.paymentModeInstallmentHint")}
-              </p>
             </div>
 
+            <LenaTextField
+              name="max_price"
+              type="money"
+              label={tr("lenaqar.buyRequest.maxPrice", "Total price budget")}
+              value={form.max_price}
+              onChange={handleFieldChange}
+              placeholder={tr("lenaqar.buyRequest.maxPricePlaceholder")}
+              adornment={tr("lenaqar.unit.egp")}
+              required
+              error={Boolean(compactError("max_price"))}
+              errorMessage={compactError("max_price")}
+            />
+
             {isCash ? (
-              <>
-                <LenaTextField
-                  name="max_price"
-                  type="money"
-                  label={tr("lenaqar.buyRequest.maxPrice", "Max cash budget")}
-                  value={form.max_price}
-                  onChange={handleFieldChange}
-                  placeholder={tr("lenaqar.buyRequest.maxPricePlaceholder")}
-                  adornment={tr("lenaqar.unit.egp")}
-                  required
-                  error={Boolean(compactError("max_price"))}
-                  errorMessage={compactError("max_price")}
-                />
-                <p className="text-xs text-gray-600 -mt-1">
-                  {tr("lenaqar.buyRequest.cashDeliveryNote")}
-                </p>
-              </>
+              <p className="text-xs text-gray-600 -mt-1">
+                {tr("lenaqar.buyRequest.cashDeliveryNote")}
+              </p>
             ) : (
               <>
                 <LenaTextField
@@ -711,7 +693,7 @@ export default function BuyRequestDialog({
               label={tr("lenaqar.buyRequest.notes", "Notes")}
               value={form.notes}
               onChange={handleFieldChange}
-              rows={4}
+              rows={3}
               helperText={tr(
                 "lenaqar.buyRequest.notesHint",
                 "اكتب أي تفاصيل إضافية عن اللي بتدور عليه",

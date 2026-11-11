@@ -195,19 +195,18 @@ export function buildPublicBuyRequirement(form) {
     }
   }
 
-  let max_price;
+  const max_price = requiredMoney(
+    form,
+    "max_price",
+    errors,
+    "maxPriceRequired",
+    "invalidNumber",
+  );
   let downPayment;
   let monthlyInstallment;
   let deliveryDate;
 
   if (paymentMode === "cash") {
-    max_price = requiredMoney(
-      form,
-      "max_price",
-      errors,
-      "maxPriceRequired",
-      "invalidNumber",
-    );
     // Cash buyers want a delivered unit by default.
     deliveryDate = "ready";
   } else {
@@ -224,7 +223,6 @@ export function buildPublicBuyRequirement(form) {
       errors,
       "invalidNumber",
     );
-    max_price = optionalMoney(form, "max_price", errors, "invalidNumber");
     if (form?.deliveryDate !== "" && form?.deliveryDate != null) {
       const token = normalizeBuyRequestDelivery(form.deliveryDate);
       if (!token) {
@@ -248,6 +246,7 @@ export function buildPublicBuyRequirement(form) {
   const project = String(form?.project || "").trim();
 
   const requirement = {
+    purpose: "buy",
     city,
     district,
     buildingType,
