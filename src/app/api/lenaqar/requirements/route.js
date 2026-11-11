@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchPublicRequirements } from "@/lib/lenaqar/requirements.server";
+import { parseRequirementSort } from "@/lib/lenaqar/requirement-sort";
 
 export const dynamic = "force-dynamic";
 
@@ -11,8 +12,17 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const limit = Number(searchParams.get("limit") || 48);
+    let sort;
+    try {
+      sort = parseRequirementSort(searchParams.get("sort") ?? "default");
+    } catch {
+      return NextResponse.json(
+        { data: { requirements: [], error: "invalid_sort" } },
+        { status: 400 },
+      );
+    }
 
-    const { requirements, error } = await fetchPublicRequirements({ limit });
+    const { requirements, error } = await fetchPublicRequirements({ limit, sort });
     // Public marketplace is buy-request only (sell/rent already dropped upstream).
     const filtered = requirements.filter((row) => row.intent === "buy");
 
