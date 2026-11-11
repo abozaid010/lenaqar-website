@@ -89,7 +89,7 @@ export default function BuyRequestSuccess({
             <div className="min-w-0">
               <dt className="text-xs text-black/60">{t("successPriceTotal")}</dt>
               <dd className="mt-0.5 text-base font-bold text-primary sm:text-lg">
-                <EgpAmount value={insight.avgTotal} translate={translate} />
+                <EgpAmount value={insight.unitPrice} translate={translate} />
               </dd>
             </div>
           </dl>
@@ -121,7 +121,7 @@ export default function BuyRequestSuccess({
           rel="noopener noreferrer"
           data-cta-intent="buy"
           data-cta-location={trackingLocation}
-          className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 py-3 text-base font-bold text-white shadow-lg shadow-[#25D366]/30 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#20BA5A] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366]/50 focus-visible:ring-offset-2"
+          className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 text-center text-sm font-bold leading-snug text-white sm:text-base shadow-lg shadow-[#25D366]/30 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#20BA5A] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366]/50 focus-visible:ring-offset-2"
         >
           <MessageCircle aria-hidden="true" className="size-5 shrink-0" />
           {t("successWhatsapp")}

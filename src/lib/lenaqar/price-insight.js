@@ -6,7 +6,9 @@
  * them (rooms, area, delivery). Budget, contact and notes never leave the page.
  *
  * `toPriceInsightView` turns the backend answer into the few fields the success
- * card prints. The backend widens the search when too few units match and says
+ * card prints. The figures are medians over listed resale units at their cash
+ * value: developer units and installment totals are left out by the backend, so
+ * the numbers match what a buyer sees on resale listing cards. The backend widens the search when too few units match and says
  * which scope the figures cover, so the label always follows `scope` — a
  * city-wide average is never printed as a district price. Anything that is not a
  * complete answer becomes `null` and the card shows no price block at all.
@@ -80,7 +82,7 @@ export function priceInsightQuery(requirement) {
  *   place: { en: string, ar: string },
  *   propertyType: string,
  *   perMeter: number,
- *   avgTotal: number,
+ *   unitPrice: number,
  *   lowest: number,
  *   highest: number,
  *   estimated: number | null,
@@ -94,12 +96,12 @@ export function toPriceInsightView(data, placeAr = () => "") {
   const scope = data.scope && typeof data.scope === "object" ? data.scope : {};
   const placeEn =
     cleanToken(scope.sub_district) || cleanToken(scope.district) || cleanToken(scope.city);
-  const perMeter = positiveNumber(data.avg_price_per_sqm);
-  const avgTotal = positiveNumber(data.avg_total_price);
-  const lowest = positiveNumber(data.lowest_total_price);
-  const highest = positiveNumber(data.highest_total_price);
+  const perMeter = positiveNumber(data.median_price_per_sqm);
+  const unitPrice = positiveNumber(data.median_unit_price);
+  const lowest = positiveNumber(data.lowest_unit_price);
+  const highest = positiveNumber(data.highest_unit_price);
   const count = positiveNumber(data.sample_size);
-  if (!placeEn || perMeter == null || avgTotal == null || lowest == null || highest == null || count == null) {
+  if (!placeEn || perMeter == null || unitPrice == null || lowest == null || highest == null || count == null) {
     return null;
   }
 
@@ -109,7 +111,7 @@ export function toPriceInsightView(data, placeAr = () => "") {
     place: { en: placeEn, ar: String(placeAr(placeEn) || "") },
     propertyType: cleanToken(scope.property_type),
     perMeter: Math.round(perMeter),
-    avgTotal: Math.round(avgTotal),
+    unitPrice: Math.round(unitPrice),
     lowest: Math.round(lowest),
     highest: Math.round(highest),
     estimated: estimated == null ? null : Math.round(estimated),

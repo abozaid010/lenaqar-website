@@ -388,6 +388,17 @@ Built on `feat/post-submit-matches` in `LENAAI-Agent` and `lenaqar`. Where this 
 - **Header / page CTAs** now show the success card in a dialog instead of navigating to `/opportunities`.
 - Numbers use the site's existing `EgpAmount` (Latin digits + ج.م).
 
+### Price figures corrected (after local testing)
+
+The first build averaged `totalPrice` over every listed unit and read high (Madinaty, 3-room apartments: 72,280 per m²).
+
+- **Cause, measured on 2026-11-11:** developer (primary) units are listed at their installment-plan total and outnumber resale units many times over: 3,790 of 3,938 apartments in Fifth Settlement, 36,672 of 37,768 sale units overall. The 2000-row fetch limit was also filled by them, so most resale units were never read.
+- **Now:** resale units only (`is_primary == false`, filtered in the query), each valued at `presentValue` (the cash-equivalent the listing cards already use for سعر المتر). A flat discount on developer units would have been a guess, so they are left out.
+- **Medians, not means.** Listings contain mistyped prices and areas; one of them moved the mean per m² in Fifth Settlement to 22 million. The headline numbers are the middle unit. Rows with an impossible price per m² (under 5,000 or over 1,000,000) are dropped, and from 20 units up the lowest / highest figures leave out the cheapest and dearest 5%.
+- **Response fields renamed:** `median_price_per_sqm`, `median_unit_price`, `lowest_unit_price`, `highest_unit_price`, `basis: "resale_cash_value"`.
+- **Result on the same data:** Madinaty 3-room apartments 60,403 per m² from 65 units; Fifth Settlement apartments 44,751 per m² from 142 units.
+- Card wording: title `متوسط أسعار إعادة البيع في {place}`, basis line `قيمة الكاش لـ {count} وحدة إعادة بيع معروضة`, button `ابعتلى الوحدات المناسبة لطلبى على الواتس`.
+
 ### Opportunities filter bar (added after local testing)
 
 - The "see units close to your request" link carries rooms, price range and property type in the URL. The filter bar had no field for them and kept them on every Apply, so a buyer who changed the area or the cash still saw "no units" with no visible cause.

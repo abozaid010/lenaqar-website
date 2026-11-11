@@ -19,11 +19,11 @@ const AVAILABLE = {
     bedrooms: 3,
   },
   relaxed: ["delivery"],
-  avg_price_per_sqm: 38500.4,
-  avg_total_price: 5650000,
-  lowest_total_price: 3900000,
-  highest_total_price: 8200000,
-  basis: "asking_prices",
+  median_price_per_sqm: 38500.4,
+  median_unit_price: 5650000,
+  lowest_unit_price: 3900000,
+  highest_unit_price: 8200000,
+  basis: "resale_cash_value",
   as_of: "2026-11-11",
 };
 
@@ -116,7 +116,7 @@ test("view names the scope the figures cover", () => {
     place: { en: "fifth settlement", ar: "التجمع الخامس" },
     propertyType: "apartment",
     perMeter: 38500,
-    avgTotal: 5650000,
+    unitPrice: 5650000,
     lowest: 3900000,
     highest: 8200000,
     estimated: null,
@@ -167,11 +167,11 @@ test("anything that is not a complete answer shows nothing", () => {
   assert.equal(toPriceInsightView("error", placeAr), null);
   assert.equal(toPriceInsightView({ available: true }, placeAr), null);
   assert.equal(
-    toPriceInsightView({ ...AVAILABLE, avg_price_per_sqm: 0 }, placeAr),
+    toPriceInsightView({ ...AVAILABLE, median_price_per_sqm: 0 }, placeAr),
     null,
   );
   assert.equal(
-    toPriceInsightView({ ...AVAILABLE, avg_total_price: "n/a" }, placeAr),
+    toPriceInsightView({ ...AVAILABLE, median_unit_price: "n/a" }, placeAr),
     null,
   );
   assert.equal(
@@ -187,4 +187,15 @@ test("view never carries anything beyond the display fields", () => {
   );
   assert.equal(JSON.stringify(view).includes("aXcvoehA"), false);
   assert.equal(JSON.stringify(view).includes("lenaqar"), false);
+});
+
+test("an answer in the old field names shows nothing rather than half a card", () => {
+  const legacy = {
+    ...AVAILABLE,
+    median_price_per_sqm: undefined,
+    median_unit_price: undefined,
+    avg_price_per_sqm: 38500,
+    avg_total_price: 5650000,
+  };
+  assert.equal(toPriceInsightView(legacy, placeAr), null);
 });
