@@ -132,7 +132,14 @@ export default function BuyRequestCta({
       // Same phone again within 5 minutes: reuse the first result, no second post.
       const repeatKey = await buyRequestRepeatKey(extra?.contact?.phone);
       const repeat = findRepeatSubmit(readLastBuyRequestSubmit(), repeatKey);
-      if (repeat) return { ok: true, userId: repeat.userId, repeated: true };
+      if (repeat) {
+        return {
+          ok: true,
+          userId: repeat.userId,
+          matchRef: repeat.matchRef || "",
+          repeated: true,
+        };
+      }
 
       const result = await savePublicBuyRequest({
         userId: id,
@@ -150,7 +157,11 @@ export default function BuyRequestCta({
           ),
         );
       }
-      saveLastBuyRequestSubmit({ key: repeatKey, userId: result.userId });
+      saveLastBuyRequestSubmit({
+        key: repeatKey,
+        userId: result.userId,
+        matchRef: result.matchRef,
+      });
       return result;
     },
     [translate],
@@ -197,12 +208,13 @@ export default function BuyRequestCta({
             purpose: "buy",
           });
           const href = qs ? `/opportunities?${qs}` : "/opportunities";
+          const matchRef = saveResult?.matchRef || "";
           if (onSubmitted) {
-            onSubmitted({ requirement, opportunitiesHref: href });
+            onSubmitted({ requirement, opportunitiesHref: href, matchRef });
             return;
           }
           // No parent success screen (header / page CTAs): show it here.
-          setSubmitted({ requirement, opportunitiesHref: href });
+          setSubmitted({ requirement, opportunitiesHref: href, matchRef });
         }}
       />
       <UnifiedDialog
@@ -219,6 +231,7 @@ export default function BuyRequestCta({
           <BuyRequestSuccess
             requirement={submitted.requirement}
             opportunitiesHref={submitted.opportunitiesHref}
+            matchRef={submitted.matchRef}
             trackingLocation={`${trackingLocation}_success`}
             showTitle={false}
           />

@@ -89,8 +89,8 @@ const RequestComposer = forwardRef(function RequestComposer(
 
   const handleOpenChange = useCallback((next) => setDialogOpen(next), []);
 
-  const handleSubmitted = useCallback(({ requirement, opportunitiesHref }) => {
-    setSuccess({ requirement, opportunitiesHref });
+  const handleSubmitted = useCallback(({ requirement, opportunitiesHref, matchRef }) => {
+    setSuccess({ requirement, opportunitiesHref, matchRef });
     setText("");
     setPrefill(null);
     setError("");
@@ -105,6 +105,7 @@ const RequestComposer = forwardRef(function RequestComposer(
       <BuyRequestSuccess
         requirement={success.requirement}
         opportunitiesHref={success.opportunitiesHref}
+        matchRef={success.matchRef}
         onAnother={() => setSuccess(null)}
         trackingLocation="home_composer_success"
         className={className}

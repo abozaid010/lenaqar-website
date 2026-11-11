@@ -78,7 +78,12 @@ test("storage keeps the key, user id and time — never the phone", async () => 
   const key = await buyRequestRepeatKey(PHONE);
   saveLastBuyRequestSubmit({ key, userId: "u1" }, 5_000);
 
-  assert.deepEqual(readLastBuyRequestSubmit(), { key, userId: "u1", at: 5_000 });
+  assert.deepEqual(readLastBuyRequestSubmit(), {
+    key,
+    userId: "u1",
+    matchRef: "",
+    at: 5_000,
+  });
   const stored = [...store.values()].join("");
   assert.ok(!stored.includes("201000000001"));
 
@@ -92,4 +97,15 @@ test("nothing is stored without a key", () => {
   saveLastBuyRequestSubmit({ key: "", userId: "u1" });
   assert.equal(store.size, 0);
   assert.equal(readLastBuyRequestSubmit(), null);
+});
+
+test("a repeat submit still has the request reference for the WhatsApp message", async () => {
+  fakeBrowser();
+  const key = await buyRequestRepeatKey(PHONE);
+  saveLastBuyRequestSubmit({ key, userId: "u1", matchRef: "K7Q2M9XD" }, 5_000);
+
+  assert.equal(
+    findRepeatSubmit(readLastBuyRequestSubmit(), key, 6_000).matchRef,
+    "K7Q2M9XD",
+  );
 });

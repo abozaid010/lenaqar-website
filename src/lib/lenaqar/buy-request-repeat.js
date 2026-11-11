@@ -42,10 +42,18 @@ export function readLastBuyRequestSubmit() {
   }
 }
 
-export function saveLastBuyRequestSubmit({ key, userId }, now = Date.now()) {
+export function saveLastBuyRequestSubmit(
+  { key, userId, matchRef = "" },
+  now = Date.now(),
+) {
   if (!key || typeof window === "undefined") return;
   try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ key, userId, at: now }));
+    // matchRef rides along so a repeat submit still opens WhatsApp with the
+    // request's reference (it is a random code, not personal data).
+    sessionStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ key, userId, matchRef, at: now }),
+    );
   } catch {
     // private mode / quota
   }

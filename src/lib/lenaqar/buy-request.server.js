@@ -4,6 +4,7 @@ import {
   formFromBuiltRequirement,
 } from "@/lib/lenaqar/buy-request-payload";
 import { sanitizeAttribution } from "@/lib/lenaqar/attribution";
+import { normalizeMatchRef } from "@/lib/lenaqar/whatsapp-intent";
 
 function apiMessage(error, fallback) {
   return (
@@ -90,7 +91,9 @@ export async function saveBuyRequestRequirement({
       attribution: Object.keys(ad).length > 0 ? ad : undefined,
     });
     const savedUserId = String(response.data?.data?.user_id || id || "").trim();
-    return { userId: savedUserId };
+    // Reference for the WhatsApp "send my matching units" message; "" on an older backend.
+    const matchRef = normalizeMatchRef(response.data?.data?.match_ref);
+    return { userId: savedUserId, matchRef };
   } catch (error) {
     console.error(
       "[lenaqar] save buy request requirement failed",

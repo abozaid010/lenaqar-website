@@ -421,3 +421,32 @@ The first build averaged `totalPrice` over every listed unit and read high (Madi
 
 - `FirestoreMatchShareDB._is_expired` never reports a share as expired: it calls `TimeManager.convert_str_to_iso_date` as a static method, the call raises, and the error is read as "not expired". Match links therefore do not expire after 30 days. Fixing it would turn older links into 404s, so it is left for a separate decision.
 - The demand-card opener mismatch described under "Noticed, out of scope" above.
+
+---
+
+## After the first production test (2026-11-11, evening)
+
+Four problems were reported after the site went live. What each one was, and what changed.
+
+| # | Reported | Verified cause | Fix |
+|---|---|---|---|
+| 1 | Average prices never show | The live backend was still the old version: `GET https://api.lenaai.net/public/v1/price-insight` answered 404 and the route was absent from production's OpenAPI. The "Deploy to Hostinger" run for the merge was stuck in the queue during a GitHub Actions outage. The site hides the block on any failure, as designed. | Nothing to fix in the first cause except deploying. To make the block near-certain to show once deployed: the city is now relaxed last (a country-wide figure labelled مصر), and the site retries once on a timeout or 5xx. |
+| 2 | Page ends up at the end after submit, success card missed | Not reproduced in desktop emulation (three ways of opening the form, no scroll event). What is certain: nothing brought the card into view, so any displacement left it off-screen. On a phone the open keyboard is the likely trigger. | On mount the success card closes the keyboard, scrolls itself to the top (again after the keyboard is gone) and takes focus. Checked by forcing the page to the very end before submit: the card lands under the header with prices and button visible. |
+| 3 | Page zooms on mobile | Viewport tag was `width=device-width, initial-scale=1`. | `maximum-scale=1, user-scalable=no`. Pinch zoom is off where the browser honours it. |
+| 4 | AI did not know the request and sent no match link | Two causes. (a) Same as #1: the hook was not deployed. (b) The WhatsApp message was not filed under the form lead at all: the only conversation record carrying the test number is the form lead, with no messages. WhatsApp often delivers a contact without a phone number, and a buyer may type another number in the form, so "same number = same lead" does not hold. | A random reference (`match_ref`, 8 characters) is stored on the request at submit and returned to the site. The WhatsApp message carries it: `… — MATCH-K7Q2M9XD`. The backend matches the request the reference names, builds the link for the form lead, and copies the request onto the WhatsApp contact so the agent knows it afterwards. Without a reference the sender's own request is used, as before. |
+
+### What is still two CRM rows
+
+When WhatsApp hides the number, the form lead (has the phone) and the WhatsApp contact (has the chat) stay two leads. The request is now on both and the match share belongs to the form lead, but they are not merged. A real merge is a separate piece of work.
+
+### Verified
+
+- Backend: 415 tests in the feature and regression suites.
+- Rehearsal on the real test request with every write captured instead of saved: reference read from the opener, 10 matching units, link built for the form lead, request copied to a sender with a hidden number.
+- Price endpoint on a local server against real inventory: the test request (Madinaty, apartment, 2 rooms, ready) → 33 units; Aswan and an unknown city → country-wide figure.
+- Site: 216 unit tests. In the browser at 375 px, against a local stand-in that fakes the submit and saves nothing: viewport tag, card brought into view from a page forced to the end, WhatsApp text ending with the reference, repeat submit keeps the reference.
+
+### Not verified
+
+- A real form submit and a real WhatsApp message on the fixed build. Both write to the live database, and the automated browser check refused to press Submit against it.
+- The cause of the scroll jump on a real phone (see #2).
