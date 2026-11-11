@@ -1,8 +1,7 @@
 "use client";
 
 import { forwardRef, useCallback, useEffect, useId, useState } from "react";
-import Link from "next/link";
-import { CheckCircle2, ClipboardList, MessageCircle } from "lucide-react";
+import { ClipboardList, MessageCircle } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { ANALYTICS } from "@/constants/analytics";
@@ -14,8 +13,8 @@ import {
   prefillFromRequestText,
   validateRequestText,
 } from "@/lib/lenaqar/request-text-prefill";
-import { actionButtonClass } from "@/components/ui/action-button-class";
 import BuyRequestCta from "./buy-request-cta";
+import BuyRequestSuccess from "./buy-request-success";
 
 /**
  * Homepage request box.
@@ -90,8 +89,8 @@ const RequestComposer = forwardRef(function RequestComposer(
 
   const handleOpenChange = useCallback((next) => setDialogOpen(next), []);
 
-  const handleSubmitted = useCallback(({ opportunitiesHref }) => {
-    setSuccess({ opportunitiesHref });
+  const handleSubmitted = useCallback(({ requirement, opportunitiesHref }) => {
+    setSuccess({ requirement, opportunitiesHref });
     setText("");
     setPrefill(null);
     setError("");
@@ -103,29 +102,13 @@ const RequestComposer = forwardRef(function RequestComposer(
 
   if (success) {
     return (
-      <div
-        role="status"
-        className={`rounded-3xl border border-emerald-200 bg-emerald-50/70 p-5 text-center sm:p-6 ${className}`}
-      >
-        <CheckCircle2 aria-hidden="true" className="mx-auto size-9 text-emerald-600" />
-        <p className="mt-2 text-lg font-bold text-primary">{t("successTitle")}</p>
-        <p className="mt-1 text-sm text-black/70 sm:text-base">{t("successBody")}</p>
-        <div className="mt-4 flex flex-col items-center justify-center gap-2.5 sm:flex-row">
-          <Link
-            href={success.opportunitiesHref}
-            className={actionButtonClass({ variant: "primary" })}
-          >
-            {t("successMatches")}
-          </Link>
-          <button
-            type="button"
-            onClick={() => setSuccess(null)}
-            className={actionButtonClass({ variant: "secondary" })}
-          >
-            {t("successAnother")}
-          </button>
-        </div>
-      </div>
+      <BuyRequestSuccess
+        requirement={success.requirement}
+        opportunitiesHref={success.opportunitiesHref}
+        onAnother={() => setSuccess(null)}
+        trackingLocation="home_composer_success"
+        className={className}
+      />
     );
   }
 

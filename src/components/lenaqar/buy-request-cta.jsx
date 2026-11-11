@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useI18n } from "@/hooks/useI18n";
 import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { ANALYTICS } from "@/constants/analytics";
@@ -16,6 +15,8 @@ import {
   saveLastBuyRequestSubmit,
 } from "@/lib/lenaqar/buy-request-repeat";
 import BuyRequestDialog from "./buy-request-dialog";
+import BuyRequestSuccess from "./buy-request-success";
+import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import {
   loadPublicBuyRequest,
   savePublicBuyRequest,
@@ -85,7 +86,6 @@ export default function BuyRequestCta({
 }) {
   const { translate } = useI18n();
   const { trackEvent } = useGoogleAnalytics();
-  const router = useRouter();
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const isControlled = typeof controlledOpen === "boolean";
   const open = isControlled ? controlledOpen : uncontrolledOpen;
@@ -97,6 +97,7 @@ export default function BuyRequestCta({
     [isControlled, onOpenChange],
   );
   const [userId, setUserId] = useState("");
+  const [submitted, setSubmitted] = useState(null);
 
   useEffect(() => {
     setUserId(readStoredUserId());
@@ -200,9 +201,29 @@ export default function BuyRequestCta({
             onSubmitted({ requirement, opportunitiesHref: href });
             return;
           }
-          router.push(href);
+          // No parent success screen (header / page CTAs): show it here.
+          setSubmitted({ requirement, opportunitiesHref: href });
         }}
       />
+      <UnifiedDialog
+        isOpen={Boolean(submitted)}
+        onClose={() => setSubmitted(null)}
+        title={translate("lenaqar.onboarding.successTitle")}
+        cancelLabel={translate("lenaqar.onboarding.successClose")}
+        closeOnEscape
+        closeOnOutsideClick
+        overlayClassName="!z-[70]"
+        dialogClassName="max-w-lg"
+      >
+        {submitted ? (
+          <BuyRequestSuccess
+            requirement={submitted.requirement}
+            opportunitiesHref={submitted.opportunitiesHref}
+            trackingLocation={`${trackingLocation}_success`}
+            showTitle={false}
+          />
+        ) : null}
+      </UnifiedDialog>
     </>
   );
 }

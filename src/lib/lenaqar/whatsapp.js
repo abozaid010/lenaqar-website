@@ -1,8 +1,8 @@
 import { formatPhoneForWhatsApp } from "@/utils/phone-utils";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
-import { buyerPageCtaMessage } from "./whatsapp-intent.js";
+import { buyerPageCtaMessage, matchRequestMessage } from "./whatsapp-intent.js";
 
-export { buyerPageCtaMessage } from "./whatsapp-intent.js";
+export { buyerPageCtaMessage, matchRequestMessage } from "./whatsapp-intent.js";
 
 const SELLER_MESSAGE = "عندى وحده عايز ابيعها من غير اوفر";
 
@@ -64,5 +64,13 @@ export function buyerPageCtaHref(pathname = "/") {
   return formatPhoneForWhatsApp(
     LENAQAR_CONTACT.whatsappE164,
     buyerPageCtaMessage(pathname),
+  );
+}
+
+/** Success screen of the buy request: "show me the units that match my request". */
+export function matchRequestHref() {
+  return formatPhoneForWhatsApp(
+    LENAQAR_CONTACT.whatsappE164,
+    matchRequestMessage(),
   );
 }

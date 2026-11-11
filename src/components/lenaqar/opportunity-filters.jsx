@@ -6,8 +6,14 @@ import { useI18n } from "@/hooks/useI18n";
 import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { ANALYTICS } from "@/constants/analytics";
 import { cashBucket } from "@/lib/analytics-utils";
+import { X } from "lucide-react";
 import UnitLocationSearch from "@/components/ui/unit-forms/unit-location-search";
 import { formatPrice, parseMoneyInput } from "@/utils/parse-amount";
+import {
+  REQUEST_FILTER_KEYS,
+  queryWithoutFilters,
+  readRequestFilters,
+} from "@/lib/lenaqar/opportunity-request-filters";
 
 function emptyLocation() {
   return {
@@ -81,6 +87,30 @@ export default function OpportunityFilters({ years = [] }) {
 
     const qs = params.toString();
     router.push(qs ? `${pathname}?${qs}` : pathname);
+  }
+
+  // Type, rooms and price range arrive in the URL (from a buy request or a shared
+  // link) and Apply keeps them. They have no field here, so each is shown as a chip
+  // the visitor can remove — otherwise "no units" has no visible cause.
+  const requestFilters = readRequestFilters(searchParams);
+
+  function removeFilters(keys) {
+    const qs = queryWithoutFilters(searchParams, keys);
+    router.push(qs ? `${pathname}?${qs}` : pathname);
+  }
+
+  function chipLabel({ key, value }) {
+    if (key === "property_type") return translate(`buildingTypes.${value}`, value);
+    const template = translate(
+      key === "bedrooms"
+        ? "lenaqar.opportunities.chipRooms"
+        : key === "min_price"
+          ? "lenaqar.opportunities.chipMinPrice"
+          : "lenaqar.opportunities.chipMaxPrice",
+    );
+    return template
+      .replace("{count}", String(value))
+      .replace("{value}", formatPrice(value));
   }
 
   return (
@@ -172,6 +202,36 @@ export default function OpportunityFilters({ years = [] }) {
           ))}
         </select>
       </label>
+
+      {requestFilters.length > 0 ? (
+        <div className="sm:col-span-2 flex flex-wrap items-center gap-2">
+          <span className="text-sm text-black/60">
+            {translate("lenaqar.opportunities.requestFilters")}
+          </span>
+          {requestFilters.map((filter) => {
+            const label = chipLabel(filter);
+            return (
+              <button
+                key={filter.key}
+                type="button"
+                onClick={() => removeFilters([filter.key])}
+                aria-label={`${translate("lenaqar.opportunities.removeFilter")}: ${label}`}
+                className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/5 ps-3 pe-2.5 text-sm font-medium text-primary hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              >
+                <span>{label}</span>
+                <X aria-hidden="true" className="size-4 shrink-0" />
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => removeFilters(REQUEST_FILTER_KEYS)}
+            className="inline-flex items-center rounded-md px-2 text-sm font-semibold text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          >
+            {translate("lenaqar.opportunities.clearRequestFilters")}
+          </button>
+        </div>
+      ) : null}
 
       <button
         type="submit"
