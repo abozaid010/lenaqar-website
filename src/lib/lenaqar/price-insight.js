@@ -14,6 +14,9 @@
  * complete answer becomes `null` and the card shows no price block at all.
  */
 
+/** Label of a country-wide figure (scope level "country"). */
+const COUNTRY = { en: "egypt", ar: "مصر" };
+
 function cleanToken(value) {
   return typeof value === "string" ? value.trim().toLowerCase() : "";
 }
@@ -94,8 +97,11 @@ export function toPriceInsightView(data, placeAr = () => "") {
   if (!data || typeof data !== "object" || data.available !== true) return null;
 
   const scope = data.scope && typeof data.scope === "object" ? data.scope : {};
-  const placeEn =
-    cleanToken(scope.sub_district) || cleanToken(scope.district) || cleanToken(scope.city);
+  // The backend widens to the whole country when even the city has too few units.
+  const countryWide = cleanToken(scope.level) === "country";
+  const placeEn = countryWide
+    ? COUNTRY.en
+    : cleanToken(scope.sub_district) || cleanToken(scope.district) || cleanToken(scope.city);
   const perMeter = positiveNumber(data.median_price_per_sqm);
   const unitPrice = positiveNumber(data.median_unit_price);
   const lowest = positiveNumber(data.lowest_unit_price);
@@ -108,7 +114,9 @@ export function toPriceInsightView(data, placeAr = () => "") {
   const estimated = positiveNumber(data.estimated_total);
   return {
     level: cleanToken(scope.level) || "city",
-    place: { en: placeEn, ar: String(placeAr(placeEn) || "") },
+    place: countryWide
+      ? { ...COUNTRY }
+      : { en: placeEn, ar: String(placeAr(placeEn) || "") },
     propertyType: cleanToken(scope.property_type),
     perMeter: Math.round(perMeter),
     unitPrice: Math.round(unitPrice),

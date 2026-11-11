@@ -199,3 +199,23 @@ test("an answer in the old field names shows nothing rather than half a card", (
   };
   assert.equal(toPriceInsightView(legacy, placeAr), null);
 });
+
+test("a country-wide figure is labelled Egypt, never the city the buyer asked for", () => {
+  const view = toPriceInsightView(
+    {
+      ...AVAILABLE,
+      relaxed: ["bedrooms", "district", "city"],
+      scope: {
+        level: "country",
+        city: null,
+        district: null,
+        sub_district: null,
+        property_type: "apartment",
+        bedrooms: null,
+      },
+    },
+    placeAr,
+  );
+  assert.equal(view.level, "country");
+  assert.deepEqual(view.place, { en: "egypt", ar: "مصر" });
+});

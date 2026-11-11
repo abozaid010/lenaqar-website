@@ -2,7 +2,11 @@ import { formatPhoneForWhatsApp } from "@/utils/phone-utils";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
 import { buyerPageCtaMessage, matchRequestMessage } from "./whatsapp-intent.js";
 
-export { buyerPageCtaMessage, matchRequestMessage } from "./whatsapp-intent.js";
+export {
+  buyerPageCtaMessage,
+  matchRequestMessage,
+  normalizeMatchRef,
+} from "./whatsapp-intent.js";
 
 const SELLER_MESSAGE = "عندى وحده عايز ابيعها من غير اوفر";
 
@@ -68,9 +72,9 @@ export function buyerPageCtaHref(pathname = "/") {
 }
 
 /** Success screen of the buy request: "show me the units that match my request". */
-export function matchRequestHref() {
+export function matchRequestHref(matchRef) {
   return formatPhoneForWhatsApp(
     LENAQAR_CONTACT.whatsappE164,
-    matchRequestMessage(),
+    matchRequestMessage(matchRef),
   );
 }

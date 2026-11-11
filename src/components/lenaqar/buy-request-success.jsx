@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, MessageCircle } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
@@ -22,6 +22,8 @@ import EgpAmount from "./egp-amount";
 export default function BuyRequestSuccess({
   requirement,
   opportunitiesHref = "/opportunities",
+  // Request reference from the submit; ties the WhatsApp sender to this request.
+  matchRef = "",
   onAnother,
   trackingLocation = "buy_request_success",
   // A dialog already prints the title in its header.
@@ -32,6 +34,25 @@ export default function BuyRequestSuccess({
   const t = (key) => translate(`lenaqar.onboarding.${key}`);
   // undefined = still loading, null = nothing to show.
   const [insight, setInsight] = useState(undefined);
+  const cardRef = useRef(null);
+
+  // The card must be what the buyer sees after submitting. On a phone the form's
+  // keyboard is still open and the page is left wherever the form pushed it, so
+  // the card (prices + WhatsApp button) can sit off-screen. Close the keyboard,
+  // then bring the card to the top — again after the keyboard has gone, because
+  // the viewport changes size when it closes.
+  useEffect(() => {
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active !== document.body) active.blur();
+    const reveal = () => {
+      const card = cardRef.current;
+      if (!card) return;
+      card.scrollIntoView({ block: "start", behavior: "auto" });
+      card.focus({ preventScroll: true });
+    };
+    const timers = [setTimeout(reveal, 60), setTimeout(reveal, 450)];
+    return () => timers.forEach(clearTimeout);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -55,8 +76,10 @@ export default function BuyRequestSuccess({
 
   return (
     <div
+      ref={cardRef}
+      tabIndex={-1}
       role="status"
-      className={`rounded-3xl border border-emerald-200 bg-emerald-50/70 p-5 text-center sm:p-6 ${className}`}
+      className={`scroll-mt-24 rounded-3xl border border-emerald-200 bg-emerald-50/70 p-5 text-center outline-none sm:p-6 ${className}`}
     >
       <CheckCircle2 aria-hidden="true" className="mx-auto size-9 text-emerald-600" />
       {showTitle ? (
@@ -116,7 +139,7 @@ export default function BuyRequestSuccess({
 
       <div className="mx-auto mt-4 flex w-full max-w-md flex-col items-stretch gap-2">
         <a
-          href={matchRequestHref()}
+          href={matchRequestHref(matchRef)}
           target="_blank"
           rel="noopener noreferrer"
           data-cta-intent="buy"

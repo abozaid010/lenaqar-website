@@ -40,6 +40,20 @@ const quicksand = Quicksand({
 export const metadata = defaultMetadata;
 
 /**
+ * Zoom is switched off on purpose (owner decision, 2026-11-11): phones zoomed the
+ * page in when a form field took focus and left the layout shifted afterwards.
+ * `maximumScale: 1` stops that focus zoom; `userScalable: false` also stops pinch
+ * zoom where the browser honours it. Text sizes therefore have to stay readable
+ * without zoom.
+ */
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
+/**
  * Arabic-only, and deliberately not `async`.
  *
  * Reading the `lang` cookie here opted every route into dynamic rendering, which

@@ -52,7 +52,7 @@ export async function savePublicBuyRequest({
       payload,
       attribution,
     });
-    return { ok: true, userId: saved.userId };
+    return { ok: true, userId: saved.userId, matchRef: saved.matchRef || "" };
   } catch (error) {
     return { ok: false, code: error?.code || "save_failed" };
   }
