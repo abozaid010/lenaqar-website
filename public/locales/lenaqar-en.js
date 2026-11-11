@@ -205,6 +205,12 @@ export default {
     pagePosition: "Page {page} of {total}",
     prevPage: "Previous",
     nextPage: "Next",
+    requestFilters: "From your request:",
+    chipRooms: "{count} rooms",
+    chipMinPrice: "Price from {value} EGP",
+    chipMaxPrice: "Price up to {value} EGP",
+    removeFilter: "Remove filter",
+    clearRequestFilters: "Clear all",
   },
   unit: {
     egp: "EGP",

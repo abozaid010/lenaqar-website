@@ -206,6 +206,12 @@ export default {
     pagePosition: "صفحة {page} من {total}",
     prevPage: "السابق",
     nextPage: "التالي",
+    requestFilters: "فلاتر من طلبك:",
+    chipRooms: "{count} غرف",
+    chipMinPrice: "السعر من {value} ج.م",
+    chipMaxPrice: "السعر حتى {value} ج.م",
+    removeFilter: "إزالة الفلتر",
+    clearRequestFilters: "امسح الكل",
   },
   unit: {
     egp: "ج.م",

@@ -388,6 +388,12 @@ Built on `feat/post-submit-matches` in `LENAAI-Agent` and `lenaqar`. Where this 
 - **Header / page CTAs** now show the success card in a dialog instead of navigating to `/opportunities`.
 - Numbers use the site's existing `EgpAmount` (Latin digits + ج.م).
 
+### Opportunities filter bar (added after local testing)
+
+- The "see units close to your request" link carries rooms, price range and property type in the URL. The filter bar had no field for them and kept them on every Apply, so a buyer who changed the area or the cash still saw "no units" with no visible cause.
+- The bar now shows each of those as a removable chip (`فلاتر من طلبك:` … `امسح الكل`). Removing a chip reloads the list without it. Location, cash and delivery behave as before.
+- Checked locally with the reported URL: 0 units with all filters, 3 after removing the price cap, 5 after clearing all.
+
 ### Verified
 
 - Backend: 120 new tests; handler, CRM, price-tool and match-share suites give the same result with and without the change (279 passed, 6 skipped).
