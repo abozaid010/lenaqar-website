@@ -35,7 +35,7 @@ export const metadata = {
 };
 
 export default async function LenaqarHomePage() {
-  const { requirements, error } = await fetchPublicRequirements({ limit: 48 });
+  const { requirements, error } = await fetchPublicRequirements({ limit: 6, sort: "default" });
   return (
     <>
       <FaqSchema />

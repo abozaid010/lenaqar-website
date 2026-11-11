@@ -3,7 +3,7 @@ import { cache } from "react";
 import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
 import { bffFetch, isCloudflareChallenge } from "@/lib/bffFetch";
 import { catalogPlaceAr } from "./arabic-labels.server";
-import { comparePublicRequirements } from "./to-public-requirement";
+import { publicRequirementsQuery } from "./requirement-sort.js";
 
 const DEFAULT_LIMIT = 48;
 
@@ -91,7 +91,7 @@ function acceptPublicRequirement(raw) {
  * Server-only: load anonymized pending requirements from the public API.
  * Auth is X-API-Key (+ BFF secret) only — no CRM username/password.
  *
- * @param {{ limit?: number }} [options]
+ * @param {{ limit?: number, sort?: "default" | "newest" | "highest_score" }} [options]
  * @returns {Promise<{ requirements: NonNullable<ReturnType<typeof acceptPublicRequirement>>[], error: string | null }>}
  */
 export const fetchPublicRequirements = cache(async function fetchPublicRequirements(
@@ -101,6 +101,7 @@ export const fetchPublicRequirements = cache(async function fetchPublicRequireme
     Math.max(Number(options.limit) || DEFAULT_LIMIT, 1),
     100,
   );
+  const qs = publicRequirementsQuery({ limit, sort: options.sort });
 
   if (!PUBLIC_X_API_KEY) {
     console.error(
@@ -110,7 +111,6 @@ export const fetchPublicRequirements = cache(async function fetchPublicRequireme
   }
 
   try {
-    const qs = new URLSearchParams({ limit: String(limit) });
     const response = await bffFetch(
       `${API_BASE_URL}/public/v1/requirements?${qs}`,
       {
@@ -161,8 +161,6 @@ export const fetchPublicRequirements = cache(async function fetchPublicRequireme
       seen.add(row.id);
       publicRows.push(row);
     }
-
-    publicRows.sort(comparePublicRequirements);
 
     return {
       requirements: publicRows.slice(0, limit),
