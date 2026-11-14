@@ -8,7 +8,11 @@ import { BUYER_LANDINGS } from "@/lib/lenaqar/buyer-landings";
 import { actionButtonClass } from "@/components/ui/action-button-class";
 import ActionButtonArrow from "@/components/ui/action-button-arrow";
 
-export default function BuyerLandingContent({ landing, matchedRequirements = [] }) {
+export default function BuyerLandingContent({
+  landing,
+  matchedRequirements = [],
+  guideLinks = [],
+}) {
   const { translate } = useI18n();
 
   const related = (landing.related || [])
@@ -106,7 +110,7 @@ export default function BuyerLandingContent({ landing, matchedRequirements = [] 
         </section>
       ) : null}
 
-      {related.length > 0 ? (
+      {related.length > 0 || guideLinks.length > 0 ? (
         <section className="space-y-4">
           <h2 className="text-xl font-bold text-primary">
             {translate("lenaqar.landings.relatedTitle")}
@@ -119,6 +123,15 @@ export default function BuyerLandingContent({ landing, matchedRequirements = [] 
                 className="min-h-11 rounded-lg border border-primary/20 bg-white px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/5"
               >
                 {translate(page.labelKey)}
+              </Link>
+            ))}
+            {guideLinks.map((guide) => (
+              <Link
+                key={guide.href}
+                href={guide.href}
+                className="min-h-11 rounded-lg border border-primary/20 bg-white px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/5"
+              >
+                {guide.title}
               </Link>
             ))}
             <Link

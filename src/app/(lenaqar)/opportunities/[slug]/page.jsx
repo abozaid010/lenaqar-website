@@ -6,6 +6,8 @@ import {
   buildListingHeadline,
 } from "@/lib/lenaqar/listing-seo";
 import { isOpportunityIndexable } from "@/lib/lenaqar/unit-trust";
+import { getIndexableGuideLinks } from "@/lib/guides/load";
+import { areaGuideHrefsForUnit } from "@/lib/guides/area-guides";
 import OpportunityDetailContent from "./opportunity-detail-content";
 
 export const revalidate = 900;
@@ -60,5 +62,6 @@ export default async function OpportunityDetailPage({ params }) {
   const { slug } = await params;
   const unit = await fetchOpportunityByCode(slug);
   if (!unit) notFound();
-  return <OpportunityDetailContent unit={unit} />;
+  const guideLinks = getIndexableGuideLinks(areaGuideHrefsForUnit(unit));
+  return <OpportunityDetailContent unit={unit} guideLinks={guideLinks} />;
 }

@@ -4,6 +4,7 @@ import matter from "gray-matter";
 import { isPubliclyVisible, isPreviewOnly } from "./status";
 import { isSearchIndexable } from "./seo-trust";
 import { getCities } from "./cities";
+import { pickIndexableGuideLinks } from "./related-links";
 
 const CONTENT_ROOT = path.join(process.cwd(), "content", "guides");
 
@@ -114,6 +115,14 @@ export function getGuidesForSitemap() {
       slug: publicGuidePath(g.slug),
       lastModified: g.date_updated || g.date_published || g.date_planned,
     }));
+}
+
+/**
+ * `{ href, title }` for the given guide hrefs, keeping only indexable guides.
+ * Server-only (reads content/guides).
+ */
+export function getIndexableGuideLinks(hrefs) {
+  return pickIndexableGuideLinks(hrefs, loadAllGuides());
 }
 
 export function getPublishedSummariesForLlms() {

@@ -44,7 +44,8 @@ export const BUYER_LANDINGS = [
     ],
     related: [
       "/apartments-for-sale/fifth-settlement",
-      "/guides/new-cairo/",
+      "/guides/new-cairo/prices-2026",
+      "/guides/new-cairo",
       "/guides/buying/how-to-write-property-request",
       "/ready-to-move-properties",
     ],
@@ -84,7 +85,8 @@ export const BUYER_LANDINGS = [
     ],
     related: [
       "/apartments-for-sale/new-cairo",
-      "/guides/fifth-settlement/",
+      "/guides/fifth-settlement/prices-2026",
+      "/guides/fifth-settlement",
       "/guides/compare/el-shorouk-vs-fifth-settlement",
     ],
   },
@@ -112,7 +114,8 @@ export const BUYER_LANDINGS = [
     initialValues: { buildingType: "apartment" },
     matchKeywords: ["madinaty", "مدينتي", "madina ty"],
     related: [
-      "/guides/madinaty/",
+      "/guides/madinaty/prices-2026",
+      "/guides/madinaty",
       "/apartments-for-sale/new-cairo",
       "/guides/compare/madinaty-vs-mostakbal-city",
     ],
@@ -141,8 +144,8 @@ export const BUYER_LANDINGS = [
     initialValues: { buildingType: "apartment" },
     matchKeywords: ["shorouk", "el shorouk", "الشروق", "مدينة الشروق"],
     related: [
-      "/guides/el-shorouk/",
       "/guides/el-shorouk/prices-2026",
+      "/guides/el-shorouk",
       "/apartments-for-sale/fifth-settlement",
     ],
   },
@@ -175,7 +178,8 @@ export const BUYER_LANDINGS = [
       "المستقبل",
     ],
     related: [
-      "/guides/mostakbal-city/",
+      "/guides/mostakbal-city/prices-2026",
+      "/guides/mostakbal-city",
       "/apartments-for-sale/madinaty",
       "/guides/buying/check-developer-project",
     ],
@@ -269,7 +273,8 @@ export const BUYER_LANDINGS = [
     matchKeywords: ["sheikh zayed", "الشيخ زايد", "زايد"],
     related: [
       "/apartments-for-sale/6th-of-october",
-      "/guides/sheikh-zayed/",
+      "/guides/sheikh-zayed/prices-2026",
+      "/guides/sheikh-zayed",
       "/guides/buying/how-to-write-property-request",
       "/guides/compare/sheikh-zayed-vs-6th-of-october",
     ],
@@ -299,7 +304,8 @@ export const BUYER_LANDINGS = [
     matchKeywords: ["6 october", "أكتوبر", "اكتوبر", "october", "توسعات"],
     related: [
       "/apartments-for-sale/sheikh-zayed",
-      "/guides/6th-of-october/",
+      "/guides/6th-of-october/prices-2026",
+      "/guides/6th-of-october",
       "/guides/buying/resale-vs-new-launch",
       "/villas-for-sale/egypt",
     ],
