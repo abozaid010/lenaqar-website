@@ -3,6 +3,7 @@ import { getBuyerLanding, filterRequirementsForLanding } from "@/lib/lenaqar/buy
 import { buyerLandingMetadata } from "@/lib/lenaqar/buyer-landing-metadata";
 import { fetchPublicRequirements } from "@/lib/lenaqar/requirements.server";
 import BuyerLandingContent from "@/components/lenaqar/buyer-landing-content";
+import { getIndexableGuideLinks } from "@/lib/guides/load";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 
 export const revalidate = 300;
@@ -20,7 +21,11 @@ export default async function BuyerLandingPage() {
       <BreadcrumbSchema
         items={[{ name: landing.h1, url: `${SITE.url}${landing.href}` }]}
       />
-      <BuyerLandingContent landing={landing} matchedRequirements={matched} />
+      <BuyerLandingContent
+        landing={landing}
+        matchedRequirements={matched}
+        guideLinks={getIndexableGuideLinks(landing.related)}
+      />
     </>
   );
 }

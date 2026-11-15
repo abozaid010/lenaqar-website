@@ -3,7 +3,7 @@
   "requirements": "seo-feature-req.json",
   "plan": "SEO-PLAN.md",
   "phase_summary": "feature-progress.json",
-  "updated_at": "2026-11-04T16:30:00.000Z",
+  "updated_at": "2026-11-15T01:20:00+02:00",
   "status": "merged_partially_verified",
   "target_date": "2026-11-03",
   "timezone": "Africa/Cairo",
@@ -235,6 +235,32 @@
       "evidence": [],
       "blocker": null,
       "updated_at": "2026-11-03T15:11:12.048969+00:00"
+    },
+    {
+      "id": "SEO-17",
+      "title": "AI-search visibility baseline: four measurement tracks + fixed prompt panel",
+      "status": "in_progress",
+      "owner": "lead",
+      "branch": "feat/ai-visibility-day1",
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/39",
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": ["docs/ai-visibility/2026-11-baseline.md", "docs/ai-visibility/panel-v1.json", "REPORT/seo-health/2026-11-15-production-before.json"],
+      "blocker": "GA4/GSC read access (owner gcloud step); AI panel accounts and runtime (owner)",
+      "updated_at": "2026-11-15T01:20:00+02:00"
+    },
+    {
+      "id": "SEO-18",
+      "title": "Area pages and listings link their indexable area guides; seo-health.mjs technical check",
+      "status": "ready_for_review",
+      "owner": "lead",
+      "branch": "feat/ai-visibility-day1",
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/39",
+      "tested_sha": null,
+      "production_sha": null,
+      "evidence": ["src/lib/guides/related-links.js", "src/lib/guides/area-guides.js", "src/lib/lenaqar/__tests__/guide-links.test.js", "scripts/seo-health.mjs"],
+      "blocker": null,
+      "updated_at": "2026-11-15T01:20:00+02:00"
     }
   ],
   "history": [

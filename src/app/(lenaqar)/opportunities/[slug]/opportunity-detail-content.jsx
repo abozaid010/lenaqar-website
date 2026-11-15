@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useI18n } from "@/hooks/useI18n";
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
@@ -27,7 +28,7 @@ import OpportunityUnitActions from "@/components/lenaqar/opportunity-unit-action
 import UnitVideo from "@/components/lenaqar/unit-video";
 import UnitViewTracker from "@/components/lenaqar/unit-view-tracker";
 
-export default function OpportunityDetailContent({ unit }) {
+export default function OpportunityDetailContent({ unit, guideLinks = [] }) {
   const { translate } = useI18n();
   const projectName = projectLabel(unit) || unit.code;
   const headline = buildListingHeadline(unit);
@@ -239,6 +240,29 @@ export default function OpportunityDetailContent({ unit }) {
       <div className="mt-8 max-w-md">
         <OpportunityUnitActions unit={unit} location="opportunity_detail" />
       </div>
+
+      {guideLinks.length > 0 ? (
+        <nav
+          aria-label={translate("lenaqar.guides.indexTitle")}
+          className="mt-10 border-t border-black/10 pt-6"
+        >
+          <h2 className="text-lg font-bold text-primary">
+            {translate("lenaqar.guides.indexTitle")}
+          </h2>
+          <ul className="mt-3 flex flex-wrap gap-3">
+            {guideLinks.map((guide) => (
+              <li key={guide.href}>
+                <Link
+                  href={guide.href}
+                  className="inline-flex min-h-11 items-center rounded-lg border border-primary/20 bg-white px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/5"
+                >
+                  {guide.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ) : null}
     </article>
   );
 }
