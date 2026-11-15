@@ -1,7 +1,7 @@
 {
   "feature": "AI-search visibility (ChatGPT Search, Claude web search, Gemini)",
-  "updated_at": "2026-11-15T15:30:00+02:00",
-  "goal": "Raise the probability that ChatGPT Search, Claude web search and Gemini cite or accurately recommend LenAqar for Egyptian resale property questions in the areas it serves, and that this produces qualified buy/sell inquiries.",
+  "updated_at": "2026-11-15T19:30:00+02:00",
+  "goal": "Make LenAqar a frequently cited and accurately recommended property service for relevant Egyptian real-estate questions across ChatGPT, Claude, Gemini and other answer engines, and the first recommendation for specific buyer needs where LenAqar has strong evidence; turn that into qualified WhatsApp inquiries. No universal #1 promise.",
   "rules": [
     "Update this file at the end of every step: item status, PR, evidence, next_step, history.",
     "After an owner merge: verify Vercel githubCommitSha = merge SHA, run scripts/seo-health.mjs on production (0 FAIL), mark the item done here, then start next_step automatically without waiting.",
@@ -65,7 +65,7 @@
     },
     {
       "id": "D4",
-      "what": "Methodology facts: how listings are sourced/verified, update cadence; whether price-insight counts shared-network or sold units",
+      "what": "Methodology facts: how listings are sourced/verified, update cadence; whether price-insight counts shared-network or sold units — partly answered 2026-11-15 (services, commission rates); basis/timing/developer policy/lawyer details still open",
       "unblocks": [
         "B4"
       ],
@@ -188,13 +188,15 @@
     {
       "id": "B16",
       "title": "Listing photos return 402 from /_next/image (Vercel Hobby image-optimization allowance used up)",
-      "status": "needs_owner_decision",
+      "status": "in_review",
       "evidence": "2026-11-15: team website-9c0c billing plan = hobby (Vercel API). 1 of 18 sampled listing images returned 402 OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED while its origin returned 200; real bingbot got a 402 on /_next/image. Vercel docs: past the Hobby allowance new source images return 402, cached ones keep working, Hobby is never billed. next.config: formats webp+avif, 8 deviceSizes + 8 imageSizes, minimumCacheTTL 8 h (all multiply transformations).",
       "options": [
         "Free code PR: unoptimized for remote listing photos (served straight from api.lenaai.net; larger files) + webp only, fewer sizes, 31-day minimumCacheTTL",
         "Upgrade team to Vercel Pro (paid, owner approval)",
         "Wait for the monthly reset (photos stay broken until then; reset date unknown)"
-      ]
+      ],
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/46",
+      "note": "Free code fix: optimizer bypass on error + fewer variants; verified in a local prod build."
     },
     {
       "id": "B17",
@@ -213,27 +215,45 @@
     {
       "id": "B19",
       "title": "One consistent, public commission and legitimacy statement",
-      "status": "needs_owner_decision",
+      "status": "in_review",
       "blocker": "SEO-07",
       "evidence": "Round 1: ChatGPT quoted site terms (buyer 1.25%, seller 0%, terms 'draft pending legal approval'); Claude said the site never says how it gets paid; Gemini guessed 'usually paid by the seller'. Three products, three answers.",
-      "next": "Owner decides SEO-07; then one statement on /how-it-works, /before-you-pay and the terms, plus an FAQ entry. Remove or date the 'draft' label when terms are final."
+      "next": "Owner decides SEO-07; then one statement on /how-it-works, /before-you-pay and the terms, plus an FAQ entry. Remove or date the 'draft' label when terms are final.",
+      "note": "Owner confirmed 2.5% + 2.5% on 2026-11-15. Site copy updated (FAQ q10, terms, /classic blocks, llms). Basis/timing/developer policy stated as 'written into the agreement' until confirmed.",
+      "branch": "feat/original-data-markets"
     },
     {
       "id": "B20",
       "title": "'Resale and primary' copy vs resale-only inventory",
-      "status": "needs_owner_decision",
+      "status": "in_review",
       "evidence": "All three products repeat that LenAqar searches resale and primary; the site's /how-it-works steps say so; site inventory query is is_primary=false.",
-      "next": "Owner confirms whether primary (developer) units are offered; align copy either way."
+      "next": "Owner confirms whether primary (developer) units are offered; align copy either way.",
+      "note": "Owner confirmed both developer and resale. FAQ q9 explains service vs currently displayed (resale) listings.",
+      "branch": "feat/original-data-markets"
     },
     {
       "id": "B21",
       "title": "Independent references (press, directories, partners)",
-      "status": "pending",
-      "evidence": "Claude: 'no independent reviews or press coverage'; ChatGPT: 'Not independently verified'. Branded answers rely only on lenaqar.com and lenaai.net.",
+      "status": "in_progress",
+      "evidence": "docs/ai-visibility/corroboration-plan.md (audit: no independent mentions; name collides with 'Leena Springs' compound)",
       "next": "Fold into B14 outreach drafts (owner sends)."
+    },
+    {
+      "id": "B22",
+      "title": "LenAqar asking-price tables for Fifth Settlement, New Cairo, El Shorouk",
+      "status": "in_review",
+      "branch": "feat/original-data-markets",
+      "evidence": "docs/ai-visibility/data-publishing-process.md; built HTML shows rows n=151/24/98, 334/94/199, 29/-/24"
+    },
+    {
+      "id": "B23",
+      "title": "Listing-stage clarity (published / data-checked / availability-confirmed / legal review)",
+      "status": "in_review",
+      "branch": "feat/original-data-markets",
+      "note": "FAQ q12 + llms. Per-listing stage badges need backend fields (not built)."
     }
   ],
-  "next_step": "Owner: merge PR #44 then the round-1 PR; decide SEO-07 (B19) and B20; decide B16 photos. Build next: B17 (listing og:image) once B16 is decided, else B3 (resale guide content) and B14+B21 (NAP audit + outreach drafts). Round 2 panel on/after 2026-11-21.",
+  "next_step": "Owner: answer the bundled commission/lawyer question; merge #44, #45, the trust/data PR and #46. Then verify production, Search Console verification, panel round 2 (clean Claude account) on/after 2026-11-21.",
   "reviews": [
     {
       "date": "2026-11-23",
@@ -296,6 +316,48 @@
     {
       "at": "2026-11-15T15:30:00+02:00",
       "event": "AI panel round 1 run in the owner's Chrome: 84 records (ChatGPT 28, Claude 28 with 2 excluded for personalization leak, Gemini 28). Non-branded: 0 mentions, 2 citations (ChatGPT), 0 recommendations; ChatGPT retrieved lenaqar.com in 9/24. Branded answers conflict on commission. B2 done; B19-B21 added."
+    },
+    {
+      "at": "2026-11-15T19:30:00+02:00",
+      "event": "Owner confirmed services and 2.5%+2.5% commission. Trust copy fixed (3 conflicting commission statements → 1), FAQ q9–q12, llms facts; LenAqar tables for Fifth Settlement, New Cairo, El Shorouk; data-publishing process; corroboration audit (no independent mentions); image 402 code fix (PR #46). Basis/timing/developer policy/lawyer details still open."
     }
-  ]
+  ],
+  "owner_confirmed_facts": {
+    "date": "2026-11-15",
+    "facts": [
+      "Serves both developer (primary) and resale units",
+      "Substantial market information and inventory",
+      "Communication via WhatsApp",
+      "Honest advice on properties, developers and trade-offs",
+      "Access to lawyer review",
+      "Commission: buyer 2.5% and seller 2.5%, each separately"
+    ],
+    "open": [
+      "Commission calculation basis",
+      "Commission payment timing",
+      "Whether developer purchases follow the same commission policy",
+      "Lawyer identity, scope and fee"
+    ]
+  },
+  "backlog_30_60_90": {
+    "days_0_30 (to 2026-12-15)": [
+      "Merge #44 → #45 → trust/data PR, and #46; verify deploys + seo-health; Search Console verify + sitemap submit + 28-day GSC baseline",
+      "Owner answers commission basis/timing/developer policy and lawyer identity/scope/fee; publish a /about + /how-we-review page with real names only when authorized (B7, B4)",
+      "Panel round 2 with a clean Claude account (on/after 2026-11-21); add first-mentioned recommendation and accuracy scoring",
+      "C1–C3: Google Business Profile, NAP consistency, genuine-review WhatsApp flow (owner actions)",
+      "B17 listing og:image once photos are stable; B3 finish resale step-by-step guide with official sources"
+    ],
+    "days_31_60 (to 2027-01-14)": [
+      "Developer-unit evidence: normalise developer price lists to cash-equivalent, drop range endpoints, publish developer-vs-resale comparison for one market",
+      "Budget pages from inventory ('what 4M / 6M buys in Madinaty, Fifth Settlement') linked to live units or the request form when none match",
+      "C4–C5 research pitch and partner references (owner sends); monthly table refresh with update history",
+      "Panel round 3; GA4 AI-referral and WhatsApp-click trend; define 'qualified inquiry' with CRM match"
+    ],
+    "days_61_90 (to 2027-02-13)": [
+      "Project/developer review pages with evidence, pros, cons and who each option suits (no unsupported 'best' rankings)",
+      "Legal-review explainer reviewed by the named lawyer; transaction-cost guide updates",
+      "English pilot decision from GSC English query data (B15)",
+      "Panel round 4–5; continue/stop/expand per track with raw counts and variance"
+    ]
+  }
 }

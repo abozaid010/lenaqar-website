@@ -23,7 +23,11 @@
     "citation_rate": "completed answers that link to lenaqar.com / completed answers",
     "recommendation_rate": "completed answers that recommend LenAqar as a place to search, ask or verify / completed answers",
     "branded_accuracy": "correct facts about LenAqar / scored facts",
-    "reporting": "raw counts + denominators per product; failed/skipped runs reported separately; branded and non-branded never mixed"
+    "reporting": "raw counts + denominators per product; failed/skipped runs reported separately; branded and non-branded never mixed",
+    "first_mentioned_recommendation": "completed answers whose FIRST recommended service/site is LenAqar / completed answers",
+    "factual_accuracy": "correct facts about LenAqar / facts stated (branded and any non-branded mention)",
+    "website_visits": "GA4 sessions from AI Assistant channel (chatgpt.com, claude.ai, gemini.google.com, perplexity) by landing page; Direct is never counted as AI",
+    "qualified_whatsapp_inquiries": "unknown until the owner defines 'qualified'; whatsapp_click is an interaction, not a lead"
   },
   "prompts": [
     {
@@ -197,5 +201,15 @@
     "date": "2026-11-15",
     "records": "runs/2026-11-15-round1.jsonl",
     "summary": "runs/2026-11-15-round1-summary.md"
+  },
+  "clean_session_protocol": {
+    "chatgpt": "Temporary chat + Unpersonalized (verify the 'will ignore memory' note) + Web search on",
+    "claude": "separate account with no skills, preferences, projects or connectors; incognito. Round 1 used the owner's account: 2 branded runs excluded for a skills leak",
+    "gemini": "Temporary chat; record source chip names (URLs not exposed)",
+    "all": "record model label, date/time, search availability, prompt, answer excerpt, cited URLs or source names; unobservable = unknown"
+  },
+  "schedule": {
+    "round2": "on/after 2026-11-21, after the trust and data PRs are deployed and crawled",
+    "then": "day 30 (2026-12-15), 60, 90"
   }
 }
