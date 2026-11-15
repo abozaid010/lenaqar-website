@@ -116,7 +116,7 @@
       "title": "Contract checklist: total purchase cost section with official sources",
       "status": "ready_for_review",
       "branch": "feat/ai-vis-progress-b6",
-      "pr": null,
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/41",
       "evidence": "content/guides/buying/contract-registration-checklist.md; src/lib/lenaqar/__tests__/guide-faq-costs.test.js",
       "note": "Sourced: registration fee bands (realestate.gov.eg page dated 2024-12-11, may be outdated) and 2.5% disposal tax on the seller's share with monthly late charge after 30 days (ETA FAQ PDF, 2026-10). Transfer, maintenance, commission and utilities: 'varies, get it in writing', no figures. Also fixed an empty FAQ answer that produced an FAQPage Answer without text (live bug) and added an answeredFaq guard."
     },
@@ -211,7 +211,7 @@
     },
     {
       "at": "2026-11-15T08:30:00+02:00",
-      "event": "B6 built: total purchase cost section with official sources; empty-FAQ schema bug fixed. PR pending."
+      "event": "B6 built: total purchase cost section with official sources; empty-FAQ schema bug fixed. PR #41 opened."
     }
   ]
 }
