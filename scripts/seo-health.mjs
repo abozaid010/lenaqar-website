@@ -65,7 +65,7 @@ const T_SET = [
   { path: "/apartments-for-sale/madinaty", expectIndex: true, facts: [/<h1[\s>]/, /href="\/guides\/madinaty"/] },
   { path: "/guides/madinaty/prices-2026", expectIndex: true, facts: [/<h1[\s>]/, /جنيه/, /"dateModified"/, /عقارماب/], softLabel: "LenAqar inventory table", softFacts: [/id="guide-inventory"/, /طريقة الحساب/] },
   { path: "/guides/el-shorouk/prices-2026", expectIndex: true, facts: [/<h1[\s>]/, /جنيه/, /"dateModified"/] },
-  { path: "/guides/buying/contract-registration-checklist", expectIndex: true, facts: [/<h1[\s>]/, /"dateModified"/, /gov\.eg/] },
+  { path: "/guides/buying/contract-registration-checklist", expectIndex: true, facts: [/<h1[\s>]/, /"dateModified"/, /gov\.eg/], softLabel: "total cost section", softFacts: [/التكاليف اللي غير سعر الشقة/, /eta\.gov\.eg/, /"acceptedAnswer":\{"@type":"Answer","text":"[^"]/] },
   {
     path: "/guides/buying/buying-resale-step-by-step",
     expectIndex: false,

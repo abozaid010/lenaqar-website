@@ -49,3 +49,16 @@ export function isSearchIndexable(guide) {
   if (hasUnverifiedMarkers(guide)) return false;
   return true;
 }
+
+/**
+ * FAQ items with both a question and a non-empty answer. An empty answer would
+ * render a blank block and an FAQPage `Answer` without `text` (invalid schema).
+ */
+export function answeredFaq(faq) {
+  if (!Array.isArray(faq)) return [];
+  return faq.filter((item) => {
+    const q = String(item?.q || item?.question || "").trim();
+    const a = String(item?.a || item?.answer || "").trim();
+    return q.length > 0 && a.length > 0;
+  });
+}

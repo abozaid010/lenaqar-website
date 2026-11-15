@@ -5,7 +5,7 @@ import GuideStickyWhatsApp from "./GuideStickyWhatsApp";
 import GuideShareButtons from "./GuideShareButtons";
 import GuideInventorySummary from "./GuideInventorySummary";
 import { normalizeSlug } from "@/lib/guides/load";
-import { hasUnverifiedMarkers } from "@/lib/guides/seo-trust";
+import { answeredFaq, hasUnverifiedMarkers } from "@/lib/guides/seo-trust";
 import { actionButtonClass } from "@/components/ui/action-button-class";
 import ActionButtonArrow from "@/components/ui/action-button-arrow";
 
@@ -33,7 +33,7 @@ export default function GuideArticleLayout({
 }) {
   const slug = normalizeSlug(guide.slug);
   const updated = formatArDate(guide.date_updated || guide.date_published);
-  const faq = guide.faq || [];
+  const faq = answeredFaq(guide.faq);
   const sources = guide.sources || [];
   const hasVerify = hasUnverifiedMarkers(guide);
 

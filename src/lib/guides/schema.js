@@ -1,7 +1,7 @@
 import { SITE } from "@/config/site";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
 import { publicGuidePath } from "./load";
-import { isSearchIndexable } from "./seo-trust";
+import { answeredFaq, isSearchIndexable } from "./seo-trust";
 
 export function buildBreadcrumbList(items) {
   return {
@@ -16,7 +16,8 @@ export function buildBreadcrumbList(items) {
   };
 }
 
-export function buildFaqPage(faq = []) {
+export function buildFaqPage(items = []) {
+  const faq = answeredFaq(items);
   if (!faq.length) return null;
   return {
     "@context": "https://schema.org",
