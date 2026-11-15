@@ -11,6 +11,7 @@ const GUIDE_AREA_BY_PLACE = {
   "el shorouk": "el-shorouk",
   "el shorouk city": "el-shorouk",
   "mostakbal city": "mostakbal-city",
+  "mostaqbal city": "mostakbal-city",
   "fifth settlement": "fifth-settlement",
   "new cairo": "new-cairo",
   "sheikh zayed": "sheikh-zayed",

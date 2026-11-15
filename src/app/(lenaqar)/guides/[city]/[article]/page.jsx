@@ -10,6 +10,11 @@ import { guideMetadata } from "@/lib/guides/metadata";
 import { guideJsonLdScripts } from "@/lib/guides/schema";
 import GuideArticleLayout from "@/components/guides/GuideArticleLayout";
 import GuideJsonLd from "@/components/guides/GuideJsonLd";
+import { loadGuideInventorySummary } from "@/lib/guides/inventory-summary.server";
+
+// Price guides carry a live LenAqar asking-price table (GuideInventorySummary);
+// refresh it hourly instead of only on deploy.
+export const revalidate = 3600;
 
 export async function generateStaticParams() {
   const { loadAllGuides } = await import("@/lib/guides/load");
@@ -59,6 +64,7 @@ export default async function CityArticlePage({ params }) {
   ];
 
   const blocks = guideJsonLdScripts(guide, { breadcrumbs, city: cityMeta });
+  const inventorySummary = await loadGuideInventorySummary(guide.slug);
 
   return (
     <>
@@ -67,6 +73,7 @@ export default async function CityArticlePage({ params }) {
         guide={guide}
         breadcrumbs={breadcrumbs}
         related={related}
+        inventorySummary={inventorySummary}
       />
     </>
   );

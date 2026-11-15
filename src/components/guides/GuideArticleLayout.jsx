@@ -3,6 +3,7 @@ import GuideMarkdown from "./GuideMarkdown";
 import GuideWhatsAppCta from "./GuideWhatsAppCta";
 import GuideStickyWhatsApp from "./GuideStickyWhatsApp";
 import GuideShareButtons from "./GuideShareButtons";
+import GuideInventorySummary from "./GuideInventorySummary";
 import { normalizeSlug } from "@/lib/guides/load";
 import { hasUnverifiedMarkers } from "@/lib/guides/seo-trust";
 import { actionButtonClass } from "@/components/ui/action-button-class";
@@ -28,6 +29,7 @@ export default function GuideArticleLayout({
   breadcrumbs = [],
   related = [],
   preview = false,
+  inventorySummary = null,
 }) {
   const slug = normalizeSlug(guide.slug);
   const updated = formatArDate(guide.date_updated || guide.date_published);
@@ -81,6 +83,8 @@ export default function GuideArticleLayout({
         <GuideWhatsAppCta leadCode={guide.lead_code} compact />
 
         <GuideMarkdown content={guide.body} />
+
+        <GuideInventorySummary summary={inventorySummary} />
 
         {faq.length > 0 ? (
           <section className="mt-12 space-y-4" aria-labelledby="guide-faq">

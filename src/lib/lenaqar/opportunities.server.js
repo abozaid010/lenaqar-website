@@ -65,7 +65,7 @@ export function parseOpportunitySearchParams(params = {}) {
  * did) opts the calling route into dynamic rendering, which costs TTFB on every
  * listing page and defeats `generateStaticParams`.
  */
-async function publicApiGet(path) {
+export async function publicApiGet(path) {
   if (!PUBLIC_X_API_KEY) {
     console.error(
       "[lenaqar] public API call skipped — no X_API_KEY / NEXT_PUBLIC_X_API_KEY configured"
