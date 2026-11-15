@@ -1,15 +1,16 @@
 /**
  * LenAqar's own asking-price summary for an area price guide.
  *
- * The figures come from the backend's `GET /public/v1/price-insight` (the same
- * route the buy-request success card uses): medians over listed resale units at
- * their cash value, developer units left out, impossible prices dropped, and the
- * cheapest / dearest 5% left out of the range from 20 units up.
+ * ONE defined sample feeds every number on the section: the apartment listings
+ * of that place currently shown on lenaqar.com (the public catalog, resale),
+ * deduplicated by listing code, with a usable price and area and a plausible
+ * price per m². The row counts, medians, ranges and the "last updated" date
+ * range are all computed from that same sample, so the section never describes
+ * one set of units with statistics from another (a review on PR #47 found the
+ * earlier version mixed backend price-insight counts with catalog dates).
  *
- * The backend widens the scope when too few units match (drops bedrooms, then the
- * district, then the city) and says so in `relaxed` / `scope`. A guide row must
- * describe exactly the place and category it is labelled with, so any widened or
- * thin answer is dropped here instead of printed under the wrong label.
+ * Price = the listing's total asking price (what the listing card shows);
+ * price per m² = total price ÷ area, as on the cards (metrics.pricePerMeter).
  */
 
 /** A category with fewer listed units than this is not shown. */
@@ -90,89 +91,98 @@ export function inventoryConfigForGuide(slug) {
   return GUIDE_INVENTORY[canonicalPath(slug)] || null;
 }
 
-/** Query string fields for one segment. */
-export function priceInsightParams(config, segment) {
-  const params = { city: config.city };
-  if (config.level === "district") params.district = config.district;
-  params.property_type = config.propertyType;
-  if (segment?.bedrooms != null) params.bedrooms = segment.bedrooms;
-  return params;
+const PLAUSIBLE_PER_SQM = [5_000, 1_000_000];
+const TRIM_FROM = 20;
+const TRIM_SHARE = 0.05;
+
+function inPlace(unit, config) {
+  return (config.level || "district") === "district"
+    ? token(unit?.district) === config.district && token(unit?.city) === config.city
+    : token(unit?.city) === config.city;
 }
 
 /**
- * One table row, or null when the answer does not describe exactly this place and
- * category with enough units.
+ * The defined sample: listings shown on lenaqar.com for this place and property
+ * type, resale only, one per listing code, with a total price, an area and a
+ * plausible price per m². Each entry keeps what the table and dates need.
  */
-export function toSummaryRow(data, config, segment, { minSample = MIN_SEGMENT_SAMPLE } = {}) {
-  if (!data || typeof data !== "object" || data.available !== true) return null;
-  if (!Array.isArray(data.relaxed) || data.relaxed.length > 0) return null;
+export function definedSample(units, config) {
+  const seen = new Set();
+  const sample = [];
+  for (const unit of Array.isArray(units) ? units : []) {
+    if (!unit || !inPlace(unit, config)) continue;
+    if (token(unit.buildingType) !== config.propertyType) continue;
+    if (unit.isPrimary === true) continue;
+    const code = String(unit.code || "");
+    if (!code || seen.has(code)) continue;
+    const price = positive(unit.totalPrice);
+    const area = positive(unit.landArea);
+    if (price == null || area == null) continue;
+    const perSqm = price / area;
+    if (perSqm < PLAUSIBLE_PER_SQM[0] || perSqm > PLAUSIBLE_PER_SQM[1]) continue;
+    seen.add(code);
+    const day = typeof unit.updatedAt === "string" ? unit.updatedAt.slice(0, 10) : "";
+    sample.push({
+      code,
+      price,
+      perSqm,
+      bedrooms: positive(unit.roomsCount),
+      updated: /^\d{4}-\d{2}-\d{2}$/.test(day) ? day : null,
+    });
+  }
+  return sample;
+}
 
-  const scope = data.scope && typeof data.scope === "object" ? data.scope : {};
-  const level = config.level || "district";
-  if (token(scope.level) !== level) return null;
-  if (token(scope.city) !== config.city) return null;
-  if (level === "district" && token(scope.district) !== config.district) return null;
-  if (token(scope.property_type) !== config.propertyType) return null;
-  const wantBedrooms = segment?.bedrooms ?? null;
-  const gotBedrooms = scope.bedrooms == null ? null : Number(scope.bedrooms);
-  if (gotBedrooms !== wantBedrooms) return null;
+function median(sorted) {
+  const n = sorted.length;
+  if (!n) return null;
+  return n % 2 ? sorted[(n - 1) / 2] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
+}
 
-  const count = positive(data.sample_size);
-  const perMeter = positive(data.median_price_per_sqm);
-  const unitPrice = positive(data.median_unit_price);
-  const lowest = positive(data.lowest_unit_price);
-  const highest = positive(data.highest_unit_price);
-  if (count == null || count < minSample) return null;
-  if (perMeter == null || unitPrice == null || lowest == null || highest == null) return null;
-
+/** One table row from the sample, or null below the minimum sample. */
+export function summarizeSegment(sample, segment, { minSample = MIN_SEGMENT_SAMPLE } = {}) {
+  const want = segment?.bedrooms ?? null;
+  const rows = want == null ? sample : sample.filter((u) => u.bedrooms === want);
+  if (rows.length < minSample) return null;
+  const prices = rows.map((u) => u.price).sort((a, b) => a - b);
+  const perSqm = rows.map((u) => u.perSqm).sort((a, b) => a - b);
+  const cut = rows.length >= TRIM_FROM ? Math.floor(rows.length * TRIM_SHARE) : 0;
+  const inRange = prices.slice(cut, prices.length - cut);
   return {
     labelAr: segment.labelAr,
-    bedrooms: wantBedrooms,
-    count: Math.round(count),
-    perMeter: Math.round(perMeter),
-    unitPrice: Math.round(unitPrice),
-    lowest: Math.round(lowest),
-    highest: Math.round(highest),
-    asOf: typeof data.as_of === "string" ? data.as_of.slice(0, 10) : "",
+    bedrooms: want,
+    count: rows.length,
+    perMeter: Math.round(median(perSqm)),
+    unitPrice: Math.round(median(prices)),
+    lowest: Math.round(inRange[0]),
+    highest: Math.round(inRange[inRange.length - 1]),
   };
 }
 
-/**
- * Earliest and latest "last updated" dates of the listed units the summary
- * covers. Shown so a reader can judge freshness; it never marks a price verified.
- */
-export function recordDateRange(units, config) {
-  const dates = [];
-  for (const unit of Array.isArray(units) ? units : []) {
-    if ((config.level || "district") === "district"
-      ? token(unit?.district) !== config.district
-      : token(unit?.city) !== config.city) continue;
-    if (token(unit?.buildingType) !== config.propertyType) continue;
-    const day = typeof unit?.updatedAt === "string" ? unit.updatedAt.slice(0, 10) : "";
-    if (/^\d{4}-\d{2}-\d{2}$/.test(day)) dates.push(day);
-  }
+/** Earliest and latest "last updated" dates within the sample. */
+export function recordDateRange(sample) {
+  const dates = sample.map((u) => u.updated).filter(Boolean).sort();
   if (!dates.length) return null;
-  dates.sort();
-  return { earliest: dates[0], latest: dates[dates.length - 1] };
+  return { earliest: dates[0], latest: dates[dates.length - 1], dated: dates.length };
 }
 
 /**
- * The whole summary, or null when the all-units row is missing (a table of
- * sub-categories without the headline figure would be misleading) or the record
- * dates are unknown.
+ * The whole summary, or null when the all-units row is missing (sub-categories
+ * without the headline figure would mislead) or no listing in the sample has a
+ * date. `asOf` is the observation date (YYYY-MM-DD) the page computed it.
  */
-export function buildInventorySummary(config, answers, units) {
+export function buildInventorySummary(config, units, { asOf = "" } = {}) {
   if (!config) return null;
-  const rows = config.segments
-    .map((segment, i) => toSummaryRow(answers?.[i], config, segment))
-    .filter(Boolean);
+  const sample = definedSample(units, config);
+  const rows = config.segments.map((segment) => summarizeSegment(sample, segment)).filter(Boolean);
   if (!rows.length || rows[0].bedrooms !== null) return null;
-  const records = recordDateRange(units, config);
+  const records = recordDateRange(sample);
   if (!records) return null;
   return {
     placeAr: config.placeAr,
     listingsHref: config.listingsHref,
-    asOf: rows[0].asOf,
+    asOf,
+    sampleSize: sample.length,
     rows,
     records,
   };

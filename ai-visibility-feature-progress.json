@@ -1,6 +1,6 @@
 {
   "feature": "AI-search visibility (ChatGPT Search, Claude web search, Gemini)",
-  "updated_at": "2026-11-15T19:30:00+02:00",
+  "updated_at": "2026-11-15T21:00:00+02:00",
   "goal": "Make LenAqar a frequently cited and accurately recommended property service for relevant Egyptian real-estate questions across ChatGPT, Claude, Gemini and other answer engines, and the first recommendation for specific buyer needs where LenAqar has strong evidence; turn that into qualified WhatsApp inquiries. No universal #1 promise.",
   "rules": [
     "Update this file at the end of every step: item status, PR, evidence, next_step, history.",
@@ -240,10 +240,11 @@
     },
     {
       "id": "B22",
-      "title": "LenAqar asking-price tables for Fifth Settlement, New Cairo, El Shorouk",
+      "title": "LenAqar asking-price tables: Madinaty, Fifth Settlement, New Cairo, El Shorouk (one defined sample)",
       "status": "in_review",
       "branch": "feat/original-data-markets",
-      "evidence": "docs/ai-visibility/data-publishing-process.md; built HTML shows rows n=151/24/98, 334/94/199, 29/-/24"
+      "evidence": "Built HTML 2026-11-15: intro n = sample n = dated n on every guide. Madinaty 120 (70,085 EGP/m²; 2BR 47, 3BR 69), Fifth Settlement 99 (37,975; 3BR 71; 2BR <20 omitted), New Cairo city 269 (54,741; 2BR 80, 3BR 168), El Shorouk 29 (23,077; 3BR 24). Regression test: guide-inventory-summary.test.js",
+      "note": "PR #47 review (P1) found counts/medians from the price-insight API (unit set not shown on lenaqar.com, e.g. 151 vs 98) mixed with catalog dates and a 'listed on LenAqar' label. Fixed: everything computed from the public catalog only; price = total asking price ÷ area as on listing cards. Replaces the PR #40 Madinaty method too."
     },
     {
       "id": "B23",
@@ -324,6 +325,10 @@
     {
       "at": "2026-11-15T20:00:00+02:00",
       "event": "Owner answered: commission on final sale price, due at contract signing, same for developer units; lawyer review free via partner lawyer (name/scope still open). Copy updated in PR #47."
+    },
+    {
+      "at": "2026-11-15T21:00:00+02:00",
+      "event": "PR #47 P1 review resolved: guide tables now computed from one defined sample (listings shown on lenaqar.com); regression test added; numbers changed (see B22). Tracker: commission confirmed (final sale price, at signing, same for developer units); lawyer review free via partner lawyer — identity and scope still UNRESOLVED."
     }
   ],
   "owner_confirmed_facts": {
