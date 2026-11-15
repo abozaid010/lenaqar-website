@@ -268,7 +268,7 @@
       "status": "ready_for_review",
       "owner": "lead",
       "branch": "feat/madinaty-inventory-summary",
-      "pr": null,
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/40",
       "tested_sha": null,
       "production_sha": null,
       "evidence": ["src/lib/guides/inventory-summary.js", "src/lib/guides/inventory-summary.server.js", "src/components/guides/GuideInventorySummary.jsx", "src/lib/lenaqar/__tests__/guide-inventory-summary.test.js"],
