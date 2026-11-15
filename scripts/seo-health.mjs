@@ -63,7 +63,7 @@ const T_SET = [
   // The footer links the Madinaty price map on every page, so the hub link is
   // what proves the area page itself links its guides.
   { path: "/apartments-for-sale/madinaty", expectIndex: true, facts: [/<h1[\s>]/, /href="\/guides\/madinaty"/] },
-  { path: "/guides/madinaty/prices-2026", expectIndex: true, facts: [/<h1[\s>]/, /جنيه/, /"dateModified"/, /عقارماب/] },
+  { path: "/guides/madinaty/prices-2026", expectIndex: true, facts: [/<h1[\s>]/, /جنيه/, /"dateModified"/, /عقارماب/], softLabel: "LenAqar inventory table", softFacts: [/id="guide-inventory"/, /طريقة الحساب/] },
   { path: "/guides/el-shorouk/prices-2026", expectIndex: true, facts: [/<h1[\s>]/, /جنيه/, /"dateModified"/] },
   { path: "/guides/buying/contract-registration-checklist", expectIndex: true, facts: [/<h1[\s>]/, /"dateModified"/, /gov\.eg/] },
   {
@@ -264,7 +264,7 @@ async function main() {
     add(p.path, p.expectIndex ? "indexable" : "noindex (expected)", indexOk ? "PASS" : "FAIL", `${p.metaRobots || "-"} | x-robots: ${p.xRobots || "-"}${p.note ? ` | ${p.note}` : ""}`);
     add(p.path, p.expectIndex ? "in sitemap" : "not in sitemap", p.inSitemap === p.expectIndex ? "PASS" : "FAIL", String(p.inSitemap));
     add(p.path, "key facts in raw HTML", p.factsMissing.length ? "FAIL" : "PASS", p.factsMissing.join(", ") || "all present");
-    if (p.softFactPatterns.length) add(p.path, "area guide link", p.softFactsMissing.length ? "WARN" : "PASS", p.softFactsMissing.join(", ") || "present");
+    if (p.softFactPatterns.length) add(p.path, p.softLabel || "area guide link", p.softFactsMissing.length ? "WARN" : "PASS", p.softFactsMissing.join(", ") || "present");
     add(p.path, "inbound links from T-set", p.inboundFromTSet.length ? "PASS" : "WARN", String(p.inboundFromTSet.length));
     add(p.path, `TTFB median < ${TTFB_WARN_MS}ms`, p.ttfbMedianMs < TTFB_WARN_MS ? "PASS" : "WARN", `${p.ttfbMs.join("/")}ms cache=${p.vercelCache || "-"}`);
     for (const c of p.crawlers) {

@@ -3,7 +3,7 @@
   "requirements": "seo-feature-req.json",
   "plan": "SEO-PLAN.md",
   "phase_summary": "feature-progress.json",
-  "updated_at": "2026-11-15T01:20:00+02:00",
+  "updated_at": "2026-11-15T06:30:00+02:00",
   "status": "merged_partially_verified",
   "target_date": "2026-11-03",
   "timezone": "Africa/Cairo",
@@ -252,15 +252,28 @@
     {
       "id": "SEO-18",
       "title": "Area pages and listings link their indexable area guides; seo-health.mjs technical check",
-      "status": "ready_for_review",
+      "status": "merged",
       "owner": "lead",
       "branch": "feat/ai-visibility-day1",
       "pr": "https://github.com/abozaid010/lenaqar-website/pull/39",
+      "tested_sha": "9617b5b907fb5d990dc03445c3686ca77248fcac",
+      "production_sha": "947bd8b24340c513cb0d5261285664bf63f2cfb9",
+      "evidence": ["src/lib/guides/related-links.js", "src/lib/guides/area-guides.js", "src/lib/lenaqar/__tests__/guide-links.test.js", "scripts/seo-health.mjs", "REPORT/seo-health/2026-11-15-production-after.json (83 PASS / 4 WARN / 0 FAIL; Vercel githubCommitSha = merge SHA)"],
+      "blocker": null,
+      "updated_at": "2026-11-15T06:30:00+02:00"
+    },
+    {
+      "id": "SEO-19",
+      "title": "Madinaty price guide: LenAqar asking-price table from listed resale inventory (B5); mostaqbal city feed token",
+      "status": "ready_for_review",
+      "owner": "lead",
+      "branch": "feat/madinaty-inventory-summary",
+      "pr": null,
       "tested_sha": null,
       "production_sha": null,
-      "evidence": ["src/lib/guides/related-links.js", "src/lib/guides/area-guides.js", "src/lib/lenaqar/__tests__/guide-links.test.js", "scripts/seo-health.mjs"],
+      "evidence": ["src/lib/guides/inventory-summary.js", "src/lib/guides/inventory-summary.server.js", "src/components/guides/GuideInventorySummary.jsx", "src/lib/lenaqar/__tests__/guide-inventory-summary.test.js"],
       "blocker": null,
-      "updated_at": "2026-11-15T01:20:00+02:00"
+      "updated_at": "2026-11-15T06:30:00+02:00"
     }
   ],
   "history": [

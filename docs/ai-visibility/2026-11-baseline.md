@@ -57,3 +57,27 @@ Not documented (**H**): which third-party indexes ChatGPT search and Claude web 
 2. Listings in a known guide area link to that area's price map and hub. Unknown areas get no link rather than a guessed one.
 3. `scripts/seo-health.mjs` adds a repeatable technical eligibility check. Simulated crawler requests are labeled as simulated.
 4. The resale guide stays `noindex` (intentional). Finishing it is Day 3–5 content work with official sources.
+
+## 6. Day 1 production check (2026-11-15, after PR #39 merged)
+- **V** Vercel production deployment `dpl_712aBsah73TTj6UssXJLTG5RQLRP`: `githubCommitSha` = merge commit `947bd8b2`.
+- **V** `seo-health.mjs` against production: 83 PASS, 4 WARN, 0 FAIL (before: 80 / 6 / 1). Raw JSON: `REPORT/seo-health/2026-11-15-production-after.json`.
+  - `/opportunities/08OZ4Lxc` (حدائق العاصمة, New Capital) has no guide link: expected, no guide area exists there.
+- **V** Feed spells the district `mostaqbal city` (19 listings). The Day 1 map only had `mostakbal city`, so those listings linked the New Cairo guides instead of Mostakbal City. Fixed in PR-3.
+
+## 7. PR-3: LenAqar asking-price table on `/guides/madinaty/prices-2026` (B5)
+Source: the backend route `GET /public/v1/price-insight` (`LENAAI-Agent/src/services/price_insight.py`), already used by the buy-request success card. Method, read from that code on 2026-11-15:
+- Resale units only; developer units excluded. Each unit valued at `presentValue` (seller's cash now plus discounted remaining installments).
+- Medians. Rows with price per m² outside 5,000–1,000,000 EGP dropped. From 20 units up, the range excludes the cheapest and dearest 5%.
+- The backend widens scope when too few units match (bedrooms → district → city) and reports it in `relaxed`. **V** asking for 1 or 4 bedrooms in Madinaty returned the all-apartments figure (n = 121) with `relaxed: ["bedrooms"]`. The site drops any widened answer, any answer not scoped to Madinaty, and any category with n < 20 (threshold **H**).
+
+Values on 2026-11-15 (production API):
+
+| Category | n | Median EGP/m² | Median unit | Range (5–95%) |
+|---|---|---|---|---|
+| All apartments | 121 | 62,112 | 7,172,058 | 4,629,463 – 12,169,865 |
+| 2 bedrooms | 46 | 64,154 | 5,509,455 | 4,466,487 – 8,394,790 |
+| 3 bedrooms | 70 | 61,264 | 8,000,000 | 5,500,000 – 12,430,000 |
+
+Cross-check (**V**): the public feed (`/public/v1/units`, client `lenaqar`) lists 121 Madinaty resale apartments, all `visible`. My own median over 118 valued units: 61,525 EGP/m² (differs by 3 units from the API's set).
+Freshness (**V**): 88 of those 118 records were last updated before 2026-10-01; the earliest is 2026-09-17. The page shows the record date range and says these are asking prices, not sale prices. Nothing is marked verified.
+Open (**I**): whether shared-network units (sharing policy) or sold units are in the API's set; the owner confirms as part of decision 4.
