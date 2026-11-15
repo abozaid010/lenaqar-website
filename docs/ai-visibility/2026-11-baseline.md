@@ -87,6 +87,8 @@ Open (**I**): whether shared-network units (sharing policy) or sold units are in
 - **V** Live bug: `/guides/buying/contract-registration-checklist` shipped an FAQPage `Answer` without `text` (FAQ "التسجيل إجباري؟" had `a: ''`). Only guide affected. Fixed in content, and `answeredFaq()` now drops empty items from both the page and the schema.
 - B6 sources (read 2026-11-15):
   - Registration fee bands 500 / 1000 / 1500 / 2000 EGP by area: `blogs.realestate.gov.eg` (official subdomain, page dated 2024-12-11, cites no law). **S** for 2026: the page itself says 2024; the guide tells the reader to confirm.
+  - The same page, under the same heading, also says 2024 registration fees reach a maximum of 4000 EGP (100 form + 3900) without reconciling it with the bands. Review of PR #41 caught that the first draft omitted this; the guide now shows both and tells the reader to confirm the final amount.
+  - Removed an unsourced claim that sellers usually hand over without utility arrears (now "حسب العقد").
   - Disposal tax: ETA FAQ PDF (2026-10) says the app computes 2.5% of sale value × seller's share; late charge monthly after 30 days from the disposal date (art. 110, Law 91/2005). **V** (official).
   - Secondary sites disagree on bands (some show 1,500 EGP up to 200 m²) and on the payment deadline (30 vs 60 days): not used.
   - Transfer fee, maintenance deposit, commission, utilities: no official figure; the guide says "varies, get it in writing".

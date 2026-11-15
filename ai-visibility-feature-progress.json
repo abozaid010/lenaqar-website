@@ -1,6 +1,6 @@
 {
   "feature": "AI-search visibility (ChatGPT Search, Claude web search, Gemini)",
-  "updated_at": "2026-11-15T08:30:00+02:00",
+  "updated_at": "2026-11-15T09:30:00+02:00",
   "goal": "Raise the probability that ChatGPT Search, Claude web search and Gemini cite or accurately recommend LenAqar for Egyptian resale property questions in the areas it serves, and that this produces qualified buy/sell inquiries.",
   "rules": [
     "Update this file at the end of every step: item status, PR, evidence, next_step, history.",
@@ -212,6 +212,10 @@
     {
       "at": "2026-11-15T08:30:00+02:00",
       "event": "B6 built: total purchase cost section with official sources; empty-FAQ schema bug fixed. PR #41 opened."
+    },
+    {
+      "at": "2026-11-15T09:30:00+02:00",
+      "event": "PR #41 review: Vercel preview failed once on a transient Google Fonts fetch (JSON-only commit); redeployed preview Ready, all checks green. Production confirmed still serving the empty FAQ answer (fix ships only on merge). Source fixes pushed: 4000 EGP 2024 cap from the same official page added; unsourced 'seller usually' utilities claim removed."
     }
   ]
 }
