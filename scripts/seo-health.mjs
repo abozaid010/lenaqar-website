@@ -62,7 +62,7 @@ const ROBOTS_ONLY_TOKENS = ["Google-Extended"];
  */
 const SITE_TYPES = ["Organization", "WebSite"];
 const T_SET = [
-  { path: "/", expectIndex: true, facts: [/<h1[\s>]/], types: ["FAQPage"] },
+  { path: "/", expectIndex: true, facts: [/<h1[\s>]/], types: ["FAQPage"], softLabel: "Search Console verification tag", softFacts: [/<meta name="google-site-verification" content="aJzg6-/] },
   { path: "/opportunities", expectIndex: true, facts: [/<h1[\s>]/, /href="\/opportunities\/[A-Za-z0-9]+"/] },
   // The footer links the Madinaty price map on every page, so the hub link is
   // what proves the area page itself links its guides.

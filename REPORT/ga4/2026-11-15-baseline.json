@@ -1,0 +1,396 @@
+{
+ "property": "properties/562541313",
+ "measurementId": "G-3QC63HK3DQ",
+ "streamCreated": "2026-11-05",
+ "range": {
+  "start": "2026-11-05",
+  "end": "2026-11-14"
+ },
+ "pulledAt": "2026-11-15",
+ "reports": {
+  "daily": {
+   "columns": [
+    "date",
+    "sessions",
+    "engagedSessions",
+    "activeUsers"
+   ],
+   "rows": [
+    [
+     "20261105",
+     "11",
+     "6",
+     "10"
+    ],
+    [
+     "20261106",
+     "12",
+     "4",
+     "9"
+    ],
+    [
+     "20261107",
+     "8",
+     "6",
+     "6"
+    ],
+    [
+     "20261108",
+     "55",
+     "26",
+     "53"
+    ],
+    [
+     "20261109",
+     "37",
+     "20",
+     "32"
+    ],
+    [
+     "20261110",
+     "54",
+     "29",
+     "53"
+    ],
+    [
+     "20261111",
+     "86",
+     "54",
+     "77"
+    ],
+    [
+     "20261112",
+     "39",
+     "20",
+     "38"
+    ],
+    [
+     "20261113",
+     "31",
+     "15",
+     "28"
+    ],
+    [
+     "20261114",
+     "14",
+     "3",
+     "7"
+    ]
+   ],
+   "rowCount": 10
+  },
+  "channels": {
+   "columns": [
+    "sessionDefaultChannelGroup",
+    "sessions",
+    "engagedSessions"
+   ],
+   "rows": [
+    [
+     "Paid Social",
+     "212",
+     "107"
+    ],
+    [
+     "Direct",
+     "65",
+     "36"
+    ],
+    [
+     "Organic Social",
+     "24",
+     "11"
+    ],
+    [
+     "Organic Search",
+     "21",
+     "11"
+    ],
+    [
+     "AI Assistant",
+     "19",
+     "14"
+    ],
+    [
+     "Referral",
+     "5",
+     "4"
+    ],
+    [
+     "Unassigned",
+     "2",
+     "0"
+    ]
+   ],
+   "rowCount": 7
+  },
+  "sources": {
+   "columns": [
+    "sessionSource",
+    "sessionMedium",
+    "sessions"
+   ],
+   "rows": [
+    [
+     "facebook",
+     "paid_social",
+     "212"
+    ],
+    [
+     "(direct)",
+     "(none)",
+     "65"
+    ],
+    [
+     "chatgpt.com",
+     "ai-assistant",
+     "19"
+    ],
+    [
+     "google",
+     "organic",
+     "19"
+    ],
+    [
+     "facebook.com",
+     "referral",
+     "13"
+    ],
+    [
+     "m.facebook.com",
+     "referral",
+     "11"
+    ],
+    [
+     "l.wl.co",
+     "referral",
+     "5"
+    ],
+    [
+     "(not set)",
+     "(not set)",
+     "2"
+    ],
+    [
+     "bing",
+     "organic",
+     "2"
+    ]
+   ],
+   "rowCount": 9
+  },
+  "ai_referrals": {
+   "columns": [
+    "sessionSource",
+    "landingPage",
+    "sessions",
+    "engagedSessions"
+   ],
+   "rows": [
+    [
+     "chatgpt.com",
+     "/",
+     "4",
+     "3"
+    ],
+    [
+     "chatgpt.com",
+     "/apartments-for-sale/new-cairo",
+     "4",
+     "4"
+    ],
+    [
+     "chatgpt.com",
+     "/guides/el-shorouk/prices-2026",
+     "4",
+     "2"
+    ],
+    [
+     "chatgpt.com",
+     "/apartments-for-sale/fifth-settlement",
+     "2",
+     "1"
+    ],
+    [
+     "chatgpt.com",
+     "/apartments-for-sale/madinaty",
+     "2",
+     "2"
+    ],
+    [
+     "chatgpt.com",
+     "/guides/madinaty/prices-2026",
+     "2",
+     "1"
+    ],
+    [
+     "chatgpt.com",
+     "/apartments-for-sale/6th-of-october",
+     "1",
+     "1"
+    ]
+   ],
+   "rowCount": 7
+  },
+  "key_events": {
+   "columns": [
+    "eventName",
+    "eventCount"
+   ],
+   "rows": [
+    [
+     "whatsapp_click",
+     "43"
+    ],
+    [
+     "buy_request_submitted",
+     "41"
+    ],
+    [
+     "sell_request_submitted",
+     "1"
+    ]
+   ],
+   "rowCount": 3
+  },
+  "landing_pages": {
+   "columns": [
+    "landingPage",
+    "sessions"
+   ],
+   "rows": [
+    [
+     "/how-it-works",
+     "218"
+    ],
+    [
+     "/",
+     "71"
+    ],
+    [
+     "/guides/el-shorouk/prices-2026",
+     "17"
+    ],
+    [
+     "/opportunities",
+     "9"
+    ],
+    [
+     "/apartments-for-sale/new-cairo",
+     "4"
+    ],
+    [
+     "/guides/buying/check-developer-project",
+     "4"
+    ],
+    [
+     "/guides/fifth-settlement/prices-2026",
+     "4"
+    ],
+    [
+     "",
+     "3"
+    ],
+    [
+     "/apartments-for-sale/madinaty",
+     "3"
+    ],
+    [
+     "/network",
+     "3"
+    ],
+    [
+     "/apartments-for-sale/fifth-settlement",
+     "2"
+    ],
+    [
+     "/guides",
+     "2"
+    ],
+    [
+     "/guides/madinaty/prices-2026",
+     "2"
+    ],
+    [
+     "(not set)",
+     "1"
+    ],
+    [
+     "/apartments-for-sale/6th-of-october",
+     "1"
+    ]
+   ],
+   "rowCount": 19
+  },
+  "language": {
+   "columns": [
+    "language",
+    "sessions"
+   ],
+   "rows": [
+    [
+     "English",
+     "203"
+    ],
+    [
+     "Arabic",
+     "142"
+    ],
+    [
+     "Italian",
+     "2"
+    ],
+    [
+     "German",
+     "1"
+    ],
+    [
+     "Turkish",
+     "1"
+    ]
+   ],
+   "rowCount": 5
+  },
+  "country": {
+   "columns": [
+    "country",
+    "sessions"
+   ],
+   "rows": [
+    [
+     "Egypt",
+     "298"
+    ],
+    [
+     "United States",
+     "22"
+    ],
+    [
+     "Germany",
+     "11"
+    ],
+    [
+     "Saudi Arabia",
+     "4"
+    ],
+    [
+     "United Arab Emirates",
+     "3"
+    ],
+    [
+     "Italy",
+     "2"
+    ],
+    [
+     "Sweden",
+     "2"
+    ],
+    [
+     "(not set)",
+     "1"
+    ]
+   ],
+   "rowCount": 12
+  }
+ }
+}

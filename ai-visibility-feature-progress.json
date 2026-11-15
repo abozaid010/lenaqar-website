@@ -1,6 +1,6 @@
 {
   "feature": "AI-search visibility (ChatGPT Search, Claude web search, Gemini)",
-  "updated_at": "2026-11-15T11:15:00+02:00",
+  "updated_at": "2026-11-15T14:00:00+02:00",
   "goal": "Raise the probability that ChatGPT Search, Claude web search and Gemini cite or accurately recommend LenAqar for Egyptian resale property questions in the areas it serves, and that this produces qualified buy/sell inquiries.",
   "rules": [
     "Update this file at the end of every step: item status, PR, evidence, next_step, history.",
@@ -27,11 +27,11 @@
     },
     "C_acquisition": {
       "source": "GA4 G-3QC63HK3DQ + GSC",
-      "status": "unknown: blocked on owner decision 1"
+      "status": "V (GA4 property 562541313, stream G-3QC63HK3DQ created 2026-11-05; REPORT/ga4/2026-11-15-baseline.json). 2026-11-05..14: 348 sessions; Paid Social 212, Direct 65, Organic Social 24, Organic Search 21, AI Assistant 19 (chatgpt.com, 14 engaged), Referral 5. Prior period (before 2026-11-05): unknown, property did not exist. GSC: pending verification (PR)."
     },
     "D_business": {
       "source": "GA4 events + lenaai.net CRM (lead_code/UTM)",
-      "status": "unknown: blocked on owner decision 1; qualified lead not yet defined"
+      "status": "V partial (GA4 key events 2026-11-05..14): buy_request_submitted 41 (Paid Social 33, Direct 7, Referral 1), sell_request_submitted 1, whatsapp_click 43 interactions (AI Assistant 7). AI-referred form submissions: 0. Qualified leads: unknown until defined + CRM match."
     }
   },
   "owner_decisions": [
@@ -42,8 +42,8 @@
         "B1",
         "tracks C/D"
       ],
-      "status": "open",
-      "checked": "2026-11-15: ~/.config/gcloud-lenaqar does not exist"
+      "status": "ga4_done_gsc_pending",
+      "checked": "2026-11-15: own OAuth client (project LenaAI-Agents gen-lang-client-0077888650), test user abozaid.ibrahim11@gmail.com, Analytics Admin + Search Console APIs enabled; ADC at ~/.config/gcloud-lenaqar. GA4 read works. Search Console: lenaqar.com was not a property in any of the 5 signed-in Google accounts; URL-prefix property https://www.lenaqar.com/ added under abozaid.ibrahim11@gmail.com. GA verification failed (tag not in <head>); HTML meta tag shipped in a PR, verify after deploy."
     },
     {
       "id": "D2",
@@ -81,8 +81,10 @@
     {
       "id": "B1",
       "title": "GA4/GSC access, tracking check, baselines",
-      "status": "blocked_owner",
-      "blocker": "D1"
+      "status": "partial",
+      "blocker": "D1",
+      "evidence": "REPORT/ga4/2026-11-15-baseline.json; REPORT/ga4/2026-11-15-key-events-by-channel.json",
+      "note": "GA4 tracking verified via Admin API (stream + 4 key events) and Data API. Planned prior-period comparison impossible: GA4 stream created 2026-11-05. GSC baseline waits for verification."
     },
     {
       "id": "B2",
@@ -177,10 +179,19 @@
       "id": "B15",
       "title": "English pilot",
       "status": "gated",
-      "blocker": "B1 data shows English demand"
+      "blocker": "B1 data shows English demand",
+      "note": "Signal 2026-11-05..14: browser language English 203 vs Arabic 142 sessions (58% English). Browser UI language is not content preference (many Egyptian users run English UI). Decide with GSC English query impressions once available."
+    },
+    {
+      "id": "B18",
+      "title": "Search Console ownership: URL-prefix https://www.lenaqar.com/ verified via HTML meta tag; submit sitemap",
+      "status": "in_progress",
+      "branch": "feat/gsc-verification",
+      "evidence": "Property added 2026-11-15 under abozaid.ibrahim11@gmail.com; meta tag in src/app/metadata.js (verification.google)",
+      "next": "After merge + deploy: click Verify (HTML tag), submit https://www.lenaqar.com/sitemap.xml, pull GSC baseline 28 days."
     }
   ],
-  "next_step": "After PR #42 merges: verify the first manual/scheduled run on main. Next build step: B11 (/opportunities TTFB on cache miss). Then B3 (resale guide content), B14 (NAP audit + outreach drafts).",
+  "next_step": "Owner merges the GSC verification PR. Then: verify in Search Console, submit sitemap, pull GSC baseline. Owner decides B16 (photos 402). Then B11, B17, B3, B14.",
   "reviews": [
     {
       "date": "2026-11-23",
@@ -231,6 +242,10 @@
     {
       "at": "2026-11-15T11:15:00+02:00",
       "event": "PR #42 workflow passed on GitHub runners (110/3/0). B9 sampled 1 h of CDN request logs: no verified AI crawler data possible on the free plan; real bingbot hit a 402 on /_next/image. B9 marked partial with options."
+    },
+    {
+      "at": "2026-11-15T14:00:00+02:00",
+      "event": "D1: own OAuth client + test user + APIs enabled; GA4 read access verified; GA4 baseline pulled (348 sessions, 19 ChatGPT referrals, 41 buy requests). lenaqar.com had no Search Console property; added URL-prefix property and opened the meta-tag verification PR (B18)."
     }
   ]
 }
