@@ -3,9 +3,19 @@
   "status": "provisional",
   "created": "2026-11-15",
   "freeze_rule": "Up to 4 non-branded prompts may be swapped once GSC query data is readable; after that the panel is frozen for all rounds.",
-  "products": ["chatgpt-search", "claude-web-search", "gemini-app"],
-  "separate_track": ["google-ai-overviews", "google-ai-mode"],
-  "runs_per_prompt_product": { "non_branded": 2, "branded": 1 },
+  "products": [
+    "chatgpt-search",
+    "claude-web-search",
+    "gemini-app"
+  ],
+  "separate_track": [
+    "google-ai-overviews",
+    "google-ai-mode"
+  ],
+  "runs_per_prompt_product": {
+    "non_branded": 2,
+    "branded": 1
+  },
   "run_budget_per_round": 84,
   "settings": "Fresh conversation; memory/personalization off; ChatGPT search on; Claude web search on; Gemini default; Egypt IP. Consumer apps only — API results are never mixed in.",
   "metrics": {
@@ -16,30 +26,176 @@
     "reporting": "raw counts + denominators per product; failed/skipped runs reported separately; branded and non-branded never mixed"
   },
   "prompts": [
-    { "id": "N01", "lang": "ar-eg", "intent": "price", "text": "سعر متر الشقق الريسيل في مدينتي دلوقتي كام؟", "mapped": ["/guides/madinaty/prices-2026"] },
-    { "id": "N02", "lang": "ar-eg", "intent": "budget", "text": "معايا ٤ مليون، ألاقي شقة ريسيل كويسة في مدينتي ولا الشروق؟", "mapped": ["/guides/madinaty/budget-4m", "/guides/el-shorouk/budget-3m"] },
-    { "id": "N03", "lang": "ar-eg", "intent": "compare", "text": "أسكن فين أحسن: مدينتي ولا الشروق ولا التجمع الخامس؟", "mapped": ["/guides/el-shorouk/pros-cons"], "gap": "compare guides noindex (placeholders)" },
-    { "id": "N04", "lang": "ar-eg", "intent": "resale_process", "text": "إزاي أشتري شقة ريسيل في مصر خطوة بخطوة من غير ما أتنصب؟", "mapped": ["/guides/buying/buying-resale-step-by-step"], "gap": "guide noindex (content incomplete)" },
-    { "id": "N05", "lang": "ar-eg", "intent": "total_cost", "text": "إيه التكاليف غير سعر الشقة لما أشتري ريسيل: تنازل وتسجيل وصيانة وعمولة؟", "mapped": ["/guides/buying/contract-registration-checklist"], "gap": "cost section added 2026-11-15 (B6); transfer, maintenance and commission amounts vary and are not given" },
-    { "id": "N06", "lang": "ar-eg", "intent": "due_diligence", "text": "أتأكد إزاي من عقد شقة ريسيل وتسجيلها قبل ما أدفع عربون؟", "mapped": ["/guides/buying/contract-registration-checklist", "/before-you-pay"] },
-    { "id": "N07", "lang": "ar-eg", "intent": "resale_vs_primary", "text": "أشتري ريسيل ولا من المطور بالتقسيط في التجمع الخامس؟", "mapped": ["/guides/buying/resale-vs-new-launch"] },
-    { "id": "N08", "lang": "ar-msa", "intent": "investment", "text": "هل شراء شقة في القاهرة الجديدة للاستثمار في 2026 قرار مناسب، وما المخاطر؟", "mapped": ["/guides/new-cairo", "/guides/fifth-settlement"] },
-    { "id": "N09", "lang": "ar-eg", "intent": "delivery_delay", "text": "المطور أخّر التسليم، ألغي التعاقد ولا أبيع الوحدة ريسيل؟", "mapped": ["/guides/buying/cancellation-vs-resale", "/delivery-delays"] },
-    { "id": "N10", "lang": "ar-eg", "intent": "listings", "text": "فين ألاقي شقق ريسيل جاهزة للاستلام في الشروق بأسعار معروضة واضحة؟", "mapped": ["/apartments-for-sale/el-shorouk", "/ready-to-move-properties"] },
-    { "id": "N11", "lang": "en", "intent": "price", "text": "What is the average price per square meter for apartments in Madinaty, Egypt in 2026?", "mapped": ["/guides/madinaty/prices-2026"], "gap": "Arabic-only page" },
-    { "id": "N12", "lang": "en", "intent": "due_diligence", "text": "What should I check before buying a resale apartment in New Cairo, Egypt?", "mapped": ["/guides/buying/contract-registration-checklist"], "gap": "Arabic-only page" }
+    {
+      "id": "N01",
+      "lang": "ar-eg",
+      "intent": "price",
+      "text": "سعر متر الشقق الريسيل في مدينتي دلوقتي كام؟",
+      "mapped": [
+        "/guides/madinaty/prices-2026"
+      ]
+    },
+    {
+      "id": "N02",
+      "lang": "ar-eg",
+      "intent": "budget",
+      "text": "معايا ٤ مليون، ألاقي شقة ريسيل كويسة في مدينتي ولا الشروق؟",
+      "mapped": [
+        "/guides/madinaty/budget-4m",
+        "/guides/el-shorouk/budget-3m"
+      ]
+    },
+    {
+      "id": "N03",
+      "lang": "ar-eg",
+      "intent": "compare",
+      "text": "أسكن فين أحسن: مدينتي ولا الشروق ولا التجمع الخامس؟",
+      "mapped": [
+        "/guides/el-shorouk/pros-cons"
+      ],
+      "gap": "compare guides noindex (placeholders)"
+    },
+    {
+      "id": "N04",
+      "lang": "ar-eg",
+      "intent": "resale_process",
+      "text": "إزاي أشتري شقة ريسيل في مصر خطوة بخطوة من غير ما أتنصب؟",
+      "mapped": [
+        "/guides/buying/buying-resale-step-by-step"
+      ],
+      "gap": "guide noindex (content incomplete)"
+    },
+    {
+      "id": "N05",
+      "lang": "ar-eg",
+      "intent": "total_cost",
+      "text": "إيه التكاليف غير سعر الشقة لما أشتري ريسيل: تنازل وتسجيل وصيانة وعمولة؟",
+      "mapped": [
+        "/guides/buying/contract-registration-checklist"
+      ],
+      "gap": "cost section added 2026-11-15 (B6); transfer, maintenance and commission amounts vary and are not given"
+    },
+    {
+      "id": "N06",
+      "lang": "ar-eg",
+      "intent": "due_diligence",
+      "text": "أتأكد إزاي من عقد شقة ريسيل وتسجيلها قبل ما أدفع عربون؟",
+      "mapped": [
+        "/guides/buying/contract-registration-checklist",
+        "/before-you-pay"
+      ]
+    },
+    {
+      "id": "N07",
+      "lang": "ar-eg",
+      "intent": "resale_vs_primary",
+      "text": "أشتري ريسيل ولا من المطور بالتقسيط في التجمع الخامس؟",
+      "mapped": [
+        "/guides/buying/resale-vs-new-launch"
+      ]
+    },
+    {
+      "id": "N08",
+      "lang": "ar-msa",
+      "intent": "investment",
+      "text": "هل شراء شقة في القاهرة الجديدة للاستثمار في 2026 قرار مناسب، وما المخاطر؟",
+      "mapped": [
+        "/guides/new-cairo",
+        "/guides/fifth-settlement"
+      ]
+    },
+    {
+      "id": "N09",
+      "lang": "ar-eg",
+      "intent": "delivery_delay",
+      "text": "المطور أخّر التسليم، ألغي التعاقد ولا أبيع الوحدة ريسيل؟",
+      "mapped": [
+        "/guides/buying/cancellation-vs-resale",
+        "/delivery-delays"
+      ]
+    },
+    {
+      "id": "N10",
+      "lang": "ar-eg",
+      "intent": "listings",
+      "text": "فين ألاقي شقق ريسيل جاهزة للاستلام في الشروق بأسعار معروضة واضحة؟",
+      "mapped": [
+        "/apartments-for-sale/el-shorouk",
+        "/ready-to-move-properties"
+      ]
+    },
+    {
+      "id": "N11",
+      "lang": "en",
+      "intent": "price",
+      "text": "What is the average price per square meter for apartments in Madinaty, Egypt in 2026?",
+      "mapped": [
+        "/guides/madinaty/prices-2026"
+      ],
+      "gap": "Arabic-only page"
+    },
+    {
+      "id": "N12",
+      "lang": "en",
+      "intent": "due_diligence",
+      "text": "What should I check before buying a resale apartment in New Cairo, Egypt?",
+      "mapped": [
+        "/guides/buying/contract-registration-checklist"
+      ],
+      "gap": "Arabic-only page"
+    }
   ],
   "branded": [
-    { "id": "BR1", "lang": "ar-eg", "text": "إيه هي لينا عقار (lenaqar.com) وبتشتغل إزاي؟" },
-    { "id": "BR2", "lang": "en", "text": "Is lenaqar.com legitimate and how does it make money?" },
-    { "id": "BR3", "lang": "ar-eg", "text": "هل لينا عقار بتاخد عمولة من المشتري؟", "scoring": "unscoreable until commission policy (SEO-07) is decided" },
-    { "id": "BR4", "lang": "ar-eg", "text": "إزاي أتواصل مع لينا عقار وفين مكتبهم؟" }
+    {
+      "id": "BR1",
+      "lang": "ar-eg",
+      "text": "إيه هي لينا عقار (lenaqar.com) وبتشتغل إزاي؟"
+    },
+    {
+      "id": "BR2",
+      "lang": "en",
+      "text": "Is lenaqar.com legitimate and how does it make money?"
+    },
+    {
+      "id": "BR3",
+      "lang": "ar-eg",
+      "text": "هل لينا عقار بتاخد عمولة من المشتري؟",
+      "scoring": "unscoreable until commission policy (SEO-07) is decided"
+    },
+    {
+      "id": "BR4",
+      "lang": "ar-eg",
+      "text": "إزاي أتواصل مع لينا عقار وفين مكتبهم؟"
+    }
   ],
   "record_fields": [
-    "run_id", "round", "date_time_cairo", "product", "model_label_visible", "search_mode",
-    "account_state", "location_context", "prompt_id", "prompt_text", "language", "run_no",
-    "status", "status_reason", "response_text_path", "cited_urls", "lenaqar_mentioned",
-    "lenaqar_cited_url", "lenaqar_recommended", "cited_lenaqar_landing_page",
-    "competitor_domains", "factual_errors_about_lenaqar", "notes"
-  ]
+    "run_id",
+    "round",
+    "date_time_cairo",
+    "product",
+    "model_label_visible",
+    "search_mode",
+    "account_state",
+    "location_context",
+    "prompt_id",
+    "prompt_text",
+    "language",
+    "run_no",
+    "status",
+    "status_reason",
+    "response_text_path",
+    "cited_urls",
+    "lenaqar_mentioned",
+    "lenaqar_cited_url",
+    "lenaqar_recommended",
+    "cited_lenaqar_landing_page",
+    "competitor_domains",
+    "factual_errors_about_lenaqar",
+    "notes"
+  ],
+  "round1": {
+    "date": "2026-11-15",
+    "records": "runs/2026-11-15-round1.jsonl",
+    "summary": "runs/2026-11-15-round1-summary.md"
+  }
 }

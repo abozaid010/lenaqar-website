@@ -1,6 +1,6 @@
 {
   "feature": "AI-search visibility (ChatGPT Search, Claude web search, Gemini)",
-  "updated_at": "2026-11-15T14:00:00+02:00",
+  "updated_at": "2026-11-15T15:30:00+02:00",
   "goal": "Raise the probability that ChatGPT Search, Claude web search and Gemini cite or accurately recommend LenAqar for Egyptian resale property questions in the areas it serves, and that this produces qualified buy/sell inquiries.",
   "rules": [
     "Update this file at the end of every step: item status, PR, evidence, next_step, history.",
@@ -22,8 +22,8 @@
       "status": "V: production 110 PASS / 3 WARN / 0 FAIL with structured-data checks, locally and from GitHub Actions (run 43679557793, 2026-11-15). GSC: I. Real crawler visits: partial (B9)"
     },
     "B_ai_visibility": {
-      "source": "docs/ai-visibility/runs/<round>.jsonl",
-      "status": "not started: blocked on owner decision 2"
+      "source": "docs/ai-visibility/runs/2026-11-15-round1.jsonl",
+      "status": "V round 1 (2026-11-15, 84 records, 82 scored): non-branded mention 0/72, citation 2/72 (ChatGPT only: N08, N11 run 2), recommendation 0/72; ChatGPT search results included lenaqar.com in 9/24; branded mention 10/10 scored. Summary: docs/ai-visibility/runs/2026-11-15-round1-summary.md"
     },
     "C_acquisition": {
       "source": "GA4 G-3QC63HK3DQ + GSC",
@@ -52,7 +52,8 @@
         "B2",
         "track B"
       ],
-      "status": "open"
+      "status": "done_round1",
+      "checked": "2026-11-15: owner approved running in his Chrome. ChatGPT temporary+Unpersonalized, Claude incognito (account skills still leak: 2 branded runs excluded), Gemini temporary chat."
     },
     {
       "id": "D3",
@@ -89,8 +90,10 @@
     {
       "id": "B2",
       "title": "AI panel round 1 (84 records)",
-      "status": "blocked_owner",
-      "blocker": "D2"
+      "status": "done",
+      "blocker": "D2",
+      "evidence": "docs/ai-visibility/runs/2026-11-15-round1.jsonl; docs/ai-visibility/runs/2026-11-15-round1-summary.md",
+      "note": "Round 2 same settings on or after 2026-11-21 (after PR #40/#41 changes have had time to be crawled). Claude branded prompts need a clean account or skills off."
     },
     {
       "id": "B3",
@@ -206,9 +209,31 @@
       "branch": "feat/gsc-verification",
       "evidence": "Property added 2026-11-15 under abozaid.ibrahim11@gmail.com; meta tag in src/app/metadata.js (verification.google)",
       "next": "After merge + deploy: click Verify (HTML tag), submit https://www.lenaqar.com/sitemap.xml, pull GSC baseline 28 days."
+    },
+    {
+      "id": "B19",
+      "title": "One consistent, public commission and legitimacy statement",
+      "status": "needs_owner_decision",
+      "blocker": "SEO-07",
+      "evidence": "Round 1: ChatGPT quoted site terms (buyer 1.25%, seller 0%, terms 'draft pending legal approval'); Claude said the site never says how it gets paid; Gemini guessed 'usually paid by the seller'. Three products, three answers.",
+      "next": "Owner decides SEO-07; then one statement on /how-it-works, /before-you-pay and the terms, plus an FAQ entry. Remove or date the 'draft' label when terms are final."
+    },
+    {
+      "id": "B20",
+      "title": "'Resale and primary' copy vs resale-only inventory",
+      "status": "needs_owner_decision",
+      "evidence": "All three products repeat that LenAqar searches resale and primary; the site's /how-it-works steps say so; site inventory query is is_primary=false.",
+      "next": "Owner confirms whether primary (developer) units are offered; align copy either way."
+    },
+    {
+      "id": "B21",
+      "title": "Independent references (press, directories, partners)",
+      "status": "pending",
+      "evidence": "Claude: 'no independent reviews or press coverage'; ChatGPT: 'Not independently verified'. Branded answers rely only on lenaqar.com and lenaai.net.",
+      "next": "Fold into B14 outreach drafts (owner sends)."
     }
   ],
-  "next_step": "Owner merges PR #44 (includes #43). Then: verify Search Console (HTML tag), submit sitemap, pull GSC baseline. Owner decides B16 (photos 402: free code fix recommended). Then B11, B17, B3, B14.",
+  "next_step": "Owner: merge PR #44 then the round-1 PR; decide SEO-07 (B19) and B20; decide B16 photos. Build next: B17 (listing og:image) once B16 is decided, else B3 (resale guide content) and B14+B21 (NAP audit + outreach drafts). Round 2 panel on/after 2026-11-21.",
   "reviews": [
     {
       "date": "2026-11-23",
@@ -267,6 +292,10 @@
     {
       "at": "2026-11-15T14:00:00+02:00",
       "event": "D1: own OAuth client + test user + APIs enabled; GA4 read access verified; GA4 baseline pulled (348 sessions, 19 ChatGPT referrals, 41 buy requests). lenaqar.com had no Search Console property; added URL-prefix property and opened the meta-tag verification PR (B18)."
+    },
+    {
+      "at": "2026-11-15T15:30:00+02:00",
+      "event": "AI panel round 1 run in the owner's Chrome: 84 records (ChatGPT 28, Claude 28 with 2 excluded for personalization leak, Gemini 28). Non-branded: 0 mentions, 2 citations (ChatGPT), 0 recommendations; ChatGPT retrieved lenaqar.com in 9/24. Branded answers conflict on commission. B2 done; B19-B21 added."
     }
   ]
 }
