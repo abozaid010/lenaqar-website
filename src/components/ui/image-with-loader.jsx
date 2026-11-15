@@ -54,6 +54,12 @@ export default function ImageWithLoader({
   const isConfigured = isConfiguredHostname(src);
   const [isLoading, setIsLoading] = useState(isConfigured);
   const [hasError, setHasError] = useState(!isConfigured);
+  // The optimizer (/_next/image) can fail while the original file is fine,
+  // e.g. HTTP 402 once the Vercel image-optimization allowance is used up.
+  // Retrying by swapping img.src cannot help: the browser keeps using the
+  // optimizer srcset. So the first failure re-renders the image unoptimized,
+  // which loads the original URL directly (no srcset).
+  const [bypassOptimizer, setBypassOptimizer] = useState(false);
 
   const handleLoad = () => {
     setIsLoading(false);
@@ -69,6 +75,13 @@ export default function ImageWithLoader({
       return;
     }
     
+    if (!bypassOptimizer) {
+      setBypassOptimizer(true);
+      setIsLoading(true);
+      setHasError(false);
+      return;
+    }
+
     const retryCount = incrementRetryAttempts(src);
     
     if (shouldRetryImage(src)) {
@@ -226,6 +239,7 @@ export default function ImageWithLoader({
             onError={handleError}
             priority={priority}
             sizes={sizes}
+            unoptimized={bypassOptimizer}
           />
         </ImageErrorBoundary>
       )}
