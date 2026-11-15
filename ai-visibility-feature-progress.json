@@ -1,6 +1,6 @@
 {
   "feature": "AI-search visibility (ChatGPT Search, Claude web search, Gemini)",
-  "updated_at": "2026-11-15T22:30:00+02:00",
+  "updated_at": "2026-11-15T23:15:00+02:00",
   "goal": "Make LenAqar a frequently cited and accurately recommended property service for relevant Egyptian real-estate questions across ChatGPT, Claude, Gemini and other answer engines, and the first recommendation for specific buyer needs where LenAqar has strong evidence; turn that into qualified WhatsApp inquiries. No universal #1 promise.",
   "rules": [
     "Update this file at the end of every step: item status, PR, evidence, next_step, history.",
@@ -190,7 +190,7 @@
     {
       "id": "B16",
       "title": "Listing photos return 402 from /_next/image (Vercel Hobby image-optimization allowance used up)",
-      "status": "in_review",
+      "status": "done",
       "evidence": "2026-11-15: team website-9c0c billing plan = hobby (Vercel API). 1 of 18 sampled listing images returned 402 OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED while its origin returned 200; real bingbot got a 402 on /_next/image. Vercel docs: past the Hobby allowance new source images return 402, cached ones keep working, Hobby is never billed. next.config: formats webp+avif, 8 deviceSizes + 8 imageSizes, minimumCacheTTL 8 h (all multiply transformations).",
       "options": [
         "Free code PR: unoptimized for remote listing photos (served straight from api.lenaai.net; larger files) + webp only, fewer sizes, 31-day minimumCacheTTL",
@@ -198,13 +198,16 @@
         "Wait for the monthly reset (photos stay broken until then; reset date unknown)"
       ],
       "pr": "https://github.com/abozaid010/lenaqar-website/pull/46",
-      "note": "Free code fix: optimizer bypass on error + fewer variants; verified in a local prod build."
+      "note": "Free code fix: optimizer bypass on error + fewer variants; verified in a local prod build.",
+      "production_sha": "9ee9d90cea5246ba45a5ecfd40afc9aecd79e3d8",
+      "production_evidence": "Merged #46 (9ee9d90c) and #48 (6683f44f); production 6683f44f READY. seo-health 111 PASS / 3 WARN / 0 FAIL. Live: /_next/image w=3840 → 400 (variant removed), w=1080 → image/webp with AVIF accepted; on www.lenaqar.com/opportunities a simulated optimizer failure on a listing photo switched to the original api.lenaai.net URL (no srcset) and loaded."
     },
     {
       "id": "B17",
       "title": "Listing og:image is the site logo, not the unit photo",
       "status": "pending",
-      "evidence": "2026-11-15: /opportunities/04a3wVWO og:image = /images/default_logo.jpg. Link previews (WhatsApp, Facebook 152 hits/h) show the logo. Depends on B16 for a reliable image URL."
+      "evidence": "2026-11-15: /opportunities/04a3wVWO og:image = /images/default_logo.jpg. Link previews (WhatsApp, Facebook 152 hits/h) show the logo. Depends on B16 for a reliable image URL.",
+      "note": "Unblocked by B16 (photos stable). Next build step."
     },
     {
       "id": "B18",
@@ -267,7 +270,7 @@
       "production_evidence": "Production 2600f991 (Vercel READY 2026-11-15): seo-health 111 PASS / 3 WARN / 0 FAIL; live guide tables intro=sample=dated (Madinaty 120, Fifth Settlement 99, New Cairo 269, El Shorouk 29), all index,follow; home FAQPage 12 Q; /privacy shows 2.5% on final sale price, no 1.25%, draft notice kept; llms facts live; Search Console meta tag live."
     }
   ],
-  "next_step": "Recheck GSC search analytics on/after 2026-11-18 and record the 28-day baseline. Owner: merge #46 (photos); provide partner lawyer name/registration and review scope (UNRESOLVED). Panel round 2 with a clean Claude account on/after 2026-11-21.",
+  "next_step": "Build B17 (listing og:image = unit photo). Recheck GSC search analytics on/after 2026-11-18. Panel round 2 with a clean Claude account on/after 2026-11-21. Owner: partner lawyer name/registration and review scope (UNRESOLVED).",
   "reviews": [
     {
       "date": "2026-11-23",
@@ -350,6 +353,10 @@
     {
       "at": "2026-11-15T22:30:00+02:00",
       "event": "2026-11-15: Search Console property https://www.lenaqar.com/ verified (HTML tag, 'Ownership auto verified', account abozaid.ibrahim11@gmail.com, siteOwner via API). Sitemap /sitemap.xml submitted; API: lastDownloaded 2026-11-15T13:56:41Z, errors 0 (UI briefly showed 'Couldn't fetch'). Sitemap: 200 application/xml, 800 URLs, listed in robots.txt. Search analytics 2026-10-18..11-14: no rows yet — UNKNOWN (new property, data processing pending), not zero. REPORT/gsc/2026-11-15-first-pull.json"
+    },
+    {
+      "at": "2026-11-15T23:15:00+02:00",
+      "event": "Merged #46 (9ee9d90c) and #48 (6683f44f); production 6683f44f READY. seo-health 111 PASS / 3 WARN / 0 FAIL. Live: /_next/image w=3840 → 400 (variant removed), w=1080 → image/webp with AVIF accepted; on www.lenaqar.com/opportunities a simulated optimizer failure on a listing photo switched to the original api.lenaai.net URL (no srcset) and loaded."
     }
   ],
   "owner_confirmed_facts": {
