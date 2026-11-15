@@ -1,10 +1,10 @@
 {
   "feature": "AI-search visibility (ChatGPT Search, Claude web search, Gemini)",
-  "updated_at": "2026-11-15T09:30:00+02:00",
+  "updated_at": "2026-11-15T10:30:00+02:00",
   "goal": "Raise the probability that ChatGPT Search, Claude web search and Gemini cite or accurately recommend LenAqar for Egyptian resale property questions in the areas it serves, and that this produces qualified buy/sell inquiries.",
   "rules": [
     "Update this file at the end of every step: item status, PR, evidence, next_step, history.",
-    "After an owner merge: verify Vercel githubCommitSha = merge SHA, run scripts/seo-health.mjs on production (0 FAIL), then start next_step without waiting.",
+    "After an owner merge: verify Vercel githubCommitSha = merge SHA, run scripts/seo-health.mjs on production (0 FAIL), mark the item done here, then start next_step automatically without waiting.",
     "Labels: V verified (evidence + date), S supplied but unverified, I inaccessible, H hypothesis.",
     "Unavailable metrics are 'unknown', never 0. Direct traffic is never AI traffic. whatsapp_click is an interaction, not a lead.",
     "No promise of inclusion, ranking, citation or training outcome. No causation claims.",
@@ -19,7 +19,7 @@
   "tracks": {
     "A_technical": {
       "source": "scripts/seo-health.mjs + GSC + CDN logs",
-      "status": "V: production 85 PASS / 3 WARN / 0 FAIL (2026-11-15, after PR #40). GSC and real crawler logs: I"
+      "status": "V: production 110 PASS / 3 WARN / 0 FAIL with structured-data checks (2026-11-15, after PR #41). GSC and real crawler logs: I"
     },
     "B_ai_visibility": {
       "source": "docs/ai-visibility/runs/<round>.jsonl",
@@ -114,11 +114,11 @@
     {
       "id": "B6",
       "title": "Contract checklist: total purchase cost section with official sources",
-      "status": "ready_for_review",
-      "branch": "feat/ai-vis-progress-b6",
+      "status": "done",
       "pr": "https://github.com/abozaid010/lenaqar-website/pull/41",
-      "evidence": "content/guides/buying/contract-registration-checklist.md; src/lib/lenaqar/__tests__/guide-faq-costs.test.js",
-      "note": "Sourced: registration fee bands (realestate.gov.eg page dated 2024-12-11, may be outdated) and 2.5% disposal tax on the seller's share with monthly late charge after 30 days (ETA FAQ PDF, 2026-10). Transfer, maintenance, commission and utilities: 'varies, get it in writing', no figures. Also fixed an empty FAQ answer that produced an FAQPage Answer without text (live bug) and added an answeredFaq guard."
+      "evidence": "Live 2026-11-15: 200, meta robots index,follow, no x-robots-tag, self canonical, in sitemap, dateModified 2026-11-15; 7/7 FAQ answers in schema and visible (match); 6 JSON-LD blocks parse; cost section, 4000 EGP cap and eta.gov.eg present. seo-health 86/3/0 (REPORT/seo-health/2026-11-15-production-after-pr41.json).",
+      "note": "Sourced: registration fee bands (realestate.gov.eg page dated 2024-12-11, may be outdated) and 2.5% disposal tax on the seller's share with monthly late charge after 30 days (ETA FAQ PDF, 2026-10). Transfer, maintenance, commission and utilities: 'varies, get it in writing', no figures. Also fixed an empty FAQ answer that produced an FAQPage Answer without text (live bug) and added an answeredFaq guard.",
+      "production_sha": "3ffe91e07c75c84e9442e49d6ef349133905c433"
     },
     {
       "id": "B7",
@@ -153,7 +153,11 @@
     {
       "id": "B12",
       "title": "Scheduled health check (GitHub Actions cron)",
-      "status": "pending"
+      "status": "ready_for_review",
+      "branch": "feat/b12-daily-health-check",
+      "pr": null,
+      "evidence": ".github/workflows/seo-health.yml; scripts/lib/jsonld-check.mjs; src/lib/__tests__/seo-health-jsonld.test.js",
+      "note": "Daily 04:30 UTC + manual + PR runs on script changes. Adds JSON-LD checks (parse, FAQ answers, required types per page). Verified the check flags the pre-PR-41 production HTML."
     },
     {
       "id": "B13",
@@ -173,7 +177,7 @@
       "blocker": "B1 data shows English demand"
     }
   ],
-  "next_step": "After PR for B6 merges: verify deploy + seo-health, then B12 (scheduled health check, GitHub Actions cron). Then B9, B11, B3, B14.",
+  "next_step": "After the B12 PR merges: verify the first scheduled/manual run on main. In parallel (read-only, no PR needed unless a fix is found): B9 real crawler visits from Vercel logs. Then B11 (/opportunities TTFB), B3 (resale guide content), B14 (NAP audit + outreach drafts).",
   "reviews": [
     {
       "date": "2026-11-23",
@@ -216,6 +220,10 @@
     {
       "at": "2026-11-15T09:30:00+02:00",
       "event": "PR #41 review: Vercel preview failed once on a transient Google Fonts fetch (JSON-only commit); redeployed preview Ready, all checks green. Production confirmed still serving the empty FAQ answer (fix ships only on merge). Source fixes pushed: 4000 EGP 2024 cap from the same official page added; unsourced 'seller usually' utilities claim removed."
+    },
+    {
+      "at": "2026-11-15T10:30:00+02:00",
+      "event": "PR #41 merged; production SHA 3ffe91e0 verified; live page, 7/7 FAQ answers, schema, canonical, indexing verified; seo-health 86/3/0. B6 marked done. B12 built: daily GitHub Actions health check with structured-data checks (110/3/0 on production)."
     }
   ]
 }

@@ -92,3 +92,7 @@ Open (**I**): whether shared-network units (sharing policy) or sold units are in
   - Disposal tax: ETA FAQ PDF (2026-10) says the app computes 2.5% of sale value × seller's share; late charge monthly after 30 days from the disposal date (art. 110, Law 91/2005). **V** (official).
   - Secondary sites disagree on bands (some show 1,500 EGP up to 200 m²) and on the payment deadline (30 vs 60 days): not used.
   - Transfer fee, maintenance deposit, commission, utilities: no official figure; the guide says "varies, get it in writing".
+
+## 9. PR #41 production check and B12
+- **V** PR #41 merged; Vercel `githubCommitSha` = `3ffe91e0`, aliased to www.lenaqar.com. Live checklist page: 200, `index, follow`, no `x-robots-tag`, self canonical, in sitemap, `dateModified` 2026-11-15, 7 of 7 FAQ answers in schema and on the page (same questions), 6 JSON-LD blocks parse.
+- B12: `scripts/lib/jsonld-check.mjs` adds structured-data checks to `seo-health.mjs` (JSON-LD parses, FAQ answers have text, required types per page). On production: 110 PASS, 3 WARN, 0 FAIL (`REPORT/seo-health/2026-11-15-production-b12-checks.json`). Run on the saved pre-PR-41 production HTML it reports `FAQPage "التسجيل إجباري؟": answer without text`, so the 2026-11-15 bug would have failed the daily job.

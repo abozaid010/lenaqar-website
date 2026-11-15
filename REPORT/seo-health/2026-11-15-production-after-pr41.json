@@ -1,0 +1,2207 @@
+{
+  "runAt": "2026-11-15T05:01:08.392Z",
+  "base": "https://www.lenaqar.com",
+  "canonicalOrigin": "https://www.lenaqar.com",
+  "note": "Crawler UA requests are simulated from this machine's IP; they do not prove how real crawler IPs are treated.",
+  "robotsTxt": {
+    "status": 200,
+    "groups": 2
+  },
+  "sitemap": {
+    "status": 200,
+    "urls": 796
+  },
+  "summary": {
+    "pass": 86,
+    "warn": 3,
+    "fail": 0
+  },
+  "checks": [
+    {
+      "path": "/",
+      "check": "status 200",
+      "level": "PASS",
+      "detail": "200"
+    },
+    {
+      "path": "/",
+      "check": "self canonical",
+      "level": "PASS",
+      "detail": "https://www.lenaqar.com"
+    },
+    {
+      "path": "/",
+      "check": "indexable",
+      "level": "PASS",
+      "detail": "index, follow | x-robots: -"
+    },
+    {
+      "path": "/",
+      "check": "in sitemap",
+      "level": "PASS",
+      "detail": "true"
+    },
+    {
+      "path": "/",
+      "check": "key facts in raw HTML",
+      "level": "PASS",
+      "detail": "all present"
+    },
+    {
+      "path": "/",
+      "check": "inbound links from T-set",
+      "level": "PASS",
+      "detail": "11"
+    },
+    {
+      "path": "/",
+      "check": "TTFB median < 1500ms",
+      "level": "PASS",
+      "detail": "713/224/99ms cache=PRERENDER"
+    },
+    {
+      "path": "/opportunities",
+      "check": "status 200",
+      "level": "PASS",
+      "detail": "200"
+    },
+    {
+      "path": "/opportunities",
+      "check": "self canonical",
+      "level": "PASS",
+      "detail": "https://www.lenaqar.com/opportunities"
+    },
+    {
+      "path": "/opportunities",
+      "check": "indexable",
+      "level": "PASS",
+      "detail": "index, follow | x-robots: -"
+    },
+    {
+      "path": "/opportunities",
+      "check": "in sitemap",
+      "level": "PASS",
+      "detail": "true"
+    },
+    {
+      "path": "/opportunities",
+      "check": "key facts in raw HTML",
+      "level": "PASS",
+      "detail": "all present"
+    },
+    {
+      "path": "/opportunities",
+      "check": "inbound links from T-set",
+      "level": "PASS",
+      "detail": "11"
+    },
+    {
+      "path": "/opportunities",
+      "check": "TTFB median < 1500ms",
+      "level": "PASS",
+      "detail": "2359/678/822ms cache=MISS"
+    },
+    {
+      "path": "/apartments-for-sale/madinaty",
+      "check": "status 200",
+      "level": "PASS",
+      "detail": "200"
+    },
+    {
+      "path": "/apartments-for-sale/madinaty",
+      "check": "self canonical",
+      "level": "PASS",
+      "detail": "https://www.lenaqar.com/apartments-for-sale/madinaty"
+    },
+    {
+      "path": "/apartments-for-sale/madinaty",
+      "check": "indexable",
+      "level": "PASS",
+      "detail": "index, follow | x-robots: -"
+    },
+    {
+      "path": "/apartments-for-sale/madinaty",
+      "check": "in sitemap",
+      "level": "PASS",
+      "detail": "true"
+    },
+    {
+      "path": "/apartments-for-sale/madinaty",
+      "check": "key facts in raw HTML",
+      "level": "PASS",
+      "detail": "all present"
+    },
+    {
+      "path": "/apartments-for-sale/madinaty",
+      "check": "inbound links from T-set",
+      "level": "PASS",
+      "detail": "1"
+    },
+    {
+      "path": "/apartments-for-sale/madinaty",
+      "check": "TTFB median < 1500ms",
+      "level": "PASS",
+      "detail": "576/86/111ms cache=PRERENDER"
+    },
+    {
+      "path": "/guides/madinaty/prices-2026",
+      "check": "status 200",
+      "level": "PASS",
+      "detail": "200"
+    },
+    {
+      "path": "/guides/madinaty/prices-2026",
+      "check": "self canonical",
+      "level": "PASS",
+      "detail": "https://www.lenaqar.com/guides/madinaty/prices-2026"
+    },
+    {
+      "path": "/guides/madinaty/prices-2026",
+      "check": "indexable",
+      "level": "PASS",
+      "detail": "index, follow | x-robots: -"
+    },
+    {
+      "path": "/guides/madinaty/prices-2026",
+      "check": "in sitemap",
+      "level": "PASS",
+      "detail": "true"
+    },
+    {
+      "path": "/guides/madinaty/prices-2026",
+      "check": "key facts in raw HTML",
+      "level": "PASS",
+      "detail": "all present"
+    },
+    {
+      "path": "/guides/madinaty/prices-2026",
+      "check": "LenAqar inventory table",
+      "level": "PASS",
+      "detail": "present"
+    },
+    {
+      "path": "/guides/madinaty/prices-2026",
+      "check": "inbound links from T-set",
+      "level": "PASS",
+      "detail": "11"
+    },
+    {
+      "path": "/guides/madinaty/prices-2026",
+      "check": "TTFB median < 1500ms",
+      "level": "PASS",
+      "detail": "742/84/99ms cache=PRERENDER"
+    },
+    {
+      "path": "/guides/el-shorouk/prices-2026",
+      "check": "status 200",
+      "level": "PASS",
+      "detail": "200"
+    },
+    {
+      "path": "/guides/el-shorouk/prices-2026",
+      "check": "self canonical",
+      "level": "PASS",
+      "detail": "https://www.lenaqar.com/guides/el-shorouk/prices-2026"
+    },
+    {
+      "path": "/guides/el-shorouk/prices-2026",
+      "check": "indexable",
+      "level": "PASS",
+      "detail": "index, follow | x-robots: -"
+    },
+    {
+      "path": "/guides/el-shorouk/prices-2026",
+      "check": "in sitemap",
+      "level": "PASS",
+      "detail": "true"
+    },
+    {
+      "path": "/guides/el-shorouk/prices-2026",
+      "check": "key facts in raw HTML",
+      "level": "PASS",
+      "detail": "all present"
+    },
+    {
+      "path": "/guides/el-shorouk/prices-2026",
+      "check": "inbound links from T-set",
+      "level": "PASS",
+      "detail": "11"
+    },
+    {
+      "path": "/guides/el-shorouk/prices-2026",
+      "check": "TTFB median < 1500ms",
+      "level": "PASS",
+      "detail": "782/75/141ms cache=PRERENDER"
+    },
+    {
+      "path": "/guides/buying/contract-registration-checklist",
+      "check": "status 200",
+      "level": "PASS",
+      "detail": "200"
+    },
+    {
+      "path": "/guides/buying/contract-registration-checklist",
+      "check": "self canonical",
+      "level": "PASS",
+      "detail": "https://www.lenaqar.com/guides/buying/contract-registration-checklist"
+    },
+    {
+      "path": "/guides/buying/contract-registration-checklist",
+      "check": "indexable",
+      "level": "PASS",
+      "detail": "index, follow | x-robots: -"
+    },
+    {
+      "path": "/guides/buying/contract-registration-checklist",
+      "check": "in sitemap",
+      "level": "PASS",
+      "detail": "true"
+    },
+    {
+      "path": "/guides/buying/contract-registration-checklist",
+      "check": "key facts in raw HTML",
+      "level": "PASS",
+      "detail": "all present"
+    },
+    {
+      "path": "/guides/buying/contract-registration-checklist",
+      "check": "total cost section",
+      "level": "PASS",
+      "detail": "present"
+    },
+    {
+      "path": "/guides/buying/contract-registration-checklist",
+      "check": "inbound links from T-set",
+      "level": "PASS",
+      "detail": "2"
+    },
+    {
+      "path": "/guides/buying/contract-registration-checklist",
+      "check": "TTFB median < 1500ms",
+      "level": "PASS",
+      "detail": "95/80/86ms cache=HIT"
+    },
+    {
+      "path": "/guides/buying/buying-resale-step-by-step",
+      "check": "status 200",
+      "level": "PASS",
+      "detail": "200"
+    },
+    {
+      "path": "/guides/buying/buying-resale-step-by-step",
+      "check": "self canonical",
+      "level": "PASS",
+      "detail": "https://www.lenaqar.com/guides/buying/buying-resale-step-by-step"
+    },
+    {
+      "path": "/guides/buying/buying-resale-step-by-step",
+      "check": "noindex (expected)",
+      "level": "PASS",
+      "detail": "noindex, follow | x-robots: - | intentional noindex: legal steps still marked «تحت المراجعة» (REPORT/seo-release-2026-11-03/excluded-guides-triage.json)"
+    },
+    {
+      "path": "/guides/buying/buying-resale-step-by-step",
+      "check": "not in sitemap",
+      "level": "PASS",
+      "detail": "false"
+    },
+    {
+      "path": "/guides/buying/buying-resale-step-by-step",
+      "check": "key facts in raw HTML",
+      "level": "PASS",
+      "detail": "all present"
+    },
+    {
+      "path": "/guides/buying/buying-resale-step-by-step",
+      "check": "inbound links from T-set",
+      "level": "PASS",
+      "detail": "1"
+    },
+    {
+      "path": "/guides/buying/buying-resale-step-by-step",
+      "check": "TTFB median < 1500ms",
+      "level": "PASS",
+      "detail": "483/104/86ms cache=PRERENDER"
+    },
+    {
+      "path": "/verified-prices",
+      "check": "status 200",
+      "level": "PASS",
+      "detail": "200"
+    },
+    {
+      "path": "/verified-prices",
+      "check": "self canonical",
+      "level": "PASS",
+      "detail": "https://www.lenaqar.com/verified-prices"
+    },
+    {
+      "path": "/verified-prices",
+      "check": "indexable",
+      "level": "PASS",
+      "detail": "index, follow | x-robots: -"
+    },
+    {
+      "path": "/verified-prices",
+      "check": "in sitemap",
+      "level": "PASS",
+      "detail": "true"
+    },
+    {
+      "path": "/verified-prices",
+      "check": "key facts in raw HTML",
+      "level": "PASS",
+      "detail": "all present"
+    },
+    {
+      "path": "/verified-prices",
+      "check": "inbound links from T-set",
+      "level": "PASS",
+      "detail": "11"
+    },
+    {
+      "path": "/verified-prices",
+      "check": "TTFB median < 1500ms",
+      "level": "PASS",
+      "detail": "662/114/88ms cache=PRERENDER"
+    },
+    {
+      "path": "/before-you-pay",
+      "check": "status 200",
+      "level": "PASS",
+      "detail": "200"
+    },
+    {
+      "path": "/before-you-pay",
+      "check": "self canonical",
+      "level": "PASS",
+      "detail": "https://www.lenaqar.com/before-you-pay"
+    },
+    {
+      "path": "/before-you-pay",
+      "check": "indexable",
+      "level": "PASS",
+      "detail": "index, follow | x-robots: -"
+    },
+    {
+      "path": "/before-you-pay",
+      "check": "in sitemap",
+      "level": "PASS",
+      "detail": "true"
+    },
+    {
+      "path": "/before-you-pay",
+      "check": "key facts in raw HTML",
+      "level": "PASS",
+      "detail": "all present"
+    },
+    {
+      "path": "/before-you-pay",
+      "check": "inbound links from T-set",
+      "level": "PASS",
+      "detail": "11"
+    },
+    {
+      "path": "/before-you-pay",
+      "check": "TTFB median < 1500ms",
+      "level": "PASS",
+      "detail": "522/94/86ms cache=PRERENDER"
+    },
+    {
+      "path": "/opportunities/%D9%85%D8%AD%D9%84%20%D8%B1%D9%82%D9%85%2029",
+      "check": "status 200",
+      "level": "PASS",
+      "detail": "200"
+    },
+    {
+      "path": "/opportunities/%D9%85%D8%AD%D9%84%20%D8%B1%D9%82%D9%85%2029",
+      "check": "self canonical",
+      "level": "PASS",
+      "detail": "https://www.lenaqar.com/opportunities/%D9%85%D8%AD%D9%84%20%D8%B1%D9%82%D9%85%2029"
+    },
+    {
+      "path": "/opportunities/%D9%85%D8%AD%D9%84%20%D8%B1%D9%82%D9%85%2029",
+      "check": "indexable",
+      "level": "PASS",
+      "detail": "index, follow | x-robots: -"
+    },
+    {
+      "path": "/opportunities/%D9%85%D8%AD%D9%84%20%D8%B1%D9%82%D9%85%2029",
+      "check": "in sitemap",
+      "level": "PASS",
+      "detail": "true"
+    },
+    {
+      "path": "/opportunities/%D9%85%D8%AD%D9%84%20%D8%B1%D9%82%D9%85%2029",
+      "check": "key facts in raw HTML",
+      "level": "PASS",
+      "detail": "all present"
+    },
+    {
+      "path": "/opportunities/%D9%85%D8%AD%D9%84%20%D8%B1%D9%82%D9%85%2029",
+      "check": "area guide link",
+      "level": "PASS",
+      "detail": "present"
+    },
+    {
+      "path": "/opportunities/%D9%85%D8%AD%D9%84%20%D8%B1%D9%82%D9%85%2029",
+      "check": "inbound links from T-set",
+      "level": "WARN",
+      "detail": "0"
+    },
+    {
+      "path": "/opportunities/%D9%85%D8%AD%D9%84%20%D8%B1%D9%82%D9%85%2029",
+      "check": "TTFB median < 1500ms",
+      "level": "PASS",
+      "detail": "627/78/88ms cache=PRERENDER"
+    },
+    {
+      "path": "/opportunities/04a3wVWO",
+      "check": "status 200",
+      "level": "PASS",
+      "detail": "200"
+    },
+    {
+      "path": "/opportunities/04a3wVWO",
+      "check": "self canonical",
+      "level": "PASS",
+      "detail": "https://www.lenaqar.com/opportunities/04a3wVWO"
+    },
+    {
+      "path": "/opportunities/04a3wVWO",
+      "check": "indexable",
+      "level": "PASS",
+      "detail": "index, follow | x-robots: -"
+    },
+    {
+      "path": "/opportunities/04a3wVWO",
+      "check": "in sitemap",
+      "level": "PASS",
+      "detail": "true"
+    },
+    {
+      "path": "/opportunities/04a3wVWO",
+      "check": "key facts in raw HTML",
+      "level": "PASS",
+      "detail": "all present"
+    },
+    {
+      "path": "/opportunities/04a3wVWO",
+      "check": "area guide link",
+      "level": "PASS",
+      "detail": "present"
+    },
+    {
+      "path": "/opportunities/04a3wVWO",
+      "check": "inbound links from T-set",
+      "level": "WARN",
+      "detail": "0"
+    },
+    {
+      "path": "/opportunities/04a3wVWO",
+      "check": "TTFB median < 1500ms",
+      "level": "PASS",
+      "detail": "456/84/86ms cache=PRERENDER"
+    },
+    {
+      "path": "/opportunities/08OZ4Lxc",
+      "check": "status 200",
+      "level": "PASS",
+      "detail": "200"
+    },
+    {
+      "path": "/opportunities/08OZ4Lxc",
+      "check": "self canonical",
+      "level": "PASS",
+      "detail": "https://www.lenaqar.com/opportunities/08OZ4Lxc"
+    },
+    {
+      "path": "/opportunities/08OZ4Lxc",
+      "check": "indexable",
+      "level": "PASS",
+      "detail": "index, follow | x-robots: -"
+    },
+    {
+      "path": "/opportunities/08OZ4Lxc",
+      "check": "in sitemap",
+      "level": "PASS",
+      "detail": "true"
+    },
+    {
+      "path": "/opportunities/08OZ4Lxc",
+      "check": "key facts in raw HTML",
+      "level": "PASS",
+      "detail": "all present"
+    },
+    {
+      "path": "/opportunities/08OZ4Lxc",
+      "check": "area guide link",
+      "level": "WARN",
+      "detail": "/<nav[^>]+aria-label=\"دليل المشتري\"/"
+    },
+    {
+      "path": "/opportunities/08OZ4Lxc",
+      "check": "inbound links from T-set",
+      "level": "PASS",
+      "detail": "1"
+    },
+    {
+      "path": "/opportunities/08OZ4Lxc",
+      "check": "TTFB median < 1500ms",
+      "level": "PASS",
+      "detail": "599/129/90ms cache=PRERENDER"
+    }
+  ],
+  "pages": [
+    {
+      "path": "/",
+      "expectIndex": true,
+      "factPatterns": [
+        "/<h1[\\s>]/"
+      ],
+      "softFactPatterns": [],
+      "status": 200,
+      "redirects": [],
+      "ttfbMs": [
+        713,
+        224,
+        99
+      ],
+      "ttfbMedianMs": 224,
+      "vercelCache": "PRERENDER",
+      "canonical": "https://www.lenaqar.com",
+      "metaRobots": "index, follow",
+      "xRobots": null,
+      "noindex": false,
+      "inSitemap": true,
+      "factsMissing": [],
+      "softFactsMissing": [],
+      "crawlers": [
+        {
+          "token": "Googlebot",
+          "role": "search (Google Search, AI Overviews, AI Mode)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /"
+          }
+        },
+        {
+          "token": "OAI-SearchBot",
+          "role": "search (ChatGPT search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "OAI-SearchBot",
+            "rule": "allow: /"
+          }
+        },
+        {
+          "token": "ChatGPT-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ChatGPT-User",
+            "rule": "allow: /"
+          }
+        },
+        {
+          "token": "Claude-SearchBot",
+          "role": "search (Claude web search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-SearchBot",
+            "rule": "allow: /"
+          }
+        },
+        {
+          "token": "Claude-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-User",
+            "rule": "allow: /"
+          }
+        },
+        {
+          "token": "PerplexityBot",
+          "role": "search (Perplexity)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "PerplexityBot",
+            "rule": "allow: /"
+          }
+        },
+        {
+          "token": "Bingbot",
+          "role": "search (Bing)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /"
+          }
+        },
+        {
+          "token": "GPTBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "GPTBot",
+            "rule": "allow: /"
+          }
+        },
+        {
+          "token": "ClaudeBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ClaudeBot",
+            "rule": "allow: /"
+          }
+        },
+        {
+          "token": "Google-Extended",
+          "role": "robots token only (Gemini Apps grounding/training)",
+          "status": null,
+          "robots": {
+            "allowed": true,
+            "group": "Google-Extended",
+            "rule": "allow: /"
+          }
+        }
+      ],
+      "inboundFromTSet": [
+        "/opportunities",
+        "/apartments-for-sale/madinaty",
+        "/guides/madinaty/prices-2026",
+        "/guides/el-shorouk/prices-2026",
+        "/guides/buying/contract-registration-checklist",
+        "/guides/buying/buying-resale-step-by-step",
+        "/verified-prices",
+        "/before-you-pay",
+        "/opportunities/%D9%85%D8%AD%D9%84%20%D8%B1%D9%82%D9%85%2029",
+        "/opportunities/04a3wVWO",
+        "/opportunities/08OZ4Lxc"
+      ],
+      "outLinkCount": 17
+    },
+    {
+      "path": "/opportunities",
+      "expectIndex": true,
+      "factPatterns": [
+        "/<h1[\\s>]/",
+        "/href=\"\\/opportunities\\/[A-Za-z0-9]+\"/"
+      ],
+      "softFactPatterns": [],
+      "status": 200,
+      "redirects": [],
+      "ttfbMs": [
+        2359,
+        678,
+        822
+      ],
+      "ttfbMedianMs": 822,
+      "vercelCache": "MISS",
+      "canonical": "https://www.lenaqar.com/opportunities",
+      "metaRobots": "index, follow",
+      "xRobots": null,
+      "noindex": false,
+      "inSitemap": true,
+      "factsMissing": [],
+      "softFactsMissing": [],
+      "crawlers": [
+        {
+          "token": "Googlebot",
+          "role": "search (Google Search, AI Overviews, AI Mode)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /opportunities"
+          }
+        },
+        {
+          "token": "OAI-SearchBot",
+          "role": "search (ChatGPT search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "OAI-SearchBot",
+            "rule": "allow: /opportunities"
+          }
+        },
+        {
+          "token": "ChatGPT-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ChatGPT-User",
+            "rule": "allow: /opportunities"
+          }
+        },
+        {
+          "token": "Claude-SearchBot",
+          "role": "search (Claude web search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-SearchBot",
+            "rule": "allow: /opportunities"
+          }
+        },
+        {
+          "token": "Claude-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-User",
+            "rule": "allow: /opportunities"
+          }
+        },
+        {
+          "token": "PerplexityBot",
+          "role": "search (Perplexity)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "PerplexityBot",
+            "rule": "allow: /opportunities"
+          }
+        },
+        {
+          "token": "Bingbot",
+          "role": "search (Bing)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /opportunities"
+          }
+        },
+        {
+          "token": "GPTBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "GPTBot",
+            "rule": "allow: /opportunities"
+          }
+        },
+        {
+          "token": "ClaudeBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ClaudeBot",
+            "rule": "allow: /opportunities"
+          }
+        },
+        {
+          "token": "Google-Extended",
+          "role": "robots token only (Gemini Apps grounding/training)",
+          "status": null,
+          "robots": {
+            "allowed": true,
+            "group": "Google-Extended",
+            "rule": "allow: /opportunities"
+          }
+        }
+      ],
+      "inboundFromTSet": [
+        "/",
+        "/apartments-for-sale/madinaty",
+        "/guides/madinaty/prices-2026",
+        "/guides/el-shorouk/prices-2026",
+        "/guides/buying/contract-registration-checklist",
+        "/guides/buying/buying-resale-step-by-step",
+        "/verified-prices",
+        "/before-you-pay",
+        "/opportunities/%D9%85%D8%AD%D9%84%20%D8%B1%D9%82%D9%85%2029",
+        "/opportunities/04a3wVWO",
+        "/opportunities/08OZ4Lxc"
+      ],
+      "outLinkCount": 41
+    },
+    {
+      "path": "/apartments-for-sale/madinaty",
+      "expectIndex": true,
+      "factPatterns": [
+        "/<h1[\\s>]/",
+        "/href=\"\\/guides\\/madinaty\"/"
+      ],
+      "softFactPatterns": [],
+      "status": 200,
+      "redirects": [],
+      "ttfbMs": [
+        576,
+        86,
+        111
+      ],
+      "ttfbMedianMs": 111,
+      "vercelCache": "PRERENDER",
+      "canonical": "https://www.lenaqar.com/apartments-for-sale/madinaty",
+      "metaRobots": "index, follow",
+      "xRobots": null,
+      "noindex": false,
+      "inSitemap": true,
+      "factsMissing": [],
+      "softFactsMissing": [],
+      "crawlers": [
+        {
+          "token": "Googlebot",
+          "role": "search (Google Search, AI Overviews, AI Mode)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /apartments-for-sale/*"
+          }
+        },
+        {
+          "token": "OAI-SearchBot",
+          "role": "search (ChatGPT search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "OAI-SearchBot",
+            "rule": "allow: /apartments-for-sale/*"
+          }
+        },
+        {
+          "token": "ChatGPT-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ChatGPT-User",
+            "rule": "allow: /apartments-for-sale/*"
+          }
+        },
+        {
+          "token": "Claude-SearchBot",
+          "role": "search (Claude web search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-SearchBot",
+            "rule": "allow: /apartments-for-sale/*"
+          }
+        },
+        {
+          "token": "Claude-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-User",
+            "rule": "allow: /apartments-for-sale/*"
+          }
+        },
+        {
+          "token": "PerplexityBot",
+          "role": "search (Perplexity)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "PerplexityBot",
+            "rule": "allow: /apartments-for-sale/*"
+          }
+        },
+        {
+          "token": "Bingbot",
+          "role": "search (Bing)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /apartments-for-sale/*"
+          }
+        },
+        {
+          "token": "GPTBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "GPTBot",
+            "rule": "allow: /apartments-for-sale/*"
+          }
+        },
+        {
+          "token": "ClaudeBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ClaudeBot",
+            "rule": "allow: /apartments-for-sale/*"
+          }
+        },
+        {
+          "token": "Google-Extended",
+          "role": "robots token only (Gemini Apps grounding/training)",
+          "status": null,
+          "robots": {
+            "allowed": true,
+            "group": "Google-Extended",
+            "rule": "allow: /apartments-for-sale/*"
+          }
+        }
+      ],
+      "inboundFromTSet": [
+        "/guides/madinaty/prices-2026"
+      ],
+      "outLinkCount": 18
+    },
+    {
+      "path": "/guides/madinaty/prices-2026",
+      "expectIndex": true,
+      "softLabel": "LenAqar inventory table",
+      "factPatterns": [
+        "/<h1[\\s>]/",
+        "/جنيه/",
+        "/\"dateModified\"/",
+        "/عقارماب/"
+      ],
+      "softFactPatterns": [
+        "/id=\"guide-inventory\"/",
+        "/طريقة الحساب/"
+      ],
+      "status": 200,
+      "redirects": [],
+      "ttfbMs": [
+        742,
+        84,
+        99
+      ],
+      "ttfbMedianMs": 99,
+      "vercelCache": "PRERENDER",
+      "canonical": "https://www.lenaqar.com/guides/madinaty/prices-2026",
+      "metaRobots": "index, follow",
+      "xRobots": null,
+      "noindex": false,
+      "inSitemap": true,
+      "factsMissing": [],
+      "softFactsMissing": [],
+      "crawlers": [
+        {
+          "token": "Googlebot",
+          "role": "search (Google Search, AI Overviews, AI Mode)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "OAI-SearchBot",
+          "role": "search (ChatGPT search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "OAI-SearchBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "ChatGPT-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ChatGPT-User",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "Claude-SearchBot",
+          "role": "search (Claude web search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-SearchBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "Claude-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-User",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "PerplexityBot",
+          "role": "search (Perplexity)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "PerplexityBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "Bingbot",
+          "role": "search (Bing)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "GPTBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "GPTBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "ClaudeBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ClaudeBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "Google-Extended",
+          "role": "robots token only (Gemini Apps grounding/training)",
+          "status": null,
+          "robots": {
+            "allowed": true,
+            "group": "Google-Extended",
+            "rule": "allow: /guides/*"
+          }
+        }
+      ],
+      "inboundFromTSet": [
+        "/",
+        "/opportunities",
+        "/apartments-for-sale/madinaty",
+        "/guides/el-shorouk/prices-2026",
+        "/guides/buying/contract-registration-checklist",
+        "/guides/buying/buying-resale-step-by-step",
+        "/verified-prices",
+        "/before-you-pay",
+        "/opportunities/%D9%85%D8%AD%D9%84%20%D8%B1%D9%82%D9%85%2029",
+        "/opportunities/04a3wVWO",
+        "/opportunities/08OZ4Lxc"
+      ],
+      "outLinkCount": 23
+    },
+    {
+      "path": "/guides/el-shorouk/prices-2026",
+      "expectIndex": true,
+      "factPatterns": [
+        "/<h1[\\s>]/",
+        "/جنيه/",
+        "/\"dateModified\"/"
+      ],
+      "softFactPatterns": [],
+      "status": 200,
+      "redirects": [],
+      "ttfbMs": [
+        782,
+        75,
+        141
+      ],
+      "ttfbMedianMs": 141,
+      "vercelCache": "PRERENDER",
+      "canonical": "https://www.lenaqar.com/guides/el-shorouk/prices-2026",
+      "metaRobots": "index, follow",
+      "xRobots": null,
+      "noindex": false,
+      "inSitemap": true,
+      "factsMissing": [],
+      "softFactsMissing": [],
+      "crawlers": [
+        {
+          "token": "Googlebot",
+          "role": "search (Google Search, AI Overviews, AI Mode)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "OAI-SearchBot",
+          "role": "search (ChatGPT search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "OAI-SearchBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "ChatGPT-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ChatGPT-User",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "Claude-SearchBot",
+          "role": "search (Claude web search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-SearchBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "Claude-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-User",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "PerplexityBot",
+          "role": "search (Perplexity)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "PerplexityBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "Bingbot",
+          "role": "search (Bing)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "GPTBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "GPTBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "ClaudeBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ClaudeBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "Google-Extended",
+          "role": "robots token only (Gemini Apps grounding/training)",
+          "status": null,
+          "robots": {
+            "allowed": true,
+            "group": "Google-Extended",
+            "rule": "allow: /guides/*"
+          }
+        }
+      ],
+      "inboundFromTSet": [
+        "/",
+        "/opportunities",
+        "/apartments-for-sale/madinaty",
+        "/guides/madinaty/prices-2026",
+        "/guides/buying/contract-registration-checklist",
+        "/guides/buying/buying-resale-step-by-step",
+        "/verified-prices",
+        "/before-you-pay",
+        "/opportunities/%D9%85%D8%AD%D9%84%20%D8%B1%D9%82%D9%85%2029",
+        "/opportunities/04a3wVWO",
+        "/opportunities/08OZ4Lxc"
+      ],
+      "outLinkCount": 22
+    },
+    {
+      "path": "/guides/buying/contract-registration-checklist",
+      "expectIndex": true,
+      "softLabel": "total cost section",
+      "factPatterns": [
+        "/<h1[\\s>]/",
+        "/\"dateModified\"/",
+        "/gov\\.eg/"
+      ],
+      "softFactPatterns": [
+        "/التكاليف اللي غير سعر الشقة/",
+        "/eta\\.gov\\.eg/",
+        "/\"acceptedAnswer\":\\{\"@type\":\"Answer\",\"text\":\"[^\"]/"
+      ],
+      "status": 200,
+      "redirects": [],
+      "ttfbMs": [
+        95,
+        80,
+        86
+      ],
+      "ttfbMedianMs": 86,
+      "vercelCache": "HIT",
+      "canonical": "https://www.lenaqar.com/guides/buying/contract-registration-checklist",
+      "metaRobots": "index, follow",
+      "xRobots": null,
+      "noindex": false,
+      "inSitemap": true,
+      "factsMissing": [],
+      "softFactsMissing": [],
+      "crawlers": [
+        {
+          "token": "Googlebot",
+          "role": "search (Google Search, AI Overviews, AI Mode)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "OAI-SearchBot",
+          "role": "search (ChatGPT search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "OAI-SearchBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "ChatGPT-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ChatGPT-User",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "Claude-SearchBot",
+          "role": "search (Claude web search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-SearchBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "Claude-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-User",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "PerplexityBot",
+          "role": "search (Perplexity)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "PerplexityBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "Bingbot",
+          "role": "search (Bing)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "GPTBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "GPTBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "ClaudeBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ClaudeBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "Google-Extended",
+          "role": "robots token only (Gemini Apps grounding/training)",
+          "status": null,
+          "robots": {
+            "allowed": true,
+            "group": "Google-Extended",
+            "rule": "allow: /guides/*"
+          }
+        }
+      ],
+      "inboundFromTSet": [
+        "/guides/buying/buying-resale-step-by-step",
+        "/before-you-pay"
+      ],
+      "outLinkCount": 22
+    },
+    {
+      "path": "/guides/buying/buying-resale-step-by-step",
+      "expectIndex": false,
+      "note": "intentional noindex: legal steps still marked «تحت المراجعة» (REPORT/seo-release-2026-11-03/excluded-guides-triage.json)",
+      "factPatterns": [
+        "/<h1[\\s>]/"
+      ],
+      "softFactPatterns": [],
+      "status": 200,
+      "redirects": [],
+      "ttfbMs": [
+        483,
+        104,
+        86
+      ],
+      "ttfbMedianMs": 104,
+      "vercelCache": "PRERENDER",
+      "canonical": "https://www.lenaqar.com/guides/buying/buying-resale-step-by-step",
+      "metaRobots": "noindex, follow",
+      "xRobots": null,
+      "noindex": true,
+      "inSitemap": false,
+      "factsMissing": [],
+      "softFactsMissing": [],
+      "crawlers": [
+        {
+          "token": "Googlebot",
+          "role": "search (Google Search, AI Overviews, AI Mode)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "OAI-SearchBot",
+          "role": "search (ChatGPT search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "OAI-SearchBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "ChatGPT-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ChatGPT-User",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "Claude-SearchBot",
+          "role": "search (Claude web search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-SearchBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "Claude-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-User",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "PerplexityBot",
+          "role": "search (Perplexity)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "PerplexityBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "Bingbot",
+          "role": "search (Bing)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "GPTBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "GPTBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "ClaudeBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ClaudeBot",
+            "rule": "allow: /guides/*"
+          }
+        },
+        {
+          "token": "Google-Extended",
+          "role": "robots token only (Gemini Apps grounding/training)",
+          "status": null,
+          "robots": {
+            "allowed": true,
+            "group": "Google-Extended",
+            "rule": "allow: /guides/*"
+          }
+        }
+      ],
+      "inboundFromTSet": [
+        "/guides/buying/contract-registration-checklist"
+      ],
+      "outLinkCount": 22
+    },
+    {
+      "path": "/verified-prices",
+      "expectIndex": true,
+      "factPatterns": [
+        "/<h1[\\s>]/"
+      ],
+      "softFactPatterns": [],
+      "status": 200,
+      "redirects": [],
+      "ttfbMs": [
+        662,
+        114,
+        88
+      ],
+      "ttfbMedianMs": 114,
+      "vercelCache": "PRERENDER",
+      "canonical": "https://www.lenaqar.com/verified-prices",
+      "metaRobots": "index, follow",
+      "xRobots": null,
+      "noindex": false,
+      "inSitemap": true,
+      "factsMissing": [],
+      "softFactsMissing": [],
+      "crawlers": [
+        {
+          "token": "Googlebot",
+          "role": "search (Google Search, AI Overviews, AI Mode)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /verified-prices"
+          }
+        },
+        {
+          "token": "OAI-SearchBot",
+          "role": "search (ChatGPT search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "OAI-SearchBot",
+            "rule": "allow: /verified-prices"
+          }
+        },
+        {
+          "token": "ChatGPT-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ChatGPT-User",
+            "rule": "allow: /verified-prices"
+          }
+        },
+        {
+          "token": "Claude-SearchBot",
+          "role": "search (Claude web search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-SearchBot",
+            "rule": "allow: /verified-prices"
+          }
+        },
+        {
+          "token": "Claude-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-User",
+            "rule": "allow: /verified-prices"
+          }
+        },
+        {
+          "token": "PerplexityBot",
+          "role": "search (Perplexity)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "PerplexityBot",
+            "rule": "allow: /verified-prices"
+          }
+        },
+        {
+          "token": "Bingbot",
+          "role": "search (Bing)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /verified-prices"
+          }
+        },
+        {
+          "token": "GPTBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "GPTBot",
+            "rule": "allow: /verified-prices"
+          }
+        },
+        {
+          "token": "ClaudeBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ClaudeBot",
+            "rule": "allow: /verified-prices"
+          }
+        },
+        {
+          "token": "Google-Extended",
+          "role": "robots token only (Gemini Apps grounding/training)",
+          "status": null,
+          "robots": {
+            "allowed": true,
+            "group": "Google-Extended",
+            "rule": "allow: /verified-prices"
+          }
+        }
+      ],
+      "inboundFromTSet": [
+        "/",
+        "/opportunities",
+        "/apartments-for-sale/madinaty",
+        "/guides/madinaty/prices-2026",
+        "/guides/el-shorouk/prices-2026",
+        "/guides/buying/contract-registration-checklist",
+        "/guides/buying/buying-resale-step-by-step",
+        "/before-you-pay",
+        "/opportunities/%D9%85%D8%AD%D9%84%20%D8%B1%D9%82%D9%85%2029",
+        "/opportunities/04a3wVWO",
+        "/opportunities/08OZ4Lxc"
+      ],
+      "outLinkCount": 17
+    },
+    {
+      "path": "/before-you-pay",
+      "expectIndex": true,
+      "factPatterns": [
+        "/<h1[\\s>]/"
+      ],
+      "softFactPatterns": [],
+      "status": 200,
+      "redirects": [],
+      "ttfbMs": [
+        522,
+        94,
+        86
+      ],
+      "ttfbMedianMs": 94,
+      "vercelCache": "PRERENDER",
+      "canonical": "https://www.lenaqar.com/before-you-pay",
+      "metaRobots": "index, follow",
+      "xRobots": null,
+      "noindex": false,
+      "inSitemap": true,
+      "factsMissing": [],
+      "softFactsMissing": [],
+      "crawlers": [
+        {
+          "token": "Googlebot",
+          "role": "search (Google Search, AI Overviews, AI Mode)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /before-you-pay"
+          }
+        },
+        {
+          "token": "OAI-SearchBot",
+          "role": "search (ChatGPT search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "OAI-SearchBot",
+            "rule": "allow: /before-you-pay"
+          }
+        },
+        {
+          "token": "ChatGPT-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ChatGPT-User",
+            "rule": "allow: /before-you-pay"
+          }
+        },
+        {
+          "token": "Claude-SearchBot",
+          "role": "search (Claude web search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-SearchBot",
+            "rule": "allow: /before-you-pay"
+          }
+        },
+        {
+          "token": "Claude-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-User",
+            "rule": "allow: /before-you-pay"
+          }
+        },
+        {
+          "token": "PerplexityBot",
+          "role": "search (Perplexity)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "PerplexityBot",
+            "rule": "allow: /before-you-pay"
+          }
+        },
+        {
+          "token": "Bingbot",
+          "role": "search (Bing)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /before-you-pay"
+          }
+        },
+        {
+          "token": "GPTBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "GPTBot",
+            "rule": "allow: /before-you-pay"
+          }
+        },
+        {
+          "token": "ClaudeBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ClaudeBot",
+            "rule": "allow: /before-you-pay"
+          }
+        },
+        {
+          "token": "Google-Extended",
+          "role": "robots token only (Gemini Apps grounding/training)",
+          "status": null,
+          "robots": {
+            "allowed": true,
+            "group": "Google-Extended",
+            "rule": "allow: /before-you-pay"
+          }
+        }
+      ],
+      "inboundFromTSet": [
+        "/",
+        "/opportunities",
+        "/apartments-for-sale/madinaty",
+        "/guides/madinaty/prices-2026",
+        "/guides/el-shorouk/prices-2026",
+        "/guides/buying/contract-registration-checklist",
+        "/guides/buying/buying-resale-step-by-step",
+        "/verified-prices",
+        "/opportunities/%D9%85%D8%AD%D9%84%20%D8%B1%D9%82%D9%85%2029",
+        "/opportunities/04a3wVWO",
+        "/opportunities/08OZ4Lxc"
+      ],
+      "outLinkCount": 19
+    },
+    {
+      "path": "/opportunities/%D9%85%D8%AD%D9%84%20%D8%B1%D9%82%D9%85%2029",
+      "expectIndex": true,
+      "factPatterns": [
+        "/<h1[\\s>]/",
+        "/ج\\.م/",
+        "/\"RealEstateListing\"/"
+      ],
+      "softFactPatterns": [
+        "/<nav[^>]+aria-label=\"دليل المشتري\"/"
+      ],
+      "status": 200,
+      "redirects": [],
+      "ttfbMs": [
+        627,
+        78,
+        88
+      ],
+      "ttfbMedianMs": 88,
+      "vercelCache": "PRERENDER",
+      "canonical": "https://www.lenaqar.com/opportunities/%D9%85%D8%AD%D9%84%20%D8%B1%D9%82%D9%85%2029",
+      "metaRobots": "index, follow",
+      "xRobots": null,
+      "noindex": false,
+      "inSitemap": true,
+      "factsMissing": [],
+      "softFactsMissing": [],
+      "crawlers": [
+        {
+          "token": "Googlebot",
+          "role": "search (Google Search, AI Overviews, AI Mode)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "OAI-SearchBot",
+          "role": "search (ChatGPT search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "OAI-SearchBot",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "ChatGPT-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ChatGPT-User",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "Claude-SearchBot",
+          "role": "search (Claude web search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-SearchBot",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "Claude-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-User",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "PerplexityBot",
+          "role": "search (Perplexity)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "PerplexityBot",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "Bingbot",
+          "role": "search (Bing)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "GPTBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "GPTBot",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "ClaudeBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ClaudeBot",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "Google-Extended",
+          "role": "robots token only (Gemini Apps grounding/training)",
+          "status": null,
+          "robots": {
+            "allowed": true,
+            "group": "Google-Extended",
+            "rule": "allow: /opportunities/*"
+          }
+        }
+      ],
+      "inboundFromTSet": [],
+      "outLinkCount": 18
+    },
+    {
+      "path": "/opportunities/04a3wVWO",
+      "expectIndex": true,
+      "factPatterns": [
+        "/<h1[\\s>]/",
+        "/ج\\.م/",
+        "/\"RealEstateListing\"/"
+      ],
+      "softFactPatterns": [
+        "/<nav[^>]+aria-label=\"دليل المشتري\"/"
+      ],
+      "status": 200,
+      "redirects": [],
+      "ttfbMs": [
+        456,
+        84,
+        86
+      ],
+      "ttfbMedianMs": 86,
+      "vercelCache": "PRERENDER",
+      "canonical": "https://www.lenaqar.com/opportunities/04a3wVWO",
+      "metaRobots": "index, follow",
+      "xRobots": null,
+      "noindex": false,
+      "inSitemap": true,
+      "factsMissing": [],
+      "softFactsMissing": [],
+      "crawlers": [
+        {
+          "token": "Googlebot",
+          "role": "search (Google Search, AI Overviews, AI Mode)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "OAI-SearchBot",
+          "role": "search (ChatGPT search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "OAI-SearchBot",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "ChatGPT-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ChatGPT-User",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "Claude-SearchBot",
+          "role": "search (Claude web search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-SearchBot",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "Claude-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-User",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "PerplexityBot",
+          "role": "search (Perplexity)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "PerplexityBot",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "Bingbot",
+          "role": "search (Bing)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "GPTBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "GPTBot",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "ClaudeBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ClaudeBot",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "Google-Extended",
+          "role": "robots token only (Gemini Apps grounding/training)",
+          "status": null,
+          "robots": {
+            "allowed": true,
+            "group": "Google-Extended",
+            "rule": "allow: /opportunities/*"
+          }
+        }
+      ],
+      "inboundFromTSet": [],
+      "outLinkCount": 19
+    },
+    {
+      "path": "/opportunities/08OZ4Lxc",
+      "expectIndex": true,
+      "factPatterns": [
+        "/<h1[\\s>]/",
+        "/ج\\.م/",
+        "/\"RealEstateListing\"/"
+      ],
+      "softFactPatterns": [
+        "/<nav[^>]+aria-label=\"دليل المشتري\"/"
+      ],
+      "status": 200,
+      "redirects": [],
+      "ttfbMs": [
+        599,
+        129,
+        90
+      ],
+      "ttfbMedianMs": 129,
+      "vercelCache": "PRERENDER",
+      "canonical": "https://www.lenaqar.com/opportunities/08OZ4Lxc",
+      "metaRobots": "index, follow",
+      "xRobots": null,
+      "noindex": false,
+      "inSitemap": true,
+      "factsMissing": [],
+      "softFactsMissing": [
+        "/<nav[^>]+aria-label=\"دليل المشتري\"/"
+      ],
+      "crawlers": [
+        {
+          "token": "Googlebot",
+          "role": "search (Google Search, AI Overviews, AI Mode)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "OAI-SearchBot",
+          "role": "search (ChatGPT search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "OAI-SearchBot",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "ChatGPT-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ChatGPT-User",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "Claude-SearchBot",
+          "role": "search (Claude web search)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-SearchBot",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "Claude-User",
+          "role": "user-initiated retrieval",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "Claude-User",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "PerplexityBot",
+          "role": "search (Perplexity)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "PerplexityBot",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "Bingbot",
+          "role": "search (Bing)",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "*",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "GPTBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "GPTBot",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "ClaudeBot",
+          "role": "training",
+          "status": 200,
+          "robots": {
+            "allowed": true,
+            "group": "ClaudeBot",
+            "rule": "allow: /opportunities/*"
+          }
+        },
+        {
+          "token": "Google-Extended",
+          "role": "robots token only (Gemini Apps grounding/training)",
+          "status": null,
+          "robots": {
+            "allowed": true,
+            "group": "Google-Extended",
+            "rule": "allow: /opportunities/*"
+          }
+        }
+      ],
+      "inboundFromTSet": [
+        "/opportunities"
+      ],
+      "outLinkCount": 17
+    }
+  ]
+}

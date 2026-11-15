@@ -1,0 +1,61 @@
+name: Production SEO health
+
+# Daily check of www.lenaqar.com: status, canonical, robots/noindex, sitemap,
+# key facts in raw HTML, structured data (valid JSON-LD, FAQ answers, required
+# types) and robots.txt rules for search/AI crawlers. Read-only GET requests.
+# A FAIL fails the job; GitHub then notifies per the repo's Actions settings.
+on:
+  schedule:
+    - cron: "30 4 * * *" # 04:30 UTC = 06:30 or 07:30 Cairo (DST)
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - scripts/seo-health.mjs
+      - scripts/lib/jsonld-check.mjs
+      - .github/workflows/seo-health.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: seo-health-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  health:
+    name: Production SEO health
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # No npm install: the script only uses Node built-ins.
+      - name: Check www.lenaqar.com
+        # `shell: bash` adds pipefail, so a FAIL (exit 1) survives the tee.
+        shell: bash
+        run: node scripts/seo-health.mjs --out seo-health.json | tee seo-health.txt
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Production SEO health"
+            echo '```'
+            cat seo-health.txt 2>/dev/null || echo "no output"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-health-${{ github.run_id }}
+          path: |
+            seo-health.json
+            seo-health.txt
+          retention-days: 30
+          if-no-files-found: ignore
