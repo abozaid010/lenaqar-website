@@ -58,6 +58,11 @@ export const defaultMetadata = {
       "ar-EG": SITE_URL,
     },
   },
+  // Google Search Console ownership of https://www.lenaqar.com/ (URL-prefix
+  // property, added 2026-11-15). Public token; removing it un-verifies the site.
+  verification: {
+    google: "aJzg6-xwPxcgXr3Aq10UZoSR1KlPeIzOwWw_C4i1EMw",
+  },
 };
 
 export const SITE_NAME = SITE.name;

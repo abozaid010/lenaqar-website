@@ -1,0 +1,174 @@
+{
+  "dimensionHeaders": [
+    {
+      "name": "sessionDefaultChannelGroup"
+    },
+    {
+      "name": "eventName"
+    }
+  ],
+  "metricHeaders": [
+    {
+      "name": "eventCount",
+      "type": "TYPE_INTEGER"
+    }
+  ],
+  "rows": [
+    {
+      "dimensionValues": [
+        {
+          "value": "Paid Social"
+        },
+        {
+          "value": "buy_request_submitted"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "33"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "Paid Social"
+        },
+        {
+          "value": "whatsapp_click"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "21"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "Direct"
+        },
+        {
+          "value": "whatsapp_click"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "9"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "AI Assistant"
+        },
+        {
+          "value": "whatsapp_click"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "7"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "Direct"
+        },
+        {
+          "value": "buy_request_submitted"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "7"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "Organic Search"
+        },
+        {
+          "value": "whatsapp_click"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "3"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "Organic Social"
+        },
+        {
+          "value": "whatsapp_click"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "2"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "Paid Social"
+        },
+        {
+          "value": "sell_request_submitted"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "Referral"
+        },
+        {
+          "value": "buy_request_submitted"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "Unassigned"
+        },
+        {
+          "value": "whatsapp_click"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "1"
+        }
+      ]
+    }
+  ],
+  "rowCount": 10,
+  "metadata": {
+    "currencyCode": "USD",
+    "timeZone": "Africa/Cairo"
+  },
+  "kind": "analyticsData#runReport"
+}
