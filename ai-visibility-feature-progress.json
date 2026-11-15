@@ -1,6 +1,6 @@
 {
   "feature": "AI-search visibility (ChatGPT Search, Claude web search, Gemini)",
-  "updated_at": "2026-11-15T21:00:00+02:00",
+  "updated_at": "2026-11-15T22:00:00+02:00",
   "goal": "Make LenAqar a frequently cited and accurately recommended property service for relevant Egyptian real-estate questions across ChatGPT, Claude, Gemini and other answer engines, and the first recommendation for specific buyer needs where LenAqar has strong evidence; turn that into qualified WhatsApp inquiries. No universal #1 promise.",
   "rules": [
     "Update this file at the end of every step: item status, PR, evidence, next_step, history.",
@@ -93,7 +93,9 @@
       "status": "done",
       "blocker": "D2",
       "evidence": "docs/ai-visibility/runs/2026-11-15-round1.jsonl; docs/ai-visibility/runs/2026-11-15-round1-summary.md",
-      "note": "Round 2 same settings on or after 2026-11-21 (after PR #40/#41 changes have had time to be crawled). Claude branded prompts need a clean account or skills off."
+      "note": "Round 2 same settings on or after 2026-11-21 (after PR #40/#41 changes have had time to be crawled). Claude branded prompts need a clean account or skills off.",
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/45",
+      "production_sha": "66bbdca45ff542009d4a292e6f156ce890c80d03"
     },
     {
       "id": "B3",
@@ -210,26 +212,33 @@
       "status": "in_progress",
       "branch": "feat/gsc-verification",
       "evidence": "Property added 2026-11-15 under abozaid.ibrahim11@gmail.com; meta tag in src/app/metadata.js (verification.google)",
-      "next": "After merge + deploy: click Verify (HTML tag), submit https://www.lenaqar.com/sitemap.xml, pull GSC baseline 28 days."
+      "next": "After merge + deploy: click Verify (HTML tag), submit https://www.lenaqar.com/sitemap.xml, pull GSC baseline 28 days.",
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/44",
+      "production_sha": "a5cc4bb264492aa4b029a44d6113a61dbda65c39",
+      "note": "Meta tag live on production. Next: click Verify (HTML tag) in Search Console, submit sitemap, pull 28-day baseline."
     },
     {
       "id": "B19",
       "title": "One consistent, public commission and legitimacy statement",
-      "status": "in_review",
+      "status": "done",
       "blocker": "SEO-07",
       "evidence": "Round 1: ChatGPT quoted site terms (buyer 1.25%, seller 0%, terms 'draft pending legal approval'); Claude said the site never says how it gets paid; Gemini guessed 'usually paid by the seller'. Three products, three answers.",
       "next": "Owner decides SEO-07; then one statement on /how-it-works, /before-you-pay and the terms, plus an FAQ entry. Remove or date the 'draft' label when terms are final.",
       "note": "Owner confirmed 2026-11-15: 2.5% buyer + 2.5% seller on final sale price, due at contract signing, same for developer units. Copy updated in PR #47.",
-      "branch": "feat/original-data-markets"
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/47",
+      "production_sha": "2600f9911c0e923cf2bbe3d1989bef1c95af85a2",
+      "production_evidence": "Production 2600f991 (Vercel READY 2026-11-15): seo-health 111 PASS / 3 WARN / 0 FAIL; live guide tables intro=sample=dated (Madinaty 120, Fifth Settlement 99, New Cairo 269, El Shorouk 29), all index,follow; home FAQPage 12 Q; /privacy shows 2.5% on final sale price, no 1.25%, draft notice kept; llms facts live; Search Console meta tag live."
     },
     {
       "id": "B20",
       "title": "'Resale and primary' copy vs resale-only inventory",
-      "status": "in_review",
+      "status": "done",
       "evidence": "All three products repeat that LenAqar searches resale and primary; the site's /how-it-works steps say so; site inventory query is is_primary=false.",
       "next": "Owner confirms whether primary (developer) units are offered; align copy either way.",
       "note": "Owner confirmed both developer and resale. FAQ q9 explains service vs currently displayed (resale) listings.",
-      "branch": "feat/original-data-markets"
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/47",
+      "production_sha": "2600f9911c0e923cf2bbe3d1989bef1c95af85a2",
+      "production_evidence": "Production 2600f991 (Vercel READY 2026-11-15): seo-health 111 PASS / 3 WARN / 0 FAIL; live guide tables intro=sample=dated (Madinaty 120, Fifth Settlement 99, New Cairo 269, El Shorouk 29), all index,follow; home FAQPage 12 Q; /privacy shows 2.5% on final sale price, no 1.25%, draft notice kept; llms facts live; Search Console meta tag live."
     },
     {
       "id": "B21",
@@ -241,20 +250,24 @@
     {
       "id": "B22",
       "title": "LenAqar asking-price tables: Madinaty, Fifth Settlement, New Cairo, El Shorouk (one defined sample)",
-      "status": "in_review",
-      "branch": "feat/original-data-markets",
+      "status": "done",
       "evidence": "Built HTML 2026-11-15: intro n = sample n = dated n on every guide. Madinaty 120 (70,085 EGP/m²; 2BR 47, 3BR 69), Fifth Settlement 99 (37,975; 3BR 71; 2BR <20 omitted), New Cairo city 269 (54,741; 2BR 80, 3BR 168), El Shorouk 29 (23,077; 3BR 24). Regression test: guide-inventory-summary.test.js",
-      "note": "PR #47 review (P1) found counts/medians from the price-insight API (unit set not shown on lenaqar.com, e.g. 151 vs 98) mixed with catalog dates and a 'listed on LenAqar' label. Fixed: everything computed from the public catalog only; price = total asking price ÷ area as on listing cards. Replaces the PR #40 Madinaty method too."
+      "note": "PR #47 review (P1) found counts/medians from the price-insight API (unit set not shown on lenaqar.com, e.g. 151 vs 98) mixed with catalog dates and a 'listed on LenAqar' label. Fixed: everything computed from the public catalog only; price = total asking price ÷ area as on listing cards. Replaces the PR #40 Madinaty method too.",
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/47",
+      "production_sha": "2600f9911c0e923cf2bbe3d1989bef1c95af85a2",
+      "production_evidence": "Production 2600f991 (Vercel READY 2026-11-15): seo-health 111 PASS / 3 WARN / 0 FAIL; live guide tables intro=sample=dated (Madinaty 120, Fifth Settlement 99, New Cairo 269, El Shorouk 29), all index,follow; home FAQPage 12 Q; /privacy shows 2.5% on final sale price, no 1.25%, draft notice kept; llms facts live; Search Console meta tag live."
     },
     {
       "id": "B23",
       "title": "Listing-stage clarity (published / data-checked / availability-confirmed / legal review)",
-      "status": "in_review",
-      "branch": "feat/original-data-markets",
-      "note": "FAQ q12 + llms. Per-listing stage badges need backend fields (not built)."
+      "status": "done",
+      "note": "FAQ q12 + llms. Per-listing stage badges need backend fields (not built).",
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/47",
+      "production_sha": "2600f9911c0e923cf2bbe3d1989bef1c95af85a2",
+      "production_evidence": "Production 2600f991 (Vercel READY 2026-11-15): seo-health 111 PASS / 3 WARN / 0 FAIL; live guide tables intro=sample=dated (Madinaty 120, Fifth Settlement 99, New Cairo 269, El Shorouk 29), all index,follow; home FAQPage 12 Q; /privacy shows 2.5% on final sale price, no 1.25%, draft notice kept; llms facts live; Search Console meta tag live."
     }
   ],
-  "next_step": "Owner: answer the bundled commission/lawyer question; merge #44, #45, the trust/data PR and #46. Then verify production, Search Console verification, panel round 2 (clean Claude account) on/after 2026-11-21.",
+  "next_step": "Search Console: Verify (HTML tag) + submit sitemap + 28-day baseline. Owner: merge #46 (photos); provide partner lawyer name/registration and review scope (still unresolved). Panel round 2 with a clean Claude account on/after 2026-11-21.",
   "reviews": [
     {
       "date": "2026-11-23",
@@ -329,6 +342,10 @@
     {
       "at": "2026-11-15T21:00:00+02:00",
       "event": "PR #47 P1 review resolved: guide tables now computed from one defined sample (listings shown on lenaqar.com); regression test added; numbers changed (see B22). Tracker: commission confirmed (final sale price, at signing, same for developer units); lawyer review free via partner lawyer — identity and scope still UNRESOLVED."
+    },
+    {
+      "at": "2026-11-15T22:00:00+02:00",
+      "event": "Merged in order #44 (a5cc4bb2) → #45 (66bbdca4) → #47 (2600f991) after CI green on each exact head and preview validation of #47. Production 2600f991 (Vercel READY 2026-11-15): seo-health 111 PASS / 3 WARN / 0 FAIL; live guide tables intro=sample=dated (Madinaty 120, Fifth Settlement 99, New Cairo 269, El Shorouk 29), all index,follow; home FAQPage 12 Q; /privacy shows 2.5% on final sale price, no 1.25%, draft notice kept; llms facts live; Search Console meta tag live. Lawyer identity and review scope remain UNRESOLVED."
     }
   ],
   "owner_confirmed_facts": {
