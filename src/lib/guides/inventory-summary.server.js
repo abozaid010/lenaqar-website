@@ -27,7 +27,7 @@ export async function loadGuideInventorySummary(slug) {
           return json?.status === false ? null : json?.data ?? null;
         }),
       ),
-      fetchOpportunityCatalog({ city: config.city, district: config.district }),
+      fetchOpportunityCatalog(config.level === "city" ? { city: config.city } : { city: config.city, district: config.district }),
     ]);
     return buildInventorySummary(config, answers, units);
   } catch (error) {

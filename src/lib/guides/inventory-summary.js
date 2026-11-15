@@ -18,11 +18,51 @@ export const MIN_SEGMENT_SAMPLE = 20;
 /** Guides that show a summary, keyed by canonical guide path. */
 export const GUIDE_INVENTORY = {
   "/guides/madinaty/prices-2026": {
+    level: "district",
     city: "new cairo",
     district: "madinaty",
     propertyType: "apartment",
     placeAr: "مدينتي",
     listingsHref: "/apartments-for-sale/madinaty",
+    segments: [
+      { bedrooms: null, labelAr: "كل الشقق" },
+      { bedrooms: 2, labelAr: "شقق غرفتين" },
+      { bedrooms: 3, labelAr: "شقق 3 غرف" },
+    ],
+  },
+  "/guides/fifth-settlement/prices-2026": {
+    level: "district",
+    city: "new cairo",
+    district: "fifth settlement",
+    propertyType: "apartment",
+    placeAr: "التجمع الخامس",
+    listingsHref: "/apartments-for-sale/fifth-settlement",
+    segments: [
+      { bedrooms: null, labelAr: "كل الشقق" },
+      { bedrooms: 2, labelAr: "شقق غرفتين" },
+      { bedrooms: 3, labelAr: "شقق 3 غرف" },
+    ],
+  },
+  "/guides/new-cairo/prices-2026": {
+    level: "city",
+    city: "new cairo",
+    district: null,
+    propertyType: "apartment",
+    placeAr: "القاهرة الجديدة (كل الأحياء)",
+    listingsHref: "/apartments-for-sale/new-cairo",
+    segments: [
+      { bedrooms: null, labelAr: "كل الشقق" },
+      { bedrooms: 2, labelAr: "شقق غرفتين" },
+      { bedrooms: 3, labelAr: "شقق 3 غرف" },
+    ],
+  },
+  "/guides/el-shorouk/prices-2026": {
+    level: "district",
+    city: "cairo",
+    district: "el shorouk city",
+    propertyType: "apartment",
+    placeAr: "الشروق",
+    listingsHref: "/apartments-for-sale/el-shorouk",
     segments: [
       { bedrooms: null, labelAr: "كل الشقق" },
       { bedrooms: 2, labelAr: "شقق غرفتين" },
@@ -52,11 +92,9 @@ export function inventoryConfigForGuide(slug) {
 
 /** Query string fields for one segment. */
 export function priceInsightParams(config, segment) {
-  const params = {
-    city: config.city,
-    district: config.district,
-    property_type: config.propertyType,
-  };
+  const params = { city: config.city };
+  if (config.level === "district") params.district = config.district;
+  params.property_type = config.propertyType;
   if (segment?.bedrooms != null) params.bedrooms = segment.bedrooms;
   return params;
 }
@@ -70,8 +108,10 @@ export function toSummaryRow(data, config, segment, { minSample = MIN_SEGMENT_SA
   if (!Array.isArray(data.relaxed) || data.relaxed.length > 0) return null;
 
   const scope = data.scope && typeof data.scope === "object" ? data.scope : {};
-  if (token(scope.level) !== "district") return null;
-  if (token(scope.district) !== config.district) return null;
+  const level = config.level || "district";
+  if (token(scope.level) !== level) return null;
+  if (token(scope.city) !== config.city) return null;
+  if (level === "district" && token(scope.district) !== config.district) return null;
   if (token(scope.property_type) !== config.propertyType) return null;
   const wantBedrooms = segment?.bedrooms ?? null;
   const gotBedrooms = scope.bedrooms == null ? null : Number(scope.bedrooms);
@@ -104,7 +144,9 @@ export function toSummaryRow(data, config, segment, { minSample = MIN_SEGMENT_SA
 export function recordDateRange(units, config) {
   const dates = [];
   for (const unit of Array.isArray(units) ? units : []) {
-    if (token(unit?.district) !== config.district) continue;
+    if ((config.level || "district") === "district"
+      ? token(unit?.district) !== config.district
+      : token(unit?.city) !== config.city) continue;
     if (token(unit?.buildingType) !== config.propertyType) continue;
     const day = typeof unit?.updatedAt === "string" ? unit.updatedAt.slice(0, 10) : "";
     if (/^\d{4}-\d{2}-\d{2}$/.test(day)) dates.push(day);

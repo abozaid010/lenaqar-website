@@ -42,7 +42,8 @@ function answer({ bedrooms = null, relaxed = [], level = "district", n = 46, ...
 
 test("config lookup accepts the stored slug with its trailing slash", () => {
   assert.equal(inventoryConfigForGuide("/guides/madinaty/prices-2026/"), config);
-  assert.equal(inventoryConfigForGuide("/guides/el-shorouk/prices-2026/"), null);
+  assert.equal(inventoryConfigForGuide("/guides/sheikh-zayed/prices-2026/"), null);
+  assert.equal(inventoryConfigForGuide("/guides/new-cairo/prices-2026/").level, "city");
 });
 
 test("query carries bedrooms only for a bedroom segment", () => {
@@ -115,4 +116,22 @@ test("summary needs the all-apartments row and known record dates", () => {
 
 test("feed spelling 'mostaqbal city' maps to the Mostakbal City guides", () => {
   assert.equal(guideAreaForUnit({ city: "new cairo", district: "mostaqbal city" }), "mostakbal-city");
+});
+
+test("city-level markets: only a whole-city answer for that city becomes a row", () => {
+  const nc = GUIDE_INVENTORY["/guides/new-cairo/prices-2026"];
+  assert.deepEqual(priceInsightParams(nc, nc.segments[0]), { city: "new cairo", property_type: "apartment" });
+  const cityAnswer = { ...answer({ n: 334 }), scope: { level: "city", city: "new cairo", district: null, property_type: "apartment", bedrooms: null } };
+  assert.equal(toSummaryRow(cityAnswer, nc, nc.segments[0]).count, 334);
+  // A district answer is narrower than the label; another city is wrong.
+  assert.equal(toSummaryRow(answer({ n: 121 }), nc, nc.segments[0]), null);
+  assert.equal(toSummaryRow({ ...cityAnswer, scope: { ...cityAnswer.scope, city: "6 october" } }, nc, nc.segments[0]), null);
+  // Record dates for a city-level market use the city, not a district.
+  assert.deepEqual(recordDateRange([{ city: "new cairo", district: "x", buildingType: "apartment", updatedAt: "2026-10-01" }], nc), { earliest: "2026-10-01", latest: "2026-10-01" });
+});
+
+test("a district answer from another city is rejected", () => {
+  const fs5 = GUIDE_INVENTORY["/guides/fifth-settlement/prices-2026"];
+  const wrongCity = { ...answer({ n: 151 }), scope: { level: "district", city: "cairo", district: "fifth settlement", property_type: "apartment", bedrooms: null } };
+  assert.equal(toSummaryRow(wrongCity, fs5, fs5.segments[0]), null);
 });
