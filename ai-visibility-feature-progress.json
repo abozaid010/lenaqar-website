@@ -219,7 +219,7 @@
       "blocker": "SEO-07",
       "evidence": "Round 1: ChatGPT quoted site terms (buyer 1.25%, seller 0%, terms 'draft pending legal approval'); Claude said the site never says how it gets paid; Gemini guessed 'usually paid by the seller'. Three products, three answers.",
       "next": "Owner decides SEO-07; then one statement on /how-it-works, /before-you-pay and the terms, plus an FAQ entry. Remove or date the 'draft' label when terms are final.",
-      "note": "Owner confirmed 2.5% + 2.5% on 2026-11-15. Site copy updated (FAQ q10, terms, /classic blocks, llms). Basis/timing/developer policy stated as 'written into the agreement' until confirmed.",
+      "note": "Owner confirmed 2026-11-15: 2.5% buyer + 2.5% seller on final sale price, due at contract signing, same for developer units. Copy updated in PR #47.",
       "branch": "feat/original-data-markets"
     },
     {
@@ -320,6 +320,10 @@
     {
       "at": "2026-11-15T19:30:00+02:00",
       "event": "Owner confirmed services and 2.5%+2.5% commission. Trust copy fixed (3 conflicting commission statements → 1), FAQ q9–q12, llms facts; LenAqar tables for Fifth Settlement, New Cairo, El Shorouk; data-publishing process; corroboration audit (no independent mentions); image 402 code fix (PR #46). Basis/timing/developer policy/lawyer details still open."
+    },
+    {
+      "at": "2026-11-15T20:00:00+02:00",
+      "event": "Owner answered: commission on final sale price, due at contract signing, same for developer units; lawyer review free via partner lawyer (name/scope still open). Copy updated in PR #47."
     }
   ],
   "owner_confirmed_facts": {
@@ -330,13 +334,15 @@
       "Communication via WhatsApp",
       "Honest advice on properties, developers and trade-offs",
       "Access to lawyer review",
-      "Commission: buyer 2.5% and seller 2.5%, each separately"
+      "Commission: buyer 2.5% and seller 2.5%, each separately",
+      "Commission calculated on the final sale price (2026-11-15)",
+      "Commission due at sale-contract signing (2026-11-15)",
+      "Same 2.5% + 2.5% policy for developer (primary) purchases (2026-11-15)",
+      "Lawyer review is free for buyers via a partner lawyer (2026-11-15)"
     ],
     "open": [
-      "Commission calculation basis",
-      "Commission payment timing",
-      "Whether developer purchases follow the same commission policy",
-      "Lawyer identity, scope and fee"
+      "Partner lawyer name and bar registration (needed before naming on site, B7)",
+      "Exact scope of the lawyer review"
     ]
   },
   "backlog_30_60_90": {

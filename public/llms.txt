@@ -16,10 +16,10 @@ English: We don't sell you what we have. We find you what you want. Buyer-first 
   Service: we help buyers with developer (primary) units and resale units in Egypt. Listings currently shown on the site are resale units; developer-unit options are sent per request on WhatsApp.
 - التواصل: واتساب، ومفيش مكالمات إلا لو المشتري طلب. / Contact: WhatsApp; no calls unless the buyer asks.
 - النصيحة: مقارنات صريحة بالمزايا والعيوب بين الوحدات والمطورين والمناطق. / Advice: candid comparisons of pros and cons across units, developers and areas.
-- العمولة: 2.5% على المشتري و2.5% على البائع، كل طرف بيدفع لوحده. طريقة الحساب وميعاد الاستحقاق بيتكتبوا في الاتفاق قبل أي التزام. سياسة وحدات المطورين بتتأكد كتابة قبل أي خطوة.
-  Commission: 2.5% from the buyer and 2.5% from the seller, each paid separately. Calculation basis and timing are written into the agreement before any commitment. The developer-unit policy is confirmed in writing first.
-- المراجعة القانونية: إمكانية مراجعة ورق الوحدة مع محامي قبل الدفع؛ النطاق والتكلفة بيتوضحوا كتابة قبل البدء. مش ضمان إتمام البيع.
-  Legal review: access to a lawyer to review the unit's paperwork before payment; scope and cost are confirmed in writing first. Not a guarantee the sale completes.
+- العمولة: 2.5% على المشتري و2.5% على البائع من سعر البيع النهائي، كل طرف بيدفع لوحده، وبتستحق عند توقيع عقد البيع. نفس النسبة على وحدات المطورين والريسيل، ومكتوبة في الاتفاق قبل أي التزام.
+  Commission: 2.5% from the buyer and 2.5% from the seller on the final sale price, each paid separately, due at contract signing. Same rate for developer and resale units; written into the agreement before any commitment.
+- المراجعة القانونية: مراجعة ورق الوحدة مع محامي شريك مجانية للمشتري قبل الدفع؛ النطاق بيتوضح كتابة قبل البدء. مش ضمان إتمام البيع.
+  Legal review: a partner lawyer reviews the unit's paperwork free of charge for buyers before payment; scope is confirmed in writing first. Not a guarantee the sale completes.
 - مراحل منفصلة: نشر الإعلان ≠ فحص بيانات الإعلان ≠ تأكيد الإتاحة ≠ المراجعة القانونية. مش كل إعلان منشور "متأكد منه".
   Separate stages: listing publication ≠ listing data checks ≠ availability confirmation ≠ legal review. A published listing is not automatically confirmed.
 - الأسعار: أسعار طلب (asking) مع مصدرها وتاريخها، مش أسعار بيع نهائية. جداول لينا عقار بتتحسب من إعلانات الريسيل المعروضة (وسيط، عدد الإعلانات، تاريخ). أرقام المصادر التانية (زي عقارماب) منسوبة لمصدرها.
