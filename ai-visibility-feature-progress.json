@@ -155,7 +155,7 @@
       "title": "Scheduled health check (GitHub Actions cron)",
       "status": "ready_for_review",
       "branch": "feat/b12-daily-health-check",
-      "pr": null,
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/42",
       "evidence": ".github/workflows/seo-health.yml; scripts/lib/jsonld-check.mjs; src/lib/__tests__/seo-health-jsonld.test.js",
       "note": "Daily 04:30 UTC + manual + PR runs on script changes. Adds JSON-LD checks (parse, FAQ answers, required types per page). Verified the check flags the pre-PR-41 production HTML."
     },
@@ -223,7 +223,7 @@
     },
     {
       "at": "2026-11-15T10:30:00+02:00",
-      "event": "PR #41 merged; production SHA 3ffe91e0 verified; live page, 7/7 FAQ answers, schema, canonical, indexing verified; seo-health 86/3/0. B6 marked done. B12 built: daily GitHub Actions health check with structured-data checks (110/3/0 on production)."
+      "event": "PR #41 merged; production SHA 3ffe91e0 verified; live page, 7/7 FAQ answers, schema, canonical, indexing verified; seo-health 86/3/0. B6 marked done. B12 built: daily GitHub Actions health check with structured-data checks (110/3/0 on production). PR #42 opened."
     }
   ]
 }
