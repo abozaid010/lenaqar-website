@@ -20,6 +20,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { checkJsonLd, missingTypes } from "./lib/jsonld-check.mjs";
 
 const args = process.argv.slice(2);
 function argValues(name) {
@@ -56,24 +57,27 @@ const ROBOTS_ONLY_TOKENS = ["Google-Extended"];
 /**
  * The fixed T-set. `expectIndex: false` documents an intentional noindex so a
  * change in either direction is reported. `facts` must be present in raw HTML.
+ * `types` are schema.org types the page must carry (all pages also need
+ * SITE_TYPES); every JSON-LD block must parse and FAQ answers must have text.
  */
+const SITE_TYPES = ["Organization", "WebSite"];
 const T_SET = [
-  { path: "/", expectIndex: true, facts: [/<h1[\s>]/] },
+  { path: "/", expectIndex: true, facts: [/<h1[\s>]/], types: ["FAQPage"] },
   { path: "/opportunities", expectIndex: true, facts: [/<h1[\s>]/, /href="\/opportunities\/[A-Za-z0-9]+"/] },
   // The footer links the Madinaty price map on every page, so the hub link is
   // what proves the area page itself links its guides.
-  { path: "/apartments-for-sale/madinaty", expectIndex: true, facts: [/<h1[\s>]/, /href="\/guides\/madinaty"/] },
-  { path: "/guides/madinaty/prices-2026", expectIndex: true, facts: [/<h1[\s>]/, /جنيه/, /"dateModified"/, /عقارماب/], softLabel: "LenAqar inventory table", softFacts: [/id="guide-inventory"/, /طريقة الحساب/] },
-  { path: "/guides/el-shorouk/prices-2026", expectIndex: true, facts: [/<h1[\s>]/, /جنيه/, /"dateModified"/] },
-  { path: "/guides/buying/contract-registration-checklist", expectIndex: true, facts: [/<h1[\s>]/, /"dateModified"/, /gov\.eg/], softLabel: "total cost section", softFacts: [/التكاليف اللي غير سعر الشقة/, /eta\.gov\.eg/, /"acceptedAnswer":\{"@type":"Answer","text":"[^"]/] },
+  { path: "/apartments-for-sale/madinaty", expectIndex: true, types: ["BreadcrumbList"], facts: [/<h1[\s>]/, /href="\/guides\/madinaty"/] },
+  { path: "/guides/madinaty/prices-2026", expectIndex: true, types: ["Article", "BreadcrumbList", "FAQPage"], facts: [/<h1[\s>]/, /جنيه/, /"dateModified"/, /عقارماب/], softLabel: "LenAqar inventory table", softFacts: [/id="guide-inventory"/, /طريقة الحساب/] },
+  { path: "/guides/el-shorouk/prices-2026", expectIndex: true, types: ["Article", "BreadcrumbList", "FAQPage"], facts: [/<h1[\s>]/, /جنيه/, /"dateModified"/] },
+  { path: "/guides/buying/contract-registration-checklist", expectIndex: true, types: ["Article", "BreadcrumbList", "FAQPage"], facts: [/<h1[\s>]/, /"dateModified"/, /gov\.eg/], softLabel: "total cost section", softFacts: [/التكاليف اللي غير سعر الشقة/, /eta\.gov\.eg/, /"acceptedAnswer":\{"@type":"Answer","text":"[^"]/] },
   {
     path: "/guides/buying/buying-resale-step-by-step",
     expectIndex: false,
     note: "intentional noindex: legal steps still marked «تحت المراجعة» (REPORT/seo-release-2026-11-03/excluded-guides-triage.json)",
     facts: [/<h1[\s>]/],
   },
-  { path: "/verified-prices", expectIndex: true, facts: [/<h1[\s>]/] },
-  { path: "/before-you-pay", expectIndex: true, facts: [/<h1[\s>]/] },
+  { path: "/verified-prices", expectIndex: true, facts: [/<h1[\s>]/], types: ["BreadcrumbList", "FAQPage"] },
+  { path: "/before-you-pay", expectIndex: true, facts: [/<h1[\s>]/], types: ["FAQPage", "HowTo"] },
 ];
 
 // ---------- robots.txt (Google semantics: groups, longest match, * and $) ----------
@@ -201,7 +205,7 @@ async function main() {
   const tSet = [
     ...T_SET,
     // Area guide link is soft: listings outside guide areas have none by design.
-    ...listingPaths.map((p) => ({ path: p, expectIndex: true, facts: [/<h1[\s>]/, /ج\.م/, /"RealEstateListing"/], softFacts: [/<nav[^>]+aria-label="دليل المشتري"/] })),
+    ...listingPaths.map((p) => ({ path: p, expectIndex: true, facts: [/<h1[\s>]/, /ج\.م/], types: ["RealEstateListing", "BreadcrumbList"], softFacts: [/<nav[^>]+aria-label="دليل المشتري"/] })),
   ];
 
   const pages = [];
@@ -240,6 +244,8 @@ async function main() {
       noindex,
       inSitemap: sitemap.paths.has(item.path),
       factsMissing: item.facts.filter((re) => !re.test(html)).map(String),
+      jsonLd: checkJsonLd(html),
+      typesExpected: [...SITE_TYPES, ...(item.types || [])],
       softFactsMissing: (item.softFacts || []).filter((re) => !re.test(html)).map(String),
       outLinks: [...internalHrefs(html)],
       crawlers,
@@ -265,6 +271,9 @@ async function main() {
     add(p.path, p.expectIndex ? "in sitemap" : "not in sitemap", p.inSitemap === p.expectIndex ? "PASS" : "FAIL", String(p.inSitemap));
     add(p.path, "key facts in raw HTML", p.factsMissing.length ? "FAIL" : "PASS", p.factsMissing.join(", ") || "all present");
     if (p.softFactPatterns.length) add(p.path, p.softLabel || "area guide link", p.softFactsMissing.length ? "WARN" : "PASS", p.softFactsMissing.join(", ") || "present");
+    add(p.path, "structured data valid", p.jsonLd.problems.length ? "FAIL" : "PASS", p.jsonLd.problems.join("; ") || `${p.jsonLd.blocks} blocks`);
+    const typesMissing = missingTypes(p.jsonLd.types, p.typesExpected);
+    add(p.path, "schema types present", typesMissing.length ? "FAIL" : "PASS", typesMissing.length ? `missing ${typesMissing.join(", ")}` : p.jsonLd.types.join(", "));
     add(p.path, "inbound links from T-set", p.inboundFromTSet.length ? "PASS" : "WARN", String(p.inboundFromTSet.length));
     add(p.path, `TTFB median < ${TTFB_WARN_MS}ms`, p.ttfbMedianMs < TTFB_WARN_MS ? "PASS" : "WARN", `${p.ttfbMs.join("/")}ms cache=${p.vercelCache || "-"}`);
     for (const c of p.crawlers) {
