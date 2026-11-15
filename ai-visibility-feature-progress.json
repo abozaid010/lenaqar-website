@@ -158,11 +158,11 @@
     {
       "id": "B12",
       "title": "Scheduled health check (GitHub Actions cron)",
-      "status": "ready_for_review",
-      "branch": "feat/b12-daily-health-check",
+      "status": "done",
       "pr": "https://github.com/abozaid010/lenaqar-website/pull/42",
-      "evidence": ".github/workflows/seo-health.yml; scripts/lib/jsonld-check.mjs; src/lib/__tests__/seo-health-jsonld.test.js",
-      "note": "Daily 04:30 UTC + manual + PR runs on script changes. Adds JSON-LD checks (parse, FAQ answers, required types per page). Verified the check flags the pre-PR-41 production HTML. PR run 43679557793 from GitHub runners: 110/3/0, all steps success, artifact uploaded; simulated crawler UAs got 200 from GitHub IPs (Vercel edge cle1, wafAction allow)."
+      "evidence": ".github/workflows/seo-health.yml; scripts/lib/jsonld-check.mjs; src/lib/__tests__/seo-health-jsonld.test.js; first run on main: workflow_dispatch run 43699882551 success",
+      "note": "Daily 04:30 UTC + manual + PR runs on script changes. Adds JSON-LD checks (parse, FAQ answers, required types per page). Verified the check flags the pre-PR-41 production HTML. PR run 43679557793 from GitHub runners: 110/3/0, all steps success, artifact uploaded; simulated crawler UAs got 200 from GitHub IPs (Vercel edge cle1, wafAction allow).",
+      "production_sha": "338ded1853121f1d52b9e7a845a8c7f604fbd9f8"
     },
     {
       "id": "B13",
@@ -183,6 +183,23 @@
       "note": "Signal 2026-11-05..14: browser language English 203 vs Arabic 142 sessions (58% English). Browser UI language is not content preference (many Egyptian users run English UI). Decide with GSC English query impressions once available."
     },
     {
+      "id": "B16",
+      "title": "Listing photos return 402 from /_next/image (Vercel Hobby image-optimization allowance used up)",
+      "status": "needs_owner_decision",
+      "evidence": "2026-11-15: team website-9c0c billing plan = hobby (Vercel API). 1 of 18 sampled listing images returned 402 OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED while its origin returned 200; real bingbot got a 402 on /_next/image. Vercel docs: past the Hobby allowance new source images return 402, cached ones keep working, Hobby is never billed. next.config: formats webp+avif, 8 deviceSizes + 8 imageSizes, minimumCacheTTL 8 h (all multiply transformations).",
+      "options": [
+        "Free code PR: unoptimized for remote listing photos (served straight from api.lenaai.net; larger files) + webp only, fewer sizes, 31-day minimumCacheTTL",
+        "Upgrade team to Vercel Pro (paid, owner approval)",
+        "Wait for the monthly reset (photos stay broken until then; reset date unknown)"
+      ]
+    },
+    {
+      "id": "B17",
+      "title": "Listing og:image is the site logo, not the unit photo",
+      "status": "pending",
+      "evidence": "2026-11-15: /opportunities/04a3wVWO og:image = /images/default_logo.jpg. Link previews (WhatsApp, Facebook 152 hits/h) show the logo. Depends on B16 for a reliable image URL."
+    },
+    {
       "id": "B18",
       "title": "Search Console ownership: URL-prefix https://www.lenaqar.com/ verified via HTML meta tag; submit sitemap",
       "status": "in_progress",
@@ -191,7 +208,7 @@
       "next": "After merge + deploy: click Verify (HTML tag), submit https://www.lenaqar.com/sitemap.xml, pull GSC baseline 28 days."
     }
   ],
-  "next_step": "Owner merges the GSC verification PR. Then: verify in Search Console, submit sitemap, pull GSC baseline. Owner decides B16 (photos 402). Then B11, B17, B3, B14.",
+  "next_step": "Owner merges PR #44 (includes #43). Then: verify Search Console (HTML tag), submit sitemap, pull GSC baseline. Owner decides B16 (photos 402: free code fix recommended). Then B11, B17, B3, B14.",
   "reviews": [
     {
       "date": "2026-11-23",
@@ -242,6 +259,10 @@
     {
       "at": "2026-11-15T11:15:00+02:00",
       "event": "PR #42 workflow passed on GitHub runners (110/3/0). B9 sampled 1 h of CDN request logs: no verified AI crawler data possible on the free plan; real bingbot hit a 402 on /_next/image. B9 marked partial with options."
+    },
+    {
+      "at": "2026-11-15T12:00:00+02:00",
+      "event": "PR #42 merged; prod SHA 338ded18 verified; first manual seo-health run on main triggered. D1 blocked by Google OAuth (gcloud client). Step 3 done: Vercel plan is Hobby and image 402 confirmed as allowance exhaustion (B16). Listing og:image = logo (B17)."
     },
     {
       "at": "2026-11-15T14:00:00+02:00",
