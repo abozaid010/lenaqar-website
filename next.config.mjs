@@ -35,9 +35,12 @@ const nextConfig = {
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline';",
     // Improve image loading performance
-    minimumCacheTTL: 60*60*8, // 8 hours
-    formats: ['image/webp', 'image/avif'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    // Fewer variants per photo = fewer billable optimizations (Hobby plan
+    // returns 402 once the allowance is used up). One modern format, no 2K/4K
+    // widths (listing photos never render that wide), cache 31 days.
+    minimumCacheTTL: 60*60*24*31,
+    formats: ['image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   async redirects() {
