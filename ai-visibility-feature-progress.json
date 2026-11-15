@@ -1,6 +1,6 @@
 {
   "feature": "AI-search visibility (ChatGPT Search, Claude web search, Gemini)",
-  "updated_at": "2026-11-15T10:30:00+02:00",
+  "updated_at": "2026-11-15T11:15:00+02:00",
   "goal": "Raise the probability that ChatGPT Search, Claude web search and Gemini cite or accurately recommend LenAqar for Egyptian resale property questions in the areas it serves, and that this produces qualified buy/sell inquiries.",
   "rules": [
     "Update this file at the end of every step: item status, PR, evidence, next_step, history.",
@@ -19,7 +19,7 @@
   "tracks": {
     "A_technical": {
       "source": "scripts/seo-health.mjs + GSC + CDN logs",
-      "status": "V: production 110 PASS / 3 WARN / 0 FAIL with structured-data checks (2026-11-15, after PR #41). GSC and real crawler logs: I"
+      "status": "V: production 110 PASS / 3 WARN / 0 FAIL with structured-data checks, locally and from GitHub Actions (run 43679557793, 2026-11-15). GSC: I. Real crawler visits: partial (B9)"
     },
     "B_ai_visibility": {
       "source": "docs/ai-visibility/runs/<round>.jsonl",
@@ -75,7 +75,7 @@
     "SEO-07 commission policy (B6 commission line, branded prompt BR3)",
     "B10 listing freshness policy: 88 of 118 Madinaty apartment records last updated before 2026-10-01 yet InStock",
     "SEO-04 hidden units",
-    "Vercel /_next/image 402 OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED (H: optimization quota); owner checks Vercel usage"
+    "Vercel /_next/image 402 OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED (H: optimization quota). Seen again 2026-11-15 05:xx UTC on a real bingbot request. Owner checks Vercel usage."
   ],
   "items": [
     {
@@ -137,7 +137,10 @@
     {
       "id": "B9",
       "title": "Verify real crawler visits (Vercel logs, read-only)",
-      "status": "pending"
+      "status": "partial",
+      "blocker": "Free plan: CDN request logs cover only the last 1 h and carry no client IP, so crawler identity cannot be verified (UA only). Longer windows need Observability Plus (paid, owner approval). Googlebot crawl stats need D1 (GSC).",
+      "evidence": "vercel logs requests, production, 2026-11-15 04:06–05:06 UTC, 1,076 records, all wafAction=allow. Excluding this session's own simulated runs (edge fra1) and the PR #42 CI run (edge cle1): bingbot 3 (iad1; 1× 402 on /_next/image), Amazonbot 2, Bytespider 1, PetalBot 7, facebookexternalhit 152. No OAI-SearchBot, Claude-SearchBot, ChatGPT-User, Claude-User or Googlebot UA in that hour (one hour only: not evidence of absence).",
+      "proposal": "Free option needing owner OK: an hourly local launchd job running `vercel logs requests --since 1h` that keeps only bot-UA rows (aggregate counts, no IPs) for a 7-day picture. Or approve Observability Plus."
     },
     {
       "id": "B10",
@@ -157,7 +160,7 @@
       "branch": "feat/b12-daily-health-check",
       "pr": "https://github.com/abozaid010/lenaqar-website/pull/42",
       "evidence": ".github/workflows/seo-health.yml; scripts/lib/jsonld-check.mjs; src/lib/__tests__/seo-health-jsonld.test.js",
-      "note": "Daily 04:30 UTC + manual + PR runs on script changes. Adds JSON-LD checks (parse, FAQ answers, required types per page). Verified the check flags the pre-PR-41 production HTML."
+      "note": "Daily 04:30 UTC + manual + PR runs on script changes. Adds JSON-LD checks (parse, FAQ answers, required types per page). Verified the check flags the pre-PR-41 production HTML. PR run 43679557793 from GitHub runners: 110/3/0, all steps success, artifact uploaded; simulated crawler UAs got 200 from GitHub IPs (Vercel edge cle1, wafAction allow)."
     },
     {
       "id": "B13",
@@ -177,7 +180,7 @@
       "blocker": "B1 data shows English demand"
     }
   ],
-  "next_step": "After the B12 PR merges: verify the first scheduled/manual run on main. In parallel (read-only, no PR needed unless a fix is found): B9 real crawler visits from Vercel logs. Then B11 (/opportunities TTFB), B3 (resale guide content), B14 (NAP audit + outreach drafts).",
+  "next_step": "After PR #42 merges: verify the first manual/scheduled run on main. Next build step: B11 (/opportunities TTFB on cache miss). Then B3 (resale guide content), B14 (NAP audit + outreach drafts).",
   "reviews": [
     {
       "date": "2026-11-23",
@@ -224,6 +227,10 @@
     {
       "at": "2026-11-15T10:30:00+02:00",
       "event": "PR #41 merged; production SHA 3ffe91e0 verified; live page, 7/7 FAQ answers, schema, canonical, indexing verified; seo-health 86/3/0. B6 marked done. B12 built: daily GitHub Actions health check with structured-data checks (110/3/0 on production). PR #42 opened."
+    },
+    {
+      "at": "2026-11-15T11:15:00+02:00",
+      "event": "PR #42 workflow passed on GitHub runners (110/3/0). B9 sampled 1 h of CDN request logs: no verified AI crawler data possible on the free plan; real bingbot hit a 402 on /_next/image. B9 marked partial with options."
     }
   ]
 }
