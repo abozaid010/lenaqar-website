@@ -68,3 +68,6 @@ Read `WEBSITE_ARCHITECTURE.md` and the 2026-11-03 section in `docs/buyer-first-i
 
 ## Active SEO continuation
 For the approved 2026-11-03 P0/P1 continuation, read `SEO-PLAN.md` and `seo-feature-req.json`; task states are authoritative in `seo-feature-progress.json`. Keep `feature-progress.json` as the phase/release history, not a duplicate task list. Latest user approval supersedes prior stop gates for this scoped work. Planning-only turns do not imply implementation or deployment. The lead alone reconciles trackers during parallel execution.
+
+## AI-search visibility
+Goal, rules, owner decisions and step status live in `ai-visibility-feature-progress.json` (authoritative for this feature; SEO-17+ in `seo-feature-progress.json` only point to it). Read it first, work its `next_step`, and update it in every step's PR. After each merge: verify the deployed SHA and run `node scripts/seo-health.mjs` on production, then continue.

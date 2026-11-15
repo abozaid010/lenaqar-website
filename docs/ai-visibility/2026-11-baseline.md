@@ -81,3 +81,12 @@ Values on 2026-11-15 (production API):
 Cross-check (**V**): the public feed (`/public/v1/units`, client `lenaqar`) lists 121 Madinaty resale apartments, all `visible`. My own median over 118 valued units: 61,525 EGP/m² (differs by 3 units from the API's set).
 Freshness (**V**): 88 of those 118 records were last updated before 2026-10-01; the earliest is 2026-09-17. The page shows the record date range and says these are asking prices, not sale prices. Nothing is marked verified.
 Open (**I**): whether shared-network units (sharing policy) or sold units are in the API's set; the owner confirms as part of decision 4.
+
+## 8. PR-3 production check and PR-4 (B6)
+- **V** PR #40 merged; Vercel `githubCommitSha` = `f21c3490`. Production `seo-health.mjs`: 85 PASS, 3 WARN, 0 FAIL. `id="guide-inventory"` live on `/guides/madinaty/prices-2026`.
+- **V** Live bug: `/guides/buying/contract-registration-checklist` shipped an FAQPage `Answer` without `text` (FAQ "التسجيل إجباري؟" had `a: ''`). Only guide affected. Fixed in content, and `answeredFaq()` now drops empty items from both the page and the schema.
+- B6 sources (read 2026-11-15):
+  - Registration fee bands 500 / 1000 / 1500 / 2000 EGP by area: `blogs.realestate.gov.eg` (official subdomain, page dated 2024-12-11, cites no law). **S** for 2026: the page itself says 2024; the guide tells the reader to confirm.
+  - Disposal tax: ETA FAQ PDF (2026-10) says the app computes 2.5% of sale value × seller's share; late charge monthly after 30 days from the disposal date (art. 110, Law 91/2005). **V** (official).
+  - Secondary sites disagree on bands (some show 1,500 EGP up to 200 m²) and on the payment deadline (30 vs 60 days): not used.
+  - Transfer fee, maintenance deposit, commission, utilities: no official figure; the guide says "varies, get it in writing".

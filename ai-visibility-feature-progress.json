@@ -1,0 +1,217 @@
+{
+  "feature": "AI-search visibility (ChatGPT Search, Claude web search, Gemini)",
+  "updated_at": "2026-11-15T08:30:00+02:00",
+  "goal": "Raise the probability that ChatGPT Search, Claude web search and Gemini cite or accurately recommend LenAqar for Egyptian resale property questions in the areas it serves, and that this produces qualified buy/sell inquiries.",
+  "rules": [
+    "Update this file at the end of every step: item status, PR, evidence, next_step, history.",
+    "After an owner merge: verify Vercel githubCommitSha = merge SHA, run scripts/seo-health.mjs on production (0 FAIL), then start next_step without waiting.",
+    "Labels: V verified (evidence + date), S supplied but unverified, I inaccessible, H hypothesis.",
+    "Unavailable metrics are 'unknown', never 0. Direct traffic is never AI traffic. whatsapp_click is an interaction, not a lead.",
+    "No promise of inclusion, ranking, citation or training outcome. No causation claims.",
+    "Never invent prices, fees or facts; every number has a source and date. Never mark a price verified from updatedAt or the current date.",
+    "Isolated worktree off origin/main, one small PR per step, owner merges. No merge or deploy by the assistant.",
+    "Outreach is drafted only, never sent. Paid tools and account changes need owner approval.",
+    "English content only with audience evidence (B15 gate)."
+  ],
+  "plan_file": "/Users/abozaid/.claude/plans/act-as-the-ceo-luminous-gray.md",
+  "evidence_doc": "docs/ai-visibility/2026-11-baseline.md",
+  "prompt_panel": "docs/ai-visibility/panel-v1.json",
+  "tracks": {
+    "A_technical": {
+      "source": "scripts/seo-health.mjs + GSC + CDN logs",
+      "status": "V: production 85 PASS / 3 WARN / 0 FAIL (2026-11-15, after PR #40). GSC and real crawler logs: I"
+    },
+    "B_ai_visibility": {
+      "source": "docs/ai-visibility/runs/<round>.jsonl",
+      "status": "not started: blocked on owner decision 2"
+    },
+    "C_acquisition": {
+      "source": "GA4 G-3QC63HK3DQ + GSC",
+      "status": "unknown: blocked on owner decision 1"
+    },
+    "D_business": {
+      "source": "GA4 events + lenaai.net CRM (lead_code/UTM)",
+      "status": "unknown: blocked on owner decision 1; qualified lead not yet defined"
+    }
+  },
+  "owner_decisions": [
+    {
+      "id": "D1",
+      "what": "Analytics access: run CLOUDSDK_CONFIG=$HOME/.config/gcloud-lenaqar gcloud auth application-default login --scopes=https://www.googleapis.com/auth/analytics.readonly,https://www.googleapis.com/auth/webmasters.readonly,https://www.googleapis.com/auth/cloud-platform",
+      "unblocks": [
+        "B1",
+        "tracks C/D"
+      ],
+      "status": "open",
+      "checked": "2026-11-15: ~/.config/gcloud-lenaqar does not exist"
+    },
+    {
+      "id": "D2",
+      "what": "AI panel accounts (ChatGPT, Claude.ai, Gemini, memory off) and when runs may happen",
+      "unblocks": [
+        "B2",
+        "track B"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "D3",
+      "what": "Named author/reviewer; lawyer identity or remove the lawyer promise",
+      "unblocks": [
+        "B7"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "D4",
+      "what": "Methodology facts: how listings are sourced/verified, update cadence; whether price-insight counts shared-network or sold units",
+      "unblocks": [
+        "B4"
+      ],
+      "status": "open"
+    }
+  ],
+  "escalated_non_blocking": [
+    "SEO-07 commission policy (B6 commission line, branded prompt BR3)",
+    "B10 listing freshness policy: 88 of 118 Madinaty apartment records last updated before 2026-10-01 yet InStock",
+    "SEO-04 hidden units",
+    "Vercel /_next/image 402 OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED (H: optimization quota); owner checks Vercel usage"
+  ],
+  "items": [
+    {
+      "id": "B1",
+      "title": "GA4/GSC access, tracking check, baselines",
+      "status": "blocked_owner",
+      "blocker": "D1"
+    },
+    {
+      "id": "B2",
+      "title": "AI panel round 1 (84 records)",
+      "status": "blocked_owner",
+      "blocker": "D2"
+    },
+    {
+      "id": "B3",
+      "title": "Resale step-by-step guide indexable",
+      "status": "pending",
+      "note": "noindex is intentional (seo_index:false + «تحت المراجعة» placeholders, content_incomplete). Needs content completion with official sources."
+    },
+    {
+      "id": "B4",
+      "title": "/verified-prices as methodology page",
+      "status": "blocked_owner",
+      "blocker": "D4",
+      "note": "price-insight method is verified from backend code (baseline doc §7) and can be reused once D4 is answered."
+    },
+    {
+      "id": "B5",
+      "title": "Madinaty price guide: LenAqar asking-price table",
+      "status": "done",
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/40",
+      "production_sha": "f21c34902a033691071e3dce3cc08a1399affe30",
+      "evidence": "REPORT/seo-health/2026-11-15-production-after-pr40.json; live id=\"guide-inventory\""
+    },
+    {
+      "id": "B6",
+      "title": "Contract checklist: total purchase cost section with official sources",
+      "status": "ready_for_review",
+      "branch": "feat/ai-vis-progress-b6",
+      "pr": null,
+      "evidence": "content/guides/buying/contract-registration-checklist.md; src/lib/lenaqar/__tests__/guide-faq-costs.test.js",
+      "note": "Sourced: registration fee bands (realestate.gov.eg page dated 2024-12-11, may be outdated) and 2.5% disposal tax on the seller's share with monthly late charge after 30 days (ETA FAQ PDF, 2026-10). Transfer, maintenance, commission and utilities: 'varies, get it in writing', no figures. Also fixed an empty FAQ answer that produced an FAQPage Answer without text (live bug) and added an answeredFaq guard."
+    },
+    {
+      "id": "B7",
+      "title": "Named author/reviewer bios + Person schema",
+      "status": "blocked_owner",
+      "blocker": "D3"
+    },
+    {
+      "id": "B8",
+      "title": "Internal links: area pages and listings to area guides",
+      "status": "done",
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/39",
+      "production_sha": "947bd8b24340c513cb0d5261285664bf63f2cfb9",
+      "note": "mostaqbal city token fix shipped in PR #40"
+    },
+    {
+      "id": "B9",
+      "title": "Verify real crawler visits (Vercel logs, read-only)",
+      "status": "pending"
+    },
+    {
+      "id": "B10",
+      "title": "Listing freshness policy",
+      "status": "escalated",
+      "blocker": "owner policy"
+    },
+    {
+      "id": "B11",
+      "title": "/opportunities TTFB on cache miss (3.4 s)",
+      "status": "pending"
+    },
+    {
+      "id": "B12",
+      "title": "Scheduled health check (GitHub Actions cron)",
+      "status": "pending"
+    },
+    {
+      "id": "B13",
+      "title": "Bing Webmaster Tools + IndexNow (experiment)",
+      "status": "pending",
+      "blocker": "account action needs owner approval"
+    },
+    {
+      "id": "B14",
+      "title": "NAP audit + outreach drafts (not sent)",
+      "status": "pending"
+    },
+    {
+      "id": "B15",
+      "title": "English pilot",
+      "status": "gated",
+      "blocker": "B1 data shows English demand"
+    }
+  ],
+  "next_step": "After PR for B6 merges: verify deploy + seo-health, then B12 (scheduled health check, GitHub Actions cron). Then B9, B11, B3, B14.",
+  "reviews": [
+    {
+      "date": "2026-11-23",
+      "what": "early review: four scorecards, raw counts"
+    },
+    {
+      "date": "2026-12-15",
+      "what": "day 30: panel round 3, GA4/GSC 28-day comparison, B15 decision"
+    },
+    {
+      "date": "2027-01-14",
+      "what": "day 60"
+    },
+    {
+      "date": "2027-02-13",
+      "what": "day 90"
+    }
+  ],
+  "history": [
+    {
+      "at": "2026-11-15T01:20:00+02:00",
+      "event": "Revised plan approved; Day 1 PR #39 opened (guide links, seo-health.mjs, evidence pack, panel v1)."
+    },
+    {
+      "at": "2026-11-15T05:44:00+02:00",
+      "event": "PR #39 merged; production SHA 947bd8b2 verified; seo-health 83/4/0 (before 80/6/1)."
+    },
+    {
+      "at": "2026-11-15T06:30:00+02:00",
+      "event": "PR #40 opened: Madinaty LenAqar asking-price table (B5) + mostaqbal city token."
+    },
+    {
+      "at": "2026-11-15T07:30:00+02:00",
+      "event": "PR #40 merged; production SHA f21c3490 verified; seo-health 85/3/0; table live. This progress file created at owner request; B6 started."
+    },
+    {
+      "at": "2026-11-15T08:30:00+02:00",
+      "event": "B6 built: total purchase cost section with official sources; empty-FAQ schema bug fixed. PR pending."
+    }
+  ]
+}
