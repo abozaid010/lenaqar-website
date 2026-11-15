@@ -6,111 +6,94 @@ import assert from "node:assert/strict";
 import {
   GUIDE_INVENTORY,
   buildInventorySummary,
+  definedSample,
   inventoryConfigForGuide,
-  priceInsightParams,
   recordDateRange,
-  toSummaryRow,
+  summarizeSegment,
 } from "../../guides/inventory-summary.js";
 import { guideAreaForUnit } from "../../guides/area-guides.js";
 
-const config = GUIDE_INVENTORY["/guides/madinaty/prices-2026"];
-const [ALL, TWO, THREE] = config.segments;
+const madinaty = GUIDE_INVENTORY["/guides/madinaty/prices-2026"];
+const newCairo = GUIDE_INVENTORY["/guides/new-cairo/prices-2026"];
 
-/** Shape of a real /public/v1/price-insight answer (2026-11-15). */
-function answer({ bedrooms = null, relaxed = [], level = "district", n = 46, ...rest } = {}) {
-  return {
-    available: true,
-    sample_size: n,
-    scope: {
-      level,
-      city: level === "country" ? null : "new cairo",
-      district: level === "district" ? "madinaty" : null,
-      sub_district: null,
-      property_type: "apartment",
-      bedrooms,
-    },
-    relaxed,
-    median_price_per_sqm: 64154,
-    median_unit_price: 5509455,
-    lowest_unit_price: 4466487,
-    highest_unit_price: 8394790,
-    basis: "resale_cash_value",
-    as_of: "2026-11-15",
-    ...rest,
-  };
-}
+let seq = 0;
+/** A public catalog item (shape of fetchOpportunityCatalog rows). */
+const unit = (over = {}) => ({
+  code: `U${++seq}`,
+  city: "new cairo",
+  district: "madinaty",
+  buildingType: "apartment",
+  isPrimary: false,
+  roomsCount: 3,
+  landArea: 100,
+  totalPrice: 6_000_000,
+  updatedAt: "2026-11-01T10:00:00Z",
+  ...over,
+});
+/** n in-sample Madinaty units with distinct prices, newest date first. */
+const madinatyUnits = (n, rooms = 3, from = 5_000_000) =>
+  Array.from({ length: n }, (_, i) => unit({ roomsCount: rooms, totalPrice: from + i * 100_000, updatedAt: `2026-10-${String(10 + (i % 15)).padStart(2, "0")}` }));
 
-test("config lookup accepts the stored slug with its trailing slash", () => {
-  assert.equal(inventoryConfigForGuide("/guides/madinaty/prices-2026/"), config);
-  assert.equal(inventoryConfigForGuide("/guides/el-shorouk/prices-2026/"), null);
+test("config lookup accepts stored slugs; city-level markets are marked", () => {
+  assert.equal(inventoryConfigForGuide("/guides/madinaty/prices-2026/"), madinaty);
+  assert.equal(inventoryConfigForGuide("/guides/new-cairo/prices-2026/").level, "city");
+  assert.equal(inventoryConfigForGuide("/guides/sheikh-zayed/prices-2026/"), null);
 });
 
-test("query carries bedrooms only for a bedroom segment", () => {
-  assert.deepEqual(priceInsightParams(config, ALL), {
-    city: "new cairo", district: "madinaty", property_type: "apartment",
-  });
-  assert.equal(priceInsightParams(config, TWO).bedrooms, 2);
-});
-
-test("a district answer with enough units becomes a row", () => {
-  assert.deepEqual(toSummaryRow(answer({ bedrooms: 2 }), config, TWO), {
-    labelAr: TWO.labelAr,
-    bedrooms: 2,
-    count: 46,
-    perMeter: 64154,
-    unitPrice: 5509455,
-    lowest: 4466487,
-    highest: 8394790,
-    asOf: "2026-11-15",
-  });
-});
-
-test("a widened answer is never printed under a narrower label", () => {
-  // Real case: asking for 4 bedrooms in Madinaty returns the all-apartments figure.
-  assert.equal(toSummaryRow(answer({ relaxed: ["bedrooms"], n: 121 }), config, THREE), null);
-  assert.equal(toSummaryRow(answer({ bedrooms: null }), config, THREE), null);
-  assert.equal(toSummaryRow(answer({ level: "city", relaxed: ["district"] }), config, ALL), null);
-  assert.equal(toSummaryRow(answer({ level: "country", relaxed: ["district", "city"] }), config, ALL), null);
-  const noRelaxedField = answer();
-  delete noRelaxedField.relaxed;
-  assert.equal(toSummaryRow(noRelaxedField, config, ALL), null);
-});
-
-test("thin, unavailable or incomplete answers are dropped", () => {
-  assert.equal(toSummaryRow(answer({ n: 19 }), config, ALL), null);
-  assert.ok(toSummaryRow(answer({ n: 20 }), config, ALL));
-  assert.equal(toSummaryRow({ available: false, sample_size: 3 }, config, ALL), null);
-  assert.equal(toSummaryRow(answer({ median_price_per_sqm: null }), config, ALL), null);
-  assert.equal(toSummaryRow(null, config, ALL), null);
-});
-
-test("record dates cover only this district's units of this type", () => {
-  const units = [
-    { district: "madinaty", buildingType: "apartment", updatedAt: "2026-11-14T08:00:00Z" },
-    { district: "madinaty", buildingType: "apartment", updatedAt: "2026-09-17T10:00:00Z" },
-    { district: "madinaty", buildingType: "villa", updatedAt: "2026-01-01T00:00:00Z" },
-    { district: "fifth settlement", buildingType: "apartment", updatedAt: "2025-01-01" },
-    { district: "madinaty", buildingType: "apartment", updatedAt: null },
+test("REGRESSION (PR #47 review): counts, statistics and dates come from ONE sample", () => {
+  const inSample = madinatyUnits(24);
+  const noise = [
+    unit({ district: "fifth settlement", updatedAt: "2020-01-01" }), // other district
+    unit({ city: "6 october", updatedAt: "2020-01-02" }), // other city, same district token
+    unit({ buildingType: "villa", totalPrice: 40_000_000, updatedAt: "2020-01-03" }), // not an apartment
+    unit({ isPrimary: true, updatedAt: "2020-01-04" }), // developer unit
+    unit({ landArea: 1, updatedAt: "2020-01-05" }), // impossible price per m²
+    unit({ totalPrice: null, updatedAt: "2020-01-06" }), // no price
+    { ...inSample[0], updatedAt: "2020-01-07" }, // duplicate listing code
   ];
-  assert.deepEqual(recordDateRange(units, config), { earliest: "2026-09-17", latest: "2026-11-14" });
-  assert.equal(recordDateRange([], config), null);
+  const summary = buildInventorySummary(madinaty, [...inSample, ...noise], { asOf: "2026-11-15" });
+
+  // The headline count, the stated sample size and the dated listings are the same units.
+  assert.equal(summary.sampleSize, 24);
+  assert.equal(summary.rows[0].count, 24);
+  assert.equal(summary.records.dated, 24);
+  // No excluded unit leaks into the freshness range or the statistics.
+  assert.equal(summary.records.earliest, "2026-10-10");
+  assert.deepEqual(summary, buildInventorySummary(madinaty, inSample, { asOf: "2026-11-15" }));
 });
 
-test("summary needs the all-apartments row and known record dates", () => {
-  const units = [{ district: "madinaty", buildingType: "apartment", updatedAt: "2026-11-14" }];
-  const full = buildInventorySummary(
-    config,
-    [answer({ n: 121 }), answer({ bedrooms: 2 }), answer({ bedrooms: 3, n: 70 })],
-    units,
-  );
-  assert.equal(full.rows.length, 3);
-  assert.equal(full.asOf, "2026-11-15");
-  // A thin bedroom row is omitted, the rest stays.
-  const partial = buildInventorySummary(config, [answer({ n: 121 }), answer({ bedrooms: 2, n: 5 }), null], units);
-  assert.deepEqual(partial.rows.map((r) => r.bedrooms), [null]);
-  // No headline row, or no record dates: no section at all.
-  assert.equal(buildInventorySummary(config, [null, answer({ bedrooms: 2 })], units), null);
-  assert.equal(buildInventorySummary(config, [answer({ n: 121 })], []), null);
+test("statistics are medians over the sample; range trims 5% tails from 20 units", () => {
+  const sample = definedSample(madinatyUnits(20), madinaty); // 5.0M … 6.9M, 100 m²
+  const row = summarizeSegment(sample, madinaty.segments[0]);
+  assert.equal(row.count, 20);
+  assert.equal(row.unitPrice, 5_950_000);
+  assert.equal(row.perMeter, 59_500);
+  assert.equal(row.lowest, 5_100_000); // cheapest 1 (5%) left out
+  assert.equal(row.highest, 6_800_000); // dearest 1 left out
+});
+
+test("thin bedroom categories are omitted; no headline row means no section", () => {
+  const units = [...madinatyUnits(22, 3), ...madinatyUnits(5, 2)];
+  const summary = buildInventorySummary(madinaty, units, { asOf: "2026-11-15" });
+  assert.deepEqual(summary.rows.map((r) => [r.bedrooms, r.count]), [[null, 27], [3, 22]]);
+  assert.equal(buildInventorySummary(madinaty, madinatyUnits(19), { asOf: "x" }), null);
+  assert.equal(buildInventorySummary(madinaty, madinatyUnits(25).map((u) => ({ ...u, updatedAt: null })), { asOf: "x" }), null);
+});
+
+test("city-level markets use every district of that city and nothing else", () => {
+  const units = [
+    ...madinatyUnits(12),
+    ...madinatyUnits(12).map((u) => ({ ...u, district: "fifth settlement" })),
+    unit({ city: "cairo", district: "el shorouk city" }),
+  ];
+  const summary = buildInventorySummary(newCairo, units, { asOf: "2026-11-15" });
+  assert.equal(summary.sampleSize, 24);
+  assert.equal(summary.rows[0].count, 24);
+});
+
+test("record date range ignores listings without a valid date", () => {
+  const sample = definedSample([unit({ updatedAt: "2026-09-17" }), unit({ updatedAt: "bad" }), unit({ updatedAt: "2026-11-14T08:00:00Z" })], madinaty);
+  assert.deepEqual(recordDateRange(sample), { earliest: "2026-09-17", latest: "2026-11-14", dated: 2 });
 });
 
 test("feed spelling 'mostaqbal city' maps to the Mostakbal City guides", () => {

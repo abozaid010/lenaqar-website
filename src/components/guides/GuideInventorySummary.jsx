@@ -36,9 +36,9 @@ export default function GuideInventorySummary({ summary }) {
       </h2>
       <p className="text-black/80 leading-relaxed">
         في {asOf}، وسيط سعر المتر لـ {all.count} شقة ريسيل معروضة على لينا عقار في{" "}
-        {summary.placeAr} هو <strong className="text-primary"><Egp value={all.perMeter} /></strong>{" "}
-        بالقيمة النقدية، ووسيط سعر الشقة <Egp value={all.unitPrice} />. دي أسعار طلب من
-        البائعين، مش أسعار بيع فعلية.
+        {summary.placeAr} هو <strong className="text-primary"><Egp value={all.perMeter} /></strong>،
+        ووسيط سعر الشقة <Egp value={all.unitPrice} />. دي أسعار طلب من البائعين، مش أسعار بيع
+        فعلية.
       </p>
 
       <div className="my-6 overflow-x-auto rounded-xl border border-primary/15">
@@ -80,8 +80,16 @@ export default function GuideInventorySummary({ summary }) {
       <ul className="list-disc ps-5 space-y-1 text-black/80 leading-relaxed text-sm">
         <li>إعلانات ريسيل معروضة على لينا عقار بس؛ وحدات المطورين (الأولي) مش محسوبة.</li>
         <li>
-          السعر بالقيمة النقدية: كاش البائع النهارده + الأقساط الباقية بعد خصمها، زي سعر المتر
-          اللي في كروت الإعلانات.
+          الإعلانات بيبعتها ملاك ووسطاء (أغلبها على واتساب ومستخلصة آليًا)، وبتتراجع قبل النشر. ده
+          مش معناه إن كل وحدة متأكد من إتاحتها أو ورقها.
+        </li>
+        <li>
+          العينة: {summary.sampleSize} إعلان شقة ريسيل معروضين على lenaqar.com في {summary.placeAr}{" "}
+          يوم {asOf}، كل إعلان مرة واحدة. كل الأرقام والتواريخ هنا محسوبة من نفس العينة دي.
+        </li>
+        <li>
+          السعر هو السعر الإجمالي المكتوب في الإعلان (لو فيه أقساط باقية بتبقى داخلة فيه)، وسعر
+          المتر = السعر ÷ المساحة، زي كروت الإعلانات.
         </li>
         <li>الوسيط هو الشقة اللي في النص: نص الإعلانات أرخص منه ونصها أغلى.</li>
         <li>
@@ -90,8 +98,13 @@ export default function GuideInventorySummary({ summary }) {
         </li>
         <li>أي فئة فيها أقل من 20 إعلان مش بتظهر في الجدول.</li>
         <li>
-          تواريخ آخر تحديث للإعلانات دي بين {formatArDay(summary.records.earliest)} و
-          {" "}{formatArDay(summary.records.latest)}؛ السعر النهائي بيتحدد بالتفاوض والمعاينة.
+          الأرقام دي من إعلانات لينا عقار بس، فممكن تختلف عن أرقام مواقع تانية مذكورة في الدليل لأن العينة
+          والمناطق والمشاريع مختلفة. كل رقم منسوب لمصدره.
+        </li>
+        <li>
+          تواريخ آخر تحديث لنفس الإعلانات دي ({summary.records.dated} إعلان ليهم تاريخ) بين{" "}
+          {formatArDay(summary.records.earliest)} و{" "}{formatArDay(summary.records.latest)}؛ السعر النهائي
+          بيتحدد بالتفاوض والمعاينة.
         </li>
       </ul>
       <p className="mt-4 text-sm">
