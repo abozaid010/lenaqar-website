@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { listingShareImages } from "@/lib/lenaqar/listing-og-image";
 import { SITE } from "@/config/site";
 import { fetchOpportunities, fetchOpportunityByCode } from "@/lib/lenaqar/opportunities.server";
 import {
@@ -36,6 +37,10 @@ export async function generateMetadata({ params }) {
     : "تفاصيل الوحدة غير متاحة حالياً على لينا عقار. راجع قائمة الفرص أو تواصل معنا على واتساب.";
 
   const indexable = unit ? isOpportunityIndexable(unit) : false;
+  const shareImages = listingShareImages(unit, {
+    fallbackUrl: `${SITE.url}/images/default_logo.jpg`,
+    alt: unit ? title : SITE.name,
+  });
 
   return {
     title,
@@ -47,7 +52,13 @@ export async function generateMetadata({ params }) {
       locale: "ar_EG",
       siteName: SITE.name,
       type: "website",
-      images: [{ url: `${SITE.url}/images/default_logo.jpg`, width: 1200, height: 630, alt: SITE.name }],
+      images: shareImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: shareImages.map((image) => image.url),
     },
     alternates: {
       canonical: `${SITE.url}/opportunities/${encodeURIComponent(slug)}`,
