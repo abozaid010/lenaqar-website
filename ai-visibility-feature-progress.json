@@ -369,6 +369,10 @@
     {
       "at": "2026-11-16T14:30:00+02:00",
       "event": "Branded spot check: ChatGPT outdated ('not clearly stated'), Gemini wrong ('no buyer commission', ungrounded). PR #50 adds the facts to /how-it-works and /before-you-pay. Requested Google re-crawl of 6 changed pages; /privacy re-crawled within the hour. GSC data started (El Shorouk guide 102 impressions)."
+    },
+    {
+      "at": "2026-11-16T15:30:00+02:00",
+      "event": "Owner: no partner lawyer yet; LenAqar pays a lawyer so the review stays free for buyers until a partner is found. 'Partner lawyer' wording replaced in FAQ a11 (AR/EN), /before-you-pay FAQ and llms files."
     }
   ],
   "owner_confirmed_facts": {
@@ -383,10 +387,10 @@
       "Commission calculated on the final sale price (2026-11-15)",
       "Commission due at sale-contract signing (2026-11-15)",
       "Same 2.5% + 2.5% policy for developer (primary) purchases (2026-11-15)",
-      "Lawyer review is free for buyers via a partner lawyer (2026-11-15)"
+      "Lawyer review is free for buyers; LenAqar pays the lawyer's fee. No partner lawyer exists yet (owner, 2026-11-16)"
     ],
     "open": [
-      "Partner lawyer name and bar registration (needed before naming on site, B7)",
+      "Lawyer identity (LenAqar-paid lawyer; a partner is being sought) — not named on site until provided",
       "Exact scope of the lawyer review"
     ]
   },
