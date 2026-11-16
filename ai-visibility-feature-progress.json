@@ -1,6 +1,6 @@
 {
   "feature": "AI-search visibility (ChatGPT Search, Claude web search, Gemini)",
-  "updated_at": "2026-11-16T14:30:00+02:00",
+  "updated_at": "2026-11-16",
   "goal": "Make LenAqar a frequently cited and accurately recommended property service for relevant Egyptian real-estate questions across ChatGPT, Claude, Gemini and other answer engines, and the first recommendation for specific buyer needs where LenAqar has strong evidence; turn that into qualified WhatsApp inquiries. No universal #1 promise.",
   "rules": [
     "Update this file at the end of every step: item status, PR, evidence, next_step, history.",
@@ -205,9 +205,12 @@
     {
       "id": "B17",
       "title": "Listing og:image is the site logo, not the unit photo",
-      "status": "pending",
+      "status": "done",
       "evidence": "2026-11-15: /opportunities/04a3wVWO og:image = /images/default_logo.jpg. Link previews (WhatsApp, Facebook 152 hits/h) show the logo. Depends on B16 for a reliable image URL.",
-      "note": "Unblocked by B16 (photos stable). Next build step."
+      "note": "Unblocked by B16 (photos stable). Next build step.",
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/51",
+      "merge_sha": "f6456ea3",
+      "production_evidence": "2026-11-16: /opportunities/kBqU7H1A og:image = https://api.lenaai.net/gcs/lenaqar_2ad35245 (unit photo, not the logo)."
     },
     {
       "id": "B18",
@@ -272,13 +275,23 @@
     {
       "id": "B24",
       "title": "Commission + free lawyer review on /how-it-works and /before-you-pay (pages AI tools actually read)",
-      "status": "in_review",
+      "status": "done",
       "branch": "feat/commission-on-key-pages",
       "pr": "https://github.com/abozaid010/lenaqar-website/pull/50",
-      "evidence": "docs/ai-visibility/runs/2026-11-16-branded-spotcheck.md (ChatGPT: 'not clearly stated'; Gemini: wrong 'no buyer commission')"
+      "evidence": "docs/ai-visibility/runs/2026-11-16-branded-spotcheck.md (ChatGPT: 'not clearly stated'; Gemini: wrong 'no buyer commission')",
+      "merge_sha": "c15715f8",
+      "production_evidence": "2026-11-16 14:08 Cairo: Vercel production deploy = c15715f8 (merge of #50). seo-health: PASS 110 / WARN 4 / FAIL 0. Raw HTML: '2.5%' on / (4), /how-it-works (8), /before-you-pay (8); 'بتدفع أتعاب المحامي' on all three; 'محامي شريك' 0."
+    },
+    {
+      "id": "B25",
+      "title": "Google Business Profile (entity corroboration for Google/Gemini)",
+      "status": "in_progress",
+      "evidence": "2026-11-16: profile created in Business Profile Manager (owner account) as «لينا عقار - LenAqar», Real estate agency, 505 ARCHPLAN Square, New Administrative Capital; pin on the owner's map link; visits by appointment; service areas New Cairo, Madinaty, El Shorouk, New Administrative Capital, 6th of October, Sheikh Zayed (Mostakbal City not offered by Google); phone + WhatsApp chat 01002891933; website; hours Sat–Thu 10:00–20:00, Fri closed; services buying/seller agent, first-time buyer, new construction, property sales; description AR+EN with commission + free lawyer review.",
+      "blocker": "OWNER: verification by business video (only method offered). Not public until verified. Add real office/storefront photos (none used).",
+      "note": "Existing Maps listing 'LENA AI' (software company, same building, other phone) is not managed by this account; consider claiming it and keeping categories distinct to avoid a duplicate-listing flag. Ad credit and Workspace offers skipped."
     }
   ],
-  "next_step": "Owner merges PR #50; then request indexing for /before-you-pay. Re-check the branded commission prompt ≈2026-11-19; GSC 28-day baseline ≥2026-11-18; panel round 2 ≥2026-11-21 (clean Claude account). Owner: Google Business Profile; partner lawyer name/registration + scope (UNRESOLVED).",
+  "next_step": "Owner: verify the Google Business Profile by video and add real photos. Re-check the branded commission prompt ≈2026-11-19 (ChatGPT/Gemini). GSC 28-day baseline ≥2026-11-18. Panel round 2 ≥2026-11-21 (clean Claude account). Then B3 (resale guide noindex), B4 methodology, B14/B21 outreach drafts. Owner: lawyer identity + review scope (UNRESOLVED).",
   "reviews": [
     {
       "date": "2026-11-23",
@@ -373,6 +386,10 @@
     {
       "at": "2026-11-16T15:30:00+02:00",
       "event": "Owner: no partner lawyer yet; LenAqar pays a lawyer so the review stays free for buyers until a partner is found. 'Partner lawyer' wording replaced in FAQ a11 (AR/EN), /before-you-pay FAQ and llms files."
+    },
+    {
+      "at": "2026-11-16T14:20:00+02:00",
+      "event": "PR #50 and #51 merged and verified on production (c15715f8). Google Business Profile created (pending owner video verification). GSC indexing re-requested for /before-you-pay and /how-it-works."
     }
   ],
   "owner_confirmed_facts": {
