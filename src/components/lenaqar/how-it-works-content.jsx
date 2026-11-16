@@ -162,6 +162,15 @@ export default function HowItWorksContent() {
         </div>
       </section>
 
+      <section className="space-y-4" aria-labelledby="how-costs">
+        <h2 id="how-costs" className="text-2xl font-bold text-primary">
+          {translate("lenaqar.faq.q10")}
+        </h2>
+        <p className="text-black/80 leading-relaxed">{translate("lenaqar.faq.a10")}</p>
+        <h3 className="text-lg font-bold text-primary">{translate("lenaqar.faq.q11")}</h3>
+        <p className="text-black/80 leading-relaxed">{translate("lenaqar.faq.a11")}</p>
+      </section>
+
       <NetworkBrokerCta />
       <FaqSection />
     </div>
