@@ -158,7 +158,7 @@ export default {
     q10: "What is the commission and who pays it?",
     a10: "2.5% from the buyer and 2.5% from the seller, calculated on the final sale price and each paid separately. It is due when the sale contract is signed, and the same rate applies to developer and resale units. It is written into the agreement before any commitment, and no other commission applies.",
     q11: "What does the legal review include?",
-    a11: "Review of the unit's paperwork by a partner lawyer is free for buyers, before you pay. The scope of the review is confirmed in writing before it starts. It reduces risk but does not guarantee the sale completes, and it does not replace your own decision.",
+    a11: "A lawyer's review of the unit's paperwork is free for buyers before you pay — LenAqar pays the lawyer's fee. The scope of the review is confirmed in writing before it starts. It reduces risk but does not guarantee the sale completes, and it does not replace your own decision.",
     q12: "Does a published listing mean the unit is confirmed?",
     a12: "Not automatically. There are four separate stages: publishing the listing, checking the listing data (price, area and payment logic — inconsistent details are hidden), confirming the unit is still available before we share it with you, and legal review of the paperwork once you choose a unit. We tell you which stage each unit has reached.",
   },

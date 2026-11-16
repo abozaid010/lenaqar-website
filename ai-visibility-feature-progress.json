@@ -1,6 +1,6 @@
 {
   "feature": "AI-search visibility (ChatGPT Search, Claude web search, Gemini)",
-  "updated_at": "2026-11-15T23:15:00+02:00",
+  "updated_at": "2026-11-16T14:30:00+02:00",
   "goal": "Make LenAqar a frequently cited and accurately recommended property service for relevant Egyptian real-estate questions across ChatGPT, Claude, Gemini and other answer engines, and the first recommendation for specific buyer needs where LenAqar has strong evidence; turn that into qualified WhatsApp inquiries. No universal #1 promise.",
   "rules": [
     "Update this file at the end of every step: item status, PR, evidence, next_step, history.",
@@ -27,7 +27,7 @@
     },
     "C_acquisition": {
       "source": "GA4 G-3QC63HK3DQ + GSC",
-      "status": "V (GA4 property 562541313, stream G-3QC63HK3DQ created 2026-11-05; REPORT/ga4/2026-11-15-baseline.json). 2026-11-05..14: 348 sessions; Paid Social 212, Direct 65, Organic Social 24, Organic Search 21, AI Assistant 19 (chatgpt.com, 14 engaged), Referral 5. Prior period (before 2026-11-05): unknown, property did not exist. GSC: verified 2026-11-15; search data not yet available (unknown)."
+      "status": "V (GA4 property 562541313, stream G-3QC63HK3DQ created 2026-11-05; REPORT/ga4/2026-11-15-baseline.json). 2026-11-05..14: 348 sessions; Paid Social 212, Direct 65, Organic Social 24, Organic Search 21, AI Assistant 19 (chatgpt.com, 14 engaged), Referral 5. Prior period (before 2026-11-05): unknown, property did not exist. GSC: verified 2026-11-15; search data not yet available (unknown). GSC first data (2026-11-16): El Shorouk price guide 102 impressions / 1 click; Madinaty price guide 11 impressions."
     },
     "D_business": {
       "source": "GA4 events + lenaai.net CRM (lead_code/UTM)",
@@ -268,9 +268,17 @@
       "pr": "https://github.com/abozaid010/lenaqar-website/pull/47",
       "production_sha": "2600f9911c0e923cf2bbe3d1989bef1c95af85a2",
       "production_evidence": "Production 2600f991 (Vercel READY 2026-11-15): seo-health 111 PASS / 3 WARN / 0 FAIL; live guide tables intro=sample=dated (Madinaty 120, Fifth Settlement 99, New Cairo 269, El Shorouk 29), all index,follow; home FAQPage 12 Q; /privacy shows 2.5% on final sale price, no 1.25%, draft notice kept; llms facts live; Search Console meta tag live."
+    },
+    {
+      "id": "B24",
+      "title": "Commission + free lawyer review on /how-it-works and /before-you-pay (pages AI tools actually read)",
+      "status": "in_review",
+      "branch": "feat/commission-on-key-pages",
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/50",
+      "evidence": "docs/ai-visibility/runs/2026-11-16-branded-spotcheck.md (ChatGPT: 'not clearly stated'; Gemini: wrong 'no buyer commission')"
     }
   ],
-  "next_step": "Build B17 (listing og:image = unit photo). Recheck GSC search analytics on/after 2026-11-18. Panel round 2 with a clean Claude account on/after 2026-11-21. Owner: partner lawyer name/registration and review scope (UNRESOLVED).",
+  "next_step": "Owner merges PR #50; then request indexing for /before-you-pay. Re-check the branded commission prompt ≈2026-11-19; GSC 28-day baseline ≥2026-11-18; panel round 2 ≥2026-11-21 (clean Claude account). Owner: Google Business Profile; partner lawyer name/registration + scope (UNRESOLVED).",
   "reviews": [
     {
       "date": "2026-11-23",
@@ -357,6 +365,14 @@
     {
       "at": "2026-11-15T23:15:00+02:00",
       "event": "Merged #46 (9ee9d90c) and #48 (6683f44f); production 6683f44f READY. seo-health 111 PASS / 3 WARN / 0 FAIL. Live: /_next/image w=3840 → 400 (variant removed), w=1080 → image/webp with AVIF accepted; on www.lenaqar.com/opportunities a simulated optimizer failure on a listing photo switched to the original api.lenaai.net URL (no srcset) and loaded."
+    },
+    {
+      "at": "2026-11-16T14:30:00+02:00",
+      "event": "Branded spot check: ChatGPT outdated ('not clearly stated'), Gemini wrong ('no buyer commission', ungrounded). PR #50 adds the facts to /how-it-works and /before-you-pay. Requested Google re-crawl of 6 changed pages; /privacy re-crawled within the hour. GSC data started (El Shorouk guide 102 impressions)."
+    },
+    {
+      "at": "2026-11-16T15:30:00+02:00",
+      "event": "Owner: no partner lawyer yet; LenAqar pays a lawyer so the review stays free for buyers until a partner is found. 'Partner lawyer' wording replaced in FAQ a11 (AR/EN), /before-you-pay FAQ and llms files."
     }
   ],
   "owner_confirmed_facts": {
@@ -371,10 +387,10 @@
       "Commission calculated on the final sale price (2026-11-15)",
       "Commission due at sale-contract signing (2026-11-15)",
       "Same 2.5% + 2.5% policy for developer (primary) purchases (2026-11-15)",
-      "Lawyer review is free for buyers via a partner lawyer (2026-11-15)"
+      "Lawyer review is free for buyers; LenAqar pays the lawyer's fee. No partner lawyer exists yet (owner, 2026-11-16)"
     ],
     "open": [
-      "Partner lawyer name and bar registration (needed before naming on site, B7)",
+      "Lawyer identity (LenAqar-paid lawyer; a partner is being sought) — not named on site until provided",
       "Exact scope of the lawyer review"
     ]
   },
