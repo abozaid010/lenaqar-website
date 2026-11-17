@@ -3,16 +3,24 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createRequirementFeedLoader } from "@/lib/lenaqar/requirement-feed-client";
-import { REQUIREMENT_SORTS } from "@/lib/lenaqar/requirement-sort";
+import {
+  PUBLIC_REQUIREMENT_SORT,
+  REQUIREMENT_SORTS,
+} from "@/lib/lenaqar/requirement-sort";
+import { requirementMatchesCity } from "@/lib/lenaqar/marketplace-city-filters";
 import { useI18n } from "@/hooks/useI18n";
 import { formatPhoneForWhatsApp } from "@/utils/phone-utils";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
 import HomeOnboarding from "./home-onboarding";
 import RequirementCard from "./requirement-card";
+import RequirementCityFilter from "./requirement-city-filter";
 import { actionButtonClass } from "@/components/ui/action-button-class";
 import ActionButtonArrow from "@/components/ui/action-button-arrow";
 
 const VISIBLE_REQUESTS = 6;
+// Sort picker hidden for now: the feed always shows the newest requests.
+// Flip to true to bring the picker back.
+const SHOW_REQUEST_SORT = false;
 
 /**
  * Buyer-first homepage: cinematic onboarding that ends on the request
@@ -23,7 +31,8 @@ export default function StorytellingHomepage({
   error = null,
 }) {
   const { translate, direction } = useI18n();
-  const [sort, setSort] = useState("default");
+  const [sort, setSort] = useState(PUBLIC_REQUIREMENT_SORT);
+  const [city, setCity] = useState("");
   const [feed, setFeed] = useState({ requirements, error, loading: false });
   const [loader] = useState(() =>
     createRequirementFeedLoader({
@@ -35,7 +44,9 @@ export default function StorytellingHomepage({
     })
   );
   useEffect(() => () => loader.cancel(), [loader]);
-  const displayRequests = feed.requirements.slice(0, VISIBLE_REQUESTS);
+  const displayRequests = feed.requirements
+    .filter((row) => requirementMatchesCity(row, city))
+    .slice(0, VISIBLE_REQUESTS);
 
   return (
     <>
@@ -73,34 +84,41 @@ export default function StorytellingHomepage({
             <p className="mt-1 text-sm text-black/60 sm:text-base">
               {translate("lenaqar.onboarding.requestsSub")}
             </p>
-            <div
-              className="mt-4 flex flex-wrap items-center justify-center gap-2"
-              dir={direction}
-            >
-              <label
-                htmlFor="lq-requests-sort"
-                className="text-sm font-medium text-primary"
+            <RequirementCityFilter
+              value={city}
+              onChange={setCity}
+              className="mt-4 justify-center"
+            />
+            {SHOW_REQUEST_SORT && (
+              <div
+                className="mt-4 flex flex-wrap items-center justify-center gap-2"
+                dir={direction}
               >
-                {translate("lenaqar.onboarding.requestsSort.label")}
-              </label>
-              <select
-                id="lq-requests-sort"
-                value={sort}
-                aria-controls="lq-requests-feed"
-                onChange={(event) => {
-                  const value = event.target.value;
-                  setSort(value);
-                  void loader.load(value);
-                }}
-                className="max-w-full rounded-lg border border-primary/20 bg-white px-3 py-2 text-sm text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-              >
-                {REQUIREMENT_SORTS.map((value) => (
-                  <option key={value} value={value}>
-                    {translate(`lenaqar.onboarding.requestsSort.${value}`)}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <label
+                  htmlFor="lq-requests-sort"
+                  className="text-sm font-medium text-primary"
+                >
+                  {translate("lenaqar.onboarding.requestsSort.label")}
+                </label>
+                <select
+                  id="lq-requests-sort"
+                  value={sort}
+                  aria-controls="lq-requests-feed"
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setSort(value);
+                    void loader.load(value);
+                  }}
+                  className="max-w-full rounded-lg border border-primary/20 bg-white px-3 py-2 text-sm text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                >
+                  {REQUIREMENT_SORTS.map((value) => (
+                    <option key={value} value={value}>
+                      {translate(`lenaqar.onboarding.requestsSort.${value}`)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
           <div id="lq-requests-feed" aria-busy={feed.loading}>

@@ -1,5 +1,6 @@
 import { SITE } from "@/config/site";
 import { fetchPublicRequirements } from "@/lib/lenaqar/requirements.server";
+import { HOME_REQUIREMENT_LIMIT } from "@/lib/lenaqar/requirement-sort";
 import StorytellingHomepage from "@/components/lenaqar/storytelling-homepage";
 import FaqSchema from "@/components/schema/FaqSchema";
 
@@ -35,7 +36,7 @@ export const metadata = {
 };
 
 export default async function LenaqarHomePage() {
-  const { requirements, error } = await fetchPublicRequirements({ limit: 6, sort: "default" });
+  const { requirements, error } = await fetchPublicRequirements({ limit: HOME_REQUIREMENT_LIMIT });
   return (
     <>
       <FaqSchema />

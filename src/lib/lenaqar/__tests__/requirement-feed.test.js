@@ -19,8 +19,8 @@ const response = (rows) => ({
   json: async () => ({ data: { requirements: rows } }),
 });
 
-test("sort query validates all modes and includes the default", () => {
-  assert.equal(publicRequirementsQuery().get("sort"), "default");
+test("sort query validates all modes and defaults to newest", () => {
+  assert.equal(publicRequirementsQuery().get("sort"), "newest");
   for (const sort of ["default", "newest", "highest_score"]) {
     const query = publicRequirementsQuery({ limit: 6, sort });
     assert.equal(query.get("sort"), sort);
@@ -31,12 +31,12 @@ test("sort query validates all modes and includes the default", () => {
   }
 });
 
-test("selector loads six backend-sorted cards and emits loading then success", async () => {
+test("selector loads the homepage batch of backend-sorted cards and emits loading then success", async () => {
   const events = [];
   const rows = [row("bbbbbbbbbbbb"), row("aaaaaaaaaaaa")];
   const loader = createRequirementFeedLoader({
     fetcher: async (url) => {
-      assert.equal(url, "/api/lenaqar/requirements?limit=6&sort=newest");
+      assert.equal(url, "/api/lenaqar/requirements?limit=48&sort=newest");
       return response(rows);
     },
     onStart: () => events.push("loading"),
@@ -215,7 +215,7 @@ test("frontend API validates sort and forwards valid selections", async () => {
     assert.equal(invalid.status, 400);
     assert.equal(requested.length, 3);
     await GET(new Request("https://frontend.test/api/lenaqar/requirements"));
-    assert.equal(requested.at(-1).sort, "default");
+    assert.equal(requested.at(-1).sort, "newest");
   } finally {
     delete globalThis.__requirementFeedLoad;
   }
