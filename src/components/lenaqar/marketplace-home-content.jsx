@@ -5,15 +5,13 @@ import Link from "next/link";
 import { MessageCircle, ShieldCheck, Target, UserCheck } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { marketplaceAddUnitHref } from "@/lib/lenaqar/whatsapp";
-import {
-  MARKETPLACE_CITY_FILTERS,
-  requirementMatchesCity,
-} from "@/lib/lenaqar/marketplace-city-filters";
+import { requirementMatchesCity } from "@/lib/lenaqar/marketplace-city-filters";
 import { BUYER_LANDING_LINKS } from "@/lib/lenaqar/buyer-landings";
 import { BUYER_GUIDE_LINKS } from "@/lib/lenaqar/buyer-guides";
 import { DOORS } from "@/lib/lenaqar/doors";
 import WhatsAppCta from "./whatsapp-cta";
 import RequirementCard from "./requirement-card";
+import RequirementCityFilter from "./requirement-city-filter";
 import MarketplaceHowItWorks from "./marketplace-how-it-works";
 import BuyRequestCta from "./buy-request-cta";
 import FaqSection from "./faq-section";
@@ -180,40 +178,7 @@ export default function MarketplaceHomeContent({
               {translate("lenaqar.marketplace.list.sub")}
             </p>
           </div>
-          <div
-            className="flex flex-wrap gap-2"
-            role="group"
-            aria-label={translate("lenaqar.marketplace.filter.cityLabel")}
-          >
-            <button
-              type="button"
-              onClick={() => setCityFilter("")}
-              className={`min-h-10 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${
-                cityFilter === ""
-                  ? "bg-primary text-white"
-                  : "border border-primary/20 bg-white text-primary hover:bg-primary/5"
-              }`}
-            >
-              {translate("lenaqar.marketplace.filter.all")}
-            </button>
-            {MARKETPLACE_CITY_FILTERS.map((city) => {
-              const active = cityFilter === city.value;
-              return (
-                <button
-                  key={city.value}
-                  type="button"
-                  onClick={() => setCityFilter(city.value)}
-                  className={`min-h-10 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${
-                    active
-                      ? "bg-primary text-white"
-                      : "border border-primary/20 bg-white text-primary hover:bg-primary/5"
-                  }`}
-                >
-                  {city.label}
-                </button>
-              );
-            })}
-          </div>
+          <RequirementCityFilter value={cityFilter} onChange={setCityFilter} />
         </div>
 
         {error ? (

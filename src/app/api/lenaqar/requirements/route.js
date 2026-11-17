@@ -14,7 +14,7 @@ export async function GET(request) {
     const limit = Number(searchParams.get("limit") || 48);
     let sort;
     try {
-      sort = parseRequirementSort(searchParams.get("sort") ?? "default");
+      sort = parseRequirementSort(searchParams.get("sort") ?? undefined);
     } catch {
       return NextResponse.json(
         { data: { requirements: [], error: "invalid_sort" } },

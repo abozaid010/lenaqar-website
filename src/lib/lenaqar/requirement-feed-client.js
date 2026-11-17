@@ -1,4 +1,7 @@
-import { publicRequirementsQuery } from "./requirement-sort.js";
+import {
+  HOME_REQUIREMENT_LIMIT,
+  publicRequirementsQuery,
+} from "./requirement-sort.js";
 
 /** Owns cancellation so only the latest selection can update the feed. */
 export function createRequirementFeedLoader({
@@ -16,7 +19,7 @@ export function createRequirementFeedLoader({
   }
 
   async function load(sort) {
-    const query = publicRequirementsQuery({ limit: 6, sort });
+    const query = publicRequirementsQuery({ limit: HOME_REQUIREMENT_LIMIT, sort });
     cancel();
     const requestVersion = version;
     const requestController = new AbortController();
@@ -36,8 +39,7 @@ export function createRequirementFeedLoader({
       ) {
         throw new Error("Public requirements unavailable");
       }
-      if (version === requestVersion)
-        onSuccess(json.data.requirements.slice(0, 6));
+      if (version === requestVersion) onSuccess(json.data.requirements);
     } catch {
       if (version === requestVersion) onError("unavailable");
     } finally {
