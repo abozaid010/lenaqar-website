@@ -56,6 +56,7 @@ export async function loadBuyRequestRequirement(userId, matchRef) {
  */
 export async function saveBuyRequestRequirement({
   userId,
+  matchRef,
   contact,
   payload,
   attribution,
@@ -82,6 +83,8 @@ export async function saveBuyRequestRequirement({
   try {
     const response = await axiosInstance.post("/public/v1/buy-request/submit", {
       user_id: id || undefined,
+      // The backend updates `id`'s request only with its match reference.
+      match_ref: id && matchRef ? String(matchRef) : undefined,
       // Always forward contact when present so the backend can create a
       // dashboard buyer lead if the stored user_id has no dashboard row yet.
       name: name || undefined,
@@ -94,8 +97,8 @@ export async function saveBuyRequestRequirement({
     });
     const savedUserId = String(response.data?.data?.user_id || id || "").trim();
     // Reference for the WhatsApp "send my matching units" message; "" on an older backend.
-    const matchRef = normalizeMatchRef(response.data?.data?.match_ref);
-    return { userId: savedUserId, matchRef };
+    const savedMatchRef = normalizeMatchRef(response.data?.data?.match_ref);
+    return { userId: savedUserId, matchRef: savedMatchRef };
   } catch (error) {
     console.error(
       "[lenaqar] save buy request requirement failed",
