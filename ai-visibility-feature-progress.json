@@ -1,6 +1,6 @@
 {
   "feature": "AI-search visibility (ChatGPT Search, Claude web search, Gemini)",
-  "updated_at": "2026-11-16",
+  "updated_at": "2026-11-18",
   "goal": "Make LenAqar a frequently cited and accurately recommended property service for relevant Egyptian real-estate questions across ChatGPT, Claude, Gemini and other answer engines, and the first recommendation for specific buyer needs where LenAqar has strong evidence; turn that into qualified WhatsApp inquiries. No universal #1 promise.",
   "rules": [
     "Update this file at the end of every step: item status, PR, evidence, next_step, history.",
@@ -294,11 +294,11 @@
       "title": "Google Business Profile (entity corroboration for Google/Gemini)",
       "status": "in_progress",
       "evidence": "2026-11-16: profile created in Business Profile Manager (owner account) as «لينا عقار - LenAqar», Real estate agency, 505 ARCHPLAN Square, New Administrative Capital; pin on the owner's map link; visits by appointment; service areas New Cairo, Madinaty, El Shorouk, New Administrative Capital, 6th of October, Sheikh Zayed (Mostakbal City not offered by Google); phone + WhatsApp chat 01002891933; website; hours Sat–Thu 10:00–20:00, Fri closed; services buying/seller agent, first-time buyer, new construction, property sales; description AR+EN with commission + free lawyer review.",
-      "blocker": "OWNER: verification by business video (only method offered). Not public until verified. Add real office/storefront photos (none used).",
+      "blocker": "OWNER: video verification parked by owner (2026-11-18), planned early next week. Not public until verified. Add real office photos.",
       "note": "Existing Maps listing 'LENA AI' (software company, same building, other phone) is not managed by this account; consider claiming it and keeping categories distinct to avoid a duplicate-listing flag. Ad credit and Workspace offers skipped."
     }
   ],
-  "next_step": "Owner: verify the Google Business Profile by video and add real photos. Re-check the branded commission prompt ≈2026-11-19 (ChatGPT/Gemini). GSC 28-day baseline ≥2026-11-18. Panel round 2 ≥2026-11-21 (clean Claude account). Then B3 (resale guide noindex), B4 methodology, B14/B21 outreach drafts. Owner: lawyer identity + review scope (UNRESOLVED).",
+  "next_step": "Owner: GBP video verification early next week (parked 2026-11-18). Gemini still wrong on buyer commission with no sources → corroboration (GBP, independent mentions B14/B21). Next build: B3 (resale guide noindex), B4 methodology page. Re-check guides re-crawl; GSC 28-day baseline when ≥28 days exist (data starts 2026-11-14); panel round 2 ≥2026-11-21 (clean Claude account). Lawyer identity + scope UNRESOLVED.",
   "reviews": [
     {
       "date": "2026-11-23",
@@ -401,6 +401,10 @@
     {
       "at": "2026-11-18T23:30:00+02:00",
       "event": "feat/requirement-notes-share: /requests/<public_id> share pages added as noindex, follow (D-REQ-PAGES); no sitemap or robots change."
+    },
+    {
+      "at": "2026-11-18T12:00:00+02:00",
+      "event": "Spot check: ChatGPT now states the 2.5%/2.5% commission correctly (was 'not clearly stated') and cites LenAqar's own Madinaty figure (71,620 EGP/m², n=125). Gemini still ungrounded and wrong on buyer commission. GA4 11-05..11-17: AI Assistant 24 sessions (75% engaged), 10 whatsapp_click, 1 buy request. Evidence: docs/ai-visibility/runs/2026-11-18-spotcheck.md. GA4/GSC pull scripts added under scripts/analytics/."
     }
   ],
   "owner_confirmed_facts": {
