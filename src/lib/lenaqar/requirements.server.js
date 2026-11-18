@@ -4,6 +4,11 @@ import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
 import { bffFetch, isCloudflareChallenge } from "@/lib/bffFetch";
 import { catalogPlaceAr } from "./arabic-labels.server";
 import { publicRequirementsQuery } from "./requirement-sort.js";
+import {
+  PUBLIC_ID_SCHEME,
+  PUBLIC_REQUIREMENTS_TAG,
+  isPublicRequirementId,
+} from "./requirement-public.js";
 
 const DEFAULT_LIMIT = 48;
 
@@ -33,7 +38,7 @@ function acceptPublicRequirement(raw) {
   if (!raw || typeof raw !== "object") return null;
   const row = /** @type {Record<string, unknown>} */ (raw);
   if (FORBIDDEN_KEYS.some((key) => key in row)) return null;
-  if (typeof row.id !== "string" || !/^[a-f0-9]{12}$/.test(row.id)) return null;
+  if (!isPublicRequirementId(row.id)) return null;
   if (row.intent !== "buy") return null;
   if (!Array.isArray(row.locations) || row.locations.length === 0) return null;
   if (!Array.isArray(row.propertyTypes)) return null;
@@ -88,6 +93,76 @@ function acceptPublicRequirement(raw) {
 }
 
 /**
+ * One call to the public requirements API (X-API-Key + BFF secret, cached 300 s under
+ * PUBLIC_REQUIREMENTS_TAG so the backend's takedown can drop it at once).
+ * Returns { status: "ok", data } | { status: "not_found" } | { status: "unavailable" }.
+ * A response without the current id scheme is treated as unavailable, never rendered.
+ * @param {string} path
+ */
+async function requestPublicRequirements(path) {
+  if (!PUBLIC_X_API_KEY) {
+    console.error(
+      "[lenaqar] public requirements skipped — no X_API_KEY / NEXT_PUBLIC_X_API_KEY",
+    );
+    return { status: "unavailable" };
+  }
+
+  try {
+    const response = await bffFetch(`${API_BASE_URL}${path}`, {
+      headers: {
+        accept: "application/json",
+        "X-API-Key": PUBLIC_X_API_KEY,
+      },
+      next: { revalidate: 300, tags: [PUBLIC_REQUIREMENTS_TAG] },
+      signal: AbortSignal.timeout(30_000),
+    });
+
+    const text = await response.text().catch(() => "");
+    if (response.status === 404) return { status: "not_found" };
+    if (!response.ok) {
+      const cf = isCloudflareChallenge(response, text);
+      console.error(
+        "[lenaqar] public requirements failed",
+        response.status,
+        cf ? "(Cloudflare challenge)" : "",
+      );
+      return { status: "unavailable" };
+    }
+
+    let json;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      console.error("[lenaqar] public requirements returned non-JSON");
+      return { status: "unavailable" };
+    }
+
+    if (json?.status === false) {
+      console.error(
+        "[lenaqar] public requirements API error",
+        json?.error_message || json?.message || "unknown",
+      );
+      return { status: "unavailable" };
+    }
+
+    const data = json?.data && typeof json.data === "object" ? json.data : {};
+    if (data.id_scheme !== PUBLIC_ID_SCHEME) {
+      console.error("[lenaqar] public requirements: unexpected id scheme", data.id_scheme);
+      return { status: "unavailable" };
+    }
+    return { status: "ok", data };
+  } catch (error) {
+    console.error(
+      "[lenaqar] public requirements error",
+      error,
+      "url=",
+      API_BASE_URL,
+    );
+    return { status: "unavailable" };
+  }
+}
+
+/**
  * Server-only: load anonymized pending requirements from the public API.
  * Auth is X-API-Key (+ BFF secret) only — no CRM username/password.
  *
@@ -103,76 +178,40 @@ export const fetchPublicRequirements = cache(async function fetchPublicRequireme
   );
   const qs = publicRequirementsQuery({ limit, sort: options.sort });
 
-  if (!PUBLIC_X_API_KEY) {
-    console.error(
-      "[lenaqar] public requirements skipped — no X_API_KEY / NEXT_PUBLIC_X_API_KEY",
-    );
-    return { requirements: [], error: "unavailable" };
+  const result = await requestPublicRequirements(`/public/v1/requirements?${qs}`);
+  if (result.status !== "ok") return { requirements: [], error: "unavailable" };
+
+  const items = Array.isArray(result.data.requirements) ? result.data.requirements : [];
+  const seen = new Set();
+  const publicRows = [];
+  for (const raw of items) {
+    const row = acceptPublicRequirement(raw);
+    if (!row || seen.has(row.id)) continue;
+    seen.add(row.id);
+    publicRows.push(row);
   }
 
-  try {
-    const response = await bffFetch(
-      `${API_BASE_URL}/public/v1/requirements?${qs}`,
-      {
-        headers: {
-          accept: "application/json",
-          "X-API-Key": PUBLIC_X_API_KEY,
-        },
-        next: { revalidate: 300 },
-        signal: AbortSignal.timeout(30_000),
-      },
-    );
+  return {
+    requirements: publicRows.slice(0, limit),
+    error: null,
+  };
+});
 
-    const text = await response.text().catch(() => "");
-    if (!response.ok) {
-      const cf = isCloudflareChallenge(response, text);
-      console.error(
-        "[lenaqar] public requirements failed",
-        response.status,
-        cf ? "(Cloudflare challenge)" : "",
-      );
-      return { requirements: [], error: "unavailable" };
-    }
-
-    let json;
-    try {
-      json = JSON.parse(text);
-    } catch {
-      console.error("[lenaqar] public requirements returned non-JSON");
-      return { requirements: [], error: "unavailable" };
-    }
-
-    if (json?.status === false) {
-      console.error(
-        "[lenaqar] public requirements API error",
-        json?.error_message || json?.message || "unknown",
-      );
-      return { requirements: [], error: "unavailable" };
-    }
-
-    const data = json?.data && typeof json.data === "object" ? json.data : {};
-    const items = Array.isArray(data.requirements) ? data.requirements : [];
-
-    const seen = new Set();
-    const publicRows = [];
-    for (const raw of items) {
-      const row = acceptPublicRequirement(raw);
-      if (!row || seen.has(row.id)) continue;
-      seen.add(row.id);
-      publicRows.push(row);
-    }
-
-    return {
-      requirements: publicRows.slice(0, limit),
-      error: null,
-    };
-  } catch (error) {
-    console.error(
-      "[lenaqar] public requirements error",
-      error,
-      "url=",
-      API_BASE_URL,
-    );
-    return { requirements: [], error: "unavailable" };
-  }
+/**
+ * Server-only: one public buyer request for /requests/[publicId].
+ * Malformed ids are never sent to the backend. Unknown or no-longer-public → null.
+ *
+ * @param {string} publicId
+ * @returns {Promise<{ requirement: NonNullable<ReturnType<typeof acceptPublicRequirement>> | null, error: string | null }>}
+ */
+export const fetchPublicRequirementById = cache(async function fetchPublicRequirementById(
+  publicId,
+) {
+  if (!isPublicRequirementId(publicId)) return { requirement: null, error: null };
+  const result = await requestPublicRequirements(`/public/v1/requirements/${publicId}`);
+  if (result.status === "not_found") return { requirement: null, error: null };
+  if (result.status !== "ok") return { requirement: null, error: "unavailable" };
+  const row = acceptPublicRequirement(result.data.requirement);
+  if (!row || row.id !== publicId) return { requirement: null, error: null };
+  return { requirement: row, error: null };
 });

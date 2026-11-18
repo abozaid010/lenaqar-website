@@ -18,9 +18,9 @@ function clientIpFromHeaders(headerStore) {
   return headerStore.get("x-real-ip") || "unknown";
 }
 
-export async function loadPublicBuyRequest(userId) {
+export async function loadPublicBuyRequest(userId, matchRef) {
   try {
-    const data = await loadBuyRequestRequirement(userId);
+    const data = await loadBuyRequestRequirement(userId, matchRef);
     return data;
   } catch (error) {
     return { error: error?.code || "load_failed" };
