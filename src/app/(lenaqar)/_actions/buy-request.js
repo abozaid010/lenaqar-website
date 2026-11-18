@@ -29,6 +29,7 @@ export async function loadPublicBuyRequest(userId, matchRef) {
 
 export async function savePublicBuyRequest({
   userId,
+  matchRef,
   contact,
   payload,
   notBrokerConfirmed,
@@ -48,6 +49,7 @@ export async function savePublicBuyRequest({
   try {
     const saved = await saveBuyRequestRequirement({
       userId,
+      matchRef,
       contact,
       payload,
       attribution,

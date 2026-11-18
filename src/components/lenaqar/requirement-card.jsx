@@ -75,6 +75,11 @@ export default function RequirementCard({ requirement }) {
             {typeLabel}
           </span>
         ) : null}
+        <RequirementShareButton
+          publicId={requirement.id}
+          shareText={shareText}
+          className="ms-auto"
+        />
       </div>
 
       <div>
@@ -168,7 +173,7 @@ export default function RequirementCard({ requirement }) {
         ) : null}
       </div>
 
-      <div className="flex flex-col gap-2 pt-1">
+      <div className="pt-1">
         <WhatsAppCta
           href={whatsappHref}
           intent="sell"
@@ -178,7 +183,6 @@ export default function RequirementCard({ requirement }) {
         >
           {translate("lenaqar.marketplace.card.whatsapp")}
         </WhatsAppCta>
-        <RequirementShareButton publicId={requirement.id} shareText={shareText} />
       </div>
     </article>
   );

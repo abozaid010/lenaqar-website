@@ -156,6 +156,9 @@ export default function BuyRequestCta({
 
       const result = await savePublicBuyRequest({
         userId: id,
+        // Proof that this browser submitted `id`'s request; without it the backend
+        // treats the submit as a new one (matched by phone).
+        matchRef: readMatchRef(browserStorage(), id),
         contact: extra?.contact,
         payload,
         notBrokerConfirmed: extra?.notBrokerConfirmed === true,
