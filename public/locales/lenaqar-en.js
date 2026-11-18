@@ -620,6 +620,26 @@ export default {
   requirements: {
     moneyReviewNotice: "Budget details are under review — contact us to confirm them.",
   },
+  share: {
+    button: "Share request",
+    requestTitle: "Buyer request on LenaQar",
+    requestText: "A buyer is looking for: {summary}. Do you have a matching unit?",
+    copyLink: "Copy link",
+    copied: "Link copied",
+    copyFailed: "Couldn't copy the link",
+    whatsapp: "Share on WhatsApp",
+  },
+  requestPage: {
+    eyebrow: "Buyer request",
+    heading: "A buyer is looking for a unit",
+    intro: "If you have a unit that matches this request, send it to the LenaQar team on WhatsApp.",
+    backToRequests: "All requests",
+    metaTitle: "Buyer request: {summary}",
+    metaTitleFallback: "Buyer request on LenaQar",
+    metaDescription: "A buyer is looking for {summary}. Have a matching unit? Send it to the LenaQar team on WhatsApp.",
+    unavailableTitle: "Request unavailable",
+    unavailableDescription: "This request is no longer available on LenaQar. Browse the open requests.",
+  },
   marketplace: {
     hero: {
       eyebrow: "A buyer-first property platform",

@@ -621,6 +621,26 @@ export default {
   requirements: {
     moneyReviewNotice: "تفاصيل الميزانية قيد المراجعة — تواصل معنا لتأكيدها.",
   },
+  share: {
+    button: "مشاركة الطلب",
+    requestTitle: "طلب شراء على لينا عقار",
+    requestText: "مشتري بيدور على: {summary}. عندك وحدة مناسبة؟",
+    copyLink: "نسخ الرابط",
+    copied: "تم نسخ الرابط",
+    copyFailed: "مقدرناش ننسخ الرابط",
+    whatsapp: "مشاركة على واتساب",
+  },
+  requestPage: {
+    eyebrow: "طلب شراء",
+    heading: "مشتري بيدور على وحدة",
+    intro: "لو عندك وحدة مناسبة للطلب ده، ابعتها لفريق لينا عقار على واتساب.",
+    backToRequests: "كل الطلبات",
+    metaTitle: "طلب شراء {summary}",
+    metaTitleFallback: "طلب شراء على لينا عقار",
+    metaDescription: "مشتري بيدور على {summary}. عندك وحدة مناسبة؟ ابعتها لفريق لينا عقار على واتساب.",
+    unavailableTitle: "الطلب غير متاح",
+    unavailableDescription: "الطلب ده مبقاش متاح على لينا عقار. شوف الطلبات المفتوحة دلوقتي.",
+  },
   marketplace: {
     hero: {
       eyebrow: "منصة عقارية بتبدأ من طلب المشتري",

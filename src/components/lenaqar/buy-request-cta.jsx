@@ -22,6 +22,7 @@ import {
   savePublicBuyRequest,
 } from "@/app/(lenaqar)/_actions/buy-request";
 import { actionButtonClass } from "@/components/ui/action-button-class";
+import { readMatchRef, writeMatchRef } from "@/lib/lenaqar/buy-request-identity";
 import ActionButtonArrow from "@/components/ui/action-button-arrow";
 
 let buyRequestHashHandled = false;
@@ -48,6 +49,15 @@ function opportunityQueryFromRequirement(requirement) {
   }
   if (filters.project_name) params.set("project", String(filters.project_name));
   return params.toString();
+}
+
+function browserStorage() {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
 }
 
 function readStoredUserId() {
@@ -118,7 +128,10 @@ export default function BuyRequestCta({
 
   const loadRequirement = useCallback(
     async (id) => {
-      const raw = await loadPublicBuyRequest(id);
+      // No saved proof for this request (older visit): start from an empty form.
+      const matchRef = readMatchRef(browserStorage(), id);
+      if (!matchRef) return null;
+      const raw = await loadPublicBuyRequest(id, matchRef);
       if (raw?.error) {
         return { error: translate("lenaqar.buyRequest.loadFailed") };
       }
@@ -162,6 +175,7 @@ export default function BuyRequestCta({
         userId: result.userId,
         matchRef: result.matchRef,
       });
+      writeMatchRef(browserStorage(), result.userId, result.matchRef);
       return result;
     },
     [translate],

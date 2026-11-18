@@ -5,6 +5,7 @@ import { addUnitForRequirementHref } from "@/lib/lenaqar/whatsapp";
 import { buildingTypeAr, roomsLabelAr } from "@/lib/lenaqar/listing-seo";
 import { localizedPlaceName } from "@/lib/lenaqar/place-display";
 import EgpAmount from "./egp-amount";
+import RequirementShareButton from "./requirement-share-button";
 import WhatsAppCta from "./whatsapp-cta";
 
 const KNOWN_DELIVERY = new Set([
@@ -58,6 +59,10 @@ export default function RequirementCard({ requirement }) {
   const delivery = deliveryLabel(requirement.deliveryDate, translate);
   const whatsappHref = addUnitForRequirementHref(requirement);
   const notes = String(requirement.notes || "").trim();
+  const shareText = translate("lenaqar.share.requestText").replace(
+    "{summary}",
+    [typeLabel, location].filter(Boolean).join(" — "),
+  );
 
   return (
     <article className="mb-4 break-inside-avoid flex flex-col gap-4 rounded-2xl border border-primary/10 bg-white p-5 shadow-[0_10px_40px_-24px_rgba(3,2,80,0.45)]">
@@ -163,7 +168,7 @@ export default function RequirementCard({ requirement }) {
         ) : null}
       </div>
 
-      <div className="pt-1">
+      <div className="flex flex-col gap-2 pt-1">
         <WhatsAppCta
           href={whatsappHref}
           intent="sell"
@@ -173,6 +178,7 @@ export default function RequirementCard({ requirement }) {
         >
           {translate("lenaqar.marketplace.card.whatsapp")}
         </WhatsAppCta>
+        <RequirementShareButton publicId={requirement.id} shareText={shareText} />
       </div>
     </article>
   );

@@ -140,6 +140,7 @@ test("server loader forwards sort and preserves backend order after sanitizing",
       JSON.stringify({
         status: true,
         data: {
+          id_scheme: "hmac-v1",
           requirements: [
             row("bbbbbbbbbbbb"),
             { ...row("aaaaaaaaaaaa"), roomsCount: 4, maxPrice: 5000000 },
@@ -218,5 +219,121 @@ test("frontend API validates sort and forwards valid selections", async () => {
     assert.equal(requested.at(-1).sort, "newest");
   } finally {
     delete globalThis.__requirementFeedLoad;
+  }
+});
+
+const SERVER_MOCKS = {
+  react: "export const cache = fn => fn;",
+  "@/lib/apiConfig":
+    'export const API_BASE_URL="https://backend.test"; export const PUBLIC_X_API_KEY="test";',
+  "@/lib/bffFetch":
+    "export const bffFetch=(...args)=>globalThis.__requirementFeedFetch(...args); export const isCloudflareChallenge=()=>false;",
+  "./arabic-labels.server": "export const catalogPlaceAr=value=>value;",
+};
+
+async function withBackend(handler, run) {
+  const calls = [];
+  globalThis.__requirementFeedFetch = async (url, options) => {
+    calls.push({ url, options });
+    return handler(url);
+  };
+  try {
+    const mod = await loadServerModule(
+      new URL("../requirements.server.js", import.meta.url),
+      SERVER_MOCKS
+    );
+    await run(mod, calls);
+  } finally {
+    delete globalThis.__requirementFeedFetch;
+  }
+}
+
+const json = (body, status = 200) =>
+  new Response(JSON.stringify(body), { status });
+
+test("responses without the current id scheme are never rendered (pre-change cache)", async () => {
+  await withBackend(
+    () => json({ status: true, data: { requirements: [row("aaaaaaaaaaaa")] } }),
+    async ({ fetchPublicRequirements }, calls) => {
+      const result = await fetchPublicRequirements({ limit: 6 });
+      assert.deepEqual(result, { requirements: [], error: "unavailable" });
+      assert.deepEqual(calls[0].options.next, {
+        revalidate: 300,
+        tags: ["public-requirements"],
+      });
+    }
+  );
+});
+
+test("detail fetch: malformed ids never reach the backend, 404 and mismatches are null", async () => {
+  const card = { ...row("aaaaaaaaaaaa"), notes: "عايز شقة 3 غرف" };
+  await withBackend(
+    (url) => {
+      if (url.endsWith("/aaaaaaaaaaaa"))
+        return json({ status: true, data: { id_scheme: "hmac-v1", requirement: card } });
+      if (url.endsWith("/bbbbbbbbbbbb"))
+        return json({ status: true, data: { id_scheme: "hmac-v1", requirement: row("cccccccccccc") } });
+      return json({ detail: "Requirement not found" }, 404);
+    },
+    async ({ fetchPublicRequirementById }, calls) => {
+      for (const bad of ["AAAAAAAAAAAA", "../admin", "", "aaaa"]) {
+        assert.deepEqual(await fetchPublicRequirementById(bad), { requirement: null, error: null });
+      }
+      assert.equal(calls.length, 0);
+      const found = await fetchPublicRequirementById("aaaaaaaaaaaa");
+      assert.equal(found.requirement.id, "aaaaaaaaaaaa");
+      assert.equal(found.requirement.notes, "عايز شقة 3 غرف");
+      assert.equal(
+        calls[0].url,
+        "https://backend.test/public/v1/requirements/aaaaaaaaaaaa"
+      );
+      assert.deepEqual(calls[0].options.next.tags, ["public-requirements"]);
+      assert.equal((await fetchPublicRequirementById("dddddddddddd")).requirement, null);
+      assert.equal((await fetchPublicRequirementById("bbbbbbbbbbbb")).requirement, null);
+    }
+  );
+});
+
+test("detail fetch: a row with CRM fields or an outage never renders", async () => {
+  await withBackend(
+    (url) =>
+      url.endsWith("/aaaaaaaaaaaa")
+        ? json({ status: true, data: { id_scheme: "hmac-v1", requirement: { ...row("aaaaaaaaaaaa"), score: 9 } } })
+        : json({ detail: "unavailable" }, 503),
+    async ({ fetchPublicRequirementById }) => {
+      assert.deepEqual(await fetchPublicRequirementById("aaaaaaaaaaaa"), { requirement: null, error: null });
+      assert.deepEqual(await fetchPublicRequirementById("bbbbbbbbbbbb"), { requirement: null, error: "unavailable" });
+    }
+  );
+});
+
+test("revalidation route expires the requirements tag only with the shared secret", async () => {
+  const expired = [];
+  globalThis.__revalidateTag = (tag, profile) => expired.push([tag, profile]);
+  const previous = process.env.REQUIREMENTS_REVALIDATE_SECRET;
+  process.env.REQUIREMENTS_REVALIDATE_SECRET = "shared-secret";
+  try {
+    const { POST } = await loadServerModule(
+      new URL("../../../app/api/revalidate/requirements/route.js", import.meta.url),
+      {
+        "node:crypto": 'export { timingSafeEqual } from "node:crypto";',
+        "next/cache": "export const revalidateTag=(...a)=>globalThis.__revalidateTag(...a);",
+        "next/server":
+          "export const NextResponse={json:(body,init)=>new Response(JSON.stringify(body),init)};",
+        "@/lib/lenaqar/requirement-public": `export * from ${JSON.stringify(new URL("../requirement-public.js", import.meta.url).href)};`,
+      }
+    );
+    const call = (headers) =>
+      POST(new Request("https://site.test/api/revalidate/requirements", { method: "POST", headers }));
+    assert.equal((await call({})).status, 401);
+    assert.equal((await call({ "x-revalidate-secret": "wrong-secret!" })).status, 401);
+    assert.equal(expired.length, 0);
+    assert.equal((await call({ "x-revalidate-secret": "shared-secret" })).status, 200);
+    assert.deepEqual(expired, [["public-requirements", { expire: 0 }]]);
+    process.env.REQUIREMENTS_REVALIDATE_SECRET = "";
+    assert.equal((await call({ "x-revalidate-secret": "" })).status, 401);
+  } finally {
+    process.env.REQUIREMENTS_REVALIDATE_SECRET = previous;
+    delete globalThis.__revalidateTag;
   }
 });

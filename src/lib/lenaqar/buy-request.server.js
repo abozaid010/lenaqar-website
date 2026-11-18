@@ -23,14 +23,16 @@ function toPublicError(error, fallbackCode) {
 }
 
 /**
- * Load a previously-submitted public buy request via the anonymous,
- * API-key-only /public/v1/buy-request/{user_id} route — no login needed.
+ * Load the caller's own submitted buy request (form fields only) via
+ * /public/v1/buy-request/{user_id}. The backend requires the request's matchRef
+ * (X-Match-Ref) as proof of ownership; without it there is nothing to load.
  */
-export async function loadBuyRequestRequirement(userId) {
-  if (!userId) return null;
+export async function loadBuyRequestRequirement(userId, matchRef) {
+  if (!userId || !matchRef) return null;
   try {
     const response = await axiosInstance.get(
       `/public/v1/buy-request/${encodeURIComponent(userId)}`,
+      { headers: { "X-Match-Ref": String(matchRef) } },
     );
     const data = response.data?.data;
     if (!data || typeof data !== "object") return null;

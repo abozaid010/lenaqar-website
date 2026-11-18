@@ -70,6 +70,13 @@
         "B4"
       ],
       "status": "open"
+    },
+    {
+      "id": "D-REQ-PAGES",
+      "what": "/requests/<public_id> buyer-request share pages: index + sitemap only if they help AI visibility, otherwise noindex, follow",
+      "unblocks": [],
+      "status": "done",
+      "checked": "2026-11-18: shipped noindex, follow and not in sitemap. Evidence: requests expire once fulfilled (soft-404s; notFound() on dynamic routes returns HTTP 200 on Next 16.2.7, docs/lenaqar-seo-geo-strategy.md), each page is one thin record (strategy rule: under 3 real records is a liability), and answer engines cite stable evidence pages, not expiring records (H). Revisit only with an aggregated, stable demand page."
     }
   ],
   "escalated_non_blocking": [
@@ -390,6 +397,10 @@
     {
       "at": "2026-11-16T14:20:00+02:00",
       "event": "PR #50 and #51 merged and verified on production (c15715f8). Google Business Profile created (pending owner video verification). GSC indexing re-requested for /before-you-pay and /how-it-works."
+    },
+    {
+      "at": "2026-11-18T23:30:00+02:00",
+      "event": "feat/requirement-notes-share: /requests/<public_id> share pages added as noindex, follow (D-REQ-PAGES); no sitemap or robots change."
     }
   ],
   "owner_confirmed_facts": {
