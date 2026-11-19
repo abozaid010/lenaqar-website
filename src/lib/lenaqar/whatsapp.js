@@ -1,6 +1,10 @@
 import { formatPhoneForWhatsApp } from "@/utils/phone-utils";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
-import { buyerPageCtaMessage, matchRequestMessage } from "./whatsapp-intent.js";
+import {
+  buyerPageCtaMessage,
+  matchRequestMessage,
+  withMatchRef,
+} from "./whatsapp-intent.js";
 
 export {
   buyerPageCtaMessage,
@@ -68,6 +72,23 @@ export function buyerPageCtaHref(pathname = "/") {
   return formatPhoneForWhatsApp(
     LENAQAR_CONTACT.whatsappE164,
     buyerPageCtaMessage(pathname),
+  );
+}
+
+/**
+ * A unit card on the match page: the unit page's own opener plus the request
+ * reference. The backend (`asks_about_a_unit`, LENAAI-Agent
+ * `src/utils/match_request.py`) ties the sender to that request and lets the
+ * agent answer about this unit. Without a clean reference it is the plain unit opener.
+ */
+export function matchUnitMessage(unit, matchRef) {
+  return withMatchRef(buyerCtaMessage(unit), matchRef);
+}
+
+export function matchUnitHref(unit, matchRef) {
+  return formatPhoneForWhatsApp(
+    LENAQAR_CONTACT.whatsappE164,
+    matchUnitMessage(unit, matchRef),
   );
 }
 

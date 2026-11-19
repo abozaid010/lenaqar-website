@@ -66,7 +66,10 @@ test("toYearMonth converts Eastern Arabic digits", () => {
 });
 
 test("inferBuyRequestPaymentMode uses installment fields when present", () => {
-  assert.equal(inferBuyRequestPaymentMode({}), "cash");
+  // Nothing stated: the buyer did not say how they pay.
+  assert.equal(inferBuyRequestPaymentMode({}), "");
+  // A cash request is stored as "ready" delivery with no down payment.
+  assert.equal(inferBuyRequestPaymentMode({ deliveryDate: "ready" }), "cash");
   assert.equal(
     inferBuyRequestPaymentMode({ downPayment: 100000 }),
     "installment",
@@ -128,7 +131,7 @@ test("installment mode allows empty delivery", () => {
   assert.equal("deliveryDate" in result.requirement, false);
 });
 
-test("defaults to cash when paymentMode is missing", () => {
+test("assumes no payment mode and no delivery date when the buyer stated neither", () => {
   const result = buildPublicBuyRequirement({
     city: "cairo",
     district: "new cairo",
@@ -148,7 +151,6 @@ test("defaults to cash when paymentMode is missing", () => {
     district: "new cairo",
     buildingType: "apartment",
     max_price: 3000000,
-    deliveryDate: "ready",
   });
 });
 
@@ -156,7 +158,7 @@ test("rejects missing required fields", () => {
   const result = buildPublicBuyRequirement({});
   assert.equal(result.ok, false);
   assert.equal(result.errors.city, "cityRequired");
-  assert.equal(result.errors.district, "districtRequired");
+  assert.equal(result.errors.district, undefined);
   assert.equal(result.errors.buildingType, "buildingTypeRequired");
   assert.equal(result.errors.max_price, "maxPriceRequired");
 });
@@ -284,7 +286,11 @@ test("server re-validation keeps the notes (additionalFeatures)", () => {
 
 test("formFromBuiltRequirement tolerates empty input", () => {
   assert.deepEqual(formFromBuiltRequirement(null), {});
-  assert.equal(formFromBuiltRequirement({ max_price: 1 }).paymentMode, "cash");
+  assert.equal(formFromBuiltRequirement({ max_price: 1 }).paymentMode, "");
+  assert.equal(
+    formFromBuiltRequirement({ max_price: 1, deliveryDate: "ready" }).paymentMode,
+    "cash",
+  );
 });
 
 import { normalizeLoadedBuyRequest } from "../buy-request-payload.js";
@@ -360,4 +366,56 @@ test("buyer purpose overrides caller input through server re-validation", () => 
   assert.equal(server.requirement.purpose, "buy");
   assert.equal(server.requirement.max_price, 3000000);
   assert.equal(server.requirement.downPayment, 300000);
+});
+
+// --- several places (the place picker) ---------------------------------------
+
+const PICKED = {
+  buildingType: "apartment",
+  max_price: "4500000",
+  places: [
+    { city: "New Cairo" },
+    { city: "cairo", district: "El Shorouk City" },
+    { project: "  كمبوند  جديد " },
+  ],
+};
+
+test("place picker: every place is sent, a whole city needs no district", () => {
+  const result = buildPublicBuyRequirement(PICKED);
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.requirement.preferred_locations, [
+    { city: "new cairo", district: null, sub_district: null, project: null },
+    { city: "cairo", district: "el shorouk city", sub_district: null, project: null },
+    { city: null, district: null, sub_district: null, project: "كمبوند جديد" },
+  ]);
+  // Flat fields describe the first place with a city.
+  assert.equal(result.requirement.city, "new cairo");
+  assert.equal(result.requirement.district, undefined);
+  assert.equal(result.requirement.deliveryDate, undefined);
+});
+
+test("place picker: an empty list and an over-long list are rejected", () => {
+  assert.equal(
+    buildPublicBuyRequirement({ ...PICKED, places: [] }).errors.places,
+    "placeRequired",
+  );
+  const six = ["a", "b", "c", "d", "e", "f"].map((city) => ({ city }));
+  assert.equal(
+    buildPublicBuyRequirement({ ...PICKED, places: six }).errors.places,
+    "placesLimit",
+  );
+});
+
+test("place picker: server re-validation keeps every place", () => {
+  const first = buildPublicBuyRequirement(PICKED);
+  const again = buildPublicBuyRequirement(formFromBuiltRequirement(first.requirement));
+  assert.equal(again.ok, true);
+  assert.deepEqual(again.requirement, first.requirement);
+});
+
+test("place picker: a typed place alone is a valid request", () => {
+  const result = buildPublicBuyRequirement({ ...PICKED, places: [{ project: "بيت الوطن" }] });
+  assert.equal(result.ok, true);
+  assert.equal(result.requirement.city, undefined);
+  assert.equal(result.requirement.preferred_locations.length, 1);
 });

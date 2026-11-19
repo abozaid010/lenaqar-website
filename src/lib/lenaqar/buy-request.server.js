@@ -77,6 +77,16 @@ export async function saveBuyRequestRequirement({
     throw error;
   }
 
+  // With a place list, the flat fields only repeat its first entry: sending both
+  // would have the backend fold that place in a second time.
+  const requirement = { ...built.requirement };
+  if (Array.isArray(requirement.preferred_locations) && requirement.preferred_locations.length) {
+    delete requirement.city;
+    delete requirement.district;
+    delete requirement.sub_district;
+    delete requirement.project;
+  }
+
   // Ad attribution (utm_* / lead_code): whitelisted here too, sent only when present.
   const ad = sanitizeAttribution(attribution);
 
@@ -92,7 +102,7 @@ export async function saveBuyRequestRequirement({
       // Backend attribution: when source === lenaaqar_forum, ensure a dashboard
       // buyer lead exists (name, phone, last_action=new) before saving the requirement.
       source: "lenaaqar_forum",
-      requirement: built.requirement,
+      requirement,
       attribution: Object.keys(ad).length > 0 ? ad : undefined,
     });
     const savedUserId = String(response.data?.data?.user_id || id || "").trim();
@@ -105,5 +115,32 @@ export async function saveBuyRequestRequirement({
       error?.response?.status || apiMessage(error, error?.message),
     );
     throw toPublicError(error, "save_failed");
+  }
+}
+
+const UNIT_CODE = /^[A-Za-z0-9_-]{1,32}$/;
+const INTEREST_CHANNELS = new Set(["whatsapp", "call"]);
+
+/**
+ * Tell the backend the buyer tapped WhatsApp or Call on a unit of their match
+ * page: it records the unit on their request and alerts the team. Best effort —
+ * returns false instead of throwing, the tap itself must never wait on it.
+ */
+export async function recordMatchUnitInterest({ matchRef, unitCode, channel }) {
+  const ref = normalizeMatchRef(matchRef);
+  const code = typeof unitCode === "string" ? unitCode.trim() : "";
+  if (!ref || !UNIT_CODE.test(code) || !INTEREST_CHANNELS.has(channel)) return false;
+  try {
+    await axiosInstance.post(`/public/v1/buy-request/match/${ref}/interest`, {
+      unit_code: code,
+      channel,
+    });
+    return true;
+  } catch (error) {
+    console.error(
+      "[lenaqar] record unit interest failed",
+      error?.response?.status || error?.code || "error",
+    );
+    return false;
   }
 }

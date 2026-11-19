@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useI18n } from "@/hooks/useI18n";
 import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { ANALYTICS } from "@/constants/analytics";
@@ -27,7 +28,8 @@ import ActionButtonArrow from "@/components/ui/action-button-arrow";
 
 let buyRequestHashHandled = false;
 
-const STORAGE_KEY = "lenaqar_buy_request_user_id";
+/** localStorage key of the lead id this browser's last buy request was saved under. */
+export const BUY_REQUEST_USER_ID_KEY = "lenaqar_buy_request_user_id";
 
 const PUBLIC_OPPORTUNITY_QUERY_KEYS = [
   "city",
@@ -63,7 +65,7 @@ function browserStorage() {
 function readStoredUserId() {
   if (typeof window === "undefined") return "";
   try {
-    return String(window.localStorage.getItem(STORAGE_KEY) || "").trim();
+    return String(window.localStorage.getItem(BUY_REQUEST_USER_ID_KEY) || "").trim();
   } catch {
     return "";
   }
@@ -72,7 +74,7 @@ function readStoredUserId() {
 function persistUserId(userId) {
   if (!userId || typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(STORAGE_KEY, userId);
+    window.localStorage.setItem(BUY_REQUEST_USER_ID_KEY, userId);
   } catch {
     /* private mode */
   }
@@ -96,6 +98,7 @@ export default function BuyRequestCta({
 }) {
   const { translate } = useI18n();
   const { trackEvent } = useGoogleAnalytics();
+  const router = useRouter();
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const isControlled = typeof controlledOpen === "boolean";
   const open = isControlled ? controlledOpen : uncontrolledOpen;
@@ -226,6 +229,14 @@ export default function BuyRequestCta({
           });
           const href = qs ? `/opportunities?${qs}` : "/opportunities";
           const matchRef = saveResult?.matchRef || "";
+          if (matchRef) {
+            // Straight to the units that match what the buyer just sent. A request
+            // edited from that page keeps its reference, so the same URL is re-read.
+            router.push(`/requests/match/${matchRef}`);
+            router.refresh();
+            return;
+          }
+          // No reference (an older backend): the success screen, as before.
           if (onSubmitted) {
             onSubmitted({ requirement, opportunitiesHref: href, matchRef });
             return;

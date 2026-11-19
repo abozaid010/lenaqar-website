@@ -46,3 +46,14 @@ export function normalizeMatchRef(value) {
   const ref = typeof value === "string" ? value.trim().toUpperCase() : "";
   return MATCH_REF.test(ref) ? ref : "";
 }
+
+/**
+ * Append the request reference to another opener, as its own trailing page
+ * code. Used by a unit card on the match page: the backend reads the unit code
+ * the opener already carries and ties the sender to the request
+ * (`asks_about_a_unit`, LENAAI-Agent `src/utils/match_request.py`).
+ */
+export function withMatchRef(message, matchRef) {
+  const ref = normalizeMatchRef(matchRef);
+  return ref ? `${message} — MATCH-${ref}` : message;
+}
