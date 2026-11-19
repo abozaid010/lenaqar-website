@@ -1,30 +1,30 @@
-code,city,district,sub_district,project,problem,correct_city,correct_district
-BaZtDNO7,ain sokhna,,,porto south beach,city not in catalog,,
-PbL1ujYl,ain sokhna,,,porto south beach,city not in catalog,,
-ZYcvtynI,ain sokhna,,,porto south beach,city not in catalog,,
-SeOVp6CB,alamein,new alamein,,il latini,city not in catalog,,
-Tik4O7Uf,el shorouk,town center mall,,town center mall,city not in catalog,,
-DYYTzy8Y,ras el hekma,,,solary,city not in catalog,,
-QL7P9f7x,حدائق العاصمه,,,النور,city not in catalog,,
-sNOntn9e,alexandria,palm hills alexandria,,,district not in catalog for this city,,
-TZZUTvXc,alexandria,رشدي باشا,,delete101,district not in catalog for this city,,
-Yw5ho0pa,cairo,al-abbaseya,,,district not in catalog for this city,,
-IpV9damk,cairo,eighth district,madinaty,madinaty,district not in catalog for this city,,
-qGoMm2zH,cairo,el rehab,,,district not in catalog for this city,,
-fLDhio7D,cairo,gardenia heights 1,,جاردينيا هايتس 1,district not in catalog for this city,,
-MZT5CuHf,cairo,gardinia heights,,gardinia heights 2,district not in catalog for this city,,
-6V9jejji,cairo,mohamed naguib axis,,gardinia heights 1,district not in catalog for this city,,
-8PTPiBtE,new administrative capital,r8,,terrace,district not in catalog for this city,,
-wcU8tcbq,north coast,alamein new city,,latin quarter,district not in catalog for this city,,
-KFGFRRnQ,north coast,الحي اللاتيني,,,district not in catalog for this city,,
-uVJfkcMi,north coast,الحي اللاتيني,,الشركة السعودية المصرية,district not in catalog for this city,,
-SF3Qh8Xw,suez,b14,madinaty,madinaty,district not in catalog for this city,,
-6mbsn1t6,,,,مدينة نور طلعت مصطفي tmg شقة,no city,,
-7LgtRBAT,,,,south med,no city,,
-VjWJF7Fh,,,,wonder mark,no city,,
-xz6g1hSQ,,كمبوند سيليا,,كمبوند سيليا,no city,,
-BAEHkb9P,new administrative capital,,,midtown condo,no district,,
-AOmaxskB,new cairo,,,elm tree park,no district,,
-EmHmhlsP,new cairo,,,elm tree park,no district,,
-UmzIBqFv,new cairo,,,,no district,,
-zOHiXmp6,new cairo,,,,no district,,
+code,link,status,problem,old_city,old_district,old_sub_district,project,new_city,new_district,new_sub_district,why
+TZZUTvXc,https://lenaai.net/lenaqar/units/TZZUTvXc,needs a person,district not in catalog for this city,alexandria,رشدي باشا,,delete101,,,,
+sNOntn9e,https://lenaai.net/lenaqar/units/sNOntn9e,needs a person,district not in catalog for this city,alexandria,palm hills alexandria,,,,,,
+6V9jejji,https://lenaai.net/lenaqar/units/6V9jejji,needs a person,district not in catalog for this city,cairo,mohamed naguib axis,,gardinia heights 1,,,,
+MZT5CuHf,https://lenaai.net/lenaqar/units/MZT5CuHf,needs a person,district not in catalog for this city,cairo,gardinia heights,,gardinia heights 2,,,,
+fLDhio7D,https://lenaai.net/lenaqar/units/fLDhio7D,needs a person,district not in catalog for this city,cairo,gardenia heights 1,,جاردينيا هايتس 1,,,,
+7LgtRBAT,https://lenaai.net/lenaqar/units/7LgtRBAT,needs a person,no city,,,,south med,,,,
+VjWJF7Fh,https://lenaai.net/lenaqar/units/VjWJF7Fh,needs a person,no city,,,,wonder mark,,,,
+xz6g1hSQ,https://lenaai.net/lenaqar/units/xz6g1hSQ,needs a person,no city,,كمبوند سيليا,,كمبوند سيليا,,,,
+BAEHkb9P,https://lenaai.net/lenaqar/units/BAEHkb9P,needs a person,no district,new administrative capital,,,midtown condo,,,,
+AOmaxskB,https://lenaai.net/lenaqar/units/AOmaxskB,needs a person,no district,new cairo,,,elm tree park,,,,
+EmHmhlsP,https://lenaai.net/lenaqar/units/EmHmhlsP,needs a person,no district,new cairo,,,elm tree park,,,,
+UmzIBqFv,https://lenaai.net/lenaqar/units/UmzIBqFv,needs a person,no district,new cairo,,,,,,,
+zOHiXmp6,https://lenaai.net/lenaqar/units/zOHiXmp6,needs a person,no district,new cairo,,,,,,,
+BaZtDNO7,https://lenaai.net/lenaqar/units/BaZtDNO7,fixed 2026-11-19,city not in catalog,ain sokhna,,,porto south beach,suez,ain sokhna,,Ain Sokhna is a district of Suez in the catalog
+PbL1ujYl,https://lenaai.net/lenaqar/units/PbL1ujYl,fixed 2026-11-19,city not in catalog,ain sokhna,,,porto south beach,suez,ain sokhna,,Ain Sokhna is a district of Suez in the catalog
+ZYcvtynI,https://lenaai.net/lenaqar/units/ZYcvtynI,fixed 2026-11-19,city not in catalog,ain sokhna,,,porto south beach,suez,ain sokhna,,Ain Sokhna is a district of Suez in the catalog
+SeOVp6CB,https://lenaai.net/lenaqar/units/SeOVp6CB,fixed 2026-11-19,city not in catalog,alamein,new alamein,,il latini,north coast,el alamein,,New Alamein is an alias of North Coast > El Alamein in the catalog
+Tik4O7Uf,https://lenaai.net/lenaqar/units/Tik4O7Uf,fixed 2026-11-19,city not in catalog,el shorouk,town center mall,,town center mall,cairo,el shorouk city,,El Shorouk is a district of Cairo; the old district repeats the project name
+DYYTzy8Y,https://lenaai.net/lenaqar/units/DYYTzy8Y,fixed 2026-11-19,city not in catalog,ras el hekma,,,solary,north coast,ras el hekma,,Ras El Hekma is a district of North Coast in the catalog
+QL7P9f7x,https://lenaai.net/lenaqar/units/QL7P9f7x,fixed 2026-11-19,city not in catalog,حدائق العاصمه,,,النور,new administrative capital,capital gardens city,,the catalog resolves this name to Capital Gardens City
+IpV9damk,https://lenaai.net/lenaqar/units/IpV9damk,fixed 2026-11-19,district not in catalog for this city,cairo,eighth district,madinaty,madinaty,new cairo,madinaty,eighth district,project and sub-district are Madinaty; the old district moves to sub-district
+Yw5ho0pa,https://lenaai.net/lenaqar/units/Yw5ho0pa,fixed 2026-11-19,district not in catalog for this city,cairo,al-abbaseya,,,cairo,abbassia,,catalog spelling of the same district
+qGoMm2zH,https://lenaai.net/lenaqar/units/qGoMm2zH,fixed 2026-11-19,district not in catalog for this city,cairo,el rehab,,,new cairo,fifth settlement,rehab city,Rehab City is a sub-district of New Cairo > Fifth Settlement in the catalog
+8PTPiBtE,https://lenaai.net/lenaqar/units/8PTPiBtE,fixed 2026-11-19,district not in catalog for this city,new administrative capital,r8,,terrace,new administrative capital,r8 district,,catalog name of the same district
+KFGFRRnQ,https://lenaai.net/lenaqar/units/KFGFRRnQ,fixed 2026-11-19,district not in catalog for this city,north coast,الحي اللاتيني,,,north coast,el alamein,الحي اللاتيني,the Latin District is in New Alamein; the old district moves to sub-district
+uVJfkcMi,https://lenaai.net/lenaqar/units/uVJfkcMi,fixed 2026-11-19,district not in catalog for this city,north coast,الحي اللاتيني,,الشركة السعودية المصرية,north coast,el alamein,الحي اللاتيني,the Latin District is in New Alamein; the old district moves to sub-district
+wcU8tcbq,https://lenaai.net/lenaqar/units/wcU8tcbq,fixed 2026-11-19,district not in catalog for this city,north coast,alamein new city,,latin quarter,north coast,el alamein,,New Alamein is an alias of El Alamein in the catalog
+SF3Qh8Xw,https://lenaai.net/lenaqar/units/SF3Qh8Xw,fixed 2026-11-19,district not in catalog for this city,suez,b14,madinaty,madinaty,new cairo,madinaty,b14,project and sub-district are Madinaty; the old district moves to sub-district
+6mbsn1t6,https://lenaai.net/lenaqar/units/6mbsn1t6,fixed 2026-11-19,no city,,,,مدينة نور طلعت مصطفي tmg شقة,cairo,noor city,,"the project text names Noor City (TMG), a district of Cairo in the catalog"

@@ -26,7 +26,7 @@ WhatsApp or phone from every unit. Product goal behind it: sell a unit within 24
 | 6 | Short form (flow A) | lenaqar, this branch | PR open |
 | 7 | Match page with WhatsApp + Call on every unit | lenaqar, this branch | PR open |
 | 8 | Unit taps recorded, team push, shown on the lead in the admin | LenaAI-Agent#255 (stacked on #253), lenaqar this branch, lenaai-website#887 | PRs open |
-| 9 | Units with off-catalog place values | `docs/instant-match-offcatalog-units-2026-11-19.csv` | list ready, fix waits for the owner |
+| 9 | Units with off-catalog place values | `docs/instant-match-offcatalog-units-2026-11-19.csv` | 16 fixed 2026-11-19 on the owner's word, 13 need a person (links in the CSV) |
 
 Merge and deploy order: LenaAI-Agent#253 first, then this lenaqar branch. #254 at any
 time. #255 after #253 (retarget it to `main`), then lenaai-website#887.
@@ -121,7 +121,9 @@ Findings:
 
 1. Customer-facing Arabic copy in the lenaqar PR and the team push copy in
    LenaAI-Agent#255 are drafts for approval.
-2. Step 9: who corrects the 29 units — a one-off script approved per unit, or by hand in
-   the admin. The CSV has empty `correct_city` / `correct_district` columns to fill.
+2. Step 9: 16 units were corrected where the catalog itself names the right place. The
+   other 13 need someone who knows the unit; the CSV has a lenaai.net link for each.
+   After any unit place change, run the units sync for client `lenaqar` so the WhatsApp
+   search index follows.
 3. Done 2026-11-19: `units-location-search.jsx` and `searchable-project-select.jsx` were
    deleted on the owner's word. Nothing imported them.
