@@ -5,11 +5,10 @@ import { getBuildingTypeOptions } from "@/lib/enums/buildingTypes";
 import { useI18n } from "@/hooks/useI18n";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import LenaTextarea from "@/components/ui/inputs/lena-textarea";
-import UnitsLocationSearch from "@/components/ui/inputs/units-location-search";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
-import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import { PhoneField } from "@/components/phone/PhoneField";
+import RequestPlacePicker from "@/components/lenaqar/request-place-picker";
 import SubmitWhatsAppFallback from "@/components/lenaqar/submit-whatsapp-fallback";
 import { FORM_IDS } from "@/constants/analytics";
 import {
@@ -18,6 +17,9 @@ import {
   normalizeBuyRequestPaymentMode,
   normalizeLoadedBuyRequest,
 } from "@/lib/lenaqar/buy-request-payload";
+import { placeAr } from "@/lib/lenaqar/listing-seo";
+import { localizedPlaceName } from "@/lib/lenaqar/place-display";
+import { placesFromForm, placesFromRequirement } from "@/lib/lenaqar/request-places";
 import {
   getBuyRequestDeliveryOptions,
   normalizeBuyRequestDelivery,
@@ -28,6 +30,7 @@ import {
 } from "@/lib/lenaqar/whatsapp-fallback";
 import { parseMoneyInput, normalizeToEnglishDigits } from "@/utils/parse-amount";
 import { useQuery } from "@tanstack/react-query";
+import { ChevronDown } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -94,10 +97,14 @@ function createEmptyForm(initialValues = {}) {
   const paymentMode = inferBuyRequestPaymentMode(initial);
   return {
     paymentMode,
-    city: pickSingleValue(initial.city),
-    district: pickSingleValue(initial.district),
-    sub_district: pickSingleValue(initial.sub_district),
-    project: pickSingleValue(initial.project),
+    // A landing page may preset one place through the flat city/district fields.
+    places: placesFromForm({
+      places: initial.places,
+      city: pickSingleValue(initial.city),
+      district: pickSingleValue(initial.district),
+      sub_district: pickSingleValue(initial.sub_district),
+      project: pickSingleValue(initial.project),
+    }),
     buildingType: pickSingleValue(initial.buildingType),
     roomsCount: numberToFieldValue(initial.roomsCount),
     max_price: numberToFieldValue(initial.max_price ?? initial.totalPrice),
@@ -117,10 +124,8 @@ function mapLoadedRequirement(loaded) {
   const paymentMode = inferBuyRequestPaymentMode(raw);
   return {
     paymentMode,
-    city: pickSingleValue(raw.city),
-    district: pickSingleValue(raw.district),
-    sub_district: pickSingleValue(raw.sub_district),
-    project: pickSingleValue(raw.project),
+    // Every saved place, not only the newest one.
+    places: placesFromRequirement(loaded),
     buildingType: normalizeEnumValue(raw.buildingType, BUILDING_TYPE_VALUES),
     roomsCount: numberToFieldValue(raw.roomsCount),
     max_price: numberToFieldValue(raw.max_price ?? raw.totalPrice),
@@ -168,6 +173,35 @@ function applyPrefill(base, prefill) {
   return next;
 }
 
+/** True when the form already holds something from the optional details block. */
+function hasDetails(form) {
+  return Boolean(
+    form.roomsCount ||
+      form.paymentMode ||
+      form.downPayment ||
+      form.monthlyInstallment ||
+      form.notes,
+  );
+}
+
+const COMMON_BUILDING_TYPES = [
+  "apartment",
+  "villa",
+  "duplex",
+  "townhouse",
+  "twinhouse",
+  "chalet",
+  "studio",
+];
+
+const DETAIL_ERROR_KEYS = [
+  "roomsCount",
+  "downPayment",
+  "monthlyInstallment",
+  "deliveryDate",
+  "notes",
+];
+
 export default function BuyRequestDialog({
   open,
   onClose,
@@ -205,7 +239,8 @@ export default function BuyRequestDialog({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(() => createEmptyForm(initialValues));
-  const [locationError, setLocationError] = useState("");
+  const [placesError, setPlacesError] = useState("");
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const [contactName, setContactName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -213,10 +248,18 @@ export default function BuyRequestDialog({
   const [notBrokerConfirmed, setNotBrokerConfirmed] = useState(false);
   const [whatsappFallbackHrefState, setWhatsappFallbackHrefState] = useState("");
 
-  const buildingTypeOptions = useMemo(
-    () => getBuildingTypeOptions(tr),
-    [locale, tr],
-  );
+  // The types most buyers ask for come first; the rest keep their order.
+  const buildingTypeOptions = useMemo(() => {
+    const options = getBuildingTypeOptions(tr);
+    const rank = (option) => {
+      const index = COMMON_BUILDING_TYPES.indexOf(String(option.value).toLowerCase());
+      return index === -1 ? COMMON_BUILDING_TYPES.length : index;
+    };
+    return options
+      .map((option, index) => ({ option, index }))
+      .sort((a, b) => rank(a.option) - rank(b.option) || a.index - b.index)
+      .map(({ option }) => option);
+  }, [locale, tr]);
 
   const deliveryOptions = useMemo(
     () => getBuyRequestDeliveryOptions(tr),
@@ -233,7 +276,8 @@ export default function BuyRequestDialog({
 
   useEffect(() => {
     if (open) return;
-    setLocationError("");
+    setPlacesError("");
+    setDetailsOpen(false);
     setNotBrokerConfirmed(false);
     setWhatsappFallbackHrefState("");
     setFieldErrors((prev) =>
@@ -243,8 +287,14 @@ export default function BuyRequestDialog({
 
   useEffect(() => {
     if (!open) return undefined;
+    const seed = (next) => {
+      setForm(next);
+      // A request that already carries details (homepage text, a saved request)
+      // shows them; a fresh one starts with the short form.
+      setDetailsOpen(hasDetails(next));
+    };
     if (!userId) {
-      setForm(applyPrefill(createEmptyForm(initialValues), prefill));
+      seed(applyPrefill(createEmptyForm(initialValues), prefill));
       setContactName("");
       setPhoneNumber("");
       setPhonePayload(null);
@@ -259,10 +309,10 @@ export default function BuyRequestDialog({
         if (cancelled) return;
         if (raw?.error || !raw || typeof raw !== "object") {
           if (raw?.error) toast.error(String(raw.error));
-          setForm(applyPrefill(createEmptyForm(initialValues), prefill));
+          seed(applyPrefill(createEmptyForm(initialValues), prefill));
           return;
         }
-        setForm(applyPrefill(mapLoadedRequirement(raw), prefill));
+        seed(applyPrefill(mapLoadedRequirement(raw), prefill));
       } catch (e) {
         if (!cancelled) {
           toast.error(
@@ -292,21 +342,25 @@ export default function BuyRequestDialog({
     }
   };
 
-  const handleLocationChange = (location) => {
-    setForm((prev) => ({
-      ...prev,
-      city: location?.city ?? "",
-      district: location?.district ?? "",
-      sub_district: location?.sub_district ?? "",
-      project: location?.project ?? prev.project,
-    }));
-    setLocationError("");
+  const handlePlacesChange = (places) => {
+    setForm((prev) => ({ ...prev, places }));
+    setPlacesError("");
   };
 
   const handlePaymentModeChange = (nextMode) => {
-    const mode = normalizeBuyRequestPaymentMode(nextMode);
+    const picked = normalizeBuyRequestPaymentMode(nextMode);
     setForm((prev) => {
-      if (prev.paymentMode === mode) return prev;
+      // Tapping the selected mode again clears it: the buyer need not say.
+      const mode = prev.paymentMode === picked ? "" : picked;
+      if (!mode) {
+        return {
+          ...prev,
+          paymentMode: "",
+          downPayment: "",
+          monthlyInstallment: "",
+          deliveryDate: "",
+        };
+      }
       if (mode === "cash") {
         return {
           ...prev,
@@ -333,7 +387,15 @@ export default function BuyRequestDialog({
     });
   };
 
-  const isCash = form.paymentMode !== "installment";
+  const isCash = form.paymentMode === "cash";
+  const isInstallment = form.paymentMode === "installment";
+  const placeName = (place) =>
+    place.project ||
+    localizedPlaceName(
+      place.sub_district || place.district || place.city,
+      placeAr(place.sub_district || place.district || place.city),
+      locale,
+    );
 
   const handleSubmit = async (e) => {
     e?.preventDefault?.();
@@ -360,21 +422,16 @@ export default function BuyRequestDialog({
       }
     }
 
-    // Buy request: any selected location level is fine — city + district only.
-    // No leaf/deepest-level check (sub-district stays optional).
-    if (!String(form.city || "").trim() || !String(form.district || "").trim()) {
-      const message = !String(form.city || "").trim()
-        ? tr("lenaqar.buyRequest.errors.cityRequired")
-        : tr("lenaqar.buyRequest.errors.districtRequired");
-      setLocationError(message);
-      toast.error(message);
-      return;
-    }
-    setLocationError("");
-
     const built = buildPublicBuyRequirement(form);
     if (!built.ok) {
       setFieldErrors(built.errors);
+      setPlacesError(
+        built.errors.places
+          ? tr(`lenaqar.buyRequest.errors.${built.errors.places}`)
+          : "",
+      );
+      // An error inside the optional block must not stay hidden behind its toggle.
+      if (DETAIL_ERROR_KEYS.some((key) => built.errors[key])) setDetailsOpen(true);
       const first = Object.values(built.errors)[0];
       toast.error(
         tr(
@@ -385,6 +442,7 @@ export default function BuyRequestDialog({
       return;
     }
     setFieldErrors({});
+    setPlacesError("");
 
     setSaving(true);
     setWhatsappFallbackHrefState("");
@@ -415,7 +473,12 @@ export default function BuyRequestDialog({
         ? tr(`buildingTypes.${form.buildingType}`, form.buildingType)
         : "";
       const message = composeBuyRequestWhatsAppMessage({
-        form: { ...form, buildingType: buildingTypeLabel },
+        form: {
+          ...form,
+          // One line for every place the buyer picked.
+          city: form.places.map(placeName).join("، "),
+          buildingType: buildingTypeLabel,
+        },
         contact: showContactFields
           ? {
               name: contactName.trim(),
@@ -426,7 +489,7 @@ export default function BuyRequestDialog({
         labels: {
           name: tr("lenaqar.buyRequest.name"),
           phone: tr("lenaqar.buyRequest.phone"),
-          city: tr("lenaqar.buyRequest.city"),
+          city: tr("lenaqar.buyRequest.places.label"),
           district: tr("lenaqar.buyRequest.district"),
           subDistrict: tr("lenaqar.buyRequest.subDistrict"),
           project: tr("lenaqar.buyRequest.project"),
@@ -491,6 +554,40 @@ export default function BuyRequestDialog({
             />
           ) : null}
 
+          <RequestPlacePicker
+            value={form.places}
+            onChange={handlePlacesChange}
+            projects={catalogProjects}
+            enabled={open}
+            error={placesError}
+          />
+
+          <SearchableDropdownSelect
+            name="buildingType"
+            label={tr("lenaqar.buyRequest.buildingType", "Property type")}
+            value={form.buildingType}
+            onChange={handleFieldChange}
+            options={buildingTypeOptions}
+            required
+            error={Boolean(compactError("buildingType"))}
+            errorMessage={compactError("buildingType")}
+            placeholder={tr("lenaqar.buyRequest.selectType", "Select type")}
+            className={dropdownClassName}
+          />
+
+          <LenaTextField
+            name="max_price"
+            type="money"
+            label={tr("lenaqar.buyRequest.maxPrice", "Total price budget")}
+            value={form.max_price}
+            onChange={handleFieldChange}
+            placeholder={tr("lenaqar.buyRequest.maxPricePlaceholder")}
+            adornment={tr("lenaqar.unit.egp")}
+            required
+            error={Boolean(compactError("max_price"))}
+            errorMessage={compactError("max_price")}
+          />
+
           {showContactFields ? (
             <section className="space-y-3">
               <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -516,191 +613,144 @@ export default function BuyRequestDialog({
             </section>
           ) : null}
 
-          <section className="space-y-3">
-            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              {tr("lenaqar.buyRequest.locationSection", "Location")}
-            </h4>
-            <UnitsLocationSearch
-              name="requirement_location"
-              label={tr("lenaqar.buyRequest.location", "Location")}
-              city={form.city}
-              district={form.district}
-              subDistrict={form.sub_district}
-              onChange={handleLocationChange}
-              enabled={open}
-              required
-              error={Boolean(locationError)}
-              errorMessage={locationError}
-              showAllOption={false}
-              placeholder={tr("lenaqar.buyRequest.locationPlaceholder")}
-              className={dropdownClassName}
-            />
-            <SearchableProjectSelect
-              name="project"
-              label={tr("lenaqar.buyRequest.project", "Project")}
-              value={form.project}
-              onChange={handleFieldChange}
-              projects={catalogProjects}
-              city={form.city || ""}
-              district={form.district || ""}
-              isLoading={catalogProjectsLoading}
-              placeholder={tr(
-                "lenaqar.buyRequest.selectProject",
-                "Optional — select project",
-              )}
-              className={dropdownClassName}
-            />
-          </section>
+          <section className="rounded-xl border border-black/10">
+            <button
+              type="button"
+              aria-expanded={detailsOpen}
+              aria-controls="buy-request-details"
+              onClick={() => setDetailsOpen((value) => !value)}
+              className="flex min-h-11 w-full items-center justify-between gap-3 px-3.5 py-2 text-start text-sm font-medium text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            >
+              <span>
+                {tr("lenaqar.buyRequest.detailsToggle")}{" "}
+                <span className="ms-1 text-xs font-normal text-gray-500">
+                  {tr("lenaqar.buyRequest.detailsOptional")}
+                </span>
+              </span>
+              <ChevronDown
+                aria-hidden="true"
+                className={`size-4 shrink-0 transition-transform ${detailsOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+            {detailsOpen ? (
+              <div id="buy-request-details" className="space-y-3 border-t border-black/10 p-3.5">
+                <LenaTextField
+                  name="roomsCount"
+                  label={tr("lenaqar.buyRequest.roomsCount", "Bedrooms")}
+                  value={form.roomsCount}
+                  onChange={handleFieldChange}
+                  inputMode="numeric"
+                  error={Boolean(compactError("roomsCount"))}
+                  errorMessage={compactError("roomsCount")}
+                />
 
-          <section className="space-y-3">
-            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              {tr("lenaqar.buyRequest.propertySection", "Property")}
-            </h4>
-            <SearchableDropdownSelect
-              name="buildingType"
-              label={tr("lenaqar.buyRequest.buildingType", "Property type")}
-              value={form.buildingType}
-              onChange={handleFieldChange}
-              options={buildingTypeOptions}
-              required
-              error={Boolean(compactError("buildingType"))}
-              errorMessage={compactError("buildingType")}
-              placeholder={tr("lenaqar.buyRequest.selectType", "Select type")}
-              className={dropdownClassName}
-            />
-            <LenaTextField
-              name="roomsCount"
-              label={tr("lenaqar.buyRequest.roomsCount", "Bedrooms")}
-              value={form.roomsCount}
-              onChange={handleFieldChange}
-              inputMode="numeric"
-              error={Boolean(compactError("roomsCount"))}
-              errorMessage={compactError("roomsCount")}
-            />
-          </section>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-800">
+                    {tr("lenaqar.buyRequest.paymentModeLabel", "Payment method")}
+                  </p>
+                  <div
+                    role="group"
+                    aria-label={tr("lenaqar.buyRequest.paymentModeLabel")}
+                    className="grid grid-cols-2 gap-2"
+                  >
+                    {[
+                      {
+                        value: "cash",
+                        label: tr("lenaqar.buyRequest.paymentModeCash", "Cash"),
+                      },
+                      {
+                        value: "installment",
+                        label: tr(
+                          "lenaqar.buyRequest.paymentModeInstallment",
+                          "Installment",
+                        ),
+                      },
+                    ].map((option) => {
+                      const selected = form.paymentMode === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => handlePaymentModeChange(option.value)}
+                          className={`min-h-[40px] rounded-md border px-3 text-sm font-medium transition-colors ${
+                            selected
+                              ? "border-primary bg-primary text-white"
+                              : "border-gray-300 bg-white text-gray-800 hover:border-gray-400"
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
 
-          <section className="space-y-3">
-            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              {tr("lenaqar.buyRequest.budgetSection", "Budget")}
-            </h4>
+                {isCash ? (
+                  <p className="text-xs text-gray-600">
+                    {tr("lenaqar.buyRequest.cashDeliveryNote")}
+                  </p>
+                ) : null}
 
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-800">
-                {tr("lenaqar.buyRequest.paymentModeLabel", "Payment method")}
-              </p>
-              <div
-                role="radiogroup"
-                aria-label={tr("lenaqar.buyRequest.paymentModeLabel")}
-                className="grid grid-cols-2 gap-2"
-              >
-                {[
-                  {
-                    value: "cash",
-                    label: tr("lenaqar.buyRequest.paymentModeCash", "Cash"),
-                  },
-                  {
-                    value: "installment",
-                    label: tr(
-                      "lenaqar.buyRequest.paymentModeInstallment",
-                      "Installment",
-                    ),
-                  },
-                ].map((option) => {
-                  const selected = form.paymentMode === option.value;
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      role="radio"
-                      aria-checked={selected}
-                      onClick={() => handlePaymentModeChange(option.value)}
-                      className={`min-h-[40px] rounded-md border px-3 text-sm font-medium transition-colors ${
-                        selected
-                          ? "border-primary bg-primary text-white"
-                          : "border-gray-300 bg-white text-gray-800 hover:border-gray-400"
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  );
-                })}
+                {isInstallment ? (
+                  <>
+                    <LenaTextField
+                      name="downPayment"
+                      type="money"
+                      label={tr("lenaqar.buyRequest.downPayment", "Down payment")}
+                      value={form.downPayment}
+                      onChange={handleFieldChange}
+                      placeholder={tr("lenaqar.buyRequest.downPaymentPlaceholder")}
+                      adornment={tr("lenaqar.unit.egp")}
+                      required
+                      error={Boolean(compactError("downPayment"))}
+                      errorMessage={compactError("downPayment")}
+                    />
+                    <LenaTextField
+                      name="monthlyInstallment"
+                      type="money"
+                      label={tr(
+                        "lenaqar.buyRequest.monthlyInstallment",
+                        "Monthly installment",
+                      )}
+                      value={form.monthlyInstallment}
+                      onChange={handleFieldChange}
+                      placeholder={tr(
+                        "lenaqar.buyRequest.monthlyInstallmentPlaceholder",
+                      )}
+                      adornment={tr("lenaqar.unit.egp")}
+                      error={Boolean(compactError("monthlyInstallment"))}
+                      errorMessage={compactError("monthlyInstallment")}
+                    />
+                    <SearchableDropdownSelect
+                      name="deliveryDate"
+                      label={tr("lenaqar.buyRequest.deliveryDate")}
+                      value={form.deliveryDate}
+                      onChange={handleFieldChange}
+                      options={deliveryOptions}
+                      placeholder={tr("lenaqar.buyRequest.selectDelivery")}
+                      error={Boolean(compactError("deliveryDate"))}
+                      errorMessage={compactError("deliveryDate")}
+                      className={dropdownClassName}
+                    />
+                  </>
+                ) : null}
+
+                <LenaTextarea
+                  name="notes"
+                  label={tr("lenaqar.buyRequest.notes", "Notes")}
+                  value={form.notes}
+                  onChange={handleFieldChange}
+                  rows={3}
+                  helperText={tr(
+                    "lenaqar.buyRequest.notesHint",
+                    "اكتب أي تفاصيل إضافية عن اللي بتدور عليه",
+                  )}
+                  error={Boolean(compactError("notes"))}
+                  errorMessage={compactError("notes")}
+                />
               </div>
-            </div>
-
-            <LenaTextField
-              name="max_price"
-              type="money"
-              label={tr("lenaqar.buyRequest.maxPrice", "Total price budget")}
-              value={form.max_price}
-              onChange={handleFieldChange}
-              placeholder={tr("lenaqar.buyRequest.maxPricePlaceholder")}
-              adornment={tr("lenaqar.unit.egp")}
-              required
-              error={Boolean(compactError("max_price"))}
-              errorMessage={compactError("max_price")}
-            />
-
-            {isCash ? (
-              <p className="text-xs text-gray-600 -mt-1">
-                {tr("lenaqar.buyRequest.cashDeliveryNote")}
-              </p>
-            ) : (
-              <>
-                <LenaTextField
-                  name="downPayment"
-                  type="money"
-                  label={tr("lenaqar.buyRequest.downPayment", "Down payment")}
-                  value={form.downPayment}
-                  onChange={handleFieldChange}
-                  placeholder={tr("lenaqar.buyRequest.downPaymentPlaceholder")}
-                  adornment={tr("lenaqar.unit.egp")}
-                  required
-                  error={Boolean(compactError("downPayment"))}
-                  errorMessage={compactError("downPayment")}
-                />
-                <LenaTextField
-                  name="monthlyInstallment"
-                  type="money"
-                  label={tr(
-                    "lenaqar.buyRequest.monthlyInstallment",
-                    "Monthly installment",
-                  )}
-                  value={form.monthlyInstallment}
-                  onChange={handleFieldChange}
-                  placeholder={tr(
-                    "lenaqar.buyRequest.monthlyInstallmentPlaceholder",
-                  )}
-                  adornment={tr("lenaqar.unit.egp")}
-                  error={Boolean(compactError("monthlyInstallment"))}
-                  errorMessage={compactError("monthlyInstallment")}
-                />
-                <SearchableDropdownSelect
-                  name="deliveryDate"
-                  label={tr("lenaqar.buyRequest.deliveryDate")}
-                  value={form.deliveryDate}
-                  onChange={handleFieldChange}
-                  options={deliveryOptions}
-                  placeholder={tr("lenaqar.buyRequest.selectDelivery")}
-                  error={Boolean(compactError("deliveryDate"))}
-                  errorMessage={compactError("deliveryDate")}
-                  className={dropdownClassName}
-                />
-              </>
-            )}
-
-            <LenaTextarea
-              name="notes"
-              label={tr("lenaqar.buyRequest.notes", "Notes")}
-              value={form.notes}
-              onChange={handleFieldChange}
-              rows={3}
-              helperText={tr(
-                "lenaqar.buyRequest.notesHint",
-                "اكتب أي تفاصيل إضافية عن اللي بتدور عليه",
-              )}
-              error={Boolean(compactError("notes"))}
-              errorMessage={compactError("notes")}
-            />
+            ) : null}
           </section>
 
           <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-black/10 bg-black/[0.02] p-3.5">

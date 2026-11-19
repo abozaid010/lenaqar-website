@@ -1,6 +1,12 @@
 import { BUILDING_TYPE_VALUES } from "../../data/constants.js";
 import { normalizeToEnglishDigits } from "../../utils/parse-amount.js";
 import { normalizeBuyRequestDelivery } from "./buy-request-delivery.js";
+import {
+  MAX_REQUEST_PLACES,
+  normalizePlaces,
+  placesFromForm,
+  primaryPlace,
+} from "./request-places.js";
 
 const BUILDING_TYPE_SET = new Set(
   BUILDING_TYPE_VALUES.map((value) => String(value).trim().toLowerCase()),
@@ -64,21 +70,26 @@ function requiredMoney(form, key, errors, requiredKey, invalidKey) {
 export const BUY_REQUEST_PAYMENT_MODES = ["cash", "installment"];
 
 /**
+ * "" means the buyer did not say how they pay: no down payment is asked and no
+ * delivery date is assumed.
  * @param {unknown} value
- * @returns {"cash" | "installment"}
+ * @returns {"cash" | "installment" | ""}
  */
 export function normalizeBuyRequestPaymentMode(value) {
-  const raw = String(value || "").trim().toLowerCase();
+  const raw = String(value ?? "").trim().toLowerCase();
+  if (!raw) return "";
   return raw === "installment" ? "installment" : "cash";
 }
 
 /**
  * Infer payment mode when loading a saved requirement (no UI mode stored).
+ * A down payment or instalment means instalments; a "ready" delivery with
+ * neither is what a cash request stores; anything else was never stated.
  * @param {object | null | undefined} raw
- * @returns {"cash" | "installment"}
+ * @returns {"cash" | "installment" | ""}
  */
 export function inferBuyRequestPaymentMode(raw) {
-  if (!raw || typeof raw !== "object") return "cash";
+  if (!raw || typeof raw !== "object") return "";
   if (raw.paymentMode != null && String(raw.paymentMode).trim()) {
     return normalizeBuyRequestPaymentMode(raw.paymentMode);
   }
@@ -87,7 +98,7 @@ export function inferBuyRequestPaymentMode(raw) {
   if ((Number.isFinite(down) && down > 0) || (Number.isFinite(monthly) && monthly > 0)) {
     return "installment";
   }
-  return "cash";
+  return normalizeBuyRequestDelivery(raw.deliveryDate) === "ready" ? "cash" : "";
 }
 
 function cleanText(value) {
@@ -153,11 +164,16 @@ export function formFromBuiltRequirement(payload) {
       : Array.isArray(features)
         ? features.map((item) => String(item || "").trim()).filter(Boolean).join("\n")
         : "";
-  return {
+  const form = {
     ...payload,
     paymentMode: inferBuyRequestPaymentMode(payload),
     notes,
   };
+  // A request built from the place picker carries every place here.
+  if (Array.isArray(payload.preferred_locations)) {
+    form.places = payload.preferred_locations;
+  }
+  return form;
 }
 
 /**
@@ -166,13 +182,19 @@ export function formFromBuiltRequirement(payload) {
  */
 export function buildPublicBuyRequirement(form) {
   const errors = {};
-  const city = String(form?.city || "").trim().toLowerCase();
-  const district = String(form?.district || "").trim().toLowerCase();
   const buildingRaw = String(form?.buildingType || "").trim().toLowerCase();
   const paymentMode = normalizeBuyRequestPaymentMode(form?.paymentMode);
 
-  if (!city) errors.city = "cityRequired";
-  if (!district) errors.district = "districtRequired";
+  // Places: the picker's list, or the older single flat city/district. A whole
+  // city is a complete place — a district is not required.
+  const fromPicker = Array.isArray(form?.places);
+  const places = placesFromForm(form);
+  if (fromPicker && normalizePlaces(form.places).length > MAX_REQUEST_PLACES) {
+    errors.places = "placesLimit";
+  } else if (!places.length) {
+    if (fromPicker) errors.places = "placeRequired";
+    else errors.city = "cityRequired";
+  }
 
   let buildingType;
   if (!buildingRaw) {
@@ -209,7 +231,7 @@ export function buildPublicBuyRequirement(form) {
   if (paymentMode === "cash") {
     // Cash buyers want a delivered unit by default.
     deliveryDate = "ready";
-  } else {
+  } else if (paymentMode === "installment") {
     downPayment = requiredMoney(
       form,
       "downPayment",
@@ -243,15 +265,24 @@ export function buildPublicBuyRequirement(form) {
     return { ok: false, errors };
   }
 
-  const project = String(form?.project || "").trim();
-
-  const requirement = {
-    purpose: "buy",
-    city,
-    district,
-    buildingType,
-  };
-  if (project) requirement.project = project;
+  const requirement = { purpose: "buy", buildingType };
+  // Flat fields describe the first place with a city; single-place readers
+  // (analytics, the browse link, the WhatsApp fallback) use them.
+  const primary = primaryPlace(places);
+  if (primary) {
+    requirement.city = primary.city;
+    if (primary.district) requirement.district = primary.district;
+    if (primary.project) requirement.project = primary.project;
+  }
+  if (fromPicker) {
+    // Every place, in the backend's LocationPreference shape.
+    requirement.preferred_locations = places.map((place) => ({
+      city: place.city || null,
+      district: place.district || null,
+      sub_district: place.sub_district || null,
+      project: place.project || null,
+    }));
+  }
   if (roomsCount != null) requirement.roomsCount = roomsCount;
   if (max_price != null) requirement.max_price = max_price;
   if (downPayment != null) requirement.downPayment = downPayment;

@@ -77,6 +77,16 @@ export async function saveBuyRequestRequirement({
     throw error;
   }
 
+  // With a place list, the flat fields only repeat its first entry: sending both
+  // would have the backend fold that place in a second time.
+  const requirement = { ...built.requirement };
+  if (Array.isArray(requirement.preferred_locations) && requirement.preferred_locations.length) {
+    delete requirement.city;
+    delete requirement.district;
+    delete requirement.sub_district;
+    delete requirement.project;
+  }
+
   // Ad attribution (utm_* / lead_code): whitelisted here too, sent only when present.
   const ad = sanitizeAttribution(attribution);
 
@@ -92,7 +102,7 @@ export async function saveBuyRequestRequirement({
       // Backend attribution: when source === lenaaqar_forum, ensure a dashboard
       // buyer lead exists (name, phone, last_action=new) before saving the requirement.
       source: "lenaaqar_forum",
-      requirement: built.requirement,
+      requirement,
       attribution: Object.keys(ad).length > 0 ? ad : undefined,
     });
     const savedUserId = String(response.data?.data?.user_id || id || "").trim();
