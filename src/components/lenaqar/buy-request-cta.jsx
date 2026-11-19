@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useI18n } from "@/hooks/useI18n";
 import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { ANALYTICS } from "@/constants/analytics";
@@ -99,6 +99,7 @@ export default function BuyRequestCta({
   const { translate } = useI18n();
   const { trackEvent } = useGoogleAnalytics();
   const router = useRouter();
+  const pathname = usePathname();
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const isControlled = typeof controlledOpen === "boolean";
   const open = isControlled ? controlledOpen : uncontrolledOpen;
@@ -232,8 +233,13 @@ export default function BuyRequestCta({
           if (matchRef) {
             // Straight to the units that match what the buyer just sent. A request
             // edited from that page keeps its reference, so the same URL is re-read.
-            router.push(`/requests/match/${matchRef}`);
-            router.refresh();
+            // One navigation only: a `router.refresh()` right after `router.push()`
+            // wins in a production build and leaves the buyer on the page they came
+            // from. The match page is dynamic, so a push already reads it fresh;
+            // from that same page (an edited request) a refresh re-reads it.
+            const target = `/requests/match/${matchRef}`;
+            if (pathname === target) router.refresh();
+            else router.push(target);
             return;
           }
           // No reference (an older backend): the success screen, as before.
