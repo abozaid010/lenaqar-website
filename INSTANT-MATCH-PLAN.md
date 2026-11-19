@@ -123,5 +123,5 @@ Findings:
    LenaAI-Agent#255 are drafts for approval.
 2. Step 9: who corrects the 29 units — a one-off script approved per unit, or by hand in
    the admin. The CSV has empty `correct_city` / `correct_district` columns to fill.
-3. `units-location-search.jsx` and `searchable-project-select.jsx` are no longer imported
-   anywhere. They were left in place.
+3. Done 2026-11-19: `units-location-search.jsx` and `searchable-project-select.jsx` were
+   deleted on the owner's word. Nothing imported them.
