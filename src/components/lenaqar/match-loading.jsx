@@ -50,38 +50,70 @@ export default function MatchLoading({ modal = false }) {
     };
   }, [modal]);
 
+  const bar = "skeleton-shimmer rounded";
   const screen = (
     <div
       ref={rootRef}
       {...(modal
         ? { role: "dialog", "aria-modal": "true", "aria-labelledby": titleId, tabIndex: -1 }
         : {})}
-      className="fixed inset-0 z-[90] flex items-center justify-center bg-white px-6 outline-none"
+      className="fixed inset-0 z-[90] overflow-y-auto bg-white outline-none"
     >
-      <div role="status" className="flex max-w-sm flex-col items-center text-center">
-        <svg
-          ref={doorRef}
-          aria-hidden="true"
-          focusable="false"
-          viewBox="0 0 64 88"
-          className="lq-door h-20 w-auto text-primary"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M10 84V30a22 22 0 0 1 44 0v54" />
-          <path d="M20 84V32a12 12 0 0 1 24 0v52" />
-          <path d="M4 84h56" />
-          <circle cx="38" cy="58" r="1.6" fill="currentColor" stroke="none" />
-        </svg>
-        <h1 id={titleId} className="lq-display mt-6 text-xl font-bold text-primary sm:text-2xl">
-          {translate("lenaqar.matchPage.loadingTitle")}
-        </h1>
-        <p className="mt-2 text-sm leading-relaxed text-black/70">
-          {translate("lenaqar.matchPage.loadingBody")}
-        </p>
+      <div className="container py-10 sm:py-14">
+        <div role="status" className="mx-auto flex max-w-sm flex-col items-center text-center">
+          <svg
+            ref={doorRef}
+            aria-hidden="true"
+            focusable="false"
+            viewBox="0 0 64 88"
+            className="lq-door h-16 w-auto text-primary"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M10 84V30a22 22 0 0 1 44 0v54" />
+            <path d="M20 84V32a12 12 0 0 1 24 0v52" />
+            <path d="M4 84h56" />
+            <circle cx="38" cy="58" r="1.6" fill="currentColor" stroke="none" />
+          </svg>
+          <h1 id={titleId} className="lq-display mt-5 text-xl font-bold text-primary sm:text-2xl">
+            {translate("lenaqar.matchPage.loadingTitle")}
+          </h1>
+          <p className="mt-2 text-sm leading-relaxed text-black/70">
+            {translate("lenaqar.matchPage.loadingBody")}
+          </p>
+        </div>
+
+        {/* Blocks shaped like the unit cards that are about to appear. */}
+        <ul aria-hidden="true" className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2].map((card) => (
+            <li
+              key={card}
+              className={`overflow-hidden rounded-lg border border-black/10 bg-white ${
+                card === 2 ? "hidden lg:block" : card === 1 ? "hidden sm:block" : ""
+              }`}
+            >
+              <div className="skeleton-shimmer aspect-[16/10]" />
+              <div className="flex flex-col gap-3 p-4">
+                <div className="space-y-2">
+                  <div className={`${bar} h-4 w-2/3`} />
+                  <div className={`${bar} h-3 w-1/2`} />
+                  <div className={`${bar} h-3 w-3/5`} />
+                </div>
+                <div className="space-y-2 border-t border-black/10 pt-3">
+                  <div className={`${bar} h-3 w-1/4`} />
+                  <div className={`${bar} h-7 w-2/5`} />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className={`${bar} h-11`} />
+                  <div className={`${bar} h-11`} />
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

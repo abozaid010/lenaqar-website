@@ -260,6 +260,16 @@ export default function BuyRequestDialog({
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phonePayload, setPhonePayload] = useState(null);
   const [notBrokerConfirmed, setNotBrokerConfirmed] = useState(false);
+  // Fields outside the requirement the buyer left empty: name, phone, the broker box.
+  // Shown on the fields themselves after a submit attempt, cleared as each is fixed.
+  const [missing, setMissing] = useState({});
+  const clearMissing = (key) =>
+    setMissing((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   const [whatsappFallbackHrefState, setWhatsappFallbackHrefState] = useState("");
 
   // The types most buyers ask for come first; the rest keep their order.
@@ -293,6 +303,7 @@ export default function BuyRequestDialog({
     setPlacesError("");
     setDetailsOpen(false);
     setNotBrokerConfirmed(false);
+    setMissing({});
     setForceContact(false);
     setWhatsappFallbackHrefState("");
     setFieldErrors((prev) =>
@@ -434,46 +445,49 @@ export default function BuyRequestDialog({
     if (savingRef.current) return;
     if (!userId && !showContactFields) return;
 
-    if (!notBrokerConfirmed) {
-      toast.error(
-        tr(
-          "lenaqar.buyRequest.notBrokerRequired",
-          "You must confirm you are not a broker",
-        ),
-      );
-      return;
-    }
-
-    if (askContact) {
-      if (!contactName.trim()) {
-        toast.error(tr("lenaqar.buyRequest.nameRequired", "Name is required"));
-        return;
-      }
-      if (!phonePayload?.combined) {
-        toast.error(tr("lenaqar.buyRequest.phoneRequired", "Phone is required"));
-        return;
-      }
-    }
-
+    // Check everything at once, so every empty required field is marked together.
     const built = buildPublicBuyRequirement(form);
-    if (!built.ok) {
-      setFieldErrors(built.errors);
+    const gaps = {};
+    if (askContact) {
+      if (!contactName.trim()) gaps.contact_name = true;
+      if (!phonePayload?.combined) gaps.contact_phone = true;
+    }
+    if (!notBrokerConfirmed) gaps.not_broker = true;
+    const builtErrors = built.ok ? {} : built.errors;
+
+    if (!built.ok || Object.keys(gaps).length) {
+      setFieldErrors(builtErrors);
+      setMissing(gaps);
       setPlacesError(
-        built.errors.places
-          ? tr(`lenaqar.buyRequest.errors.${built.errors.places}`)
-          : "",
+        builtErrors.places ? tr(`lenaqar.buyRequest.errors.${builtErrors.places}`) : "",
       );
       // An error inside the optional block must not stay hidden behind its toggle.
-      if (DETAIL_ERROR_KEYS.some((key) => built.errors[key])) setDetailsOpen(true);
-      const first = Object.values(built.errors)[0];
+      if (DETAIL_ERROR_KEYS.some((key) => builtErrors[key])) setDetailsOpen(true);
       toast.error(
-        tr(
-          `lenaqar.buyRequest.errors.${first}`,
-          locale === "ar" ? "راجع البيانات المطلوبة" : "Check the required fields",
-        ),
+        locale === "ar"
+          ? "كمّل الحقول المعلّمة بالأحمر"
+          : "Complete the highlighted fields",
       );
+      // Bring the first marked field (in form order) into view.
+      const order = [
+        "places",
+        "buildingType",
+        "max_price",
+        "contact_name",
+        "contact_phone",
+        "not_broker",
+      ];
+      const failing = new Set([...Object.keys(builtErrors), ...Object.keys(gaps)]);
+      const firstKey = order.find((key) => failing.has(key));
+      requestAnimationFrame(() => {
+        const target = firstKey
+          ? document.querySelector(`[data-field="${firstKey}"]`)
+          : null;
+        target?.scrollIntoView({ block: "center", behavior: "smooth" });
+      });
       return;
     }
+    setMissing({});
     setFieldErrors({});
     setPlacesError("");
 
@@ -572,8 +586,7 @@ export default function BuyRequestDialog({
       submitDisabled={
         loading ||
         saving ||
-        (!userId && !showContactFields) ||
-        !notBrokerConfirmed
+        (!userId && !showContactFields)
       }
       submitLoading={saving}
       closeOnEscape
@@ -605,40 +618,46 @@ export default function BuyRequestDialog({
             />
           ) : null}
 
-          <RequestPlacePicker
-            value={form.places}
-            onChange={handlePlacesChange}
-            projects={catalogProjects}
-            enabled={open}
-            error={placesError}
-          />
+          <div data-field="places">
+            <RequestPlacePicker
+              value={form.places}
+              onChange={handlePlacesChange}
+              projects={catalogProjects}
+              enabled={open}
+              error={placesError}
+            />
+          </div>
 
-          <SearchableDropdownSelect
-            name="buildingType"
-            label={tr("lenaqar.buyRequest.buildingType", "Property type")}
-            value={form.buildingType}
-            onChange={handleFieldChange}
-            options={buildingTypeOptions}
-            sortOptions={keepGivenOrder}
-            required
-            error={Boolean(compactError("buildingType"))}
-            errorMessage={compactError("buildingType")}
-            placeholder={tr("lenaqar.buyRequest.selectType", "Select type")}
-            className={dropdownClassName}
-          />
+          <div data-field="buildingType">
+            <SearchableDropdownSelect
+              name="buildingType"
+              label={tr("lenaqar.buyRequest.buildingType", "Property type")}
+              value={form.buildingType}
+              onChange={handleFieldChange}
+              options={buildingTypeOptions}
+              sortOptions={keepGivenOrder}
+              required
+              error={Boolean(compactError("buildingType"))}
+              errorMessage={compactError("buildingType")}
+              placeholder={tr("lenaqar.buyRequest.selectType", "Select type")}
+              className={dropdownClassName}
+            />
+          </div>
 
-          <LenaTextField
-            name="max_price"
-            type="money"
-            label={tr("lenaqar.buyRequest.maxPrice", "Total price budget")}
-            value={form.max_price}
-            onChange={handleFieldChange}
-            placeholder={tr("lenaqar.buyRequest.maxPricePlaceholder")}
-            adornment={tr("lenaqar.unit.egp")}
-            required
-            error={Boolean(compactError("max_price"))}
-            errorMessage={compactError("max_price")}
-          />
+          <div data-field="max_price">
+            <LenaTextField
+              name="max_price"
+              type="money"
+              label={tr("lenaqar.buyRequest.maxPrice", "Total price budget")}
+              value={form.max_price}
+              onChange={handleFieldChange}
+              placeholder={tr("lenaqar.buyRequest.maxPricePlaceholder")}
+              adornment={tr("lenaqar.unit.egp")}
+              required
+              error={Boolean(compactError("max_price"))}
+              errorMessage={compactError("max_price")}
+            />
+          </div>
 
           {knownContact && hintParts.length ? (
             <p className="rounded-lg bg-primary/5 px-3 py-2.5 text-sm text-gray-700">
@@ -652,23 +671,44 @@ export default function BuyRequestDialog({
               <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                 {tr("lenaqar.buyRequest.contactSection", "Contact")}
               </h4>
-              <LenaTextField
-                name="contact_name"
-                label={tr("lenaqar.buyRequest.name", "Name")}
-                value={contactName}
-                onChange={(e) => setContactName(e.target.value)}
-                required
-              />
-              <PhoneField
-                className="w-full"
-                name="contact_phone"
-                label={tr("lenaqar.buyRequest.phone", "Phone")}
-                required
-                defaultCountry="EG"
-                value={phoneNumber}
-                onChange={(next) => setPhoneNumber(next ?? "")}
-                onValueChange={setPhonePayload}
-              />
+              <div data-field="contact_name">
+                <LenaTextField
+                  name="contact_name"
+                  label={tr("lenaqar.buyRequest.name", "Name")}
+                  value={contactName}
+                  onChange={(e) => {
+                    setContactName(e.target.value);
+                    if (e.target.value.trim()) clearMissing("contact_name");
+                  }}
+                  required
+                  error={Boolean(missing.contact_name)}
+                  errorMessage={
+                    missing.contact_name
+                      ? tr("lenaqar.buyRequest.nameRequired", "Name is required")
+                      : ""
+                  }
+                />
+              </div>
+              <div data-field="contact_phone">
+                <PhoneField
+                  className="w-full"
+                  name="contact_phone"
+                  label={tr("lenaqar.buyRequest.phone", "Phone")}
+                  required
+                  defaultCountry="EG"
+                  value={phoneNumber}
+                  error={
+                    missing.contact_phone
+                      ? tr("lenaqar.buyRequest.phoneRequired", "Phone is required")
+                      : undefined
+                  }
+                  onChange={(next) => setPhoneNumber(next ?? "")}
+                  onValueChange={(payload) => {
+                    setPhonePayload(payload);
+                    if (payload?.combined) clearMissing("contact_phone");
+                  }}
+                />
+              </div>
             </section>
           ) : null}
 
@@ -812,19 +852,36 @@ export default function BuyRequestDialog({
             ) : null}
           </section>
 
-          <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-black/10 bg-black/[0.02] p-3.5">
-            <input
-              type="checkbox"
-              name="not_broker_confirm"
-              checked={notBrokerConfirmed}
-              onChange={(event) => setNotBrokerConfirmed(event.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-black/20 text-primary focus:ring-primary/30"
-              required
-            />
-            <span className="text-sm text-black/80 leading-relaxed">
-              {tr("lenaqar.buyRequest.notBrokerConfirm")}
-            </span>
-          </label>
+          {/* Yellow so nobody misses it; red once a submit found it unchecked. */}
+          <div data-field="not_broker">
+            <label
+              className={`flex items-start gap-3 cursor-pointer rounded-xl border-2 p-3.5 transition-colors ${
+                missing.not_broker
+                  ? "border-red-500 bg-red-50"
+                  : "border-amber-400 bg-amber-50"
+              }`}
+            >
+              <input
+                type="checkbox"
+                name="not_broker_confirm"
+                checked={notBrokerConfirmed}
+                aria-invalid={Boolean(missing.not_broker)}
+                onChange={(event) => {
+                  setNotBrokerConfirmed(event.target.checked);
+                  if (event.target.checked) clearMissing("not_broker");
+                }}
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-black/30 text-primary focus:ring-primary/30"
+              />
+              <span className="text-sm font-medium text-black/80 leading-relaxed">
+                {tr("lenaqar.buyRequest.notBrokerConfirm")}
+              </span>
+            </label>
+            {missing.not_broker ? (
+              <p role="alert" className="mt-1.5 text-xs font-medium text-red-600">
+                {tr("lenaqar.buyRequest.notBrokerRequired", "You must confirm you are not a broker")}
+              </p>
+            ) : null}
+          </div>
         </>
       )}
     </UnifiedDialog>
