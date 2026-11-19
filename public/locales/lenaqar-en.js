@@ -467,6 +467,8 @@ export default {
     loadingTitle: "We’re preparing your matching options",
     loadingBody: "Based on the places and budget you chose",
     retry: "Try again",
+    retrying: "Trying again…",
+    retryStillFailing: "We still can’t load the units. Your request is saved — try again shortly or message us on WhatsApp.",
     unavailableTitle: "We can’t show the units right now",
     unavailableBody: "Your request is saved. Message us on WhatsApp and we’ll send the matching units.",
     notFoundTitle: "This request was not found",

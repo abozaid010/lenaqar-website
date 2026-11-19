@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { MessageCircle, Phone } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
@@ -60,7 +60,7 @@ function Notice({ title, body, children }) {
       <div className="mx-auto max-w-xl rounded-2xl border border-black/10 bg-white p-6 text-center">
         <h1 className="lq-display text-xl font-bold text-primary sm:text-2xl">{title}</h1>
         <p className="mt-2 text-sm leading-relaxed text-black/70">{body}</p>
-        <div className="mt-5 flex flex-col items-stretch gap-2 sm:flex-row sm:justify-center">
+        <div className="mt-5 flex flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:justify-center">
           {children}
         </div>
       </div>
@@ -75,6 +75,13 @@ export default function RequestMatchContent({ result }) {
   const ownsRequest = useOwnsRequest(matchRef);
   const router = useRouter();
   const [retrying, startRetry] = useTransition();
+  // A retry that ended and left this notice on screen: say so, instead of looking idle.
+  const [retryFailed, setRetryFailed] = useState(false);
+  const wasRetrying = useRef(false);
+  useEffect(() => {
+    if (wasRetrying.current && !retrying) setRetryFailed(true);
+    wasRetrying.current = retrying;
+  }, [retrying]);
 
   if (result?.status === "not_found") {
     return (
@@ -91,11 +98,22 @@ export default function RequestMatchContent({ result }) {
         <button
           type="button"
           disabled={retrying}
-          onClick={() => startRetry(() => router.refresh())}
+          aria-busy={retrying}
+          onClick={() => {
+            setRetryFailed(false);
+            startRetry(() => router.refresh());
+          }}
           className={`${callClass} disabled:opacity-60`}
         >
-          {t("retry")}
+          {retrying ? t("retrying") : t("retry")}
         </button>
+        {/* The buyer can still correct the request (new places, another budget). */}
+        <BuyRequestCta
+          label={ownsRequest ? t("edit") : t("newRequest")}
+          variant="secondary"
+          size="compact"
+          trackingLocation="match_page_unavailable_edit"
+        />
         <WhatsAppCta
           href={matchRequestHref(matchRef)}
           intent="buy"
@@ -105,6 +123,11 @@ export default function RequestMatchContent({ result }) {
           {t("barWhatsapp")}
         </WhatsAppCta>
         <CallLink location="match_page_unavailable">{t("barCall")}</CallLink>
+        {retryFailed && !retrying ? (
+          <p role="status" className="text-sm text-black/70 sm:basis-full">
+            {t("retryStillFailing")}
+          </p>
+        ) : null}
       </Notice>
     );
   }
