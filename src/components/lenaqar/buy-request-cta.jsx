@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useI18n } from "@/hooks/useI18n";
@@ -8,7 +8,7 @@ import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { ANALYTICS } from "@/constants/analytics";
 import { SITE } from "@/config/site";
 import { requirementToUnitsFilter } from "@/lib/match/requirement-to-units-filter";
-import { trackBuyRequestSubmitted } from "@/lib/analytics";
+import { trackBuyRequestFormViewed, trackBuyRequestSubmitted } from "@/lib/analytics";
 import { readAttribution } from "@/lib/lenaqar/attribution";
 import {
   buyRequestSubmitKey,
@@ -35,6 +35,7 @@ import {
 import ActionButtonArrow from "@/components/ui/action-button-arrow";
 
 let buyRequestHashHandled = false;
+let inlineFormViewTracked = false;
 
 /** localStorage key of the lead id this browser's last buy request was saved under. */
 export const BUY_REQUEST_USER_ID_KEY = "lenaqar_buy_request_user_id";
@@ -103,7 +104,12 @@ export default function BuyRequestCta({
   prefill,
   onSubmitted,
   trackingLocation = "unknown",
+  // "inline": the form itself sits in the page (no trigger, no dialog); `className`
+  // then styles the form's wrapper.
+  presentation = "dialog",
+  autoFocus = false,
 }) {
+  const inline = presentation === "inline";
   const { translate } = useI18n();
   const { trackEvent } = useGoogleAnalytics();
   const router = useRouter();
@@ -129,17 +135,43 @@ export default function BuyRequestCta({
 
   useEffect(() => {
     setUserId(readStoredUserId());
-    if (isControlled) return;
+    if (isControlled || inline) return;
     if (buyRequestHashHandled) return;
     if (window.location.hash !== "#buy-request") return;
     buyRequestHashHandled = true;
     setOpen(true);
     trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_OPENED, { cta_location: trackingLocation });
-  }, [trackEvent, isControlled, setOpen, trackingLocation]);
+  }, [trackEvent, isControlled, inline, setOpen, trackingLocation]);
 
   useEffect(() => {
-    setContactHint(open && userId ? readContactHint(browserStorage(), userId) : null);
-  }, [open, userId]);
+    setContactHint(
+      (open || inline) && userId ? readContactHint(browserStorage(), userId) : null,
+    );
+  }, [open, inline, userId]);
+
+  // Inline: record the form being shown (once per page view, when about half of it is on
+  // screen) — there is no dialog-open event to rely on.
+  const viewRef = useRef(null);
+  useEffect(() => {
+    if (!inline) return undefined;
+    const node = viewRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") return undefined;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          // Once per page view: replaying the onboarding remounts the form.
+          if (!inlineFormViewTracked) {
+            inlineFormViewTracked = true;
+            trackBuyRequestFormViewed({ location: trackingLocation });
+          }
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [inline, trackingLocation]);
 
   const handleUserId = useCallback((nextId) => {
     const id = String(nextId || "").trim();
@@ -223,7 +255,7 @@ export default function BuyRequestCta({
 
   return (
     <>
-      {hideTrigger ? null : (
+      {hideTrigger || inline ? null : (
         <button
           type="button"
           className={actionButtonClass({ variant, tone, size, className })}
@@ -236,14 +268,19 @@ export default function BuyRequestCta({
           <ActionButtonArrow size={size} />
         </button>
       )}
+      <div ref={viewRef} className={inline ? className : "contents"}>
       <BuyRequestDialog
-        open={open}
-        onClose={() => setOpen(false)}
+        presentation={presentation}
+        autoFocusNotes={autoFocus}
+        open={inline ? true : open}
+        onClose={() => (inline ? undefined : setOpen(false))}
         userId={userId}
         onUserId={handleUserId}
         title={translate("lenaqar.buyRequest.title")}
-        submitLabel={translate("lenaqar.buyRequest.submit")}
-        intro={translate("lenaqar.buyRequest.intro")}
+        submitLabel={translate(
+          inline ? "lenaqar.buyRequest.inlineSubmit" : "lenaqar.buyRequest.submit",
+        )}
+        intro={inline ? undefined : translate("lenaqar.buyRequest.intro")}
         successMessage={translate("lenaqar.buyRequest.saved")}
         showSuccessToast={false}
         onSavingChange={setSaving}
@@ -292,6 +329,7 @@ export default function BuyRequestCta({
           setSubmitted({ requirement, opportunitiesHref: href, matchRef });
         }}
       />
+      </div>
       {saving || navigating ? <MatchLoading modal /> : null}
       <UnifiedDialog
         isOpen={Boolean(submitted)}

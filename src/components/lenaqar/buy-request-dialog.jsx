@@ -20,6 +20,10 @@ import {
 import { placeAr } from "@/lib/lenaqar/listing-seo";
 import { localizedPlaceName } from "@/lib/lenaqar/place-display";
 import { placesFromForm, placesFromRequirement } from "@/lib/lenaqar/request-places";
+import { prefillFromRequestText } from "@/lib/lenaqar/request-text-prefill";
+import { cleanDraft, clearDraft, readDraft, writeDraft } from "@/lib/lenaqar/request-draft";
+import { parsePhonePayload, toPhoneFieldPublicValue } from "@/components/phone/phone-utils";
+import { actionButtonClass } from "@/components/ui/action-button-class";
 import {
   getBuyRequestDeliveryOptions,
   normalizeBuyRequestDelivery,
@@ -33,6 +37,15 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
+
+function sessionStore() {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.sessionStorage;
+  } catch {
+    return null;
+  }
+}
 
 const MONEY_FIELDS = new Set([
   "max_price",
@@ -214,8 +227,15 @@ export default function BuyRequestDialog({
   overlayClassName,
   loadRequirement,
   saveRequirement,
+  // "dialog" (default): the modal. "inline": the same form in the page itself, with the
+  // description first, one submit button at the end and the buyer's typing kept as a draft.
+  presentation = "dialog",
+  className = "",
+  // Inline only: put the cursor in the description once, when the form is ready.
+  autoFocusNotes = false,
 }) {
   const { locale, translate: tr } = useI18n();
+  const inline = presentation === "inline";
 
   const { data: catalogProjects = [], isLoading: catalogProjectsLoading } = useQuery({
     queryKey: ["lenaqar", "catalog-projects"],
@@ -236,6 +256,12 @@ export default function BuyRequestDialog({
   // Set at once on submit (state lags a render): blocks a second submit and the close
   // actions (Escape, the header X) while the request is being saved.
   const savingRef = useRef(false);
+  // Inline draft: what the form looked like when seeded (a draft is kept only when the
+  // buyer changed something), and a switch that stops writing once the request is saved.
+  const baselineRef = useRef("null");
+  const draftOffRef = useRef(false);
+  const notesRef = useRef(null);
+  const focusedNotesRef = useRef(false);
   // The saved request was read back for this buyer: they are editing it, and the
   // server already knows who they are.
   const [editingSaved, setEditingSaved] = useState(false);
@@ -304,16 +330,30 @@ export default function BuyRequestDialog({
   useEffect(() => {
     if (!open) return undefined;
     const seed = (next) => {
-      setForm(next);
+      baselineRef.current = JSON.stringify(cleanDraft({ form: next }));
+      let merged = next;
+      if (inline) {
+        // What the buyer typed before moving away from the form comes back.
+        const draft = readDraft(sessionStore());
+        if (draft) {
+          merged = { ...next, ...draft.form };
+          setContactName(draft.contactName);
+          setPhoneNumber(draft.phoneNumber);
+          setPhonePayload(
+            toPhoneFieldPublicValue(parsePhonePayload(draft.phoneNumber, "EG")),
+          );
+        }
+      }
+      setForm(merged);
       setDetailsOpen(true);
     };
     if (!userId) {
-      seed(applyPrefill(createEmptyForm(initialValues), prefill));
       setEditingSaved(false);
       setContactName("");
       setPhoneNumber("");
       setPhonePayload(null);
       setLoading(false);
+      seed(applyPrefill(createEmptyForm(initialValues), prefill));
       return undefined;
     }
     let cancelled = false;
@@ -345,7 +385,45 @@ export default function BuyRequestDialog({
     return () => {
       cancelled = true;
     };
-  }, [open, userId, loadRequirement, initialValues, prefill, tr]);
+  }, [open, userId, loadRequirement, initialValues, prefill, tr, inline]);
+
+  useEffect(() => {
+    if (!inline || !autoFocusNotes || !open || loading || focusedNotesRef.current) return;
+    focusedNotesRef.current = true;
+    notesRef.current?.focus?.();
+  }, [inline, autoFocusNotes, open, loading]);
+
+  // Inline only: keep the unsaved form for this tab (debounced).
+  useEffect(() => {
+    if (!inline || !open || loading) return undefined;
+    const timer = setTimeout(() => {
+      if (draftOffRef.current) return;
+      const storage = sessionStore();
+      const untouched =
+        JSON.stringify(cleanDraft({ form })) === baselineRef.current &&
+        !contactName.trim() &&
+        !phoneNumber;
+      if (untouched) clearDraft(storage);
+      else writeDraft(storage, { form, contactName, phoneNumber });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [inline, open, loading, form, contactName, phoneNumber]);
+
+  // Inline: the description is the first thing typed; once the buyer leaves it, the
+  // fields it already answers (type, rooms, budget, payment) are filled when still empty.
+  const handleNotesBlur = () => {
+    if (!form.notes.trim()) return;
+    const parsed = prefillFromRequestText(form.notes);
+    const fill = {};
+    for (const key of ["buildingType", "roomsCount", "max_price", "downPayment", "monthlyInstallment"]) {
+      if (form[key] === "" && parsed[key] != null) fill[key] = parsed[key];
+    }
+    if (!form.paymentMode && parsed.paymentMode) {
+      fill.paymentMode = parsed.paymentMode;
+      if (parsed.deliveryDate) fill.deliveryDate = parsed.deliveryDate;
+    }
+    if (Object.keys(fill).length) setForm((prev) => applyPrefill(prev, fill));
+  };
 
   const handleFieldChange = (e) => {
     const { name, value } = e.target;
@@ -458,6 +536,7 @@ export default function BuyRequestDialog({
       );
       // Bring the first marked field (in form order) into view.
       const order = [
+        "notes",
         "places",
         "buildingType",
         "max_price",
@@ -499,6 +578,10 @@ export default function BuyRequestDialog({
       const savedUserId = String(saveResult?.userId || userId || "").trim();
       if (savedUserId) onUserId?.(savedUserId);
 
+      if (inline) {
+        draftOffRef.current = true;
+        clearDraft(sessionStore());
+      }
       if (showSuccessToast) {
         toast.success(
           successMessage ||
@@ -558,30 +641,13 @@ export default function BuyRequestDialog({
 
   const dropdownClassName = "w-full";
 
-  return (
-    <UnifiedDialog
-      isOpen={open}
-      onClose={handleClose}
-      title={title || tr("lenaqar.buyRequest.title", "Buy request")}
-      cancelLabel={tr("common.cancel", locale === "ar" ? "إلغاء" : "Cancel")}
-      onCancel={handleClose}
-      submitLabel={
-        saving
-          ? tr("lenaqar.buyRequest.sending", "بنبعت الطلب...")
-          : submitLabel || tr("lenaqar.buyRequest.submit", "Submit")
-      }
-      onSubmit={handleSubmit}
-      submitDisabled={
-        loading ||
-        saving ||
-        (!userId && !showContactFields)
-      }
-      submitLoading={saving}
-      closeOnEscape
-      overlayClassName={overlayClassName}
-      dialogClassName="w-full sm:max-w-xl"
-      bodyClassName="space-y-5 text-sm !p-4 pb-8"
-    >
+  const submitDisabled = loading || saving || (!userId && !showContactFields);
+  const submitText = saving
+    ? tr("lenaqar.buyRequest.sending", "بنبعت الطلب...")
+    : submitLabel || tr("lenaqar.buyRequest.submit", "Submit");
+
+  const content = (
+    <>
       {loading ? (
         <div role="status" aria-busy="true" className="space-y-5 py-1">
           <span className="sr-only">
@@ -604,6 +670,22 @@ export default function BuyRequestDialog({
               countdownLabel={tr("lenaqar.buyRequest.saveFailedWhatsAppCountdown")}
               ctaLabel={tr("lenaqar.buyRequest.saveFailedWhatsAppCta")}
             />
+          ) : null}
+
+          {inline ? (
+            <div data-field="notes" onBlur={handleNotesBlur}>
+              <LenaTextarea
+                ref={notesRef}
+                name="notes"
+                label={tr("lenaqar.buyRequest.notesTopLabel")}
+                value={form.notes}
+                onChange={handleFieldChange}
+                rows={3}
+                helperText={tr("lenaqar.buyRequest.notesTopHint")}
+                error={Boolean(compactError("notes"))}
+                errorMessage={compactError("notes")}
+              />
+            </div>
           ) : null}
 
           <div data-field="places">
@@ -823,19 +905,21 @@ export default function BuyRequestDialog({
                   </>
                 ) : null}
 
-                <LenaTextarea
-                  name="notes"
-                  label={tr("lenaqar.buyRequest.notes", "Notes")}
-                  value={form.notes}
-                  onChange={handleFieldChange}
-                  rows={3}
-                  helperText={tr(
-                    "lenaqar.buyRequest.notesHint",
-                    "اكتب أي تفاصيل إضافية عن اللي بتدور عليه",
-                  )}
-                  error={Boolean(compactError("notes"))}
-                  errorMessage={compactError("notes")}
-                />
+                {inline ? null : (
+                  <LenaTextarea
+                    name="notes"
+                    label={tr("lenaqar.buyRequest.notes", "Notes")}
+                    value={form.notes}
+                    onChange={handleFieldChange}
+                    rows={3}
+                    helperText={tr(
+                      "lenaqar.buyRequest.notesHint",
+                      "اكتب أي تفاصيل إضافية عن اللي بتدور عليه",
+                    )}
+                    error={Boolean(compactError("notes"))}
+                    errorMessage={compactError("notes")}
+                  />
+                )}
               </div>
             ) : null}
           </section>
@@ -872,6 +956,52 @@ export default function BuyRequestDialog({
           </div>
         </>
       )}
+    </>
+  );
+
+  // Inline: the same fields in the page's own layout. No overlay, no close button; the one
+  // submit action closes the form.
+  if (inline) {
+    return (
+      <form
+        onSubmit={handleSubmit}
+        noValidate
+        aria-busy={saving}
+        className={`space-y-5 text-sm ${className}`}
+      >
+        {content}
+        <button
+          type="submit"
+          disabled={submitDisabled}
+          className={actionButtonClass({
+            variant: "primary",
+            size: "large",
+            className: "w-full disabled:pointer-events-none disabled:opacity-60",
+          })}
+        >
+          {submitText}
+        </button>
+      </form>
+    );
+  }
+
+  return (
+    <UnifiedDialog
+      isOpen={open}
+      onClose={handleClose}
+      title={title || tr("lenaqar.buyRequest.title", "Buy request")}
+      cancelLabel={tr("common.cancel", locale === "ar" ? "إلغاء" : "Cancel")}
+      onCancel={handleClose}
+      submitLabel={submitText}
+      onSubmit={handleSubmit}
+      submitDisabled={submitDisabled}
+      submitLoading={saving}
+      closeOnEscape
+      overlayClassName={overlayClassName}
+      dialogClassName="w-full sm:max-w-xl"
+      bodyClassName="space-y-5 text-sm !p-4 pb-8"
+    >
+      {content}
     </UnifiedDialog>
   );
 }
