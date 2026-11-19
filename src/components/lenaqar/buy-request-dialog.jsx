@@ -194,6 +194,9 @@ const COMMON_BUILDING_TYPES = [
   "studio",
 ];
 
+/** The dropdown sorts by label unless told otherwise; the type list has its own order. */
+const keepGivenOrder = (options) => options;
+
 const DETAIL_ERROR_KEYS = [
   "roomsCount",
   "downPayment",
@@ -568,6 +571,7 @@ export default function BuyRequestDialog({
             value={form.buildingType}
             onChange={handleFieldChange}
             options={buildingTypeOptions}
+            sortOptions={keepGivenOrder}
             required
             error={Boolean(compactError("buildingType"))}
             errorMessage={compactError("buildingType")}

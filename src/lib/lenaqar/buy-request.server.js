@@ -117,3 +117,30 @@ export async function saveBuyRequestRequirement({
     throw toPublicError(error, "save_failed");
   }
 }
+
+const UNIT_CODE = /^[A-Za-z0-9_-]{1,32}$/;
+const INTEREST_CHANNELS = new Set(["whatsapp", "call"]);
+
+/**
+ * Tell the backend the buyer tapped WhatsApp or Call on a unit of their match
+ * page: it records the unit on their request and alerts the team. Best effort —
+ * returns false instead of throwing, the tap itself must never wait on it.
+ */
+export async function recordMatchUnitInterest({ matchRef, unitCode, channel }) {
+  const ref = normalizeMatchRef(matchRef);
+  const code = typeof unitCode === "string" ? unitCode.trim() : "";
+  if (!ref || !UNIT_CODE.test(code) || !INTEREST_CHANNELS.has(channel)) return false;
+  try {
+    await axiosInstance.post(`/public/v1/buy-request/match/${ref}/interest`, {
+      unit_code: code,
+      channel,
+    });
+    return true;
+  } catch (error) {
+    console.error(
+      "[lenaqar] record unit interest failed",
+      error?.response?.status || error?.code || "error",
+    );
+    return false;
+  }
+}

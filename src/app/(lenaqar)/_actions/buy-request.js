@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { rateLimit } from "@/lib/rateLimit";
 import {
   loadBuyRequestRequirement,
+  recordMatchUnitInterest,
   saveBuyRequestRequirement,
 } from "@/lib/lenaqar/buy-request.server";
 import {
@@ -76,4 +77,16 @@ export async function loadBuyRequestPriceInsight(payload) {
   if (!built.ok) return null;
 
   return loadPriceInsight(built.requirement);
+}
+
+/**
+ * Match page: the buyer tapped WhatsApp or Call on a unit card. Recorded for the
+ * team; the browser does not wait for it and nothing is shown for a failure.
+ */
+export async function recordUnitInterest({ matchRef, unitCode, channel }) {
+  const headerStore = await headers();
+  const ip = clientIpFromHeaders(headerStore);
+  const { allowed } = rateLimit(`lenaqar-unit-interest:${ip}`, 40, 60 * 60 * 1000);
+  if (!allowed) return { ok: false };
+  return { ok: await recordMatchUnitInterest({ matchRef, unitCode, channel }) };
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { MessageCircle, Phone } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
+import { recordUnitInterest } from "@/app/(lenaqar)/_actions/buy-request";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
 import { readMatchRef } from "@/lib/lenaqar/buy-request-identity";
 import { placeAr, roomsLabelAr } from "@/lib/lenaqar/listing-seo";
@@ -119,8 +120,23 @@ export default function RequestMatchContent({ result }) {
       </p>
     );
 
+  // A tap on WhatsApp or Call tells the team which unit this buyer asked about.
+  // Not awaited: the link opens at once whatever the answer.
+  const noteInterest = (unit, event) => {
+    const intent = event.target.closest?.("a[data-cta-intent]")?.dataset.ctaIntent;
+    if (!intent) return;
+    recordUnitInterest({
+      matchRef,
+      unitCode: unit.code,
+      channel: intent === "call" ? "call" : "whatsapp",
+    }).catch(() => {});
+  };
+
   const actions = (unit) => (
-    <div className="mt-auto grid grid-cols-2 gap-2">
+    <div
+      className="mt-auto grid grid-cols-2 gap-2"
+      onClickCapture={(event) => noteInterest(unit, event)}
+    >
       <WhatsAppCta
         href={matchUnitHref(unit, matchRef)}
         intent="buy"
