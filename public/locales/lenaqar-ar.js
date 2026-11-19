@@ -229,6 +229,7 @@ export default {
     years: "سنين",
     year: "سنة",
     delivery: "الاستلام",
+    deliveryReady: "استلام فوري",
     totalValue: "إجمالي العقد",
     cashMultiple: "مضاعف الكاش",
     recordUpdated: "آخر تحديث للسجل: {date}",

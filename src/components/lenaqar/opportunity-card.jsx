@@ -5,6 +5,7 @@ import { useI18n } from "@/hooks/useI18n";
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { formatDeliveryDate } from "@/lib/units/unit-formatters";
+import { deliveryDisplay } from "@/lib/lenaqar/delivery-display";
 import {
   buildingTypeAr,
   buildListingHeadline,
@@ -42,7 +43,11 @@ export default function OpportunityCard({ unit, badge = null, actions = null }) 
     .filter(Boolean)
     .join(" · ");
   const typeLabel = buildingTypeAr(unit.buildingType) || null;
-  const deliveryLabel = formatDeliveryDate(unit.deliveryDate, "ar");
+  // A delivery date already past reads «استلام فوري»; a future one stays as it is.
+  const delivery = deliveryDisplay(unit);
+  const deliveryLabel = delivery.ready
+    ? translate("lenaqar.unit.deliveryReady")
+    : formatDeliveryDate(unit.deliveryDate, "ar");
   const href = `/opportunities/${encodeURIComponent(unit.code)}`;
   const showMoneySplit = mayShowMoneySplit(unit);
   const showOffer = showMoneySplit && Number(unit.overPrice) > 0;

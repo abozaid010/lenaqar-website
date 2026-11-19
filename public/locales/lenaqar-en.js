@@ -228,6 +228,7 @@ export default {
     years: "years",
     year: "year",
     delivery: "Delivery",
+    deliveryReady: "Ready to move in",
     totalValue: "Total contract value",
     cashMultiple: "Cash multiple",
     recordUpdated: "Record updated: {date}",
