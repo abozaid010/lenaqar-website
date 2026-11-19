@@ -173,17 +173,6 @@ function applyPrefill(base, prefill) {
   return next;
 }
 
-/** True when the form already holds something from the optional details block. */
-function hasDetails(form) {
-  return Boolean(
-    form.roomsCount ||
-      form.paymentMode ||
-      form.downPayment ||
-      form.monthlyInstallment ||
-      form.notes,
-  );
-}
-
 const COMMON_BUILDING_TYPES = [
   "apartment",
   "villa",
@@ -254,7 +243,8 @@ export default function BuyRequestDialog({
   const [forceContact, setForceContact] = useState(false);
   const [form, setForm] = useState(() => createEmptyForm(initialValues));
   const [placesError, setPlacesError] = useState("");
-  const [detailsOpen, setDetailsOpen] = useState(false);
+  // The optional block starts expanded; the buyer can still fold it away.
+  const [detailsOpen, setDetailsOpen] = useState(true);
   const [fieldErrors, setFieldErrors] = useState({});
   const [contactName, setContactName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -301,7 +291,7 @@ export default function BuyRequestDialog({
   useEffect(() => {
     if (open) return;
     setPlacesError("");
-    setDetailsOpen(false);
+    setDetailsOpen(true);
     setNotBrokerConfirmed(false);
     setMissing({});
     setForceContact(false);
@@ -315,9 +305,7 @@ export default function BuyRequestDialog({
     if (!open) return undefined;
     const seed = (next) => {
       setForm(next);
-      // A request that already carries details (homepage text, a saved request)
-      // shows them; a fresh one starts with the short form.
-      setDetailsOpen(hasDetails(next));
+      setDetailsOpen(true);
     };
     if (!userId) {
       seed(applyPrefill(createEmptyForm(initialValues), prefill));
