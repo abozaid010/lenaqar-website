@@ -57,6 +57,11 @@ export function trackWhatsAppClick({
   trackMetaContact({ content_name: intent, content_category: location });
 }
 
+/** The inline buy-request form scrolled into view. Not a dialog open: use `location` to tell pages apart. */
+export function trackBuyRequestFormViewed({ location = "unknown" } = {}) {
+  trackGa(ANALYTICS.EVENTS.BUY_REQUEST_FORM_VIEWED, { cta_location: location });
+}
+
 export function trackBuyRequestSubmitted({ location = "unknown", city } = {}) {
   trackGa(ANALYTICS.EVENTS.BUY_REQUEST_SUBMITTED, { cta_location: location, city });
   trackMetaLead({ content_name: "buyer_request", content_category: "buy" });

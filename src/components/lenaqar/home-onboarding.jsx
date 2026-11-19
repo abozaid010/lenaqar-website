@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Check, MessageCircle, Pause, Play, RotateCcw } from "lucide-react";
+import { Check, Pause, Play, RotateCcw } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { ANALYTICS } from "@/constants/analytics";
 import { trackGa } from "@/lib/analytics";
-import RequestComposer from "./request-composer";
+import BuyRequestCta from "./buy-request-cta";
 
 /**
  * Homepage onboarding: a ~30 second, auto-advancing presentation that ends on
@@ -189,9 +189,8 @@ function ExampleScene({ label, text, sendLabel, elapsed, reduced }) {
             initial={false}
             animate={done ? { opacity: 1, scale: [1, 1.06, 1] } : { opacity: 0.35, scale: 1 }}
             transition={{ duration: reduced ? 0 : 0.6, ease: EASE }}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#25D366] px-5 text-sm font-bold text-white shadow-lg shadow-[#25D366]/30"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-white shadow-lg shadow-primary/25"
           >
-            <MessageCircle aria-hidden="true" className="size-4" />
             {sendLabel}
           </motion.span>
         </div>
@@ -282,7 +281,6 @@ export default function HomeOnboarding() {
   const [mounted, setMounted] = useState(false);
   const [scene, setScene] = useState(0);
   const [paused, setPaused] = useState(false);
-  const composerRef = useRef(null);
   const stageRef = useRef(null);
   const focusOnCompose = useRef(false);
   const [focusComposer, setFocusComposer] = useState(false);
@@ -391,7 +389,7 @@ export default function HomeOnboarding() {
           <ExampleScene
             label={t("exampleLabel")}
             text={exampleText}
-            sendLabel={t("send")}
+            sendLabel={translate("lenaqar.buyRequest.inlineSubmit")}
             elapsed={elapsed}
             reduced={reduced}
           />
@@ -410,29 +408,26 @@ export default function HomeOnboarding() {
         );
       default:
         return (
-          // Compact on purpose: the composer takes ~half the screen so the
-          // other buyers' requests start in the first view.
+          // The buyer-request form itself, in the page: description first, one button.
           <div className="mx-auto w-full max-w-3xl">
-            <h2 className="lq-display text-center text-[clamp(1.5rem,4vw,2.5rem)] font-bold leading-tight text-primary">
-              {t("composerTitle")}
-            </h2>
-            <p className="mx-auto mt-1.5 max-w-xl text-center text-sm text-black/60 sm:text-base">
-              {t("composerSub")}
-            </p>
-            <RequestComposer
-              ref={composerRef}
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="lq-display text-[clamp(1.5rem,4vw,2.5rem)] font-bold leading-tight text-primary">
+                {t("composerTitle")}
+              </h2>
+              <button
+                type="button"
+                onClick={() => goTo(0)}
+                className="compact-btn inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium text-primary/60 transition-colors hover:bg-primary/5 hover:text-primary"
+              >
+                <RotateCcw aria-hidden="true" className="size-3.5" />
+                {t("replay")}
+              </button>
+            </div>
+            <BuyRequestCta
+              presentation="inline"
               autoFocus={focusComposer}
-              className="mt-3 sm:mt-4"
-              labelAside={
-                <button
-                  type="button"
-                  onClick={() => goTo(0)}
-                  className="compact-btn inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium text-primary/60 transition-colors hover:bg-primary/5 hover:text-primary"
-                >
-                  <RotateCcw aria-hidden="true" className="size-3.5" />
-                  {t("replay")}
-                </button>
-              }
+              trackingLocation="home_inline"
+              className="mt-3 rounded-2xl border border-primary/15 bg-white p-4 shadow-[0_20px_50px_-30px_rgba(3,2,80,0.45)] sm:mt-4 sm:rounded-3xl sm:p-6"
             />
           </div>
         );

@@ -1,21 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { useI18n } from "@/hooks/useI18n";
 import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { ANALYTICS } from "@/constants/analytics";
 import { SITE } from "@/config/site";
 import { requirementToUnitsFilter } from "@/lib/match/requirement-to-units-filter";
-import { trackBuyRequestSubmitted } from "@/lib/analytics";
+import { trackBuyRequestFormViewed, trackBuyRequestSubmitted } from "@/lib/analytics";
 import { readAttribution } from "@/lib/lenaqar/attribution";
 import {
-  buyRequestRepeatKey,
+  buyRequestSubmitKey,
   findRepeatSubmit,
+  isNewBuyRequestConversion,
   readLastBuyRequestSubmit,
   saveLastBuyRequestSubmit,
 } from "@/lib/lenaqar/buy-request-repeat";
 import BuyRequestDialog from "./buy-request-dialog";
+import MatchLoading from "./match-loading";
 import BuyRequestSuccess from "./buy-request-success";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import {
@@ -23,10 +26,16 @@ import {
   savePublicBuyRequest,
 } from "@/app/(lenaqar)/_actions/buy-request";
 import { actionButtonClass } from "@/components/ui/action-button-class";
-import { readMatchRef, writeMatchRef } from "@/lib/lenaqar/buy-request-identity";
+import {
+  clearMatchRef,
+  readContactHint,
+  readMatchRef,
+  writeMatchRef,
+} from "@/lib/lenaqar/buy-request-identity";
 import ActionButtonArrow from "@/components/ui/action-button-arrow";
 
 let buyRequestHashHandled = false;
+let inlineFormViewTracked = false;
 
 /** localStorage key of the lead id this browser's last buy request was saved under. */
 export const BUY_REQUEST_USER_ID_KEY = "lenaqar_buy_request_user_id";
@@ -95,7 +104,12 @@ export default function BuyRequestCta({
   prefill,
   onSubmitted,
   trackingLocation = "unknown",
+  // "inline": the form itself sits in the page (no trigger, no dialog); `className`
+  // then styles the form's wrapper.
+  presentation = "dialog",
+  autoFocus = false,
 }) {
+  const inline = presentation === "inline";
   const { translate } = useI18n();
   const { trackEvent } = useGoogleAnalytics();
   const router = useRouter();
@@ -112,16 +126,52 @@ export default function BuyRequestCta({
   );
   const [userId, setUserId] = useState("");
   const [submitted, setSubmitted] = useState(null);
+  // Saving (set by the dialog) and the navigation to the match page (a transition) are
+  // one "matching" state for the buyer: the loading screen covers both, and goes away
+  // when the save fails or the match page has rendered.
+  const [saving, setSaving] = useState(false);
+  const [navigating, startNavigation] = useTransition();
+  const [contactHint, setContactHint] = useState(null);
 
   useEffect(() => {
     setUserId(readStoredUserId());
-    if (isControlled) return;
+    if (isControlled || inline) return;
     if (buyRequestHashHandled) return;
     if (window.location.hash !== "#buy-request") return;
     buyRequestHashHandled = true;
     setOpen(true);
     trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_OPENED, { cta_location: trackingLocation });
-  }, [trackEvent, isControlled, setOpen, trackingLocation]);
+  }, [trackEvent, isControlled, inline, setOpen, trackingLocation]);
+
+  useEffect(() => {
+    setContactHint(
+      (open || inline) && userId ? readContactHint(browserStorage(), userId) : null,
+    );
+  }, [open, inline, userId]);
+
+  // Inline: record the form being shown (once per page view, when about half of it is on
+  // screen) — there is no dialog-open event to rely on.
+  const viewRef = useRef(null);
+  useEffect(() => {
+    if (!inline) return undefined;
+    const node = viewRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") return undefined;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          // Once per page view: replaying the onboarding remounts the form.
+          if (!inlineFormViewTracked) {
+            inlineFormViewTracked = true;
+            trackBuyRequestFormViewed({ location: trackingLocation });
+          }
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [inline, trackingLocation]);
 
   const handleUserId = useCallback((nextId) => {
     const id = String(nextId || "").trim();
@@ -139,6 +189,8 @@ export default function BuyRequestCta({
       if (raw?.error) {
         return { error: translate("lenaqar.buyRequest.loadFailed") };
       }
+      // The backend no longer knows this proof: forget it, so the form asks for contact.
+      if (!raw) clearMatchRef(browserStorage());
       return raw;
     },
     [translate],
@@ -146,8 +198,17 @@ export default function BuyRequestCta({
 
   const saveRequirement = useCallback(
     async (id, payload, extra) => {
-      // Same phone again within 5 minutes: reuse the first result, no second post.
-      const repeatKey = await buyRequestRepeatKey(extra?.contact?.phone);
+      // The buyer is editing a request this browser saved (the server accepts the proof).
+      const isEdit = Boolean(id && readMatchRef(browserStorage(), id));
+
+      // The identical submission again within 5 minutes reuses the first result; a
+      // changed request (budget, place, ...) is always posted.
+      const repeatKey = await buyRequestSubmitKey({
+        userId: isEdit ? id : "",
+        phone: extra?.contact?.phone,
+        name: extra?.contact?.name,
+        requirement: payload,
+      });
       const repeat = findRepeatSubmit(readLastBuyRequestSubmit(), repeatKey);
       if (repeat) {
         return {
@@ -155,6 +216,7 @@ export default function BuyRequestCta({
           userId: repeat.userId,
           matchRef: repeat.matchRef || "",
           repeated: true,
+          isEdit,
         };
       }
 
@@ -170,11 +232,14 @@ export default function BuyRequestCta({
       });
       if (!result?.ok) {
         const code = result?.code || "save_failed";
-        throw new Error(
-          translate(
-            `lenaqar.buyRequest.errors.${code}`,
-            translate("lenaqar.buyRequest.saveFailed"),
+        throw Object.assign(
+          new Error(
+            translate(
+              `lenaqar.buyRequest.errors.${code}`,
+              translate("lenaqar.buyRequest.saveFailed"),
+            ),
           ),
+          { code },
         );
       }
       saveLastBuyRequestSubmit({
@@ -182,15 +247,15 @@ export default function BuyRequestCta({
         userId: result.userId,
         matchRef: result.matchRef,
       });
-      writeMatchRef(browserStorage(), result.userId, result.matchRef);
-      return result;
+      writeMatchRef(browserStorage(), result.userId, result.matchRef, extra?.contact);
+      return { ...result, isEdit };
     },
     [translate],
   );
 
   return (
     <>
-      {hideTrigger ? null : (
+      {hideTrigger || inline ? null : (
         <button
           type="button"
           className={actionButtonClass({ variant, tone, size, className })}
@@ -203,15 +268,23 @@ export default function BuyRequestCta({
           <ActionButtonArrow size={size} />
         </button>
       )}
+      <div ref={viewRef} className={inline ? className : "contents"}>
       <BuyRequestDialog
-        open={open}
-        onClose={() => setOpen(false)}
+        presentation={presentation}
+        autoFocusNotes={autoFocus}
+        open={inline ? true : open}
+        onClose={() => (inline ? undefined : setOpen(false))}
         userId={userId}
         onUserId={handleUserId}
         title={translate("lenaqar.buyRequest.title")}
-        submitLabel={translate("lenaqar.buyRequest.submit")}
-        intro={translate("lenaqar.buyRequest.intro")}
+        submitLabel={translate(
+          inline ? "lenaqar.buyRequest.inlineSubmit" : "lenaqar.buyRequest.submit",
+        )}
+        intro={inline ? undefined : translate("lenaqar.buyRequest.intro")}
         successMessage={translate("lenaqar.buyRequest.saved")}
+        showSuccessToast={false}
+        onSavingChange={setSaving}
+        contactHint={contactHint}
         initialValues={initialValues}
         prefill={prefill}
         showContactFields
@@ -221,7 +294,8 @@ export default function BuyRequestCta({
         onSuccess={(requirement, saveResult) => {
           // Ads conversion: Lead = successful buyer request (no PII in payload).
           // A repeat of the same phone is not a second conversion.
-          if (!saveResult?.repeated) {
+          // An edit of a saved request is not a new lead either.
+          if (isNewBuyRequestConversion(saveResult || {})) {
             trackBuyRequestSubmitted({ location: trackingLocation, city: requirement?.city });
           }
           const qs = opportunityQueryFromRequirement({
@@ -238,11 +312,15 @@ export default function BuyRequestCta({
             // from. The match page is dynamic, so a push already reads it fresh;
             // from that same page (an edited request) a refresh re-reads it.
             const target = `/requests/match/${matchRef}`;
-            if (pathname === target) router.refresh();
-            else router.push(target);
+            // In a transition, so the loading screen stays up until the page has rendered.
+            startNavigation(() => {
+              if (pathname === target) router.refresh();
+              else router.push(target);
+            });
             return;
           }
           // No reference (an older backend): the success screen, as before.
+          toast.success(translate("lenaqar.buyRequest.saved"));
           if (onSubmitted) {
             onSubmitted({ requirement, opportunitiesHref: href, matchRef });
             return;
@@ -251,6 +329,8 @@ export default function BuyRequestCta({
           setSubmitted({ requirement, opportunitiesHref: href, matchRef });
         }}
       />
+      </div>
+      {saving || navigating ? <MatchLoading modal /> : null}
       <UnifiedDialog
         isOpen={Boolean(submitted)}
         onClose={() => setSubmitted(null)}

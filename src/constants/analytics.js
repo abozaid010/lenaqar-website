@@ -10,6 +10,8 @@ export const ANALYTICS = {
     CALCULATOR_USED: 'calculator_used',
     UNIT_VIEWED: 'unit_viewed',
     BUY_REQUEST_OPENED: 'buy_request_opened',
+    // The buyer-request form shown inline in the page (no dialog opened).
+    BUY_REQUEST_FORM_VIEWED: 'buy_request_form_viewed',
     BUY_REQUEST_SUBMITTED: 'buy_request_submitted',
     NETWORK_SIGNUP_SUBMITTED: 'network_signup_submitted',
     NETWORK_LOGIN_SUBMITTED: 'network_login_submitted',

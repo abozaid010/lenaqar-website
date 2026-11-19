@@ -668,3 +668,27 @@ select:disabled {
   margin-top: 0.125rem;
   top: 0;
 }
+
+/* Match loading: the navy doorway breathes once every 3 s (opacity only). */
+@keyframes lq-door-breathe {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+.lq-door {
+  animation: lq-door-breathe 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer {
+    animation: none;
+  }
+  .lq-door,
+  .lq-door * {
+    animation: none !important;
+    transition: none !important;
+  }
+  .lq-door {
+    opacity: 1;
+  }
+}

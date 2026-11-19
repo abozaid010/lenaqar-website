@@ -57,3 +57,19 @@ export function withMatchRef(message, matchRef) {
   const ref = normalizeMatchRef(matchRef);
   return ref ? `${message} — MATCH-${ref}` : message;
 }
+
+const UNIT_NOUN_BY_TYPE = { apartment: "الشقة", villa: "الفيلا" };
+
+/**
+ * The opener a buyer sends from one unit's page or card: a short question about that
+ * unit, then its page code. The backend finds the unit from the trailing `— OPP-<code>`
+ * (`asks_about_a_unit`), so that code must stay a standalone code after a dash.
+ * The unit is "the apartment" / "the villa" when the type says so, else "the unit".
+ */
+export function unitInquiryMessage(unit) {
+  const code = String(unit?.code || "UNIT").trim().toUpperCase() || "UNIT";
+  const reference = code.startsWith("OPP-") ? code : `OPP-${code}`;
+  const type = String(unit?.buildingType || "").trim().toLowerCase();
+  const noun = UNIT_NOUN_BY_TYPE[type] || "الوحدة";
+  return `مرحبا\nعايز اعرف تفاصيل اكتر عن ${noun} دى؟ — ${reference}`;
+}

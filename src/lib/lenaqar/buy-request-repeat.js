@@ -1,28 +1,55 @@
 /**
- * Repeat-submit guard for the buy request: the same phone submitted again
- * within the window reuses the first result instead of posting a second time.
- * Only a SHA-256 key of the phone is stored — never the phone itself.
+ * Repeat-submit guard for the buy request: the identical submission (same sender,
+ * name and requirement) sent again within the window reuses the first result instead
+ * of posting a second time. A changed requirement is always posted. Only a SHA-256
+ * key is stored — never the phone, name or requirement itself.
  */
 
 export const REPEAT_WINDOW_MS = 5 * 60 * 1000;
 
 const STORAGE_KEY = "lenaqar_buy_request_last_submit";
 
-/** SHA-256 hex of the phone's digits; "" when there is no phone or no Web Crypto. */
-export async function buyRequestRepeatKey(phone) {
+/** JSON with object keys sorted, so equal requests give equal text whatever their key order. */
+export function canonicalJson(value) {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value)
+      .filter((key) => value[key] !== undefined)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`)
+      .join(",")}}`;
+  }
+  return JSON.stringify(value ?? null);
+}
+
+/**
+ * SHA-256 hex identifying one submission: who sent it (the saved request's user id,
+ * else the phone's digits), the name typed, and the whole requirement. The same
+ * submission twice gives the same key; any changed field gives another one, so an
+ * edited request is never mistaken for a repeat. "" when there is no identity or
+ * no Web Crypto.
+ */
+export async function buyRequestSubmitKey({ userId, phone, name, requirement }) {
   const digits = String(phone || "").replace(/\D/g, "");
-  if (!digits) return "";
+  const who = userId ? `u:${userId}` : digits ? `p:${digits}` : "";
+  if (!who) return "";
   try {
-    const hash = await crypto.subtle.digest(
-      "SHA-256",
-      new TextEncoder().encode(digits),
-    );
+    const text = [who, String(name || "").trim(), canonicalJson(requirement)].join("|");
+    const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
     return Array.from(new Uint8Array(hash), (byte) =>
       byte.toString(16).padStart(2, "0"),
     ).join("");
   } catch {
     return "";
   }
+}
+
+/**
+ * Whether this submit is a conversion for ads: only when it created the request.
+ * An edit of a saved request, or a reused identical submit, is not a new lead.
+ */
+export function isNewBuyRequestConversion({ isEdit, repeated }) {
+  return !isEdit && !repeated;
 }
 
 /** Pure: the stored submit when it has the same key and is inside the window, else null. */

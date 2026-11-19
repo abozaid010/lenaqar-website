@@ -5,6 +5,7 @@ import { useI18n } from "@/hooks/useI18n";
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { formatDate, formatDeliveryDate } from "@/lib/units/unit-formatters";
+import { deliveryDisplay } from "@/lib/lenaqar/delivery-display";
 import { formatCashMultiple, pricePerMeter } from "@/lib/lenaqar/metrics";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import ListingSchema from "@/components/schema/ListingSchema";
@@ -34,7 +35,10 @@ export default function OpportunityDetailContent({ unit, guideLinks = [] }) {
   const headline = buildListingHeadline(unit);
   const canonicalUrl = `${SITE.url}/opportunities/${encodeURIComponent(unit.code)}`;
   const developerName = developerLabel(unit);
-  const deliveryLabel = formatDeliveryDate(unit.deliveryDate, "ar");
+  // A delivery date already past reads «استلام فوري»; a future one stays as it is.
+  const deliveryLabel = deliveryDisplay(unit).ready
+    ? translate("lenaqar.unit.deliveryReady")
+    : formatDeliveryDate(unit.deliveryDate, "ar");
   const recordUpdatedDate = formatDate(unit.updatedAt, "ar");
   const lastCheckedLabel = formatDate(unitLastChecked(unit), "ar");
   const paperStatus = unitPaperStatus(unit);

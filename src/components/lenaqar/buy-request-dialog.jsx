@@ -20,6 +20,10 @@ import {
 import { placeAr } from "@/lib/lenaqar/listing-seo";
 import { localizedPlaceName } from "@/lib/lenaqar/place-display";
 import { placesFromForm, placesFromRequirement } from "@/lib/lenaqar/request-places";
+import { prefillFromRequestText } from "@/lib/lenaqar/request-text-prefill";
+import { cleanDraft, clearDraft, readDraft, writeDraft } from "@/lib/lenaqar/request-draft";
+import { parsePhonePayload, toPhoneFieldPublicValue } from "@/components/phone/phone-utils";
+import { actionButtonClass } from "@/components/ui/action-button-class";
 import {
   getBuyRequestDeliveryOptions,
   normalizeBuyRequestDelivery,
@@ -31,8 +35,17 @@ import {
 import { parseMoneyInput, normalizeToEnglishDigits } from "@/utils/parse-amount";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
+
+function sessionStore() {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.sessionStorage;
+  } catch {
+    return null;
+  }
+}
 
 const MONEY_FIELDS = new Set([
   "max_price",
@@ -173,17 +186,6 @@ function applyPrefill(base, prefill) {
   return next;
 }
 
-/** True when the form already holds something from the optional details block. */
-function hasDetails(form) {
-  return Boolean(
-    form.roomsCount ||
-      form.paymentMode ||
-      form.downPayment ||
-      form.monthlyInstallment ||
-      form.notes,
-  );
-}
-
 const COMMON_BUILDING_TYPES = [
   "apartment",
   "villa",
@@ -215,6 +217,9 @@ export default function BuyRequestDialog({
   submitLabel,
   intro,
   successMessage,
+  showSuccessToast = true,
+  onSavingChange,
+  contactHint = null,
   clientId,
   initialValues,
   prefill,
@@ -222,8 +227,15 @@ export default function BuyRequestDialog({
   overlayClassName,
   loadRequirement,
   saveRequirement,
+  // "dialog" (default): the modal. "inline": the same form in the page itself, with the
+  // description first, one submit button at the end and the buyer's typing kept as a draft.
+  presentation = "dialog",
+  className = "",
+  // Inline only: put the cursor in the description once, when the form is ready.
+  autoFocusNotes = false,
 }) {
   const { locale, translate: tr } = useI18n();
+  const inline = presentation === "inline";
 
   const { data: catalogProjects = [], isLoading: catalogProjectsLoading } = useQuery({
     queryKey: ["lenaqar", "catalog-projects"],
@@ -241,14 +253,39 @@ export default function BuyRequestDialog({
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  // Set at once on submit (state lags a render): blocks a second submit and the close
+  // actions (Escape, the header X) while the request is being saved.
+  const savingRef = useRef(false);
+  // Inline draft: what the form looked like when seeded (a draft is kept only when the
+  // buyer changed something), and a switch that stops writing once the request is saved.
+  const baselineRef = useRef("null");
+  const draftOffRef = useRef(false);
+  const notesRef = useRef(null);
+  const focusedNotesRef = useRef(false);
+  // The saved request was read back for this buyer: they are editing it, and the
+  // server already knows who they are.
+  const [editingSaved, setEditingSaved] = useState(false);
+  // The server asked for a name and phone after all (it no longer accepts the saved proof).
+  const [forceContact, setForceContact] = useState(false);
   const [form, setForm] = useState(() => createEmptyForm(initialValues));
   const [placesError, setPlacesError] = useState("");
-  const [detailsOpen, setDetailsOpen] = useState(false);
+  // The optional block starts expanded; the buyer can still fold it away.
+  const [detailsOpen, setDetailsOpen] = useState(true);
   const [fieldErrors, setFieldErrors] = useState({});
   const [contactName, setContactName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phonePayload, setPhonePayload] = useState(null);
   const [notBrokerConfirmed, setNotBrokerConfirmed] = useState(false);
+  // Fields outside the requirement the buyer left empty: name, phone, the broker box.
+  // Shown on the fields themselves after a submit attempt, cleared as each is fixed.
+  const [missing, setMissing] = useState({});
+  const clearMissing = (key) =>
+    setMissing((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   const [whatsappFallbackHrefState, setWhatsappFallbackHrefState] = useState("");
 
   // The types most buyers ask for come first; the rest keep their order.
@@ -280,8 +317,10 @@ export default function BuyRequestDialog({
   useEffect(() => {
     if (open) return;
     setPlacesError("");
-    setDetailsOpen(false);
+    setDetailsOpen(true);
     setNotBrokerConfirmed(false);
+    setMissing({});
+    setForceContact(false);
     setWhatsappFallbackHrefState("");
     setFieldErrors((prev) =>
       prev && Object.keys(prev).length === 0 ? prev : {},
@@ -291,17 +330,30 @@ export default function BuyRequestDialog({
   useEffect(() => {
     if (!open) return undefined;
     const seed = (next) => {
-      setForm(next);
-      // A request that already carries details (homepage text, a saved request)
-      // shows them; a fresh one starts with the short form.
-      setDetailsOpen(hasDetails(next));
+      baselineRef.current = JSON.stringify(cleanDraft({ form: next }));
+      let merged = next;
+      if (inline) {
+        // What the buyer typed before moving away from the form comes back.
+        const draft = readDraft(sessionStore());
+        if (draft) {
+          merged = { ...next, ...draft.form };
+          setContactName(draft.contactName);
+          setPhoneNumber(draft.phoneNumber);
+          setPhonePayload(
+            toPhoneFieldPublicValue(parsePhonePayload(draft.phoneNumber, "EG")),
+          );
+        }
+      }
+      setForm(merged);
+      setDetailsOpen(true);
     };
     if (!userId) {
-      seed(applyPrefill(createEmptyForm(initialValues), prefill));
+      setEditingSaved(false);
       setContactName("");
       setPhoneNumber("");
       setPhonePayload(null);
       setLoading(false);
+      seed(applyPrefill(createEmptyForm(initialValues), prefill));
       return undefined;
     }
     let cancelled = false;
@@ -312,12 +364,15 @@ export default function BuyRequestDialog({
         if (cancelled) return;
         if (raw?.error || !raw || typeof raw !== "object") {
           if (raw?.error) toast.error(String(raw.error));
+          setEditingSaved(false);
           seed(applyPrefill(createEmptyForm(initialValues), prefill));
           return;
         }
+        setEditingSaved(true);
         seed(applyPrefill(mapLoadedRequirement(raw), prefill));
       } catch (e) {
         if (!cancelled) {
+          setEditingSaved(false);
           toast.error(
             e?.message ||
               tr("lenaqar.buyRequest.loadFailed", "Failed to load request"),
@@ -330,7 +385,45 @@ export default function BuyRequestDialog({
     return () => {
       cancelled = true;
     };
-  }, [open, userId, loadRequirement, initialValues, prefill, tr]);
+  }, [open, userId, loadRequirement, initialValues, prefill, tr, inline]);
+
+  useEffect(() => {
+    if (!inline || !autoFocusNotes || !open || loading || focusedNotesRef.current) return;
+    focusedNotesRef.current = true;
+    notesRef.current?.focus?.();
+  }, [inline, autoFocusNotes, open, loading]);
+
+  // Inline only: keep the unsaved form for this tab (debounced).
+  useEffect(() => {
+    if (!inline || !open || loading) return undefined;
+    const timer = setTimeout(() => {
+      if (draftOffRef.current) return;
+      const storage = sessionStore();
+      const untouched =
+        JSON.stringify(cleanDraft({ form })) === baselineRef.current &&
+        !contactName.trim() &&
+        !phoneNumber;
+      if (untouched) clearDraft(storage);
+      else writeDraft(storage, { form, contactName, phoneNumber });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [inline, open, loading, form, contactName, phoneNumber]);
+
+  // Inline: the description is the first thing typed; once the buyer leaves it, the
+  // fields it already answers (type, rooms, budget, payment) are filled when still empty.
+  const handleNotesBlur = () => {
+    if (!form.notes.trim()) return;
+    const parsed = prefillFromRequestText(form.notes);
+    const fill = {};
+    for (const key of ["buildingType", "roomsCount", "max_price", "downPayment", "monthlyInstallment"]) {
+      if (form[key] === "" && parsed[key] != null) fill[key] = parsed[key];
+    }
+    if (!form.paymentMode && parsed.paymentMode) {
+      fill.paymentMode = parsed.paymentMode;
+      if (parsed.deliveryDate) fill.deliveryDate = parsed.deliveryDate;
+    }
+    if (Object.keys(fill).length) setForm((prev) => applyPrefill(prev, fill));
+  };
 
   const handleFieldChange = (e) => {
     const { name, value } = e.target;
@@ -390,6 +483,19 @@ export default function BuyRequestDialog({
     });
   };
 
+  // Contact is asked of a new request; the owner of a saved request is not asked again.
+  const knownContact = showContactFields && editingSaved && !forceContact;
+  const askContact = showContactFields && !knownContact;
+  const hintParts = [
+    contactHint?.name,
+    contactHint?.phoneTail ? `••• ${contactHint.phoneTail}` : "",
+  ].filter(Boolean);
+
+  const handleClose = () => {
+    if (savingRef.current) return;
+    onClose?.();
+  };
+
   const isCash = form.paymentMode === "cash";
   const isInstallment = form.paymentMode === "installment";
   const placeName = (place) =>
@@ -402,57 +508,64 @@ export default function BuyRequestDialog({
 
   const handleSubmit = async (e) => {
     e?.preventDefault?.();
+    if (savingRef.current) return;
     if (!userId && !showContactFields) return;
 
-    if (!notBrokerConfirmed) {
-      toast.error(
-        tr(
-          "lenaqar.buyRequest.notBrokerRequired",
-          "You must confirm you are not a broker",
-        ),
-      );
-      return;
-    }
-
-    if (showContactFields) {
-      if (!contactName.trim()) {
-        toast.error(tr("lenaqar.buyRequest.nameRequired", "Name is required"));
-        return;
-      }
-      if (!phonePayload?.combined) {
-        toast.error(tr("lenaqar.buyRequest.phoneRequired", "Phone is required"));
-        return;
-      }
-    }
-
+    // Check everything at once, so every empty required field is marked together.
     const built = buildPublicBuyRequirement(form);
-    if (!built.ok) {
-      setFieldErrors(built.errors);
+    const gaps = {};
+    if (askContact) {
+      if (!contactName.trim()) gaps.contact_name = true;
+      if (!phonePayload?.combined) gaps.contact_phone = true;
+    }
+    if (!notBrokerConfirmed) gaps.not_broker = true;
+    const builtErrors = built.ok ? {} : built.errors;
+
+    if (!built.ok || Object.keys(gaps).length) {
+      setFieldErrors(builtErrors);
+      setMissing(gaps);
       setPlacesError(
-        built.errors.places
-          ? tr(`lenaqar.buyRequest.errors.${built.errors.places}`)
-          : "",
+        builtErrors.places ? tr(`lenaqar.buyRequest.errors.${builtErrors.places}`) : "",
       );
       // An error inside the optional block must not stay hidden behind its toggle.
-      if (DETAIL_ERROR_KEYS.some((key) => built.errors[key])) setDetailsOpen(true);
-      const first = Object.values(built.errors)[0];
+      if (DETAIL_ERROR_KEYS.some((key) => builtErrors[key])) setDetailsOpen(true);
       toast.error(
-        tr(
-          `lenaqar.buyRequest.errors.${first}`,
-          locale === "ar" ? "راجع البيانات المطلوبة" : "Check the required fields",
-        ),
+        locale === "ar"
+          ? "كمّل الحقول المعلّمة بالأحمر"
+          : "Complete the highlighted fields",
       );
+      // Bring the first marked field (in form order) into view.
+      const order = [
+        "notes",
+        "places",
+        "buildingType",
+        "max_price",
+        "contact_name",
+        "contact_phone",
+        "not_broker",
+      ];
+      const failing = new Set([...Object.keys(builtErrors), ...Object.keys(gaps)]);
+      const firstKey = order.find((key) => failing.has(key));
+      requestAnimationFrame(() => {
+        const target = firstKey
+          ? document.querySelector(`[data-field="${firstKey}"]`)
+          : null;
+        target?.scrollIntoView({ block: "center", behavior: "smooth" });
+      });
       return;
     }
+    setMissing({});
     setFieldErrors({});
     setPlacesError("");
 
+    savingRef.current = true;
     setSaving(true);
+    onSavingChange?.(true);
     setWhatsappFallbackHrefState("");
     try {
       const extra = {
         notBrokerConfirmed: true,
-        ...(showContactFields
+        ...(askContact
           ? {
               contact: {
                 name: contactName.trim(),
@@ -465,13 +578,26 @@ export default function BuyRequestDialog({
       const savedUserId = String(saveResult?.userId || userId || "").trim();
       if (savedUserId) onUserId?.(savedUserId);
 
-      toast.success(
-        successMessage ||
-          tr("lenaqar.buyRequest.saved", "Request saved"),
-      );
+      if (inline) {
+        draftOffRef.current = true;
+        clearDraft(sessionStore());
+      }
+      if (showSuccessToast) {
+        toast.success(
+          successMessage ||
+            tr("lenaqar.buyRequest.saved", "Request saved"),
+        );
+      }
       onSuccess?.(built.requirement, saveResult);
       onClose();
     } catch (err) {
+      if (err?.code === "contact_required") {
+        // Nothing was saved and the server needs to know who this is: show the
+        // contact fields (empty, to be typed) instead of the WhatsApp fallback.
+        setForceContact(true);
+        toast.error(tr("lenaqar.buyRequest.errors.contact_required"));
+        return;
+      }
       const buildingTypeLabel = form.buildingType
         ? tr(`buildingTypes.${form.buildingType}`, form.buildingType)
         : "";
@@ -482,7 +608,7 @@ export default function BuyRequestDialog({
           city: form.places.map(placeName).join("، "),
           buildingType: buildingTypeLabel,
         },
-        contact: showContactFields
+        contact: askContact
           ? {
               name: contactName.trim(),
               phone: phonePayload?.combined,
@@ -507,40 +633,29 @@ export default function BuyRequestDialog({
       });
       setWhatsappFallbackHrefState(whatsappFallbackHref(message));
     } finally {
+      savingRef.current = false;
       setSaving(false);
+      onSavingChange?.(false);
     }
   };
 
   const dropdownClassName = "w-full";
 
-  return (
-    <UnifiedDialog
-      isOpen={open}
-      onClose={onClose}
-      title={title || tr("lenaqar.buyRequest.title", "Buy request")}
-      cancelLabel={tr("common.cancel", locale === "ar" ? "إلغاء" : "Cancel")}
-      onCancel={onClose}
-      submitLabel={
-        saving
-          ? tr("lenaqar.buyRequest.sending", "بنبعت الطلب...")
-          : submitLabel || tr("lenaqar.buyRequest.submit", "Submit")
-      }
-      onSubmit={handleSubmit}
-      submitDisabled={
-        loading ||
-        saving ||
-        (!userId && !showContactFields) ||
-        !notBrokerConfirmed
-      }
-      submitLoading={saving}
-      closeOnEscape
-      overlayClassName={overlayClassName}
-      dialogClassName="w-full sm:max-w-xl"
-      bodyClassName="space-y-5 text-sm !p-4 pb-8"
-    >
+  const submitDisabled = loading || saving || (!userId && !showContactFields);
+  const submitText = saving
+    ? tr("lenaqar.buyRequest.sending", "بنبعت الطلب...")
+    : submitLabel || tr("lenaqar.buyRequest.submit", "Submit");
+
+  const content = (
+    <>
       {loading ? (
-        <div className="p-6 text-center text-sm text-gray-500">
-          {tr("common.loading", locale === "ar" ? "بنحمّل..." : "Loading...")}
+        <div role="status" aria-busy="true" className="space-y-5 py-1">
+          <span className="sr-only">
+            {tr("common.loading", locale === "ar" ? "بنحمّل..." : "Loading...")}
+          </span>
+          {[0, 1, 2, 3].map((row) => (
+            <div key={row} aria-hidden="true" className="skeleton-shimmer h-12 rounded-md" />
+          ))}
         </div>
       ) : (
         <>
@@ -557,63 +672,113 @@ export default function BuyRequestDialog({
             />
           ) : null}
 
-          <RequestPlacePicker
-            value={form.places}
-            onChange={handlePlacesChange}
-            projects={catalogProjects}
-            enabled={open}
-            error={placesError}
-          />
+          {inline ? (
+            <div data-field="notes" onBlur={handleNotesBlur}>
+              <LenaTextarea
+                ref={notesRef}
+                name="notes"
+                label={tr("lenaqar.buyRequest.notesTopLabel")}
+                value={form.notes}
+                onChange={handleFieldChange}
+                rows={3}
+                helperText={tr("lenaqar.buyRequest.notesTopHint")}
+                error={Boolean(compactError("notes"))}
+                errorMessage={compactError("notes")}
+              />
+            </div>
+          ) : null}
 
-          <SearchableDropdownSelect
-            name="buildingType"
-            label={tr("lenaqar.buyRequest.buildingType", "Property type")}
-            value={form.buildingType}
-            onChange={handleFieldChange}
-            options={buildingTypeOptions}
-            sortOptions={keepGivenOrder}
-            required
-            error={Boolean(compactError("buildingType"))}
-            errorMessage={compactError("buildingType")}
-            placeholder={tr("lenaqar.buyRequest.selectType", "Select type")}
-            className={dropdownClassName}
-          />
+          <div data-field="places">
+            <RequestPlacePicker
+              value={form.places}
+              onChange={handlePlacesChange}
+              projects={catalogProjects}
+              enabled={open}
+              error={placesError}
+            />
+          </div>
 
-          <LenaTextField
-            name="max_price"
-            type="money"
-            label={tr("lenaqar.buyRequest.maxPrice", "Total price budget")}
-            value={form.max_price}
-            onChange={handleFieldChange}
-            placeholder={tr("lenaqar.buyRequest.maxPricePlaceholder")}
-            adornment={tr("lenaqar.unit.egp")}
-            required
-            error={Boolean(compactError("max_price"))}
-            errorMessage={compactError("max_price")}
-          />
+          <div data-field="buildingType">
+            <SearchableDropdownSelect
+              name="buildingType"
+              label={tr("lenaqar.buyRequest.buildingType", "Property type")}
+              value={form.buildingType}
+              onChange={handleFieldChange}
+              options={buildingTypeOptions}
+              sortOptions={keepGivenOrder}
+              required
+              error={Boolean(compactError("buildingType"))}
+              errorMessage={compactError("buildingType")}
+              placeholder={tr("lenaqar.buyRequest.selectType", "Select type")}
+              className={dropdownClassName}
+            />
+          </div>
 
-          {showContactFields ? (
+          <div data-field="max_price">
+            <LenaTextField
+              name="max_price"
+              type="money"
+              label={tr("lenaqar.buyRequest.maxPrice", "Total price budget")}
+              value={form.max_price}
+              onChange={handleFieldChange}
+              placeholder={tr("lenaqar.buyRequest.maxPricePlaceholder")}
+              adornment={tr("lenaqar.unit.egp")}
+              required
+              error={Boolean(compactError("max_price"))}
+              errorMessage={compactError("max_price")}
+            />
+          </div>
+
+          {knownContact && hintParts.length ? (
+            <p className="rounded-lg bg-primary/5 px-3 py-2.5 text-sm text-gray-700">
+              {tr("lenaqar.buyRequest.contactKnown")}{" "}
+              <bdi className="font-semibold text-primary">{hintParts.join(" · ")}</bdi>
+            </p>
+          ) : null}
+
+          {askContact ? (
             <section className="space-y-3">
               <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                 {tr("lenaqar.buyRequest.contactSection", "Contact")}
               </h4>
-              <LenaTextField
-                name="contact_name"
-                label={tr("lenaqar.buyRequest.name", "Name")}
-                value={contactName}
-                onChange={(e) => setContactName(e.target.value)}
-                required
-              />
-              <PhoneField
-                className="w-full"
-                name="contact_phone"
-                label={tr("lenaqar.buyRequest.phone", "Phone")}
-                required
-                defaultCountry="EG"
-                value={phoneNumber}
-                onChange={(next) => setPhoneNumber(next ?? "")}
-                onValueChange={setPhonePayload}
-              />
+              <div data-field="contact_name">
+                <LenaTextField
+                  name="contact_name"
+                  label={tr("lenaqar.buyRequest.name", "Name")}
+                  value={contactName}
+                  onChange={(e) => {
+                    setContactName(e.target.value);
+                    if (e.target.value.trim()) clearMissing("contact_name");
+                  }}
+                  required
+                  error={Boolean(missing.contact_name)}
+                  errorMessage={
+                    missing.contact_name
+                      ? tr("lenaqar.buyRequest.nameRequired", "Name is required")
+                      : ""
+                  }
+                />
+              </div>
+              <div data-field="contact_phone">
+                <PhoneField
+                  className="w-full"
+                  name="contact_phone"
+                  label={tr("lenaqar.buyRequest.phone", "Phone")}
+                  required
+                  defaultCountry="EG"
+                  value={phoneNumber}
+                  error={
+                    missing.contact_phone
+                      ? tr("lenaqar.buyRequest.phoneRequired", "Phone is required")
+                      : undefined
+                  }
+                  onChange={(next) => setPhoneNumber(next ?? "")}
+                  onValueChange={(payload) => {
+                    setPhonePayload(payload);
+                    if (payload?.combined) clearMissing("contact_phone");
+                  }}
+                />
+              </div>
             </section>
           ) : null}
 
@@ -740,38 +905,103 @@ export default function BuyRequestDialog({
                   </>
                 ) : null}
 
-                <LenaTextarea
-                  name="notes"
-                  label={tr("lenaqar.buyRequest.notes", "Notes")}
-                  value={form.notes}
-                  onChange={handleFieldChange}
-                  rows={3}
-                  helperText={tr(
-                    "lenaqar.buyRequest.notesHint",
-                    "اكتب أي تفاصيل إضافية عن اللي بتدور عليه",
-                  )}
-                  error={Boolean(compactError("notes"))}
-                  errorMessage={compactError("notes")}
-                />
+                {inline ? null : (
+                  <LenaTextarea
+                    name="notes"
+                    label={tr("lenaqar.buyRequest.notes", "Notes")}
+                    value={form.notes}
+                    onChange={handleFieldChange}
+                    rows={3}
+                    helperText={tr(
+                      "lenaqar.buyRequest.notesHint",
+                      "اكتب أي تفاصيل إضافية عن اللي بتدور عليه",
+                    )}
+                    error={Boolean(compactError("notes"))}
+                    errorMessage={compactError("notes")}
+                  />
+                )}
               </div>
             ) : null}
           </section>
 
-          <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-black/10 bg-black/[0.02] p-3.5">
-            <input
-              type="checkbox"
-              name="not_broker_confirm"
-              checked={notBrokerConfirmed}
-              onChange={(event) => setNotBrokerConfirmed(event.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-black/20 text-primary focus:ring-primary/30"
-              required
-            />
-            <span className="text-sm text-black/80 leading-relaxed">
-              {tr("lenaqar.buyRequest.notBrokerConfirm")}
-            </span>
-          </label>
+          {/* Yellow so nobody misses it; red once a submit found it unchecked. */}
+          <div data-field="not_broker">
+            <label
+              className={`flex items-start gap-3 cursor-pointer rounded-xl border-2 p-3.5 transition-colors ${
+                missing.not_broker
+                  ? "border-red-500 bg-red-50"
+                  : "border-amber-400 bg-amber-50"
+              }`}
+            >
+              <input
+                type="checkbox"
+                name="not_broker_confirm"
+                checked={notBrokerConfirmed}
+                aria-invalid={Boolean(missing.not_broker)}
+                onChange={(event) => {
+                  setNotBrokerConfirmed(event.target.checked);
+                  if (event.target.checked) clearMissing("not_broker");
+                }}
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-black/30 text-primary focus:ring-primary/30"
+              />
+              <span className="text-sm font-medium text-black/80 leading-relaxed">
+                {tr("lenaqar.buyRequest.notBrokerConfirm")}
+              </span>
+            </label>
+            {missing.not_broker ? (
+              <p role="alert" className="mt-1.5 text-xs font-medium text-red-600">
+                {tr("lenaqar.buyRequest.notBrokerRequired", "You must confirm you are not a broker")}
+              </p>
+            ) : null}
+          </div>
         </>
       )}
+    </>
+  );
+
+  // Inline: the same fields in the page's own layout. No overlay, no close button; the one
+  // submit action closes the form.
+  if (inline) {
+    return (
+      <form
+        onSubmit={handleSubmit}
+        noValidate
+        aria-busy={saving}
+        className={`space-y-5 text-sm ${className}`}
+      >
+        {content}
+        <button
+          type="submit"
+          disabled={submitDisabled}
+          className={actionButtonClass({
+            variant: "primary",
+            size: "large",
+            className: "w-full disabled:pointer-events-none disabled:opacity-60",
+          })}
+        >
+          {submitText}
+        </button>
+      </form>
+    );
+  }
+
+  return (
+    <UnifiedDialog
+      isOpen={open}
+      onClose={handleClose}
+      title={title || tr("lenaqar.buyRequest.title", "Buy request")}
+      cancelLabel={tr("common.cancel", locale === "ar" ? "إلغاء" : "Cancel")}
+      onCancel={handleClose}
+      submitLabel={submitText}
+      onSubmit={handleSubmit}
+      submitDisabled={submitDisabled}
+      submitLoading={saving}
+      closeOnEscape
+      overlayClassName={overlayClassName}
+      dialogClassName="w-full sm:max-w-xl"
+      bodyClassName="space-y-5 text-sm !p-4 pb-8"
+    >
+      {content}
     </UnifiedDialog>
   );
 }
