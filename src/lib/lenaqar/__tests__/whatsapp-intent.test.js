@@ -4,6 +4,7 @@ import {
   buyerPageCtaMessage,
   matchRequestMessage,
   normalizeMatchRef,
+  withMatchRef,
 } from "../whatsapp-intent.js";
 
 test("buyer footer message carries listing attribution on property detail routes", () => {
@@ -64,4 +65,15 @@ test("anything that is not a well-formed reference is left out of the message", 
 
 test("a reference is normalised to upper case", () => {
   assert.equal(normalizeMatchRef("k7q2m9xd"), "K7Q2M9XD");
+});
+
+test("a unit card on the match page sends the unit code, then the request reference", () => {
+  const unitOpener = "مرحبا لينا عقار، جاي من موقع لينا عقار — OPP-J6YDYHAJ";
+  assert.equal(
+    withMatchRef(unitOpener, "k7q2m9xd"),
+    "مرحبا لينا عقار، جاي من موقع لينا عقار — OPP-J6YDYHAJ — MATCH-K7Q2M9XD",
+  );
+  // No clean reference: the plain unit opener, exactly as a unit page sends it.
+  assert.equal(withMatchRef(unitOpener, "bad"), unitOpener);
+  assert.equal(withMatchRef(unitOpener, ""), unitOpener);
 });

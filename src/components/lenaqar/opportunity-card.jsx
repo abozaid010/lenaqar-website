@@ -22,7 +22,13 @@ function firstImageUrl(unit) {
   return url ? getDisplayImageUrl(url) : null;
 }
 
-export default function OpportunityCard({ unit }) {
+/**
+ * @param {object} props
+ * @param {object} props.unit public opportunity
+ * @param {import("react").ReactNode} [props.badge] line above the title (match page)
+ * @param {import("react").ReactNode} [props.actions] replaces the default WhatsApp action
+ */
+export default function OpportunityCard({ unit, badge = null, actions = null }) {
   const { translate } = useI18n();
   if (!unit) return null;
 
@@ -69,6 +75,7 @@ export default function OpportunityCard({ unit }) {
       </Link>
 
       <div className="p-4 flex flex-col gap-3 grow">
+        {badge}
         <div>
           {projectName ? (
             <h3 className="font-bold text-primary">
@@ -166,7 +173,9 @@ export default function OpportunityCard({ unit }) {
           ) : null}
         </dl>
 
-        <OpportunityUnitActions unit={unit} location="opportunity_card" className="mt-auto" />
+        {actions || (
+          <OpportunityUnitActions unit={unit} location="opportunity_card" className="mt-auto" />
+        )}
       </div>
     </article>
   );
