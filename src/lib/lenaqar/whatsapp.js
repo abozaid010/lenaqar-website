@@ -3,6 +3,7 @@ import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
 import {
   buyerPageCtaMessage,
   matchRequestMessage,
+  unitInquiryMessage,
   withMatchRef,
 } from "./whatsapp-intent.js";
 
@@ -56,9 +57,8 @@ export function addUnitForRequirementHref(requirement) {
 }
 
 export function buyerCtaMessage(unit) {
-  const code = String(unit?.code || "UNIT").trim().toUpperCase() || "UNIT";
-  // PAGE-CODE format (content-rules / contact-rules): route slug in caps.
-  return `مرحبا لينا عقار، جاي من موقع لينا عقار — OPP-${code}`;
+  // Short question + the unit's page code (OPP-<code>), which the agent reads.
+  return unitInquiryMessage(unit);
 }
 
 export function buyerCtaHref(unit) {

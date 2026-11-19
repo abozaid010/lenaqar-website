@@ -4,6 +4,7 @@ import {
   buyerPageCtaMessage,
   matchRequestMessage,
   normalizeMatchRef,
+  unitInquiryMessage,
   withMatchRef,
 } from "../whatsapp-intent.js";
 
@@ -67,11 +68,34 @@ test("a reference is normalised to upper case", () => {
   assert.equal(normalizeMatchRef("k7q2m9xd"), "K7Q2M9XD");
 });
 
+test("a unit opener asks about the unit, then carries its code", () => {
+  assert.equal(
+    unitInquiryMessage({ code: "rwl5wi1v", buildingType: "apartment" }),
+    "مرحبا\nعايز اعرف تفاصيل اكتر عن الشقة دى؟ — OPP-RWL5WI1V",
+  );
+  assert.equal(
+    unitInquiryMessage({ code: "AB12", buildingType: "villa" }),
+    "مرحبا\nعايز اعرف تفاصيل اكتر عن الفيلا دى؟ — OPP-AB12",
+  );
+  // Any other or unknown type: "the unit".
+  assert.match(unitInquiryMessage({ code: "AB12", buildingType: "land" }), /عن الوحدة دى؟ — OPP-AB12$/);
+  assert.match(unitInquiryMessage({ code: "AB12" }), /عن الوحدة دى؟ — OPP-AB12$/);
+  // A code already written as OPP-… is not doubled.
+  assert.match(unitInquiryMessage({ code: "OPP-AB12", buildingType: "apartment" }), /— OPP-AB12$/);
+});
+
+test("the code stays a standalone dash-separated code the backend can read", () => {
+  const message = withMatchRef(unitInquiryMessage({ code: "RWL5WI1V", buildingType: "apartment" }), "9brr4u27");
+  assert.match(message, /[—–-]\s*OPP-RWL5WI1V(?![\w-])/);
+  assert.match(message, /[—–-]\s*MATCH-9BRR4U27(?![\w-])/);
+  assert.ok(message.endsWith("— OPP-RWL5WI1V — MATCH-9BRR4U27"));
+});
+
 test("a unit card on the match page sends the unit code, then the request reference", () => {
-  const unitOpener = "مرحبا لينا عقار، جاي من موقع لينا عقار — OPP-J6YDYHAJ";
+  const unitOpener = unitInquiryMessage({ code: "J6YDYHAJ", buildingType: "apartment" });
   assert.equal(
     withMatchRef(unitOpener, "k7q2m9xd"),
-    "مرحبا لينا عقار، جاي من موقع لينا عقار — OPP-J6YDYHAJ — MATCH-K7Q2M9XD",
+    "مرحبا\nعايز اعرف تفاصيل اكتر عن الشقة دى؟ — OPP-J6YDYHAJ — MATCH-K7Q2M9XD",
   );
   // No clean reference: the plain unit opener, exactly as a unit page sends it.
   assert.equal(withMatchRef(unitOpener, "bad"), unitOpener);
