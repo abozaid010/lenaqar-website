@@ -52,6 +52,7 @@ async function loadBuyRequestServer() {
     "@/lib/lenaqar/buy-request-payload": real("../buy-request-payload.js"),
     "@/lib/lenaqar/attribution": real("../attribution.js"),
     "@/lib/lenaqar/whatsapp-intent": real("../whatsapp-intent.js"),
+    "@/lib/lenaqar/buy-request-errors": real("../buy-request-errors.js"),
   };
   const source = (await readFile(url, "utf8")).replace(/from "([^"]+)"/g, (match, specifier) => {
     const target = mocks[specifier];

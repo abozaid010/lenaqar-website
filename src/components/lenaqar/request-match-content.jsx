@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { MessageCircle, Phone } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { recordUnitInterest } from "@/app/(lenaqar)/_actions/buy-request";
@@ -72,6 +73,8 @@ export default function RequestMatchContent({ result }) {
   const t = (key) => translate(`lenaqar.matchPage.${key}`);
   const matchRef = result?.matchRef || "";
   const ownsRequest = useOwnsRequest(matchRef);
+  const router = useRouter();
+  const [retrying, startRetry] = useTransition();
 
   if (result?.status === "not_found") {
     return (
@@ -84,6 +87,15 @@ export default function RequestMatchContent({ result }) {
   if (result?.status !== "ok") {
     return (
       <Notice title={t("unavailableTitle")} body={t("unavailableBody")}>
+        {/* The request is saved; reading the units again is all a retry does. */}
+        <button
+          type="button"
+          disabled={retrying}
+          onClick={() => startRetry(() => router.refresh())}
+          className={`${callClass} disabled:opacity-60`}
+        >
+          {t("retry")}
+        </button>
         <WhatsAppCta
           href={matchRequestHref(matchRef)}
           intent="buy"

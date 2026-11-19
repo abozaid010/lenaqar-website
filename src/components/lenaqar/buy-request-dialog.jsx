@@ -31,7 +31,7 @@ import {
 import { parseMoneyInput, normalizeToEnglishDigits } from "@/utils/parse-amount";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 const MONEY_FIELDS = new Set([
@@ -215,6 +215,9 @@ export default function BuyRequestDialog({
   submitLabel,
   intro,
   successMessage,
+  showSuccessToast = true,
+  onSavingChange,
+  contactHint = null,
   clientId,
   initialValues,
   prefill,
@@ -241,6 +244,14 @@ export default function BuyRequestDialog({
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  // Set at once on submit (state lags a render): blocks a second submit and the close
+  // actions (Escape, the header X) while the request is being saved.
+  const savingRef = useRef(false);
+  // The saved request was read back for this buyer: they are editing it, and the
+  // server already knows who they are.
+  const [editingSaved, setEditingSaved] = useState(false);
+  // The server asked for a name and phone after all (it no longer accepts the saved proof).
+  const [forceContact, setForceContact] = useState(false);
   const [form, setForm] = useState(() => createEmptyForm(initialValues));
   const [placesError, setPlacesError] = useState("");
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -282,6 +293,7 @@ export default function BuyRequestDialog({
     setPlacesError("");
     setDetailsOpen(false);
     setNotBrokerConfirmed(false);
+    setForceContact(false);
     setWhatsappFallbackHrefState("");
     setFieldErrors((prev) =>
       prev && Object.keys(prev).length === 0 ? prev : {},
@@ -298,6 +310,7 @@ export default function BuyRequestDialog({
     };
     if (!userId) {
       seed(applyPrefill(createEmptyForm(initialValues), prefill));
+      setEditingSaved(false);
       setContactName("");
       setPhoneNumber("");
       setPhonePayload(null);
@@ -312,12 +325,15 @@ export default function BuyRequestDialog({
         if (cancelled) return;
         if (raw?.error || !raw || typeof raw !== "object") {
           if (raw?.error) toast.error(String(raw.error));
+          setEditingSaved(false);
           seed(applyPrefill(createEmptyForm(initialValues), prefill));
           return;
         }
+        setEditingSaved(true);
         seed(applyPrefill(mapLoadedRequirement(raw), prefill));
       } catch (e) {
         if (!cancelled) {
+          setEditingSaved(false);
           toast.error(
             e?.message ||
               tr("lenaqar.buyRequest.loadFailed", "Failed to load request"),
@@ -390,6 +406,19 @@ export default function BuyRequestDialog({
     });
   };
 
+  // Contact is asked of a new request; the owner of a saved request is not asked again.
+  const knownContact = showContactFields && editingSaved && !forceContact;
+  const askContact = showContactFields && !knownContact;
+  const hintParts = [
+    contactHint?.name,
+    contactHint?.phoneTail ? `••• ${contactHint.phoneTail}` : "",
+  ].filter(Boolean);
+
+  const handleClose = () => {
+    if (savingRef.current) return;
+    onClose?.();
+  };
+
   const isCash = form.paymentMode === "cash";
   const isInstallment = form.paymentMode === "installment";
   const placeName = (place) =>
@@ -402,6 +431,7 @@ export default function BuyRequestDialog({
 
   const handleSubmit = async (e) => {
     e?.preventDefault?.();
+    if (savingRef.current) return;
     if (!userId && !showContactFields) return;
 
     if (!notBrokerConfirmed) {
@@ -414,7 +444,7 @@ export default function BuyRequestDialog({
       return;
     }
 
-    if (showContactFields) {
+    if (askContact) {
       if (!contactName.trim()) {
         toast.error(tr("lenaqar.buyRequest.nameRequired", "Name is required"));
         return;
@@ -447,12 +477,14 @@ export default function BuyRequestDialog({
     setFieldErrors({});
     setPlacesError("");
 
+    savingRef.current = true;
     setSaving(true);
+    onSavingChange?.(true);
     setWhatsappFallbackHrefState("");
     try {
       const extra = {
         notBrokerConfirmed: true,
-        ...(showContactFields
+        ...(askContact
           ? {
               contact: {
                 name: contactName.trim(),
@@ -465,13 +497,22 @@ export default function BuyRequestDialog({
       const savedUserId = String(saveResult?.userId || userId || "").trim();
       if (savedUserId) onUserId?.(savedUserId);
 
-      toast.success(
-        successMessage ||
-          tr("lenaqar.buyRequest.saved", "Request saved"),
-      );
+      if (showSuccessToast) {
+        toast.success(
+          successMessage ||
+            tr("lenaqar.buyRequest.saved", "Request saved"),
+        );
+      }
       onSuccess?.(built.requirement, saveResult);
       onClose();
     } catch (err) {
+      if (err?.code === "contact_required") {
+        // Nothing was saved and the server needs to know who this is: show the
+        // contact fields (empty, to be typed) instead of the WhatsApp fallback.
+        setForceContact(true);
+        toast.error(tr("lenaqar.buyRequest.errors.contact_required"));
+        return;
+      }
       const buildingTypeLabel = form.buildingType
         ? tr(`buildingTypes.${form.buildingType}`, form.buildingType)
         : "";
@@ -482,7 +523,7 @@ export default function BuyRequestDialog({
           city: form.places.map(placeName).join("، "),
           buildingType: buildingTypeLabel,
         },
-        contact: showContactFields
+        contact: askContact
           ? {
               name: contactName.trim(),
               phone: phonePayload?.combined,
@@ -507,7 +548,9 @@ export default function BuyRequestDialog({
       });
       setWhatsappFallbackHrefState(whatsappFallbackHref(message));
     } finally {
+      savingRef.current = false;
       setSaving(false);
+      onSavingChange?.(false);
     }
   };
 
@@ -516,10 +559,10 @@ export default function BuyRequestDialog({
   return (
     <UnifiedDialog
       isOpen={open}
-      onClose={onClose}
+      onClose={handleClose}
       title={title || tr("lenaqar.buyRequest.title", "Buy request")}
       cancelLabel={tr("common.cancel", locale === "ar" ? "إلغاء" : "Cancel")}
-      onCancel={onClose}
+      onCancel={handleClose}
       submitLabel={
         saving
           ? tr("lenaqar.buyRequest.sending", "بنبعت الطلب...")
@@ -539,8 +582,13 @@ export default function BuyRequestDialog({
       bodyClassName="space-y-5 text-sm !p-4 pb-8"
     >
       {loading ? (
-        <div className="p-6 text-center text-sm text-gray-500">
-          {tr("common.loading", locale === "ar" ? "بنحمّل..." : "Loading...")}
+        <div role="status" aria-busy="true" className="space-y-5 py-1">
+          <span className="sr-only">
+            {tr("common.loading", locale === "ar" ? "بنحمّل..." : "Loading...")}
+          </span>
+          {[0, 1, 2, 3].map((row) => (
+            <div key={row} aria-hidden="true" className="skeleton-shimmer h-12 rounded-md" />
+          ))}
         </div>
       ) : (
         <>
@@ -592,7 +640,14 @@ export default function BuyRequestDialog({
             errorMessage={compactError("max_price")}
           />
 
-          {showContactFields ? (
+          {knownContact && hintParts.length ? (
+            <p className="rounded-lg bg-primary/5 px-3 py-2.5 text-sm text-gray-700">
+              {tr("lenaqar.buyRequest.contactKnown")}{" "}
+              <bdi className="font-semibold text-primary">{hintParts.join(" · ")}</bdi>
+            </p>
+          ) : null}
+
+          {askContact ? (
             <section className="space-y-3">
               <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                 {tr("lenaqar.buyRequest.contactSection", "Contact")}

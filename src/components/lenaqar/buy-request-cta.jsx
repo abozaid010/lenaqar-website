@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { useI18n } from "@/hooks/useI18n";
 import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
 import { ANALYTICS } from "@/constants/analytics";
@@ -10,12 +11,14 @@ import { requirementToUnitsFilter } from "@/lib/match/requirement-to-units-filte
 import { trackBuyRequestSubmitted } from "@/lib/analytics";
 import { readAttribution } from "@/lib/lenaqar/attribution";
 import {
-  buyRequestRepeatKey,
+  buyRequestSubmitKey,
   findRepeatSubmit,
+  isNewBuyRequestConversion,
   readLastBuyRequestSubmit,
   saveLastBuyRequestSubmit,
 } from "@/lib/lenaqar/buy-request-repeat";
 import BuyRequestDialog from "./buy-request-dialog";
+import MatchLoading from "./match-loading";
 import BuyRequestSuccess from "./buy-request-success";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import {
@@ -23,7 +26,12 @@ import {
   savePublicBuyRequest,
 } from "@/app/(lenaqar)/_actions/buy-request";
 import { actionButtonClass } from "@/components/ui/action-button-class";
-import { readMatchRef, writeMatchRef } from "@/lib/lenaqar/buy-request-identity";
+import {
+  clearMatchRef,
+  readContactHint,
+  readMatchRef,
+  writeMatchRef,
+} from "@/lib/lenaqar/buy-request-identity";
 import ActionButtonArrow from "@/components/ui/action-button-arrow";
 
 let buyRequestHashHandled = false;
@@ -112,6 +120,12 @@ export default function BuyRequestCta({
   );
   const [userId, setUserId] = useState("");
   const [submitted, setSubmitted] = useState(null);
+  // Saving (set by the dialog) and the navigation to the match page (a transition) are
+  // one "matching" state for the buyer: the loading screen covers both, and goes away
+  // when the save fails or the match page has rendered.
+  const [saving, setSaving] = useState(false);
+  const [navigating, startNavigation] = useTransition();
+  const [contactHint, setContactHint] = useState(null);
 
   useEffect(() => {
     setUserId(readStoredUserId());
@@ -122,6 +136,10 @@ export default function BuyRequestCta({
     setOpen(true);
     trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_OPENED, { cta_location: trackingLocation });
   }, [trackEvent, isControlled, setOpen, trackingLocation]);
+
+  useEffect(() => {
+    setContactHint(open && userId ? readContactHint(browserStorage(), userId) : null);
+  }, [open, userId]);
 
   const handleUserId = useCallback((nextId) => {
     const id = String(nextId || "").trim();
@@ -139,6 +157,8 @@ export default function BuyRequestCta({
       if (raw?.error) {
         return { error: translate("lenaqar.buyRequest.loadFailed") };
       }
+      // The backend no longer knows this proof: forget it, so the form asks for contact.
+      if (!raw) clearMatchRef(browserStorage());
       return raw;
     },
     [translate],
@@ -146,8 +166,17 @@ export default function BuyRequestCta({
 
   const saveRequirement = useCallback(
     async (id, payload, extra) => {
-      // Same phone again within 5 minutes: reuse the first result, no second post.
-      const repeatKey = await buyRequestRepeatKey(extra?.contact?.phone);
+      // The buyer is editing a request this browser saved (the server accepts the proof).
+      const isEdit = Boolean(id && readMatchRef(browserStorage(), id));
+
+      // The identical submission again within 5 minutes reuses the first result; a
+      // changed request (budget, place, ...) is always posted.
+      const repeatKey = await buyRequestSubmitKey({
+        userId: isEdit ? id : "",
+        phone: extra?.contact?.phone,
+        name: extra?.contact?.name,
+        requirement: payload,
+      });
       const repeat = findRepeatSubmit(readLastBuyRequestSubmit(), repeatKey);
       if (repeat) {
         return {
@@ -155,6 +184,7 @@ export default function BuyRequestCta({
           userId: repeat.userId,
           matchRef: repeat.matchRef || "",
           repeated: true,
+          isEdit,
         };
       }
 
@@ -170,11 +200,14 @@ export default function BuyRequestCta({
       });
       if (!result?.ok) {
         const code = result?.code || "save_failed";
-        throw new Error(
-          translate(
-            `lenaqar.buyRequest.errors.${code}`,
-            translate("lenaqar.buyRequest.saveFailed"),
+        throw Object.assign(
+          new Error(
+            translate(
+              `lenaqar.buyRequest.errors.${code}`,
+              translate("lenaqar.buyRequest.saveFailed"),
+            ),
           ),
+          { code },
         );
       }
       saveLastBuyRequestSubmit({
@@ -182,8 +215,8 @@ export default function BuyRequestCta({
         userId: result.userId,
         matchRef: result.matchRef,
       });
-      writeMatchRef(browserStorage(), result.userId, result.matchRef);
-      return result;
+      writeMatchRef(browserStorage(), result.userId, result.matchRef, extra?.contact);
+      return { ...result, isEdit };
     },
     [translate],
   );
@@ -212,6 +245,9 @@ export default function BuyRequestCta({
         submitLabel={translate("lenaqar.buyRequest.submit")}
         intro={translate("lenaqar.buyRequest.intro")}
         successMessage={translate("lenaqar.buyRequest.saved")}
+        showSuccessToast={false}
+        onSavingChange={setSaving}
+        contactHint={contactHint}
         initialValues={initialValues}
         prefill={prefill}
         showContactFields
@@ -221,7 +257,8 @@ export default function BuyRequestCta({
         onSuccess={(requirement, saveResult) => {
           // Ads conversion: Lead = successful buyer request (no PII in payload).
           // A repeat of the same phone is not a second conversion.
-          if (!saveResult?.repeated) {
+          // An edit of a saved request is not a new lead either.
+          if (isNewBuyRequestConversion(saveResult || {})) {
             trackBuyRequestSubmitted({ location: trackingLocation, city: requirement?.city });
           }
           const qs = opportunityQueryFromRequirement({
@@ -238,11 +275,15 @@ export default function BuyRequestCta({
             // from. The match page is dynamic, so a push already reads it fresh;
             // from that same page (an edited request) a refresh re-reads it.
             const target = `/requests/match/${matchRef}`;
-            if (pathname === target) router.refresh();
-            else router.push(target);
+            // In a transition, so the loading screen stays up until the page has rendered.
+            startNavigation(() => {
+              if (pathname === target) router.refresh();
+              else router.push(target);
+            });
             return;
           }
           // No reference (an older backend): the success screen, as before.
+          toast.success(translate("lenaqar.buyRequest.saved"));
           if (onSubmitted) {
             onSubmitted({ requirement, opportunitiesHref: href, matchRef });
             return;
@@ -251,6 +292,7 @@ export default function BuyRequestCta({
           setSubmitted({ requirement, opportunitiesHref: href, matchRef });
         }}
       />
+      {saving || navigating ? <MatchLoading modal /> : null}
       <UnifiedDialog
         isOpen={Boolean(submitted)}
         onClose={() => setSubmitted(null)}

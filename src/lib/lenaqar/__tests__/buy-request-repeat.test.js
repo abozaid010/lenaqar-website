@@ -7,7 +7,9 @@ import assert from "node:assert/strict";
 
 import {
   REPEAT_WINDOW_MS,
-  buyRequestRepeatKey,
+  buyRequestSubmitKey,
+  canonicalJson,
+  isNewBuyRequestConversion,
   findRepeatSubmit,
   readLastBuyRequestSubmit,
   saveLastBuyRequestSubmit,
@@ -31,23 +33,53 @@ function fakeBrowser() {
   return store;
 }
 
-test("key is a SHA-256 hex that does not contain the phone", async () => {
-  const key = await buyRequestRepeatKey(PHONE);
+const REQ = { max_price: 5_000_000, preferred_locations: [{ city: "new cairo" }], buildingType: "apartment" };
+
+test("key is a SHA-256 hex that does not contain the phone or the request", async () => {
+  const key = await buyRequestSubmitKey({ phone: PHONE, name: "Ali", requirement: REQ });
   assert.match(key, /^[0-9a-f]{64}$/);
   assert.ok(!key.includes("201000000001"));
 });
 
-test("key is the same for the same digits whatever the formatting", async () => {
-  const key = await buyRequestRepeatKey(PHONE);
-  assert.equal(await buyRequestRepeatKey("+20 100 000 0001"), key);
-  assert.equal(await buyRequestRepeatKey("20-100-000-0001"), key);
-  assert.notEqual(await buyRequestRepeatKey(OTHER_PHONE), key);
+test("the same submission gives the same key whatever the formatting or key order", async () => {
+  const key = await buyRequestSubmitKey({ phone: PHONE, name: "Ali", requirement: REQ });
+  const reordered = { buildingType: "apartment", preferred_locations: [{ city: "new cairo" }], max_price: 5_000_000 };
+  assert.equal(await buyRequestSubmitKey({ phone: "+20 100 000 0001", name: " Ali ", requirement: reordered }), key);
+  assert.equal(await buyRequestSubmitKey({ phone: "20-100-000-0001", name: "Ali", requirement: REQ }), key);
 });
 
-test("no phone gives no key", async () => {
-  assert.equal(await buyRequestRepeatKey(""), "");
-  assert.equal(await buyRequestRepeatKey(undefined), "");
-  assert.equal(await buyRequestRepeatKey("abc"), "");
+test("an edited requirement, place, name or sender gives another key", async () => {
+  const key = await buyRequestSubmitKey({ phone: PHONE, name: "Ali", requirement: REQ });
+  assert.notEqual(await buyRequestSubmitKey({ phone: PHONE, name: "Ali", requirement: { ...REQ, max_price: 6_000_000 } }), key);
+  assert.notEqual(
+    await buyRequestSubmitKey({ phone: PHONE, name: "Ali", requirement: { ...REQ, preferred_locations: [{ city: "cairo" }] } }),
+    key,
+  );
+  assert.notEqual(await buyRequestSubmitKey({ phone: PHONE, name: "Omar", requirement: REQ }), key);
+  assert.notEqual(await buyRequestSubmitKey({ phone: OTHER_PHONE, name: "Ali", requirement: REQ }), key);
+});
+
+test("an edit of a saved request is keyed by its user id, without a phone", async () => {
+  const key = await buyRequestSubmitKey({ userId: "u1", requirement: REQ });
+  assert.match(key, /^[0-9a-f]{64}$/);
+  assert.equal(await buyRequestSubmitKey({ userId: "u1", requirement: { ...REQ } }), key);
+  assert.notEqual(await buyRequestSubmitKey({ userId: "u1", requirement: { ...REQ, max_price: 1 } }), key);
+  assert.notEqual(await buyRequestSubmitKey({ userId: "u2", requirement: REQ }), key);
+});
+
+test("no sender identity gives no key", async () => {
+  assert.equal(await buyRequestSubmitKey({ requirement: REQ }), "");
+  assert.equal(await buyRequestSubmitKey({ phone: "abc", requirement: REQ }), "");
+});
+
+test("canonicalJson sorts keys and skips undefined", () => {
+  assert.equal(canonicalJson({ b: 1, a: [2, { d: 1, c: undefined }] }), '{"a":[2,{"d":1}],"b":1}');
+});
+
+test("only a request created by this submit is an ads conversion", () => {
+  assert.equal(isNewBuyRequestConversion({ isEdit: false, repeated: false }), true);
+  assert.equal(isNewBuyRequestConversion({ isEdit: true, repeated: false }), false);
+  assert.equal(isNewBuyRequestConversion({ isEdit: false, repeated: true }), false);
 });
 
 test("same key inside the window is a repeat", () => {
@@ -75,7 +107,7 @@ test("another phone, no key, or a broken record is not a repeat", () => {
 
 test("storage keeps the key, user id and time — never the phone", async () => {
   const store = fakeBrowser();
-  const key = await buyRequestRepeatKey(PHONE);
+  const key = await buyRequestSubmitKey({ phone: PHONE, requirement: REQ });
   saveLastBuyRequestSubmit({ key, userId: "u1" }, 5_000);
 
   assert.deepEqual(readLastBuyRequestSubmit(), {
@@ -88,7 +120,7 @@ test("storage keeps the key, user id and time — never the phone", async () => 
   assert.ok(!stored.includes("201000000001"));
 
   assert.equal(findRepeatSubmit(readLastBuyRequestSubmit(), key, 6_000).userId, "u1");
-  const otherKey = await buyRequestRepeatKey(OTHER_PHONE);
+  const otherKey = await buyRequestSubmitKey({ phone: OTHER_PHONE, requirement: REQ });
   assert.equal(findRepeatSubmit(readLastBuyRequestSubmit(), otherKey, 6_000), null);
 });
 
@@ -101,7 +133,7 @@ test("nothing is stored without a key", () => {
 
 test("a repeat submit still has the request reference for the WhatsApp message", async () => {
   fakeBrowser();
-  const key = await buyRequestRepeatKey(PHONE);
+  const key = await buyRequestSubmitKey({ phone: PHONE, requirement: REQ });
   saveLastBuyRequestSubmit({ key, userId: "u1", matchRef: "K7Q2M9XD" }, 5_000);
 
   assert.equal(

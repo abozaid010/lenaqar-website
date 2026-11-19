@@ -4,6 +4,7 @@ import {
   formFromBuiltRequirement,
 } from "@/lib/lenaqar/buy-request-payload";
 import { sanitizeAttribution } from "@/lib/lenaqar/attribution";
+import { publicErrorCode } from "@/lib/lenaqar/buy-request-errors";
 import { normalizeMatchRef } from "@/lib/lenaqar/whatsapp-intent";
 
 function apiMessage(error, fallback) {
@@ -16,9 +17,9 @@ function apiMessage(error, fallback) {
 }
 
 function toPublicError(error, fallbackCode) {
-  const status = error?.response?.status;
-  const next = new Error(fallbackCode);
-  next.code = status === 429 ? "rate_limited" : fallbackCode;
+  const code = publicErrorCode(error, fallbackCode);
+  const next = new Error(code);
+  next.code = code;
   return next;
 }
 
