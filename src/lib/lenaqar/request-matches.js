@@ -60,3 +60,17 @@ export function requestSummary(requirement) {
     rooms: positive(req.roomsCount),
   };
 }
+
+// The backend's own "no such request" answer. Any other 404 means the route is
+// not there (an older backend): the request exists, the units just cannot be shown.
+const REQUEST_NOT_FOUND = "Request not found";
+
+/**
+ * True when a 404 body says the request itself does not exist. Production wraps
+ * errors as `{ status, code, error_message }`; a bare FastAPI app sends `{ detail }`.
+ * @param {unknown} body parsed JSON of the 404 response
+ */
+export function isRequestNotFound(body) {
+  if (!body || typeof body !== "object") return false;
+  return body.error_message === REQUEST_NOT_FOUND || body.detail === REQUEST_NOT_FOUND;
+}

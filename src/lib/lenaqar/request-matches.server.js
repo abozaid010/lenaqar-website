@@ -1,14 +1,10 @@
 import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
 import { bffFetch } from "@/lib/bffFetch";
 import { catalogPlaceAr, enrichOpportunityLabels } from "./arabic-labels.server";
-import { matchInfo, requestSummary } from "./request-matches";
+import { isRequestNotFound, matchInfo, requestSummary } from "./request-matches";
 import { toPublicOpportunity } from "./to-public-opportunity";
 import { isListableOpportunity } from "./validate-unit";
 import { normalizeMatchRef } from "./whatsapp-intent";
-
-// The backend's own "no such request" answer. Any other 404 means the route is
-// not there (an older backend): the request exists, the units just cannot be shown.
-const REQUEST_NOT_FOUND_DETAIL = "Request not found";
 
 /** One backend unit → the card the site renders, or null when it is not listable. */
 async function toMatchCard(raw) {
@@ -57,7 +53,7 @@ export async function fetchRequestMatches(ref) {
     );
     if (response.status === 404) {
       const body = await response.json().catch(() => null);
-      return body?.detail === REQUEST_NOT_FOUND_DETAIL
+      return isRequestNotFound(body)
         ? { status: "not_found" }
         : { status: "unavailable", matchRef };
     }

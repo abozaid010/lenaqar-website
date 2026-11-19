@@ -5,7 +5,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { matchInfo, requestSummary } from "../request-matches.js";
+import { isRequestNotFound, matchInfo, requestSummary } from "../request-matches.js";
 
 test("a unit without a near-miss label is a match", () => {
   assert.deepEqual(matchInfo({ code: "A" }), { kind: "match" });
@@ -62,4 +62,17 @@ test("request summary keeps what the buyer stated and nothing else", () => {
     downPayment: null,
     rooms: null,
   });
+});
+
+test("a 404 is 'request not found' only when the backend says so", () => {
+  // Production error shape (seen live 2026-11-19) and the bare FastAPI shape.
+  assert.equal(
+    isRequestNotFound({ status: false, code: 404, error_message: "Request not found" }),
+    true,
+  );
+  assert.equal(isRequestNotFound({ detail: "Request not found" }), true);
+  // A backend without the route answers a generic 404: the request may well exist.
+  assert.equal(isRequestNotFound({ detail: "Not Found" }), false);
+  assert.equal(isRequestNotFound({ error_message: "Unit not found" }), false);
+  assert.equal(isRequestNotFound(null), false);
 });

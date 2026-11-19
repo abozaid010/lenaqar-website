@@ -1,7 +1,7 @@
 # Instant match — plan and progress
 
-_Plan approved by the owner 2026-11-19. Built the same day; every step is in an open PR.
-Nothing is merged or deployed._
+_Plan approved by the owner 2026-11-19 and built the same day. Merged on the owner's word
+2026-11-19: the backend is live; the website and admin merges follow in this order._
 
 Goal: a buyer sees real units seconds after sending a request, and can reach us by
 WhatsApp or phone from every unit. Product goal behind it: sell a unit within 24 hours.
@@ -18,21 +18,19 @@ WhatsApp or phone from every unit. Product goal behind it: sell a unit within 24
 
 | # | Step | Where | Status |
 | --- | --- | --- | --- |
-| 1 | A match must sit in a place the buyer named | LenaAI-Agent#253 | PR open |
-| 2 | Near misses shown beside fewer than 5 matches; nearby places read when short | LenaAI-Agent#253 | PR open |
-| 3 | `GET /public/v1/buy-request/match/{ref}` | LenaAI-Agent#253 | PR open |
-| 4 | Unit-card WhatsApp opener (`OPP-<code> — MATCH-<ref>`) goes to the agent | LenaAI-Agent#254 | PR open |
-| 5 | Place picker P2, city-only places, several places in the payload | lenaqar, this branch | PR open |
-| 6 | Short form (flow A) | lenaqar, this branch | PR open |
-| 7 | Match page with WhatsApp + Call on every unit | lenaqar, this branch | PR open |
-| 8 | Unit taps recorded, team push, shown on the lead in the admin | LenaAI-Agent#255 (stacked on #253), lenaqar this branch, lenaai-website#887 | PRs open |
+| 1 | A match must sit in a place the buyer named | LenaAI-Agent#253 | merged and live 2026-11-19 |
+| 2 | Near misses shown beside fewer than 5 matches; nearby places read when short | LenaAI-Agent#253 | merged and live 2026-11-19 |
+| 3 | `GET /public/v1/buy-request/match/{ref}` | LenaAI-Agent#253 | merged and live 2026-11-19 |
+| 4 | Unit-card WhatsApp opener (`OPP-<code> — MATCH-<ref>`) goes to the agent | LenaAI-Agent#254 | merged and live 2026-11-19 |
+| 5 | Place picker P2, city-only places, several places in the payload | lenaqar-website#57 | merged 2026-11-19 |
+| 6 | Short form (flow A) | lenaqar-website#57 | merged 2026-11-19 |
+| 7 | Match page with WhatsApp + Call on every unit | lenaqar-website#57 | merged 2026-11-19 |
+| 8 | Unit taps recorded, team push, shown on the lead in the admin | LenaAI-Agent#255 (went in with #253), lenaqar-website#57, lenaai-website#887 | backend live; website and admin merged 2026-11-19 |
 | 9 | Units with off-catalog place values | `docs/instant-match-offcatalog-units-2026-11-19.csv` | 16 fixed 2026-11-19 on the owner's word, 13 need a person (links in the CSV) |
 
-Merge and deploy order: LenaAI-Agent#253 first, then this lenaqar branch. #254 at any
-time. #255 after #253 (retarget it to `main`), then lenaai-website#887.
-
-Before LenaAI-Agent#253 is live, the match page shows "مش قادرين نعرض الوحدات دلوقتي"
-with the WhatsApp button, so the lenaqar branch should not go out first.
+Production check after the backend deploy (2026-11-19): `GET /public/v1/buy-request/match/<unknown ref>`
+answers 404 "Request not found" (it was a generic 404 before), the tap endpoint answers
+the same for an unknown request, and both need the public API key.
 
 ## What differs from the approved plan
 
