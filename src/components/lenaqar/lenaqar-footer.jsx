@@ -74,6 +74,9 @@ export default function LenaqarFooter() {
                   {link.labelKey ? translate(link.labelKey) : link.label}
                 </Link>
               ))}
+              <Link href="/projects" className="hover:text-white/80">
+                {translate("lenaqar.projects.breadcrumb")}
+              </Link>
               <Link
                 href="/calculator"
                 data-track="calculator_link"

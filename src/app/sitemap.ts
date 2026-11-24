@@ -6,6 +6,7 @@ import { BUYER_LANDINGS } from '@/lib/lenaqar/buyer-landings';
 import { DOORS } from '@/lib/lenaqar/doors';
 import { getGuidesForSitemap } from '@/lib/guides/load';
 import { isOpportunityIndexable } from '@/lib/lenaqar/unit-trust';
+import { loadProjectSnapshot } from '@/lib/lenaqar/projects.server';
 
 /** Stable lastmod for evergreen marketing pages (not build time). */
 const STATIC_LASTMOD = new Date('2026-11-02T00:00:00.000Z');
@@ -87,6 +88,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.75,
     });
+  }
+
+  // Developer-project pages: dated by the newest unit record behind each summary.
+  const projectSnapshot = loadProjectSnapshot();
+  if (projectSnapshot.projects.length > 0) {
+    const snapshotDate = projectSnapshot.generatedAt
+      ? new Date(projectSnapshot.generatedAt)
+      : STATIC_LASTMOD;
+    staticPages.push({
+      url: `${SITE_URL}/projects`,
+      lastModified: snapshotDate,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    });
+    for (const project of projectSnapshot.projects) {
+      staticPages.push({
+        url: `${SITE_URL}/projects/${project.slug}`,
+        lastModified: project.summary?.updatedTo
+          ? new Date(project.summary.updatedTo)
+          : snapshotDate,
+        changeFrequency: 'weekly',
+        priority: 0.7,
+      });
+    }
   }
 
   if (!SITE.feed.enabled) {

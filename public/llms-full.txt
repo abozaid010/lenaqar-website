@@ -40,6 +40,10 @@ How to write a buying request per area, with public anonymised buyer requests (n
 https://www.lenaqar.com/apartments-for-sale/new-cairo · https://www.lenaqar.com/apartments-for-sale/fifth-settlement · https://www.lenaqar.com/apartments-for-sale/madinaty · https://www.lenaqar.com/apartments-for-sale/el-shorouk · https://www.lenaqar.com/apartments-for-sale/mostakbal-city · https://www.lenaqar.com/apartments-for-sale/noor-city · https://www.lenaqar.com/apartments-for-sale/new-administrative-capital · https://www.lenaqar.com/apartments-for-sale/sheikh-zayed · https://www.lenaqar.com/apartments-for-sale/6th-of-october · https://www.lenaqar.com/chalets-for-sale/north-coast · https://www.lenaqar.com/villas-for-sale/egypt · https://www.lenaqar.com/ready-to-move-properties
 Listed units: https://www.lenaqar.com/opportunities
 
+## Developer projects
+
+Per-project price summaries (developer list prices on stated dates; counts, lowest / median / highest price, median per m²; not completed-sale prices): https://www.lenaqar.com/projects
+
 ## Buying guides
 
 - How to write a property request: https://www.lenaqar.com/guides/buying/how-to-write-property-request
