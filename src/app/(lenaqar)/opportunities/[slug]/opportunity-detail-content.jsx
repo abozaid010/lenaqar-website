@@ -13,6 +13,7 @@ import {
   buildingTypeAr,
   buildListingHeadline,
   developerLabel,
+  isoDateModified,
   placeAr,
   projectLabel,
 } from "@/lib/lenaqar/listing-seo";
@@ -40,6 +41,7 @@ export default function OpportunityDetailContent({ unit, guideLinks = [] }) {
     ? translate("lenaqar.unit.deliveryReady")
     : formatDeliveryDate(unit.deliveryDate, "ar");
   const recordUpdatedDate = formatDate(unit.updatedAt, "ar");
+  const recordUpdatedIso = isoDateModified(unit.updatedAt);
   const lastCheckedLabel = formatDate(unitLastChecked(unit), "ar");
   const paperStatus = unitPaperStatus(unit);
   const verificationLevel = unitVerificationLevel(unit);
@@ -237,7 +239,9 @@ export default function OpportunityDetailContent({ unit, guideLinks = [] }) {
       </p>
       {recordUpdatedDate ? (
         <p className="text-xs text-black/50 mt-2">
-          {translate("lenaqar.unit.recordUpdated").replace("{date}", recordUpdatedDate)}
+          <time dateTime={recordUpdatedIso || undefined}>
+            {translate("lenaqar.unit.recordUpdated").replace("{date}", recordUpdatedDate)}
+          </time>
         </p>
       ) : null}
 

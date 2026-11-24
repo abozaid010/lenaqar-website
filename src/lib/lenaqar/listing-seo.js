@@ -189,6 +189,19 @@ export function buildListingDescription(unit) {
 }
 
 /**
+ * `updatedAt` as an ISO string, for `dateModified` and `<time dateTime>`.
+ * It is a "last modified" date only — never a posting or verification date.
+ * Null when the value does not parse or lies in the future.
+ */
+export function isoDateModified(value, now = new Date()) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  if (date.getTime() > now.getTime()) return null;
+  return date.toISOString();
+}
+
+/**
  * schema.org RealEstateListing wrapping an Accommodation.
  *
  * Only allowlisted, API-sourced fields are emitted. `downPayment` is exposed as
@@ -211,6 +224,7 @@ export function buildListingSchema(unit, url) {
   const images = (unit.images || [])
     .map((image) => clean(image?.url))
     .filter(Boolean);
+  const dateModified = isoDateModified(unit.updatedAt);
 
   const accommodation = {
     "@type": "Accommodation",
@@ -276,6 +290,7 @@ export function buildListingSchema(unit, url) {
     name,
     description: buildListingDescription(unit),
     ...(unit.datePosted && { datePosted: unit.datePosted }),
+    ...(dateModified && { dateModified }),
     ...(images.length > 0 && { image: images }),
     // additionalProperty belongs to Accommodation (a Place), not WebPage.
     mainEntity: {
