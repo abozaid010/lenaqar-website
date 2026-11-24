@@ -1,7 +1,9 @@
 import { formatPhoneForWhatsApp } from "@/utils/phone-utils";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
+import { SITE } from "@/config/site";
 import {
   buyerPageCtaMessage,
+  demandOfferMessage,
   matchRequestMessage,
   unitInquiryMessage,
   withMatchRef,
@@ -39,14 +41,11 @@ export function marketplaceAddUnitMessage() {
 }
 
 /**
- * Prefill WhatsApp so an owner can offer a unit against an anonymous demand card.
- * Keep it short: welcome + anonymous ref only — the owner fills in their details.
+ * Prefill WhatsApp so an owner can offer a unit against an anonymous demand card:
+ * the seller sentence, the request code and the request link (`demandOfferMessage`).
  */
 export function addUnitForRequirementMessage(requirement) {
-  const ref = requirement?.id
-    ? String(requirement.id).trim().toUpperCase()
-    : "HOME";
-  return `مرحبا لينا عقار، جاي من موقع لينا عقار — REQ-${ref}`;
+  return demandOfferMessage(requirement?.id, SITE.url);
 }
 
 export function addUnitForRequirementHref(requirement) {
