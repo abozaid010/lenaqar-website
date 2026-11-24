@@ -73,3 +73,19 @@ Resale under tenant `public` (first 6 pages, 96 units): price 96/96, area 94/96,
 ## Not checked
 
 Whether instant-match already searches tenant `public`; whether developers gave permission to republish price lists; the age rule after which a price list is stale (ties to gate G2).
+
+## Update, 2026-11-24 (later the same day): exact developer count
+
+The project snapshot (`scripts/build-project-snapshot.mjs`) paged the whole developer set through the public API: 1,443 pages, complete.
+
+| What | Count | Label |
+| --- | --- | --- |
+| Developer units for sale, visible, tenant `public`, primary | 23,086 | V (paged to the end, 2026-11-24) |
+| Of these, usable for a price summary (price, area, plausible price per m²) | 23,011 | V |
+| Units whose project record was not found | 71 | V |
+| Projects with 10 or more usable units, not marked sold out | 431 | V |
+| Units behind those 431 project pages | 21,213 | V |
+
+So the developer set is 23,086 units, not the stored counter's 24,785 (row 5). With the 872 resale units that is 23,958 units reachable through the public API. The rest of "30k+" is rows 8–9 (resale under tenant `public`, broker tenants) and still needs the grouped database count.
+
+Owner decision G1 (2026-11-24): publish project pages with a unit-price summary, no private data. Built as `/projects` and `/projects/<slug>`; see tracker item B31.

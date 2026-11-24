@@ -94,6 +94,13 @@ Each page explains how to write a buying request for that area and shows public,
 - فلل في مصر: https://www.lenaqar.com/villas-for-sale/egypt
 - وحدات استلام فوري: https://www.lenaqar.com/ready-to-move-properties
 
+### مشاريع المطورين (developer projects)
+
+Price summary per developer project: recorded units, lowest / median / highest list price, median price per m², by unit type and rooms. Developer list prices as recorded on the dates shown on each page — not completed-sale prices and not a binding offer.
+
+- فهرس المشاريع (index): https://www.lenaqar.com/projects
+- صفحة المشروع (pattern): https://www.lenaqar.com/projects/<project-slug>
+
 ### أدلة الشراء (buying)
 
 - AR: إزاي تكتب طلب عقاري واضح
