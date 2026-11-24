@@ -69,6 +69,31 @@ Hub: https://www.lenaqar.com/guides
   EN: El Shorouk hub: prices, pros/cons, red file, real units.
   URL: https://www.lenaqar.com/guides/el-shorouk
 
+### جداول أسعار لينا عقار (LenAqar asking-price tables)
+
+Asking prices per m² computed from resale units listed on LenAqar (median, sample size and date are on each page). Not completed-sale prices.
+
+- مدينتي (Madinaty): https://www.lenaqar.com/guides/madinaty/prices-2026
+- التجمع الخامس (Fifth Settlement): https://www.lenaqar.com/guides/fifth-settlement/prices-2026
+- القاهرة الجديدة (New Cairo): https://www.lenaqar.com/guides/new-cairo/prices-2026
+
+### صفحات الطلب حسب المنطقة (area request pages)
+
+Each page explains how to write a buying request for that area and shows public, anonymised buyer requests. They are not unit lists; listed units are under https://www.lenaqar.com/opportunities
+
+- شقق في القاهرة الجديدة: https://www.lenaqar.com/apartments-for-sale/new-cairo
+- شقق في التجمع الخامس: https://www.lenaqar.com/apartments-for-sale/fifth-settlement
+- شقق في مدينتي: https://www.lenaqar.com/apartments-for-sale/madinaty
+- شقق في الشروق: https://www.lenaqar.com/apartments-for-sale/el-shorouk
+- شقق في مدينة المستقبل: https://www.lenaqar.com/apartments-for-sale/mostakbal-city
+- شقق في مدينة نور: https://www.lenaqar.com/apartments-for-sale/noor-city
+- شقق في العاصمة الإدارية: https://www.lenaqar.com/apartments-for-sale/new-administrative-capital
+- شقق في الشيخ زايد: https://www.lenaqar.com/apartments-for-sale/sheikh-zayed
+- شقق في 6 أكتوبر: https://www.lenaqar.com/apartments-for-sale/6th-of-october
+- شاليهات الساحل الشمالي: https://www.lenaqar.com/chalets-for-sale/north-coast
+- فلل في مصر: https://www.lenaqar.com/villas-for-sale/egypt
+- وحدات استلام فوري: https://www.lenaqar.com/ready-to-move-properties
+
 ### أدلة الشراء (buying)
 
 - AR: إزاي تكتب طلب عقاري واضح
