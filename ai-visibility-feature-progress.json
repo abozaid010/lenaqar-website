@@ -120,6 +120,15 @@
         "Phase 1 baseline"
       ],
       "status": "open"
+    },
+    {
+      "id": "G2-PROJECTS",
+      "what": "Project pages whose unit records have not changed since 2026-09-01 (149 of 431 on 2026-11-24): hide them or keep them with the dates shown?",
+      "unblocks": [
+        "B31"
+      ],
+      "status": "done",
+      "checked": "2026-11-24: owner: keep them, dates shown. No age cut-off on project pages. G2 for listing availability (InStock on old resale records, B10) is still open."
     }
   ],
   "escalated_non_blocking": [
@@ -381,10 +390,10 @@
       "title": "Developer project pages with a unit-price summary (/projects, /projects/<slug>)",
       "status": "in_progress",
       "evidence": "Branch feat/ai-visibility-project-pages (stacked on #62). Snapshot content/projects/projects-snapshot.json, generated 2026-11-24: 23,086 developer units read (1,443 API pages, complete), 23,011 usable, 431 projects with 10 or more units, 21,213 units behind the pages. Built HTML scan of all 432 pages: 0 emails, 0 phone numbers other than LenAqar's own, 0 author/client/unit-id keys; every project page has dateModified and AggregateOffer; 6 or more H2 each; unique titles. Tests 305/305, lint 0 errors, build exit 0. Mobile 375 px RTL: no overflow.",
-      "note": "Privacy: allowlisted project facts only (names, developer, place, finishing, unit types); no description, images, map link, payment-plan text, author or client. Unit data appears only as aggregates; a type or rooms row needs 5 or more units; a project needs 10 or more. Prices are labelled developer list prices on their dates, not sale prices, never 'verified'. dateModified = newest unit-record change behind the summary. Open: 149 of 431 projects have no unit record changed since 2026-09-01 (dates are shown; G2 decides whether to hide them). Refresh: npm run snapshot:projects (about 30 minutes), then commit the file; not automated yet. After merge: verify deployed SHA, seo-health, audit."
+      "note": "Privacy: allowlisted project facts only (names, developer, place, finishing, unit types); no description, images, map link, payment-plan text, author or client. Unit data appears only as aggregates; a type or rooms row needs 5 or more units; a project needs 10 or more. Prices are labelled developer list prices on their dates, not sale prices, never 'verified'. dateModified = newest unit-record change behind the summary. 149 of 431 projects have no unit record changed since 2026-09-01; owner decided on 2026-11-24 to keep them with the dates shown (G2-PROJECTS). Refresh: npm run snapshot:projects (about 30 minutes), then commit the file; not automated yet. After merge: verify deployed SHA, seo-health, audit."
     }
   ],
-  "next_step": "Owner: merge #61 → #62 → the project-pages PR; answer G2 (freshness age; affects 149 project price lists with no unit change since 2026-09-01 and old listings) and G3; refresh the Search Console login; Bing Webmaster + IndexNow (B13); grouped unit count for the remaining tenants. Assistant after merge: verify deployed SHA, seo-health and the 40-page audit on production; then hubs with real listings (B30) once G3 is set. Earlier open items stay: GBP video verification (B25), B3, B4, panel round 2 (clean Claude account), lawyer identity + scope.",
+  "next_step": "Owner: merge #61 → #62 → the project-pages PR; answer G2 for listings (age after which InStock is no longer stated, B10) and G3; refresh the Search Console login; Bing Webmaster + IndexNow (B13); grouped unit count for the remaining tenants. Assistant after merge: verify deployed SHA, seo-health and the 40-page audit on production; then hubs with real listings (B30) once G3 is set. Earlier open items stay: GBP video verification (B25), B3, B4, panel round 2 (clean Claude account), lawyer identity + scope.",
   "reviews": [
     {
       "date": "2026-11-23",
@@ -503,6 +512,10 @@
     {
       "at": "2026-11-24T20:00:00+02:00",
       "event": "Owner decided G1: publish project pages with a unit-price summary, no private data. B31 built: 431 project pages + index from a committed snapshot of 23,086 developer units (aggregates only). Third PR opened, stacked. No merge or deploy."
+    },
+    {
+      "at": "2026-11-24T20:30:00+02:00",
+      "event": "Owner: keep project pages with older price lists; dates stay visible (G2-PROJECTS). No code change needed."
     }
   ],
   "owner_confirmed_facts": {
