@@ -390,7 +390,7 @@
       "title": "Developer project pages with a unit-price summary (/projects, /projects/<slug>)",
       "status": "in_progress",
       "evidence": "Branch feat/ai-visibility-project-pages (stacked on #62). Snapshot content/projects/projects-snapshot.json, generated 2026-11-24: 23,086 developer units read (1,443 API pages, complete), 23,011 usable, 431 projects with 10 or more units, 21,213 units behind the pages. Built HTML scan of all 432 pages: 0 emails, 0 phone numbers other than LenAqar's own, 0 author/client/unit-id keys; every project page has dateModified and AggregateOffer; 6 or more H2 each; unique titles. Tests 305/305, lint 0 errors, build exit 0. Mobile 375 px RTL: no overflow.",
-      "note": "Privacy: allowlisted project facts only (names, developer, place, finishing, unit types); no description, images, map link, payment-plan text, author or client. Unit data appears only as aggregates; a type or rooms row needs 5 or more units; a project needs 10 or more. Prices are labelled developer list prices on their dates, not sale prices, never 'verified'. dateModified = newest unit-record change behind the summary. 149 of 431 projects have no unit record changed since 2026-09-01; owner decided on 2026-11-24 to keep them with the dates shown (G2-PROJECTS). Refresh: npm run snapshot:projects (about 30 minutes), then commit the file; not automated yet. After merge: verify deployed SHA, seo-health, audit."
+      "note": "Privacy: allowlisted project facts only (names, developer, place, finishing, unit types); no description, images, map link, payment-plan text, author or client. Unit data appears only as aggregates; a type or rooms row needs 5 or more units; a project needs 10 or more. Prices are labelled developer list prices on their dates, not sale prices, never 'verified'. dateModified = newest unit-record change behind the summary. 149 of 431 projects have no unit record changed since 2026-09-01; owner decided on 2026-11-24 to keep them with the dates shown (G2-PROJECTS). Refresh: npm run snapshot:projects (about 30 minutes), then commit the file; not automated yet. After merge: verify deployed SHA, seo-health, audit. Review finding P1 on PR #63 (2026-11-24, after merge): robots.txt still listed `projects` as a retired CRM path, so `Disallow: /projects` blocked the index and every project page for Googlebot, Bingbot and the AI search agents (0 of 432 allowed on production). Fix in a separate PR (branch fix/robots-allow-projects): rule removed, explicit Allow added, rules moved to a tested module; 432 of 432 allowed for 7 agents on the branch."
     }
   ],
   "next_step": "Owner: merge #61 → #62 → the project-pages PR; answer G2 for listings (age after which InStock is no longer stated, B10) and G3; refresh the Search Console login; Bing Webmaster + IndexNow (B13); grouped unit count for the remaining tenants. Assistant after merge: verify deployed SHA, seo-health and the 40-page audit on production; then hubs with real listings (B30) once G3 is set. Earlier open items stay: GBP video verification (B25), B3, B4, panel round 2 (clean Claude account), lawyer identity + scope.",
@@ -516,6 +516,10 @@
     {
       "at": "2026-11-24T20:30:00+02:00",
       "event": "Owner: keep project pages with older price lists; dates stay visible (G2-PROJECTS). No code change needed."
+    },
+    {
+      "at": "2026-11-24T21:00:00+02:00",
+      "event": "Owner asked to merge: #61, #62, #63 merged in order (main 4f6d5ff7, Vercel production deployment success). Owner's review comment on #63: robots.txt blocked /projects. Confirmed on production (0/432 project URLs allowed). Fix opened as a separate PR; project pages are not crawlable until it is merged."
     }
   ],
   "owner_confirmed_facts": {
