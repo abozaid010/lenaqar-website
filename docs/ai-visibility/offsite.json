@@ -1,0 +1,10 @@
+{
+  "_help": "Set each item to true/false after checking by hand. Leave null if not checked yet.",
+  "indexed_google": true,
+  "indexed_bing": null,
+  "indexed_brave": null,
+  "brand_mentions_5plus_sites": false,
+  "youtube_mentions": null,
+  "entity_profiles": null,
+  "cited_in_test_prompts": true
+}
