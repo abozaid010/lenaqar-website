@@ -815,6 +815,7 @@ export default {
       delivery: "التسليم",
       developer: "المطور",
       notes: "ملاحظات",
+      excluded: "مش عايز",
       whatsapp: "عندي وحدة مناسبة للطلب ده",
     },
     delivery: {

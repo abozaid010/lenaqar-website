@@ -817,6 +817,7 @@ export default {
       delivery: "Delivery",
       developer: "Developer",
       notes: "Notes",
+      excluded: "Not wanted",
       whatsapp: "I have a unit that fits this request",
     },
     delivery: {

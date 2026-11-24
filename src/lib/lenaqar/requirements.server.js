@@ -8,6 +8,7 @@ import {
   PUBLIC_ID_SCHEME,
   PUBLIC_REQUIREMENTS_TAG,
   isPublicRequirementId,
+  readPublicPlaces,
 } from "./requirement-public.js";
 
 const DEFAULT_LIMIT = 48;
@@ -43,29 +44,11 @@ function acceptPublicRequirement(raw) {
   if (!Array.isArray(row.locations) || row.locations.length === 0) return null;
   if (!Array.isArray(row.propertyTypes)) return null;
 
-  const locations = [];
-  for (const loc of row.locations) {
-    if (!loc || typeof loc !== "object") continue;
-    const entry = /** @type {Record<string, unknown>} */ (loc);
-    const city = typeof entry.city === "string" ? entry.city : "";
-    const district = typeof entry.district === "string" ? entry.district : "";
-    const subDistrict =
-      typeof entry.subDistrict === "string" ? entry.subDistrict : "";
-    const project = typeof entry.project === "string" ? entry.project : "";
-    locations.push({
-      city,
-      district,
-      subDistrict,
-      project,
-      cityAr: catalogPlaceAr(city),
-      districtAr: catalogPlaceAr(district),
-      subDistrictAr: catalogPlaceAr(subDistrict),
-      projectAr: catalogPlaceAr(project),
-    });
-  }
+  const locations = readPublicPlaces(row.locations, catalogPlaceAr);
   if (locations.length === 0) return null;
+  const excludedLocations = readPublicPlaces(row.excludedLocations, catalogPlaceAr);
 
-  /** @type {{ id: string, intent: "buy", locations: typeof locations, propertyTypes: string[], roomsCount?: number, minPrice?: number, maxPrice?: number, downPayment?: number, monthlyInstallment?: number, deliveryDate?: string, developer?: string, notes?: string, moneyReviewRequired?: boolean }} */
+  /** @type {{ id: string, intent: "buy", locations: typeof locations, propertyTypes: string[], roomsCount?: number, minPrice?: number, maxPrice?: number, downPayment?: number, monthlyInstallment?: number, deliveryDate?: string, developer?: string, notes?: string, excludedLocations?: typeof locations, moneyReviewRequired?: boolean }} */
   const out = {
     id: row.id,
     intent: "buy",
@@ -89,6 +72,7 @@ function acceptPublicRequirement(raw) {
   if (typeof row.notes === "string" && row.notes.trim()) {
     out.notes = row.notes.trim().slice(0, 600);
   }
+  if (excludedLocations.length) out.excludedLocations = excludedLocations;
   return applyRequirementMoneyTrust(out);
 }
 
