@@ -2,7 +2,8 @@ import { SITE } from "@/config/site";
 import PrivacyPageContent from "./privacy-page-content";
 
 export const metadata = {
-  title: "سياسة الخصوصية والشروط — لينا عقار",
+  // The root template adds «| لينا عقار»; the brand must not be repeated here.
+  title: "سياسة الخصوصية والشروط",
   description:
     "لينا عقار بتبدأ من طلب المشتري. هنا طبيعة الخدمة، العمولة، حدود المسؤولية، وخصوصية بياناتك. مشاركة الوحدة مع مشتري مناسب مش ضمان بيع.",
   openGraph: {
