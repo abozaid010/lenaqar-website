@@ -12,6 +12,7 @@ on:
     paths:
       - scripts/seo-health.mjs
       - scripts/lib/jsonld-check.mjs
+      - scripts/lib/robots-parser.mjs
       - .github/workflows/seo-health.yml
 
 permissions:

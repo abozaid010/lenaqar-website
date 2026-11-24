@@ -19,7 +19,7 @@
   "tracks": {
     "A_technical": {
       "source": "scripts/seo-health.mjs + GSC + CDN logs",
-      "status": "V: production 110 PASS / 3 WARN / 0 FAIL with structured-data checks, locally and from GitHub Actions (run 43679557793, 2026-11-15). GSC: I. Real crawler visits: partial (B9) | 2026-11-24: seo-health production 111 PASS / 3 WARN / 0 FAIL. ai_visibity_judge audit, 40 pages, off-site unchecked: production before 94.4 provisional (E3 0.68/4, 17% of pages; C4 1.46/2, 73%); local build of feat/ai-visibility 94.4 (E3 1.66/4, 41%; loses 1 point for http on localhost). Reports: REPORT/ai-visibility-audit/"
+      "status": "V: production 110 PASS / 3 WARN / 0 FAIL with structured-data checks, locally and from GitHub Actions (run 43679557793, 2026-11-15). GSC: I. Real crawler visits: partial (B9) | 2026-11-24: seo-health production 111 PASS / 3 WARN / 0 FAIL. ai_visibity_judge audit, 40 pages, off-site unchecked: production before 94.4 provisional (E3 0.68/4, 17% of pages; C4 1.46/2, 73%); local build of feat/ai-visibility 94.4 (E3 1.66/4, 41%; loses 1 point for http on localhost). Reports: REPORT/ai-visibility-audit/ | 2026-11-24 after merging #61–#63 (main 4f6d5ff7, production): /guides and /privacy titles carry the brand once; a sampled listing has <time>, dateModified and 6 H2; /projects and a project page answer 200; sitemap 1,370 URLs incl. 432 project URLs. seo-health 129 PASS / 3 WARN / 16 FAIL, all 16 = robots.txt disallows /projects. Audit 40 pages: total 40.0 provisional (capped: 7 of 41 sampled pages blocked by robots.txt), E3 1.85/4 (46%), C4 1.95/2 (97%), C2 1.66/2 (82%: project descriptions too long). Fix for both in PR #64. Report: REPORT/ai-visibility-audit/2026-11-24-after-merge-production-40p.md"
     },
     "B_ai_visibility": {
       "source": "docs/ai-visibility/runs/2026-11-15-round1.jsonl",
@@ -360,9 +360,10 @@
     {
       "id": "B27",
       "title": "Phase 1 supporting fixes: listing dateModified + <time>, brand once in /guides and /privacy titles, hubs and price tables in llms files, feed page guard 16 × 320",
-      "status": "in_progress",
+      "status": "done",
       "evidence": "Branch feat/ai-visibility. Tests: listing-seo-provenance 8/8, fetch-cursor-pages 9/9; lint:seo 0 errors; next build exit 0 (958 static pages). Local production build: /guides and /privacy titles contain the brand once; 3 listings show <time dateTime> and dateModified from updatedAt, no datePosted; JSON-LD blocks parse. Audit E3 0.68/4 (production) → 1.66/4 (local build), 40 pages.",
-      "note": "Hubs and static pages get no date: buyer requests carry no date field, so there is no real source. After merge: verify deployed SHA, run seo-health and the audit on production."
+      "note": "Hubs and static pages get no date: buyer requests carry no date field, so there is no real source. After merge: verify deployed SHA, run seo-health and the audit on production. Merged 2026-11-24 and verified on production (titles once; listing <time>, dateModified, 6 H2).",
+      "production_sha": "4f6d5ff778a02b2c45f6cb98302eed634852cba8"
     },
     {
       "id": "B28",
@@ -374,9 +375,10 @@
     {
       "id": "B29",
       "title": "Listing page as a data page: existing fields under H2 sections, price per m² labelled as computed, before-you-pay checklist",
-      "status": "in_progress",
-      "note": "Sections: السداد والكاش (only when mayShowMoneySplit), السعر (price per m² labelled as computed), مواصفات الوحدة, المكان والاستلام, حالة الإعلان (only when fields exist), قبل ما تشتري (the four /before-you-pay bullets + links). No new facts: every row was already on the page or in its headline. After merge: verify deployed SHA, seo-health, audit on production.",
-      "evidence": "Branch feat/ai-visibility-listing-sections (stacked on feat/ai-visibility). Local production build, 5 sampled listings: 5–6 H2 each (was 0–1), JSON-LD parses, no FAQ schema added, no empty lists. Mobile 375 px RTL: no horizontal overflow. Tests 293/293, lint 0 errors, build exit 0. Audit, 40 pages, local build: C4 1.46/2 (73%) → 1.95/2 (97%); total 95.1 provisional (still minus 1 point for http on localhost). Report: REPORT/ai-visibility-audit/2026-11-24-after-listing-sections-local-40p.md"
+      "status": "done",
+      "note": "Sections: السداد والكاش (only when mayShowMoneySplit), السعر (price per m² labelled as computed), مواصفات الوحدة, المكان والاستلام, حالة الإعلان (only when fields exist), قبل ما تشتري (the four /before-you-pay bullets + links). No new facts: every row was already on the page or in its headline. After merge: verify deployed SHA, seo-health, audit on production. Merged 2026-11-24 and verified on production (titles once; listing <time>, dateModified, 6 H2).",
+      "evidence": "Branch feat/ai-visibility-listing-sections (stacked on feat/ai-visibility). Local production build, 5 sampled listings: 5–6 H2 each (was 0–1), JSON-LD parses, no FAQ schema added, no empty lists. Mobile 375 px RTL: no horizontal overflow. Tests 293/293, lint 0 errors, build exit 0. Audit, 40 pages, local build: C4 1.46/2 (73%) → 1.95/2 (97%); total 95.1 provisional (still minus 1 point for http on localhost). Report: REPORT/ai-visibility-audit/2026-11-24-after-listing-sections-local-40p.md",
+      "production_sha": "4f6d5ff778a02b2c45f6cb98302eed634852cba8"
     },
     {
       "id": "B30",
@@ -390,10 +392,11 @@
       "title": "Developer project pages with a unit-price summary (/projects, /projects/<slug>)",
       "status": "in_progress",
       "evidence": "Branch feat/ai-visibility-project-pages (stacked on #62). Snapshot content/projects/projects-snapshot.json, generated 2026-11-24: 23,086 developer units read (1,443 API pages, complete), 23,011 usable, 431 projects with 10 or more units, 21,213 units behind the pages. Built HTML scan of all 432 pages: 0 emails, 0 phone numbers other than LenAqar's own, 0 author/client/unit-id keys; every project page has dateModified and AggregateOffer; 6 or more H2 each; unique titles. Tests 305/305, lint 0 errors, build exit 0. Mobile 375 px RTL: no overflow.",
-      "note": "Privacy: allowlisted project facts only (names, developer, place, finishing, unit types); no description, images, map link, payment-plan text, author or client. Unit data appears only as aggregates; a type or rooms row needs 5 or more units; a project needs 10 or more. Prices are labelled developer list prices on their dates, not sale prices, never 'verified'. dateModified = newest unit-record change behind the summary. 149 of 431 projects have no unit record changed since 2026-09-01; owner decided on 2026-11-24 to keep them with the dates shown (G2-PROJECTS). Refresh: npm run snapshot:projects (about 30 minutes), then commit the file; not automated yet. After merge: verify deployed SHA, seo-health, audit."
+      "note": "Privacy: allowlisted project facts only (names, developer, place, finishing, unit types); no description, images, map link, payment-plan text, author or client. Unit data appears only as aggregates; a type or rooms row needs 5 or more units; a project needs 10 or more. Prices are labelled developer list prices on their dates, not sale prices, never 'verified'. dateModified = newest unit-record change behind the summary. 149 of 431 projects have no unit record changed since 2026-09-01; owner decided on 2026-11-24 to keep them with the dates shown (G2-PROJECTS). Refresh: npm run snapshot:projects (about 30 minutes), then commit the file; not automated yet. After merge: verify deployed SHA, seo-health, audit. Review finding P1 on PR #63 (2026-11-24, after merge): robots.txt still listed `projects` as a retired CRM path, so `Disallow: /projects` blocked the index and every project page for Googlebot, Bingbot and the AI search agents (0 of 432 allowed on production). Fix in a separate PR (branch fix/robots-allow-projects): rule removed, explicit Allow added, rules moved to a tested module; 432 of 432 allowed for 7 agents on the branch. Merged 2026-11-24 (main 4f6d5ff7); pages answer 200 on production but stay blocked by robots.txt until PR #64 is merged. PR #64 also caps the project meta description at 170 characters.",
+      "pr": "https://github.com/abozaid010/lenaqar-website/pull/63"
     }
   ],
-  "next_step": "Owner: merge #61 → #62 → the project-pages PR; answer G2 for listings (age after which InStock is no longer stated, B10) and G3; refresh the Search Console login; Bing Webmaster + IndexNow (B13); grouped unit count for the remaining tenants. Assistant after merge: verify deployed SHA, seo-health and the 40-page audit on production; then hubs with real listings (B30) once G3 is set. Earlier open items stay: GBP video verification (B25), B3, B4, panel round 2 (clean Claude account), lawyer identity + scope.",
+  "next_step": "Owner: merge PR #64 (robots.txt blocks /projects on production; audit total is capped at 40.0 until then). Then assistant: verify deployed SHA, seo-health 0 FAIL, 40-page audit. Still open for the owner: G2 for listings (B10), G3, Search Console re-login, Bing Webmaster + IndexNow (B13), grouped unit count for the remaining tenants, GBP video verification (B25), lawyer identity + scope. Next build after G3: hubs with real listings (B30); B3, B4; panel round 2 with a clean Claude account.",
   "reviews": [
     {
       "date": "2026-11-23",
@@ -516,6 +519,10 @@
     {
       "at": "2026-11-24T20:30:00+02:00",
       "event": "Owner: keep project pages with older price lists; dates stay visible (G2-PROJECTS). No code change needed."
+    },
+    {
+      "at": "2026-11-24T21:00:00+02:00",
+      "event": "Owner asked to merge: #61, #62, #63 merged in order (main 4f6d5ff7, Vercel production deployment success). Owner's review comment on #63: robots.txt blocked /projects. Confirmed on production (0/432 project URLs allowed). Fix opened as a separate PR; project pages are not crawlable until it is merged."
     }
   ],
   "owner_confirmed_facts": {
@@ -564,9 +571,9 @@
     "order": "0 inventory truth → 1 crawlability/indexing → 2 accurate property data → 3 inventory and demand pages → 4 guides → 5 off-site (parallel, drafts)",
     "phases": {
       "0": "partial — report written; exact unit counts need one grouped database count (D-COUNT)",
-      "1": "in PR — dates, titles, llms, page guard; baselines recorded; Search Console index counts and Bing/IndexNow wait for owner (D-GSC-LOGIN, B13)",
-      "2": "listing sections in PR (B29); freshness waits for G2; primary units wait for G1",
-      "3": "project pages in PR (B31); hubs with real listings/requests and seller demand pages wait for G3",
+      "1": "merged (#61); Search Console index counts and Bing/IndexNow still wait for the owner",
+      "2": "listing sections merged (#62); freshness for listings waits for G2; primary units are published as project pages (phase 3)",
+      "3": "project pages merged (#63) but blocked by robots.txt until #64; hubs with real listings/requests and seller demand pages wait for G3",
       "4": "unchanged: B3, B4 (D4), B7 (D3)",
       "5": "drafts written; owner performs every external action"
     }
