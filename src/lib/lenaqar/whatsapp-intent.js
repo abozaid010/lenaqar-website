@@ -1,3 +1,5 @@
+import { isPublicRequirementId, requirementShareUrl } from "./requirement-public.js";
+
 /** Buyer-oriented footer prefill with a stable route reference and no user data. */
 export function buyerPageCtaMessage(pathname = "/") {
   const parts = String(pathname || "/").split("/").filter(Boolean);
@@ -72,4 +74,19 @@ export function unitInquiryMessage(unit) {
   const type = String(unit?.buildingType || "").trim().toLowerCase();
   const noun = UNIT_NOUN_BY_TYPE[type] || "الوحدة";
   return `مرحبا\nعايز اعرف تفاصيل اكتر عن ${noun} دى؟ — ${reference}`;
+}
+
+const DEMAND_OFFER_SENTENCE = "عندى شقة للبيع مناسبة لطلب العميل ده";
+
+/**
+ * The opener an owner sends from a buyer-request card ("I have a unit for this request").
+ * The backend reads the trailing `— REQ-<id>` first, then the request link
+ * (`detect_demand_offer_ref`, LENAAI-Agent `src/utils/demand_offer.py`), saves the lead
+ * as a seller and asks for the unit's details. The link lets the owner reopen the request.
+ * Without a valid public id the sentence goes alone: no code, no link.
+ */
+export function demandOfferMessage(requirementId, siteUrl) {
+  const id = typeof requirementId === "string" ? requirementId.trim().toLowerCase() : "";
+  if (!isPublicRequirementId(id)) return DEMAND_OFFER_SENTENCE;
+  return `${DEMAND_OFFER_SENTENCE} — REQ-${id.toUpperCase()}\n${requirementShareUrl(id, siteUrl)}`;
 }

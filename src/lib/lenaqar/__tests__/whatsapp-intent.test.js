@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   buyerPageCtaMessage,
+  demandOfferMessage,
   matchRequestMessage,
   normalizeMatchRef,
   unitInquiryMessage,
@@ -100,4 +101,23 @@ test("a unit card on the match page sends the unit code, then the request refere
   // No clean reference: the plain unit opener, exactly as a unit page sends it.
   assert.equal(withMatchRef(unitOpener, "bad"), unitOpener);
   assert.equal(withMatchRef(unitOpener, ""), unitOpener);
+});
+
+test("demand-card opener: seller sentence, upper-case REQ code, then the request link", () => {
+  assert.equal(
+    demandOfferMessage("ecfd9cdc8bcc", "https://www.lenaqar.com"),
+    "عندى شقة للبيع مناسبة لطلب العميل ده — REQ-ECFD9CDC8BCC\nhttps://www.lenaqar.com/requests/ecfd9cdc8bcc",
+  );
+});
+
+test("demand-card opener accepts an upper-case or padded id and a trailing-slash site URL", () => {
+  const expected =
+    "عندى شقة للبيع مناسبة لطلب العميل ده — REQ-ECFD9CDC8BCC\nhttps://www.lenaqar.com/requests/ecfd9cdc8bcc";
+  assert.equal(demandOfferMessage(" ECFD9CDC8BCC ", "https://www.lenaqar.com/"), expected);
+});
+
+test("demand-card opener without a valid public id is the sentence alone", () => {
+  for (const id of [undefined, null, "", "HOME", "ecfd9cdc8bc", "ecfd9cdc8bccx", "zzzzzzzzzzzz", 123]) {
+    assert.equal(demandOfferMessage(id, "https://www.lenaqar.com"), "عندى شقة للبيع مناسبة لطلب العميل ده");
+  }
 });
