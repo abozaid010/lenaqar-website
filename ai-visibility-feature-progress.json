@@ -364,8 +364,9 @@
     {
       "id": "B29",
       "title": "Listing page as a data page: existing fields under H2 sections, price per m² labelled as computed, before-you-pay checklist",
-      "status": "pending",
-      "note": "Phase 2, own PR. Baseline: audit C4 1.46/2 (73% of sampled pages have 3 or more H2/H3); sampled listings have 0–1 H2."
+      "status": "in_progress",
+      "note": "Sections: السداد والكاش (only when mayShowMoneySplit), السعر (price per m² labelled as computed), مواصفات الوحدة, المكان والاستلام, حالة الإعلان (only when fields exist), قبل ما تشتري (the four /before-you-pay bullets + links). No new facts: every row was already on the page or in its headline. After merge: verify deployed SHA, seo-health, audit on production.",
+      "evidence": "Branch feat/ai-visibility-listing-sections (stacked on feat/ai-visibility). Local production build, 5 sampled listings: 5–6 H2 each (was 0–1), JSON-LD parses, no FAQ schema added, no empty lists. Mobile 375 px RTL: no horizontal overflow. Tests 293/293, lint 0 errors, build exit 0. Audit, 40 pages, local build: C4 1.46/2 (73%) → 1.95/2 (97%); total 95.1 provisional (still minus 1 point for http on localhost). Report: REPORT/ai-visibility-audit/2026-11-24-after-listing-sections-local-40p.md"
     },
     {
       "id": "B30",
@@ -486,6 +487,10 @@
     {
       "at": "2026-11-24T16:00:00+02:00",
       "event": "Phased plan approved (inventory truth first). Phase 0 report: the site shows 872 resale units of tenant lenaqar; developer inventory (874 projects, stored counter 24,785 units) sits under tenant public and is never queried. Phase 1 supporting fixes and off-site drafts on branch feat/ai-visibility. Findings: API pages capped at 16 units (old guard failed above 1,600 units); Search Console API login expired; listing codes containing '/' return 404 from unit-by-code (e.g. 63/50/13); guide JSON-LD dateModified is 2026-11-02 while the asking-price tables are recomputed daily."
+    },
+    {
+      "at": "2026-11-24T18:30:00+02:00",
+      "event": "B29 listing sections built on feat/ai-visibility-listing-sections; second PR opened, stacked on the first. No merge or deploy."
     }
   ],
   "owner_confirmed_facts": {
@@ -535,7 +540,7 @@
     "phases": {
       "0": "partial — report written; exact unit counts need one grouped database count (D-COUNT)",
       "1": "in PR — dates, titles, llms, page guard; baselines recorded; Search Console index counts and Bing/IndexNow wait for owner (D-GSC-LOGIN, B13)",
-      "2": "listing sections next (own PR); freshness waits for G2; primary units wait for G1",
+      "2": "listing sections in PR (B29); freshness waits for G2; primary units wait for G1",
       "3": "waits for G1 and G3; 5 hubs approved 2026-11-24: apartments Nasr City, First Settlement, El Obour, Heliopolis; villas New Cairo",
       "4": "unchanged: B3, B4 (D4), B7 (D3)",
       "5": "drafts written; owner performs every external action"
