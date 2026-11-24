@@ -28,7 +28,7 @@ Master record (from `public/llms.txt`, the site's own source):
 | Address | 505 ARCHPLAN Square، العاصمة الإدارية، القاهرة، مصر |
 | Phone / WhatsApp (buyers and sellers) | +201002891933 |
 | Category | Real estate agency / property marketplace (resale and developer units, Egypt) |
-| Service area | unknown (cities to list officially) |
+| Service area | As set on the Google Business Profile (2026-11-16): New Cairo, Madinaty, El Shorouk, New Administrative Capital, 6th of October, Sheikh Zayed |
 | Founding date | unknown |
 | Legal entity name and registration number | unknown |
 | Founder name to publish | unknown (needs owner approval) |
