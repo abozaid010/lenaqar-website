@@ -37,11 +37,11 @@ Master record (from `public/llms.txt`, the site's own source):
 
 Draft description, Arabic (use on all profiles):
 
-> لينا عقار — منصة عقارية في مصر لشراء وبيع الوحدات الريسيل ووحدات المطورين. المشتري بيكتب طلبه (المنطقة، الميزانية، عدد الغرف) وبنرشّح له وحدات مناسبة، مع أسعار طلب معروضة بتاريخها ومراجعة قانونية لورق الوحدة قبل الدفع. التواصل على واتساب، ومش بنتصل إلا لو العميل طلب. العمولة 2.5% على المشتري و2.5% على البائع من سعر البيع النهائي.
+> لينا عقار — منصة عقارية في مصر لشراء وبيع الوحدات الريسيل ووحدات المطورين. المشتري بيكتب طلبه (المنطقة، الميزانية، عدد الغرف) وبنرشّح له وحدات مناسبة، مع أسعار طلب معروضة بتاريخها ومراجعة قانونية لورق وحدة الريسيل قبل الدفع. التواصل على واتساب، ومش بنتصل إلا لو العميل طلب. العمولة 2.5% على المشتري و2.5% على البائع من سعر البيع النهائي.
 
 Draft description, English:
 
-> LenAqar (lenaqar.com) is an Egyptian property marketplace for resale and developer units. Buyers write a request (area, budget, rooms) and get matching units, dated asking prices and a legal review of the unit's papers before paying. Contact is by WhatsApp; no cold calls. Commission is 2.5% from the buyer and 2.5% from the seller on the final sale price.
+> LenAqar (lenaqar.com) is an Egyptian property marketplace for resale and developer units. Buyers write a request (area, budget, rooms) and get matching units, dated asking prices and a legal review of a resale unit's papers before paying. Contact is by WhatsApp; no cold calls. Commission is 2.5% from the buyer and 2.5% from the seller on the final sale price.
 
 | Profile | State | What to do |
 | --- | --- | --- |
@@ -87,7 +87,7 @@ Unverified, check by hand before use: alborsaanews.com (no response), yellowpage
 > الموضوع: لينا عقار — المشتري بيكتب طلبه بدل ما يلف على الإعلانات
 >
 > أهلًا [الاسم]،
-> لينا عقار منصة مصرية بتبدأ من طلب المشتري: يكتب المنطقة والميزانية وعدد الغرف، والمنصة ترشّح وحدات ريسيل ووحدات مطورين مناسبة، مع أسعار طلب بتاريخها ومراجعة قانونية لورق الوحدة. [رقم حقيقي واحد يختاره المالك: عدد الطلبات أو الوحدات، بتاريخه].
+> لينا عقار منصة مصرية بتبدأ من طلب المشتري: يكتب المنطقة والميزانية وعدد الغرف، والمنصة ترشّح وحدات ريسيل ووحدات مطورين مناسبة، مع أسعار طلب بتاريخها ومراجعة قانونية لورق وحدة الريسيل. [رقم حقيقي واحد يختاره المالك: عدد الطلبات أو الوحدات، بتاريخه].
 > نحب نحكي لكم إزاي بنشتغل وإيه اللي اتعلمناه من طلبات المشترين. الموقع: https://www.lenaqar.com
 > [الاسم] — [الصفة]
 
