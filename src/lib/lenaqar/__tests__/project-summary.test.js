@@ -188,7 +188,16 @@ test("page title drops a long developer name; description quotes the summary", (
   assert.equal(short.title, "أسعار طلاله — مدينة مصر");
   assert.match(short.description, /12 وحدة/);
   assert.match(short.description, /9,000,000/);
-  assert.match(short.description, /مش أسعار بيع نهائية/);
+  assert.match(short.description, /مش أسعار بيع/);
+  assert.match(short.description, /التجمع الخامس/);
+  assert.ok(short.description.length <= 170, String(short.description.length));
   const long = projectMetaText(project, { name: "مشروع باسم طويل جدًا في العاصمة", developer: "شركة تطوير عقاري باسم طويل جدًا جدًا للاستثمار" });
   assert.equal(long.title, "أسعار مشروع باسم طويل جدًا في العاصمة");
+  const far = projectMetaText(project, {
+    name: "مشروع باسم طويل جدًا في العاصمة",
+    city: "العاصمة الإدارية الجديدة",
+    district: "منطقة باسم طويل جدًا في العاصمة الإدارية الجديدة",
+  });
+  assert.doesNotMatch(far.description, /منطقة باسم طويل/);
+  assert.ok(far.description.length <= 170, String(far.description.length));
 });

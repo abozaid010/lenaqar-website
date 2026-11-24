@@ -242,6 +242,7 @@ export function buildProjectSchema({ project, labels, url, title, description })
 
 /** Longest page title before the site brand is appended by the root template. */
 const TITLE_MAX = 58;
+const DESCRIPTION_MAX = 170;
 
 /**
  * Title and description, built only from the snapshot's own numbers. The
@@ -252,10 +253,13 @@ export function projectMetaText(project, labels) {
   const place = [labels.district, labels.city].filter(Boolean).join("، ");
   const withDeveloper = `أسعار ${labels.name}${labels.developer ? ` — ${labels.developer}` : ""}`;
   const title = withDeveloper.length <= TITLE_MAX ? withDeveloper : `أسعار ${labels.name}`;
+  // Search snippets cut at about 170 characters: the place goes first.
+  const describe = (withPlace) =>
+    `أسعار ${summary.units} وحدة في ${labels.name}` +
+    `${withPlace && place ? ` (${place})` : ""}: من ${formatEgpNumber(summary.priceMin)} إلى ` +
+    `${formatEgpNumber(summary.priceMax)} ج.م، وسيط المتر ` +
+    `${formatEgpNumber(summary.perMeterMedian)} ج.م. أسعار قوائم المطور بتاريخها، مش أسعار بيع.`;
   const description =
-    `ملخص أسعار ${summary.units} وحدة من المطور في ${labels.name}` +
-    `${place ? ` (${place})` : ""}: من ${formatEgpNumber(summary.priceMin)} إلى ` +
-    `${formatEgpNumber(summary.priceMax)} ج.م، ووسيط سعر المتر ` +
-    `${formatEgpNumber(summary.perMeterMedian)} ج.م. أسعار قوائم المطور بتاريخها، مش أسعار بيع نهائية.`;
+    describe(true).length <= DESCRIPTION_MAX ? describe(true) : describe(false);
   return { title, description };
 }
