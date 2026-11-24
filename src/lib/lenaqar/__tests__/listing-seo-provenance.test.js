@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildListingDescription, buildListingSchema } from "../listing-seo.js";
+import { buildListingDescription, buildListingSchema, isoDateModified } from "../listing-seo.js";
 
 const unit = {
   code: "OPP-123",
@@ -26,6 +26,27 @@ test("schema does not treat updatedAt as the original posting date or seller evi
 test("schema retains an explicit posting date when present", () => {
   const schema = buildListingSchema({ ...unit, datePosted: "2026-10-20" }, "/opportunities/OPP-123");
   assert.equal(schema.datePosted, "2026-10-20");
+});
+
+test("dateModified comes from a valid, non-future updatedAt as ISO", () => {
+  const schema = buildListingSchema({ ...unit, updatedAt: "2026-11-03T05:36:42.834320Z" }, "/opportunities/OPP-123");
+  assert.equal(schema.dateModified, "2026-11-03T05:36:42.834Z");
+  assert.equal(schema.datePosted, undefined);
+});
+
+test("dateModified is omitted when updatedAt is missing, invalid or in the future", () => {
+  const url = "/opportunities/OPP-123";
+  assert.equal("dateModified" in buildListingSchema(unit, url), false);
+  assert.equal("dateModified" in buildListingSchema({ ...unit, updatedAt: null }, url), false);
+  assert.equal("dateModified" in buildListingSchema({ ...unit, updatedAt: "not a date" }, url), false);
+  assert.equal("dateModified" in buildListingSchema({ ...unit, updatedAt: "2999-01-01" }, url), false);
+});
+
+test("isoDateModified accepts today and rejects tomorrow against a fixed clock", () => {
+  const now = new Date("2026-11-24T12:00:00Z");
+  assert.equal(isoDateModified("2026-11-24T11:59:59Z", now), "2026-11-24T11:59:59.000Z");
+  assert.equal(isoDateModified("2026-11-25T00:00:00Z", now), null);
+  assert.equal(isoDateModified("", now), null);
 });
 
 test("delivery year is not presented as the installment end date", () => {

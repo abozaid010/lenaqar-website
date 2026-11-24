@@ -10,7 +10,8 @@ import {
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = {
-  title: "دليل المشتري في مصر | لينا عقار",
+  // The root template adds «| لينا عقار»; the brand must not be repeated here.
+  title: "دليل المشتري في مصر",
   description:
     "دليل المشتري العقاري في مصر من لينا عقار: خرائط أسعار، مميزات وعيوب المدن، قوائم فحص، ومقارنات — بدون مكالمات باردة.",
   openGraph: {

@@ -51,8 +51,11 @@ export const SITE = {
    */
   feed: {
     enabled: process.env.NEXT_PUBLIC_LENAQAR_FEED_ENABLED !== "false",
-    maxPages: 100,
-    pageSize: 50,
+    // The API returns at most 16 units per page whatever is asked, so the page
+    // guard must cover maxUnits at 16 per page (5000 / 16 = 313). With the old
+    // 100-page guard the catalogue failed above 1,600 units.
+    maxPages: 320,
+    pageSize: 16,
     maxUnits: 5000,
     maxDurationMs: 120_000,
   },

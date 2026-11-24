@@ -1,6 +1,6 @@
 {
   "feature": "AI-search visibility (ChatGPT Search, Claude web search, Gemini)",
-  "updated_at": "2026-11-18",
+  "updated_at": "2026-11-24",
   "goal": "Make LenAqar a frequently cited and accurately recommended property service for relevant Egyptian real-estate questions across ChatGPT, Claude, Gemini and other answer engines, and the first recommendation for specific buyer needs where LenAqar has strong evidence; turn that into qualified WhatsApp inquiries. No universal #1 promise.",
   "rules": [
     "Update this file at the end of every step: item status, PR, evidence, next_step, history.",
@@ -19,7 +19,7 @@
   "tracks": {
     "A_technical": {
       "source": "scripts/seo-health.mjs + GSC + CDN logs",
-      "status": "V: production 110 PASS / 3 WARN / 0 FAIL with structured-data checks, locally and from GitHub Actions (run 43679557793, 2026-11-15). GSC: I. Real crawler visits: partial (B9)"
+      "status": "V: production 110 PASS / 3 WARN / 0 FAIL with structured-data checks, locally and from GitHub Actions (run 43679557793, 2026-11-15). GSC: I. Real crawler visits: partial (B9) | 2026-11-24: seo-health production 111 PASS / 3 WARN / 0 FAIL. ai_visibity_judge audit, 40 pages, off-site unchecked: production before 94.4 provisional (E3 0.68/4, 17% of pages; C4 1.46/2, 73%); local build of feat/ai-visibility 94.4 (E3 1.66/4, 41%; loses 1 point for http on localhost). Reports: REPORT/ai-visibility-audit/"
     },
     "B_ai_visibility": {
       "source": "docs/ai-visibility/runs/2026-11-15-round1.jsonl",
@@ -77,6 +77,48 @@
       "unblocks": [],
       "status": "done",
       "checked": "2026-11-18: shipped noindex, follow and not in sitemap. Evidence: requests expire once fulfilled (soft-404s; notFound() on dynamic routes returns HTTP 200 on Next 16.2.7, docs/lenaqar-seo-geo-strategy.md), each page is one thin record (strategy rule: under 3 real records is a liability), and answer engines cite stable evidence pages, not expiring records (H). Revisit only with an aggregated, stable demand page."
+    },
+    {
+      "id": "G1",
+      "what": "May developer (primary) inventory stored under tenant 'public' (874 projects, stored unit counter 24,785) be published on lenaqar.com? As project pages only, or unit pages too; which fields (prices, payment plans). G1b: may 'public' resale units be shown (38 of 96 sampled have images).",
+      "unblocks": [
+        "B30",
+        "Phase 2 primary units"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "G2",
+      "what": "Listing freshness: age of updatedAt after which availability (InStock) is no longer stated (B10).",
+      "unblocks": [
+        "B10"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "G3",
+      "what": "Minimum real records for an inventory or demand page to exist or be indexed (proposal: 10 listings or 5 requests).",
+      "unblocks": [
+        "B30"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "D-COUNT",
+      "what": "One grouped count on units_v1 by clientId, is_primary, purpose, visibility. A direct database read was not permitted in the 2026-11-24 session, so the '30k+' figure is explained to about 85% (estimate) from the API and stored counters.",
+      "unblocks": [
+        "B26"
+      ],
+      "status": "open"
+    },
+    {
+      "id": "D-GSC-LOGIN",
+      "what": "Search Console API login expired (401 on 2026-11-24). Re-run the gcloud application-default login from D1 so indexed/submitted counts can be pulled.",
+      "unblocks": [
+        "B1",
+        "Phase 1 baseline"
+      ],
+      "status": "open"
     }
   ],
   "escalated_non_blocking": [
@@ -296,9 +338,44 @@
       "evidence": "2026-11-16: profile created in Business Profile Manager (owner account) as «لينا عقار - LenAqar», Real estate agency, 505 ARCHPLAN Square, New Administrative Capital; pin on the owner's map link; visits by appointment; service areas New Cairo, Madinaty, El Shorouk, New Administrative Capital, 6th of October, Sheikh Zayed (Mostakbal City not offered by Google); phone + WhatsApp chat 01002891933; website; hours Sat–Thu 10:00–20:00, Fri closed; services buying/seller agent, first-time buyer, new construction, property sales; description AR+EN with commission + free lawyer review.",
       "blocker": "OWNER: video verification parked by owner (2026-11-18), planned early next week. Not public until verified. Add real office photos.",
       "note": "Existing Maps listing 'LENA AI' (software company, same building, other phone) is not managed by this account; consider claiming it and keeping categories distinct to avoid a duplicate-listing flag. Ad credit and Workspace offers skipped."
+    },
+    {
+      "id": "B26",
+      "title": "Inventory truth: '30k+ units' vs 872 public listings",
+      "status": "partial",
+      "blocker": "D-COUNT",
+      "evidence": "docs/ai-visibility/2026-11-inventory-gap.md (2026-11-24): site query = tenant lenaqar, resale, sell → 872 units (833 indexable, in sitemap); tenant lenaqar has 0 primary units; tenant public has 874 projects with stored units_count 24,785 (source import_v2); sample of 320 primary units: price/area/delivery/developer/project 320/320, images 305/320, 0 duplicate rows.",
+      "note": "API pages are capped at 16 units; public endpoints 60 requests/minute. A unit-per-page approach does not scale to the developer inventory; GET /public/projects returns all projects in one call."
+    },
+    {
+      "id": "B27",
+      "title": "Phase 1 supporting fixes: listing dateModified + <time>, brand once in /guides and /privacy titles, hubs and price tables in llms files, feed page guard 16 × 320",
+      "status": "in_progress",
+      "evidence": "Branch feat/ai-visibility. Tests: listing-seo-provenance 8/8, fetch-cursor-pages 9/9; lint:seo 0 errors; next build exit 0 (958 static pages). Local production build: /guides and /privacy titles contain the brand once; 3 listings show <time dateTime> and dateModified from updatedAt, no datePosted; JSON-LD blocks parse. Audit E3 0.68/4 (production) → 1.66/4 (local build), 40 pages.",
+      "note": "Hubs and static pages get no date: buyer requests carry no date field, so there is no real source. After merge: verify deployed SHA, run seo-health and the audit on production."
+    },
+    {
+      "id": "B28",
+      "title": "Off-site checklist and drafts (indexing checks, entity text, 10 targets + pitches, 5 video outlines, citation benchmark CSV, offsite.json)",
+      "status": "done",
+      "evidence": "docs/ai-visibility-offsite.md; docs/ai-visibility/citation-benchmark-template.csv (45 rows: 12 panel prompts + 3 extra × 3 assistants); docs/ai-visibility/offsite.json",
+      "note": "Drafts only. Nothing sent or created. Owner actions: Bing Webmaster + IndexNow (B13), GBP verification (B25), profiles, outreach (B14/B21), videos."
+    },
+    {
+      "id": "B29",
+      "title": "Listing page as a data page: existing fields under H2 sections, price per m² labelled as computed, before-you-pay checklist",
+      "status": "pending",
+      "note": "Phase 2, own PR. Baseline: audit C4 1.46/2 (73% of sampled pages have 3 or more H2/H3); sampled listings have 0–1 H2."
+    },
+    {
+      "id": "B30",
+      "title": "Inventory and demand pages: hubs with real listings and requests, project pages, seller demand pages",
+      "status": "gated",
+      "blocker": "G1, G3",
+      "note": "Phase 3. Five hubs approved by the owner on 2026-11-24 (counts that day: Nasr City 28 listings / 10 recent requests, First Settlement 26 / 2, El Obour 16 / 11, Heliopolis 12 / 8, New Cairo villas 21 listings)."
     }
   ],
-  "next_step": "Owner: GBP video verification early next week (parked 2026-11-18). Gemini still wrong on buyer commission with no sources → corroboration (GBP, independent mentions B14/B21). Next build: B3 (resale guide noindex), B4 methodology page. Re-check guides re-crawl; GSC 28-day baseline when ≥28 days exist (data starts 2026-11-14); panel round 2 ≥2026-11-21 (clean Claude account). Lawyer identity + scope UNRESOLVED.",
+  "next_step": "Owner: merge the feat/ai-visibility PR; answer G1, G2, G3; run or permit the grouped unit count (D-COUNT); refresh the Search Console login (D-GSC-LOGIN); Bing Webmaster + IndexNow (B13). Assistant after merge: verify deployed SHA, seo-health and the 40-page audit on production; then B29 listing sections (Phase 2). Earlier open items stay: GBP video verification (B25), B3, B4, panel round 2 (due since 2026-11-21, clean Claude account), lawyer identity + scope.",
   "reviews": [
     {
       "date": "2026-11-23",
@@ -405,6 +482,10 @@
     {
       "at": "2026-11-18T12:00:00+02:00",
       "event": "Spot check: ChatGPT now states the 2.5%/2.5% commission correctly (was 'not clearly stated') and cites LenAqar's own Madinaty figure (71,620 EGP/m², n=125). Gemini still ungrounded and wrong on buyer commission. GA4 11-05..11-17: AI Assistant 24 sessions (75% engaged), 10 whatsapp_click, 1 buy request. Evidence: docs/ai-visibility/runs/2026-11-18-spotcheck.md. GA4/GSC pull scripts added under scripts/analytics/."
+    },
+    {
+      "at": "2026-11-24T16:00:00+02:00",
+      "event": "Phased plan approved (inventory truth first). Phase 0 report: the site shows 872 resale units of tenant lenaqar; developer inventory (874 projects, stored counter 24,785 units) sits under tenant public and is never queried. Phase 1 supporting fixes and off-site drafts on branch feat/ai-visibility. Findings: API pages capped at 16 units (old guard failed above 1,600 units); Search Console API login expired; listing codes containing '/' return 404 from unit-by-code (e.g. 63/50/13); guide JSON-LD dateModified is 2026-11-02 while the asking-price tables are recomputed daily."
     }
   ],
   "owner_confirmed_facts": {
@@ -446,5 +527,18 @@
       "English pilot decision from GSC English query data (B15)",
       "Panel round 4–5; continue/stop/expand per track with raw counts and variance"
     ]
+  },
+  "phased_plan": {
+    "approved": "2026-11-24 (owner)",
+    "doc": "docs/ai-visibility/2026-11-24-phased-plan.md",
+    "order": "0 inventory truth → 1 crawlability/indexing → 2 accurate property data → 3 inventory and demand pages → 4 guides → 5 off-site (parallel, drafts)",
+    "phases": {
+      "0": "partial — report written; exact unit counts need one grouped database count (D-COUNT)",
+      "1": "in PR — dates, titles, llms, page guard; baselines recorded; Search Console index counts and Bing/IndexNow wait for owner (D-GSC-LOGIN, B13)",
+      "2": "listing sections next (own PR); freshness waits for G2; primary units wait for G1",
+      "3": "waits for G1 and G3; 5 hubs approved 2026-11-24: apartments Nasr City, First Settlement, El Obour, Heliopolis; villas New Cairo",
+      "4": "unchanged: B3, B4 (D4), B7 (D3)",
+      "5": "drafts written; owner performs every external action"
+    }
   }
 }
