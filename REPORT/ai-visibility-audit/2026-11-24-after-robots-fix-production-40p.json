@@ -1,0 +1,623 @@
+{
+  "site": "https://www.lenaqar.com",
+  "audited_at": "2026-11-24 14:28 UTC",
+  "version": "1.0",
+  "pages_sampled": [
+    "https://www.lenaqar.com/how-it-works",
+    "https://www.lenaqar.com/no-calls",
+    "https://www.lenaqar.com/verified-prices",
+    "https://www.lenaqar.com/before-you-pay",
+    "https://www.lenaqar.com/delivery-delays",
+    "https://www.lenaqar.com/opportunities/L42vRnfD",
+    "https://www.lenaqar.com/guides/madinaty/prices-2026",
+    "https://www.lenaqar.com/sell",
+    "https://www.lenaqar.com/calculator",
+    "https://www.lenaqar.com/privacy",
+    "https://www.lenaqar.com/network",
+    "https://www.lenaqar.com/apartments-for-sale/noor-city",
+    "https://www.lenaqar.com/chalets-for-sale/north-coast",
+    "https://www.lenaqar.com/ready-to-move-properties",
+    "https://www.lenaqar.com/villas-for-sale/egypt",
+    "https://www.lenaqar.com/projects/carnelia",
+    "https://www.lenaqar.com/opportunities/xsZOwXgu",
+    "https://www.lenaqar.com/guides/buying/how-to-write-property-request",
+    "https://www.lenaqar.com/apartments-for-sale/fifth-settlement",
+    "https://www.lenaqar.com/projects/sky-ramp",
+    "https://www.lenaqar.com/opportunities/88EtuMuf",
+    "https://www.lenaqar.com/guides/new-cairo/red-file",
+    "https://www.lenaqar.com/apartments-for-sale/sheikh-zayed",
+    "https://www.lenaqar.com/projects/dr5-medical-center",
+    "https://www.lenaqar.com/opportunities/8QC9Bdrc",
+    "https://www.lenaqar.com/guides/fifth-settlement",
+    "https://www.lenaqar.com/apartments-for-sale/el-shorouk",
+    "https://www.lenaqar.com/projects/palm-hills-alexandria",
+    "https://www.lenaqar.com/opportunities/5HRMWBNX",
+    "https://www.lenaqar.com/guides/6th-of-october/prices-2026",
+    "https://www.lenaqar.com/apartments-for-sale/new-cairo",
+    "https://www.lenaqar.com/projects/saada-boutique",
+    "https://www.lenaqar.com/opportunities/T3k6oHWY",
+    "https://www.lenaqar.com/guides/mostakbal-city/prices-2026",
+    "https://www.lenaqar.com/apartments-for-sale/new-administrative-capital",
+    "https://www.lenaqar.com/projects/kukun",
+    "https://www.lenaqar.com/opportunities/BAEHkb9P",
+    "https://www.lenaqar.com/guides/el-shorouk",
+    "https://www.lenaqar.com/apartments-for-sale/madinaty",
+    "https://www.lenaqar.com/projects/kasakuon"
+  ],
+  "pages": [
+    {
+      "url": "https://www.lenaqar.com",
+      "status": 200,
+      "words": 610,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/how-it-works",
+      "status": 200,
+      "words": 866,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/no-calls",
+      "status": 200,
+      "words": 409,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/verified-prices",
+      "status": 200,
+      "words": 435,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/before-you-pay",
+      "status": 200,
+      "words": 604,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/delivery-delays",
+      "status": 200,
+      "words": 437,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/opportunities/L42vRnfD",
+      "status": 200,
+      "words": 341,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/guides/madinaty/prices-2026",
+      "status": 200,
+      "words": 917,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/sell",
+      "status": 200,
+      "words": 348,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/calculator",
+      "status": 200,
+      "words": 204,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/privacy",
+      "status": 200,
+      "words": 501,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/network",
+      "status": 200,
+      "words": 384,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/apartments-for-sale/noor-city",
+      "status": 200,
+      "words": 310,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/chalets-for-sale/north-coast",
+      "status": 200,
+      "words": 331,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/ready-to-move-properties",
+      "status": 200,
+      "words": 900,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/villas-for-sale/egypt",
+      "status": 200,
+      "words": 320,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/projects/carnelia",
+      "status": 200,
+      "words": 502,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/opportunities/xsZOwXgu",
+      "status": 200,
+      "words": 321,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/guides/buying/how-to-write-property-request",
+      "status": 200,
+      "words": 438,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/apartments-for-sale/fifth-settlement",
+      "status": 200,
+      "words": 739,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/projects/sky-ramp",
+      "status": 200,
+      "words": 578,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/opportunities/88EtuMuf",
+      "status": 200,
+      "words": 308,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/guides/new-cairo/red-file",
+      "status": 200,
+      "words": 606,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/apartments-for-sale/sheikh-zayed",
+      "status": 200,
+      "words": 458,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/projects/dr5-medical-center",
+      "status": 200,
+      "words": 467,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/opportunities/8QC9Bdrc",
+      "status": 200,
+      "words": 323,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/guides/fifth-settlement",
+      "status": 200,
+      "words": 582,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/apartments-for-sale/el-shorouk",
+      "status": 200,
+      "words": 591,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/projects/palm-hills-alexandria",
+      "status": 200,
+      "words": 545,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/opportunities/5HRMWBNX",
+      "status": 200,
+      "words": 327,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/guides/6th-of-october/prices-2026",
+      "status": 200,
+      "words": 663,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/apartments-for-sale/new-cairo",
+      "status": 200,
+      "words": 1159,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/projects/saada-boutique",
+      "status": 200,
+      "words": 651,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/opportunities/T3k6oHWY",
+      "status": 200,
+      "words": 327,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/guides/mostakbal-city/prices-2026",
+      "status": 200,
+      "words": 613,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/apartments-for-sale/new-administrative-capital",
+      "status": 200,
+      "words": 345,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/projects/kukun",
+      "status": 200,
+      "words": 504,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/opportunities/BAEHkb9P",
+      "status": 200,
+      "words": 317,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/guides/el-shorouk",
+      "status": 200,
+      "words": 634,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/apartments-for-sale/madinaty",
+      "status": 200,
+      "words": 456,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    },
+    {
+      "url": "https://www.lenaqar.com/projects/kasakuon",
+      "status": 200,
+      "words": 535,
+      "noindex": false,
+      "nosnippet": false,
+      "blocked_search_bots": []
+    }
+  ],
+  "onsite": 67.7,
+  "onsite_max": 70,
+  "offsite": 0,
+  "offsite_max": 0,
+  "offsite_provided": false,
+  "offsite_unchecked": [
+    "Indexed in Google",
+    "Indexed in Bing (feeds ChatGPT)",
+    "Indexed in Brave (feeds Claude)",
+    "Brand mentioned on 5+ independent sites",
+    "Brand present on YouTube",
+    "Entity profiles (Google Business Profile, LinkedIn, Crunchbase/Wikidata)",
+    "Cited by at least one assistant on test prompts"
+  ],
+  "provisional": true,
+  "onsite_percent": 96.7,
+  "total": 96.7,
+  "grade": "A - Excellent, provisional",
+  "critical_caps": [],
+  "checks": [
+    {
+      "pillar": "A. Access for AI bots",
+      "id": "A1",
+      "name": "robots.txt reachable",
+      "points": 1,
+      "max": 1,
+      "detail": "HTTP 200",
+      "fix": ""
+    },
+    {
+      "pillar": "A. Access for AI bots",
+      "id": "A2",
+      "name": "AI search bots allowed (OAI-SearchBot, Claude-SearchBot, Googlebot, Bingbot, PerplexityBot)",
+      "points": 10,
+      "max": 10,
+      "detail": "blocked: none",
+      "fix": ""
+    },
+    {
+      "pillar": "A. Access for AI bots",
+      "id": "A3",
+      "name": "User-request fetchers allowed (ChatGPT-User, Claude-User)",
+      "points": 2,
+      "max": 2,
+      "detail": "blocked: none",
+      "fix": ""
+    },
+    {
+      "pillar": "A. Access for AI bots",
+      "id": "A4",
+      "name": "Training bots allowed (GPTBot, ClaudeBot, Google-Extended, CCBot)",
+      "points": 2.0,
+      "max": 2,
+      "detail": "blocked: none",
+      "fix": ""
+    },
+    {
+      "pillar": "A. Access for AI bots",
+      "id": "A5",
+      "name": "XML sitemap declared and readable",
+      "points": 2,
+      "max": 2,
+      "detail": "1370 URLs; declared in robots.txt: True",
+      "fix": ""
+    },
+    {
+      "pillar": "A. Access for AI bots",
+      "id": "A6",
+      "name": "Server/CDN does not refuse AI user agents",
+      "points": 3,
+      "max": 3,
+      "detail": "user-agent probe only (cannot reproduce vendor IP ranges); refused: none; inconclusive: none",
+      "fix": ""
+    },
+    {
+      "pillar": "B. Readable without JavaScript",
+      "id": "B1",
+      "name": "Homepage returns 200 over HTTPS",
+      "points": 2,
+      "max": 2,
+      "detail": "HTTP 200, https=True, 0.5s",
+      "fix": ""
+    },
+    {
+      "pillar": "B. Readable without JavaScript",
+      "id": "B2",
+      "name": "Homepage has real text in raw HTML (>=300 words)",
+      "points": 5,
+      "max": 5,
+      "detail": "610 words without JavaScript",
+      "fix": ""
+    },
+    {
+      "pillar": "B. Readable without JavaScript",
+      "id": "B3",
+      "name": "Inner pages have >=200 words in raw HTML",
+      "points": 6.0,
+      "max": 6,
+      "detail": "40/40 sampled pages",
+      "fix": ""
+    },
+    {
+      "pillar": "B. Readable without JavaScript",
+      "id": "B4",
+      "name": "No noindex / nosnippet / max-snippet:0 (meta or X-Robots-Tag) on sampled pages",
+      "points": 2,
+      "max": 2,
+      "detail": "0 page(s) restricted",
+      "fix": ""
+    },
+    {
+      "pillar": "C. Page structure and content",
+      "id": "C1",
+      "name": "Unique descriptive <title> (10-70 chars)",
+      "points": 1.95,
+      "max": 2,
+      "detail": "97% of pages",
+      "fix": "Give every page a unique title naming the place/product and the brand."
+    },
+    {
+      "pillar": "C. Page structure and content",
+      "id": "C2",
+      "name": "Unique meta description (50-170 chars)",
+      "points": 2.0,
+      "max": 2,
+      "detail": "100% of pages",
+      "fix": ""
+    },
+    {
+      "pillar": "C. Page structure and content",
+      "id": "C3",
+      "name": "Exactly one H1 per page",
+      "points": 2.0,
+      "max": 2,
+      "detail": "100% of pages",
+      "fix": ""
+    },
+    {
+      "pillar": "C. Page structure and content",
+      "id": "C4",
+      "name": "Sectioned with >=3 H2/H3 headings",
+      "points": 1.95,
+      "max": 2,
+      "detail": "97% of pages",
+      "fix": "Use headings that mirror buyer questions (e.g. 'Apartment prices in Madinaty 2026')."
+    },
+    {
+      "pillar": "C. Page structure and content",
+      "id": "C5",
+      "name": "Canonical URL on this site",
+      "points": 1.0,
+      "max": 1,
+      "detail": "100% of pages",
+      "fix": ""
+    },
+    {
+      "pillar": "C. Page structure and content",
+      "id": "C6",
+      "name": "<html lang> declared",
+      "points": 1,
+      "max": 1,
+      "detail": "lang='ar-EG'",
+      "fix": ""
+    },
+    {
+      "pillar": "C. Page structure and content",
+      "id": "C7",
+      "name": "Concrete facts: >=15 numbers per page on average (prices, sizes, dates)",
+      "points": 3.0,
+      "max": 3,
+      "detail": "28.7 numbers per page",
+      "fix": ""
+    },
+    {
+      "pillar": "C. Page structure and content",
+      "id": "C8",
+      "name": "Open Graph title + description",
+      "points": 2.0,
+      "max": 2,
+      "detail": "100% of pages",
+      "fix": ""
+    },
+    {
+      "pillar": "D. Structured data (schema.org)",
+      "id": "D1",
+      "name": "Valid JSON-LD present",
+      "points": 2,
+      "max": 2,
+      "detail": "41/41 pages",
+      "fix": ""
+    },
+    {
+      "pillar": "D. Structured data (schema.org)",
+      "id": "D2",
+      "name": "Organization / LocalBusiness / RealEstateAgent entity",
+      "points": 3,
+      "max": 3,
+      "detail": "types: accommodation, aggregateoffer, answer, article, breadcrumblist, contactpoint, country, faqpage, howto, howtostep, imageobject, listitem, localbusiness, offer, organization, place, postaladdress, propertyvalue, quantitativevalue, question, realestatelisting, webpage, website",
+      "fix": ""
+    },
+    {
+      "pillar": "D. Structured data (schema.org)",
+      "id": "D3",
+      "name": "Content schema on inner pages (Offer, Residence, Article, FAQPage, ItemList ...)",
+      "points": 3,
+      "max": 3,
+      "detail": "types: accommodation, aggregateoffer, answer, article, breadcrumblist, contactpoint, country, faqpage, howto, howtostep, imageobject, listitem, localbusiness, offer, organization, place, postaladdress, propertyvalue, quantitativevalue, question, realestatelisting, webpage, website",
+      "fix": ""
+    },
+    {
+      "pillar": "D. Structured data (schema.org)",
+      "id": "D4",
+      "name": "BreadcrumbList",
+      "points": 2,
+      "max": 2,
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "pillar": "E. Freshness",
+      "id": "E1",
+      "name": "Sitemap URLs carry a valid <lastmod>",
+      "points": 3.0,
+      "max": 3,
+      "detail": "100% of URLs",
+      "fix": ""
+    },
+    {
+      "pillar": "E. Freshness",
+      "id": "E2",
+      "name": "Site updated in the last 30 days (newest lastmod)",
+      "points": 3,
+      "max": 3,
+      "detail": "newest lastmod: 2026-11-24",
+      "fix": ""
+    },
+    {
+      "pillar": "E. Freshness",
+      "id": "E3",
+      "name": "Pages expose valid dates (dateModified/datePublished, <time datetime>, article:modified_time)",
+      "points": 1.85,
+      "max": 4,
+      "detail": "46% of pages",
+      "fix": "Show 'Last updated <date>' in a <time datetime> tag and dateModified in JSON-LD on price/listing pages."
+    }
+  ]
+}
