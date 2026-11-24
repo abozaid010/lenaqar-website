@@ -32,8 +32,7 @@ function deliveryLabel(value, translate) {
   return null;
 }
 
-function locationLine(requirement, locale) {
-  const loc = requirement?.locations?.[0];
+function placeLine(loc, locale) {
   if (!loc) return "";
   return [
     localizedPlaceName(loc.project, loc.projectAr, locale),
@@ -42,6 +41,17 @@ function locationLine(requirement, locale) {
   ]
     .filter(Boolean)
     .join(" · ");
+}
+
+/** Places the buyer does not want, one line ("Madinaty B15، Rehab"). */
+function excludedLine(requirement, locale) {
+  return (requirement?.excludedLocations || [])
+    .map(
+      (loc) =>
+        placeLine(loc, locale) || localizedPlaceName(loc.city, loc.cityAr, locale),
+    )
+    .filter(Boolean)
+    .join(locale === "ar" ? "، " : ", ");
 }
 
 export default function RequirementCard({ requirement }) {
@@ -55,7 +65,8 @@ export default function RequirementCard({ requirement }) {
       : buildingTypeAr(rawType)) ||
     rawType ||
     null;
-  const location = locationLine(requirement, locale);
+  const location = placeLine(requirement.locations?.[0], locale);
+  const excluded = excludedLine(requirement, locale);
   const delivery = deliveryLabel(requirement.deliveryDate, translate);
   const whatsappHref = addUnitForRequirementHref(requirement);
   const notes = String(requirement.notes || "").trim();
@@ -161,6 +172,14 @@ export default function RequirementCard({ requirement }) {
         {requirement.moneyReviewRequired ? (
           <p className="mt-3 text-sm leading-relaxed text-black/70">
             {translate("lenaqar.requirements.moneyReviewNotice")}
+          </p>
+        ) : null}
+        {excluded ? (
+          <p className="mt-3 text-sm leading-relaxed text-black/70">
+            <span className="font-semibold text-primary/80">
+              {translate("lenaqar.marketplace.card.excluded")}:{" "}
+            </span>
+            {excluded}
           </p>
         ) : null}
         {notes ? (

@@ -32,3 +32,33 @@ export function whatsappShareHref(text, url) {
   const body = [text, url].filter(Boolean).join("\n");
   return `https://wa.me/?text=${encodeURIComponent(body)}`;
 }
+
+const text = (value) => (typeof value === "string" ? value : "");
+
+/**
+ * The places of a public requirement row (`locations` / `excludedLocations`), each
+ * with its Arabic names from `placeAr`. Anything that is not a place object is skipped.
+ * @param {unknown} list
+ * @param {(name: string) => string} placeAr
+ */
+export function readPublicPlaces(list, placeAr) {
+  if (!Array.isArray(list)) return [];
+  return list
+    .filter((loc) => loc && typeof loc === "object")
+    .map((loc) => {
+      const city = text(loc.city);
+      const district = text(loc.district);
+      const subDistrict = text(loc.subDistrict);
+      const project = text(loc.project);
+      return {
+        city,
+        district,
+        subDistrict,
+        project,
+        cityAr: placeAr(city),
+        districtAr: placeAr(district),
+        subDistrictAr: placeAr(subDistrict),
+        projectAr: placeAr(project),
+      };
+    });
+}
