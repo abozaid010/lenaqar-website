@@ -9,6 +9,7 @@ import {
 import { isOpportunityIndexable } from "@/lib/lenaqar/unit-trust";
 import { getIndexableGuideLinks } from "@/lib/guides/load";
 import { areaGuideHrefsForUnit } from "@/lib/guides/area-guides";
+import { getDoor } from "@/lib/lenaqar/doors";
 import OpportunityDetailContent from "./opportunity-detail-content";
 
 export const revalidate = 900;
@@ -74,5 +75,17 @@ export default async function OpportunityDetailPage({ params }) {
   const unit = await fetchOpportunityByCode(slug);
   if (!unit) notFound();
   const guideLinks = getIndexableGuideLinks(areaGuideHrefsForUnit(unit));
-  return <OpportunityDetailContent unit={unit} guideLinks={guideLinks} />;
+  // «قبل ما تشتري» reuses the approved /before-you-pay copy; no new claims.
+  const buyChecks = getDoor("before-you-pay")?.bullets || [];
+  const [checklistGuide = null] = getIndexableGuideLinks([
+    "/guides/buying/contract-registration-checklist",
+  ]);
+  return (
+    <OpportunityDetailContent
+      unit={unit}
+      guideLinks={guideLinks}
+      buyChecks={buyChecks}
+      checklistGuide={checklistGuide}
+    />
+  );
 }
