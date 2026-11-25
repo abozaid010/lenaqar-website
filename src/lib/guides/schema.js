@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 import { SITE } from "@/config/site";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
 import { publicGuidePath } from "./load";
@@ -55,10 +56,10 @@ export function buildArticleSchema(guide, { placeName } = {}) {
       alternateName: "Lenaqar",
       logo: {
         "@type": "ImageObject",
-        url: `${SITE.url}/images/default_logo.jpg`,
+        url: `${SITE.url}${BRAND.logo}`,
       },
     },
-    image: `${SITE.url}/images/default_logo.jpg`,
+    image: `${SITE.url}${BRAND.socialImage}`,
     mainEntityOfPage: url,
     url,
   };

@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 import { SITE } from "@/config/site";
 
 /** Shared Open Graph / canonical metadata for buyer landing pages. */
@@ -15,12 +16,16 @@ export function buyerLandingMetadata(landing) {
       type: "website",
       images: [
         {
-          url: `${SITE.url}/images/default_logo.jpg`,
+          url: `${SITE.url}${BRAND.socialImage}`,
           width: 1200,
           height: 630,
-          alt: SITE.name,
+          alt: BRAND.socialAlt,
         },
       ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: [{ url: `${SITE.url}${BRAND.socialImage}`, alt: BRAND.socialAlt }],
     },
     alternates: { canonical: url },
   };

@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 /**
  * Image utility functions for handling various image loading scenarios
  */
@@ -337,7 +338,7 @@ export function getFallbackImage(context = 'default') {
   const fallbacks = {
     property: '/images/property_placeholder.jpg',
     user: '/images/defaultImage.jpg',
-    logo: '/images/default_logo.jpg',
+    logo: BRAND.icon,
     dashboard: '/images/dasbordDesctop.png',
     mobile: '/images/dashbordmobile.png',
     default: '/images/defaultImage.jpg'

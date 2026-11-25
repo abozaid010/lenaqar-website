@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 import { SITE_URL, SITE_NAME } from "@/app/metadata";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
 
@@ -6,7 +7,7 @@ export default function LocalBusinessSchema() {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: SITE_NAME,
-    image: `${SITE_URL}/images/default_logo.jpg`,
+    image: `${SITE_URL}${BRAND.logo}`,
     address: {
       "@type": "PostalAddress",
       addressCountry: LENAQAR_CONTACT.country,

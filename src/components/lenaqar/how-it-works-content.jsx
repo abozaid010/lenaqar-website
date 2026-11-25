@@ -106,7 +106,7 @@ export default function HowItWorksContent() {
         titleKey="lenaqar.howItWorks.buySectionTitle"
         steps={buySteps}
         noteKey="lenaqar.howItWorks.requestWaitingNote"
-        imageSrc="/images/clients/lenaqar-flow-buyer.png"
+        imageSrc="/brand/lenaqar-v1/flow-buyer.png"
         imageAltKey="lenaqar.howItWorks.buyFlowAlt"
         cta={
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -125,7 +125,7 @@ export default function HowItWorksContent() {
       <FlowBlock
         titleKey="lenaqar.howItWorks.sellerSectionTitle"
         steps={sellSteps}
-        imageSrc="/images/clients/lenaqar-flow-seller-broker.png"
+        imageSrc="/brand/lenaqar-v1/flow-seller-broker.png"
         imageAltKey="lenaqar.howItWorks.sellerFlowAlt"
         cta={
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">

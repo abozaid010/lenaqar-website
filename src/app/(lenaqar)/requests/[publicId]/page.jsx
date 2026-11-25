@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 import { notFound } from "next/navigation";
 import { SITE } from "@/config/site";
 import { buildingTypeAr } from "@/lib/lenaqar/listing-seo";
@@ -40,7 +41,7 @@ export async function generateMetadata({ params }) {
     : copy.unavailableDescription;
   const url = requirement ? `${SITE.url}${requirementPath(requirement.id)}` : SITE.url;
   const images = listingShareImages(null, {
-    fallbackUrl: `${SITE.url}/images/default_logo.jpg`,
+    fallbackUrl: `${SITE.url}${BRAND.socialImage}`,
     alt: title,
   });
 
@@ -54,6 +55,7 @@ export async function generateMetadata({ params }) {
       locale: SITE.ogLocale,
       siteName: SITE.name,
       type: "website",
+      images: [{ url: `${SITE.url}${BRAND.socialImage}`, width: 1200, height: 630, alt: BRAND.socialAlt }],
       images,
     },
     twitter: {

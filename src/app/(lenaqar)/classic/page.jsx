@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 import { SITE } from "@/config/site";
 import { fetchOpportunities } from "@/lib/lenaqar/opportunities.server";
 import HomeContent from "@/components/lenaqar/home-content";
@@ -15,6 +16,11 @@ export const metadata = {
     locale: "ar_EG",
     siteName: SITE.name,
     type: "website",
+    images: [{ url: `${SITE.url}${BRAND.socialImage}`, width: 1200, height: 630, alt: BRAND.socialAlt }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [{ url: `${SITE.url}${BRAND.socialImage}`, alt: BRAND.socialAlt }],
   },
   alternates: {
     canonical: `${SITE.url}/classic`,

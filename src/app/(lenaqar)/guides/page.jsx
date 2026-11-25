@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 import Link from "next/link";
 import { SITE } from "@/config/site";
 import { getCities } from "@/lib/guides/cities";
@@ -24,12 +25,16 @@ export const metadata = {
     type: "website",
     images: [
       {
-        url: `${SITE.url}/images/default_logo.jpg`,
+        url: `${SITE.url}${BRAND.socialImage}`,
         width: 1200,
         height: 630,
-        alt: SITE.name,
+        alt: BRAND.socialAlt,
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [{ url: `${SITE.url}${BRAND.socialImage}`, alt: BRAND.socialAlt }],
   },
   alternates: {
     canonical: `${SITE.url}/guides`,

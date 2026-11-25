@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 import { SITE } from "@/config/site";
 import { fetchRequestMatches } from "@/lib/lenaqar/request-matches.server";
 import { normalizeMatchRef } from "@/lib/lenaqar/whatsapp-intent";
@@ -26,6 +27,11 @@ export async function generateMetadata({ params }) {
       locale: SITE.ogLocale,
       siteName: SITE.name,
       type: "website",
+      images: [{ url: `${SITE.url}${BRAND.socialImage}`, width: 1200, height: 630, alt: BRAND.socialAlt }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: [{ url: `${SITE.url}${BRAND.socialImage}`, alt: BRAND.socialAlt }],
     },
     alternates: { canonical: url },
     // The URL carries the buyer's request reference: not for search engines, and

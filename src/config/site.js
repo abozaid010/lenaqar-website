@@ -1,10 +1,12 @@
+import { BRAND } from "./brand.js";
+
 export const LENAQAR_TENANT_ID = (
   process.env.NEXT_PUBLIC_LENAQAR_TENANT_ID || "lenaqar"
 ).trim();
 
 export const SITE = {
   clientId: LENAQAR_TENANT_ID,
-  name: "لينا عقار",
+  name: BRAND.name,
   // Prefer www — apex redirects to www in production; keep canonicals/sitemap aligned.
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://www.lenaqar.com",
   /** Public host of re-hosted unit videos (Cloudflare R2); only MP4/WebM from this host play inline. */

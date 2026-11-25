@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 import { SITE } from "@/config/site";
 import { fetchPublicRequirements } from "@/lib/lenaqar/requirements.server";
 import { HOME_REQUIREMENT_LIMIT } from "@/lib/lenaqar/requirement-sort";
@@ -21,14 +22,14 @@ export const metadata = {
     locale: "ar_EG",
     siteName: SITE.name,
     type: "website",
-    images: [{ url: `${SITE.url}/images/default_logo.jpg`, width: 1200, height: 630, alt: SITE.name }],
+    images: [{ url: `${SITE.url}${BRAND.socialImage}`, width: 1200, height: 630, alt: BRAND.socialAlt }],
   },
   twitter: {
     card: "summary_large_image",
     title: "لينا عقار | اشتري أو بيع بيتك بأرقام أوضح ومن غير مكالمات",
     description:
       "ابعت طلبك واتساب، والذكاء الاصطناعي يدوّرلك على وحدات مناسبة، ومراجعة قانونية لورق وحدة الريسيل اللي تختارها. أرقام أوضح لما تكون متاحة — ومش هنتصل إلا لو طلبت.",
-    images: [`${SITE.url}/images/default_logo.jpg`],
+    images: [`${SITE.url}${BRAND.socialImage}`],
   },
   alternates: {
     canonical: SITE.url,

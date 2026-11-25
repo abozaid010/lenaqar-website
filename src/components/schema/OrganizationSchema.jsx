@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 import { SITE_URL, SITE_NAME } from "@/app/metadata";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
 
@@ -16,7 +17,7 @@ export default function OrganizationSchema() {
     name: SITE_NAME,
     alternateName: ["لينا عقار", "Lenaqar", "LenaQar", "LenAqar"],
     url: SITE_URL,
-    logo: `${SITE_URL}/images/default_logo.jpg`,
+    logo: `${SITE_URL}${BRAND.logo}`,
     description:
       "منصة عقارية في مصر بتبدأ من طلب المشتري: اكتب مواصفات بيتك وميزانيتك، وهنساعدك تلاقي اختيارات مناسبة لطلبك. واتساب فقط — مش هنتصل إلا لو طلبت.",
     address: {

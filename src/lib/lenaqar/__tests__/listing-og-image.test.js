@@ -5,7 +5,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { listingShareImages } from "../listing-og-image.js";
 
-const fallbackUrl = "https://www.lenaqar.com/images/default_logo.jpg";
+const fallbackUrl = "https://www.lenaqar.com/brand/lenaqar-v1/social-preview.png";
 
 test("uses the first https photo of the listing", () => {
   const unit = { images: [{ url: "http://insecure.example/a.jpg" }, { url: " https://api.lenaai.net/gcs/lenaqar_1 " }, { url: "https://api.lenaai.net/gcs/lenaqar_2" }] };

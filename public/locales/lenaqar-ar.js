@@ -13,7 +13,7 @@ export default {
     howItWorks: "إزاي بنشتغل",
     logoAlt: "لينا عقار",
     logoAr: "لينا عقار",
-    logoEn: "Lena Aqar",
+    logoEn: "Lenaqar",
     joinNetwork: "انضم لشبكة لينا",
     openMenu: "فتح القائمة",
     closeMenu: "إغلاق القائمة",
