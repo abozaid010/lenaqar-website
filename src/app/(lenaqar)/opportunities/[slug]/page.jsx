@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 import { notFound } from "next/navigation";
 import { listingShareImages } from "@/lib/lenaqar/listing-og-image";
 import { SITE } from "@/config/site";
@@ -39,7 +40,7 @@ export async function generateMetadata({ params }) {
 
   const indexable = unit ? isOpportunityIndexable(unit) : false;
   const shareImages = listingShareImages(unit, {
-    fallbackUrl: `${SITE.url}/images/default_logo.jpg`,
+    fallbackUrl: `${SITE.url}${BRAND.socialImage}`,
     alt: unit ? title : SITE.name,
   });
 

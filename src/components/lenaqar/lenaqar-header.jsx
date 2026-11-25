@@ -1,5 +1,7 @@
 "use client";
 
+import { BRAND } from "@/config/brand";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
@@ -33,11 +35,11 @@ export default function LenaqarHeader() {
           className="flex items-center gap-2 shrink-0"
         >
           <Image
-            src="/images/default_logo.jpg"
+            src={BRAND.icon}
             alt=""
             width={48}
             height={48}
-            className="h-12 w-12 rounded-xl"
+            className="h-12 w-12 rounded-xl object-contain bg-white"
             priority
           />
           <span className="flex flex-col items-end gap-0.5">

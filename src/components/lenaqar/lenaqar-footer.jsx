@@ -8,6 +8,8 @@ import { SITE } from "@/config/site";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
 import { buyerPageCtaHref, sellerCtaHref } from "@/lib/lenaqar/whatsapp";
 import { DOORS } from "@/lib/lenaqar/doors";
+import Image from "next/image";
+import { BRAND } from "@/config/brand";
 
 const GUIDE_LINKS = [
   { href: "/guides/madinaty/prices-2026", label: "أسعار مدينتي" },
@@ -26,6 +28,13 @@ export default function LenaqarFooter() {
   return (
     <footer className="bg-primary text-white py-10 mt-12">
       <div className="container space-y-8">
+        <Link href="/" className="flex items-center justify-center gap-3" dir="ltr">
+          <Image src={BRAND.icon} alt="" width={48} height={48} className="h-12 w-12 rounded-xl bg-white object-contain" />
+          <span>
+            <span className="block lena-wordmark font-bold">{BRAND.name}</span>
+            <span className="block text-sm">{BRAND.tagline}</span>
+          </span>
+        </Link>
         <div className="max-w-3xl mx-auto text-center space-y-3">
           <p className="text-base font-semibold leading-relaxed">
             {translate("lenaqar.footer.goldenTitle")}

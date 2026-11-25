@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 import { SITE } from "@/config/site";
 
 const SITE_URL = SITE.url;
@@ -6,18 +7,23 @@ const SITE_URL = SITE.url;
 const LENAQAR_DESCRIPTION =
   "بتدور على شقة أو فيلا أو شاليه في مصر؟ اكتب طلبك وحدد ميزانيتك والمكان والمواصفات. لينا عقار بتساعدك تلاقي عقارات مناسبة لاحتياجاتك — ابدأ بطلب واضح.";
 
-const LENAQAR_TITLE = "لينا عقار | دور على بيتك المناسب في مصر حسب طلبك وميزانيتك";
+const LENAQAR_TITLE = "Lenaqar | لينا عقار — دور على بيتك المناسب في مصر";
 
 export const defaultMetadata = {
   metadataBase: new URL(SITE_URL),
+  applicationName: BRAND.name,
   title: {
     default: LENAQAR_TITLE,
     template: "%s | لينا عقار",
   },
   icons: {
-    icon: "/images/default_logo.jpg",
-    shortcut: "/images/default_logo.jpg",
-    apple: "/images/default_logo.jpg",
+    icon: [
+      { url: "/brand/lenaqar-v1/favicon.ico", sizes: "16x16 32x32 48x48", type: "image/x-icon" },
+      { url: "/brand/lenaqar-v1/icon-96.png", sizes: "96x96", type: "image/png" },
+      { url: BRAND.icon, sizes: "any", type: "image/svg+xml" },
+    ],
+    shortcut: "/brand/lenaqar-v1/favicon.ico",
+    apple: [{ url: "/brand/lenaqar-v1/icon-180.png", sizes: "180x180", type: "image/png" }],
   },
   description: LENAQAR_DESCRIPTION,
   openGraph: {
@@ -25,14 +31,14 @@ export const defaultMetadata = {
     url: SITE_URL,
     title: LENAQAR_TITLE,
     description: LENAQAR_DESCRIPTION,
-    siteName: "لينا عقار",
+    siteName: BRAND.name,
     locale: "ar_EG",
     images: [
       {
-        url: `${SITE_URL}/images/default_logo.jpg`,
+        url: `${SITE_URL}${BRAND.socialImage}`,
         width: 1200,
         height: 630,
-        alt: "لينا عقار",
+        alt: BRAND.socialAlt,
       },
     ],
   },
@@ -40,7 +46,7 @@ export const defaultMetadata = {
     card: "summary_large_image",
     title: LENAQAR_TITLE,
     description: LENAQAR_DESCRIPTION,
-    images: [`${SITE_URL}/images/default_logo.jpg`],
+    images: [{ url: `${SITE_URL}${BRAND.socialImage}`, alt: BRAND.socialAlt }],
   },
   robots: {
     index: true,

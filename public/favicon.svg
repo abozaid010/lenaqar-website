@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 256 256" role="img" aria-label="Lenaqar Version 1, direction A"><title>Lenaqar — Version 1</title><defs><linearGradient id="lena-gradient" gradientUnits="userSpaceOnUse" x1="51" y1="207" x2="205" y2="51"><stop offset="0" stop-color="#7841ff"/><stop offset=".49" stop-color="#4b91fa"/><stop offset="1" stop-color="#12dfe5"/></linearGradient>
+<linearGradient id="child-gradient" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#7841ff"/><stop offset=".49" stop-color="#4b91fa"/><stop offset="1" stop-color="#12dfe5"/></linearGradient></defs><rect width="256" height="256" fill="#fff"/>
+      <g fill="none" stroke="url(#lena-gradient)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"><path d="M51 111 128 51 205 111V177Q205 202 180 202H169"/></g>
+      <g transform="translate(8.64 0) scale(.92 1)" fill="url(#lena-gradient)"><path d="M104 91C91 91 82 100 78 113L62 164C54 189 66 207 89 207C103 207 113 200 122 189C101 184 92 173 98 154L119 89Q111 89 104 91Z"/><path d="M108 207C129 192 145 171 167 171C163 192 146 207 126 207Z"/></g>
+      <circle cx="135" cy="122" r="9" fill="url(#child-gradient)"/>
+      <g fill="url(#child-gradient)"><circle cx="173" cy="122" r="9"/></g>
+      <circle cx="154" cy="144" r="7" fill="url(#child-gradient)"/>
+      <g fill="none" stroke-width="8" stroke-linecap="round"><path d="M122 157V153Q122 140 134 140H136Q145 140 146 149" stroke="url(#child-gradient)"/><path d="M181 157V153Q181 140 173 140Q164 140 163 149" stroke="url(#child-gradient)"/><path d="M143 169Q143 156 154 156Q165 156 165 164" stroke="url(#child-gradient)"/></g>
+    </svg>

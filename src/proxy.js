@@ -3,6 +3,13 @@ import { NextResponse } from "next/server";
 export function proxy(request) {
   const { pathname } = request.nextUrl;
 
+  // Conventional aliases can change; only versioned brand URLs are immutable.
+  if (["/favicon.svg", "/apple-touch-icon.png"].includes(pathname)) {
+    const response = NextResponse.next();
+    response.headers.set("Cache-Control", "public, max-age=0, must-revalidate");
+    return response;
+  }
+
   if (pathname === "/lenaqar" || pathname === "/lenaqar/") {
     const url = request.nextUrl.clone();
     url.pathname = "/";

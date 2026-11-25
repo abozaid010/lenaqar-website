@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 import { notFound } from "next/navigation";
 import { SITE } from "@/config/site";
 import {
@@ -44,6 +45,11 @@ export async function generateMetadata({ params }) {
       locale: "ar_EG",
       siteName: SITE.name,
       type: "website",
+      images: [{ url: `${SITE.url}${BRAND.socialImage}`, width: 1200, height: 630, alt: BRAND.socialAlt }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: [{ url: `${SITE.url}${BRAND.socialImage}`, alt: BRAND.socialAlt }],
     },
     alternates: { canonical: url },
     robots: { index: true, follow: true },

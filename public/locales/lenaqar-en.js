@@ -13,7 +13,7 @@ export default {
     howItWorks: "How it works",
     logoAlt: "LenaQar",
     logoAr: "لينا عقار",
-    logoEn: "Lena Aqar",
+    logoEn: "Lenaqar",
     joinNetwork: "Join Lena Network",
     openMenu: "Open menu",
     closeMenu: "Close menu",

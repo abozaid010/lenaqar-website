@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 import { SITE } from "@/config/site";
 
 export function doorMetadata(door) {
@@ -16,10 +17,10 @@ export function doorMetadata(door) {
       type: "website",
       images: [
         {
-          url: `${SITE.url}/images/default_logo.jpg`,
+          url: `${SITE.url}${BRAND.socialImage}`,
           width: 1200,
           height: 630,
-          alt: SITE.name,
+          alt: BRAND.socialAlt,
         },
       ],
     },
@@ -27,7 +28,7 @@ export function doorMetadata(door) {
       card: "summary_large_image",
       title: door.title,
       description: door.description,
-      images: [`${SITE.url}/images/default_logo.jpg`],
+      images: [`${SITE.url}${BRAND.socialImage}`],
     },
     alternates: { canonical: url },
   };
