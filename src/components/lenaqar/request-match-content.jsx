@@ -132,7 +132,7 @@ export default function RequestMatchContent({ result }) {
     );
   }
 
-  const { matches, closest, summary } = result;
+  const { matches, closest, summary, suggestion } = result;
   const egp = translate("lenaqar.unit.egp");
   const amount = (value) => `${formatEgpNumber(value)} ${egp}`;
   const placeName = (place) => {
@@ -141,19 +141,42 @@ export default function RequestMatchContent({ result }) {
     return localizedPlaceName(token, place.labelAr || placeAr(token), locale);
   };
 
-  const badge = (unit) =>
-    unit.match?.kind === "closest" ? (
-      <p className="self-start rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-900">
-        {t(`miss.${unit.match.labelKey}`).replace(
+  const missLabel = (match) =>
+    match.months
+      ? t("miss.deliveryMonths").replace("{months}", String(match.months))
+      : t(`miss.${match.labelKey}`).replace(
           "{amount}",
-          unit.match.amount != null ? amount(unit.match.amount) : "",
-        )}
-      </p>
-    ) : (
-      <p className="self-start rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">
-        {t("matchBadge")}
-      </p>
-    );
+          match.amount != null ? amount(match.amount) : "",
+        );
+
+  const unknownLine = (unit) =>
+    unit.unknown?.length
+      ? t("notRecorded").replace(
+          "{fields}",
+          unit.unknown.map((field) => t(`unknown.${field}`)).join(t("listSeparator")),
+        )
+      : null;
+
+  const badge = (unit) => (
+    <div className="flex flex-col items-start gap-1">
+      {unit.match?.kind === "closest" ? (
+        <p className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-900">
+          {missLabel(unit.match)}
+        </p>
+      ) : (
+        <p className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">
+          {t("matchBadge")}
+        </p>
+      )}
+      {unknownLine(unit) ? <p className="text-xs text-black/60">{unknownLine(unit)}</p> : null}
+    </div>
+  );
+
+  const suggestionText = suggestion
+    ? t(`suggest.${suggestion.labelKey}`)
+        .replace("{value}", suggestion.isMoney ? amount(suggestion.value) : String(suggestion.value ?? ""))
+        .replace("{count}", String(suggestion.count))
+    : null;
 
   // A tap on WhatsApp or Call tells the team which unit this buyer asked about.
   // Not awaited: the link opens at once whatever the answer.
@@ -260,6 +283,9 @@ export default function RequestMatchContent({ result }) {
           <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-6 text-center">
             <p className="text-lg font-bold text-primary">{t("emptyTitle")}</p>
             <p className="mt-1 text-sm leading-relaxed text-black/70">{t("emptyBody")}</p>
+            {!closest.length && suggestionText ? (
+              <p className="mt-2 text-sm font-semibold text-primary">{suggestionText}</p>
+            ) : null}
           </div>
         )}
       </section>

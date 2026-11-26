@@ -25,10 +25,22 @@ function positive(value) {
 /**
  * How a unit relates to the request, for its badge.
  * @param {object} raw unit as the backend sent it
- * @returns {{kind: "match"} | {kind: "closest", labelKey: string, amount: number | null}}
+ * @returns {{kind: "match"} | {kind: "closest", labelKey: string, amount: number | null, months?: number}}
  */
 export function matchInfo(raw) {
   if (raw?.match_kind !== "closest") return { kind: "match" };
+  // A later handover says by how much: the shortest delays are offered first.
+  const late = (Array.isArray(raw.trade_offs) ? raw.trade_offs : []).find(
+    (tradeOff) => tradeOff?.kind === "late_delivery" && positive(tradeOff.delay_days),
+  );
+  if (late && raw.miss === "after_delivery_deadline") {
+    return {
+      kind: "closest",
+      labelKey: "delivery",
+      amount: null,
+      months: Math.max(1, Math.round(late.delay_days / 30)),
+    };
+  }
   const labelKey = MISS_LABEL_KEYS[raw.miss] || "other";
   const amount =
     labelKey === "overPrice"
@@ -41,6 +53,43 @@ export function matchInfo(raw) {
     return { kind: "closest", labelKey: "other", amount: null };
   }
   return { kind: "closest", labelKey, amount };
+}
+
+const UNKNOWN_FIELDS = ["delivery", "down_payment", "rooms", "project"];
+
+/**
+ * What the buyer asked about that this unit does not record (label keys), so the
+ * card says so instead of implying it fits.
+ * @param {object} raw unit as the backend sent it
+ * @returns {string[]}
+ */
+export function unknownFields(raw) {
+  const unknown = Array.isArray(raw?.unknown) ? raw.unknown : [];
+  return UNKNOWN_FIELDS.filter((field) => unknown.includes(field));
+}
+
+const SUGGESTION_KEYS = {
+  max_price: "maxPrice",
+  downPayment: "downPayment",
+  roomsCount: "rooms",
+  land_area: "area",
+  precise_location: "preciseLocation",
+};
+const MONEY_SUGGESTIONS = new Set(["maxPrice", "downPayment"]);
+
+/**
+ * The one change to the request that would show the most units, when nothing fits.
+ * @param {unknown} suggestion backend `suggestion` ({field, value, unlocks})
+ * @returns {{labelKey: string, value: number | null, isMoney: boolean, count: number} | null}
+ */
+export function requestSuggestion(suggestion) {
+  if (!suggestion || typeof suggestion !== "object") return null;
+  const labelKey = SUGGESTION_KEYS[suggestion.field];
+  const count = positive(suggestion.unlocks);
+  if (!labelKey || !count) return null;
+  const value = labelKey === "preciseLocation" ? null : positive(suggestion.value);
+  if (labelKey !== "preciseLocation" && value == null) return null;
+  return { labelKey, value, isMoney: MONEY_SUGGESTIONS.has(labelKey), count: Math.floor(count) };
 }
 
 /**

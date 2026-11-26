@@ -5,7 +5,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { isRequestNotFound, matchInfo, requestSummary } from "../request-matches.js";
+import {
+  isRequestNotFound,
+  matchInfo,
+  requestSuggestion,
+  requestSummary,
+  unknownFields,
+} from "../request-matches.js";
 
 test("a unit without a near-miss label is a match", () => {
   assert.deepEqual(matchInfo({ code: "A" }), { kind: "match" });
@@ -75,4 +81,46 @@ test("a 404 is 'request not found' only when the backend says so", () => {
   assert.equal(isRequestNotFound({ detail: "Not Found" }), false);
   assert.equal(isRequestNotFound({ error_message: "Unit not found" }), false);
   assert.equal(isRequestNotFound(null), false);
+});
+
+test("a later handover says by how many months", () => {
+  assert.deepEqual(
+    matchInfo({
+      match_kind: "closest",
+      miss: "after_delivery_deadline",
+      trade_offs: [{ kind: "late_delivery", delay_days: 245 }],
+    }),
+    { kind: "closest", labelKey: "delivery", amount: null, months: 8 },
+  );
+  assert.equal(
+    matchInfo({
+      match_kind: "closest",
+      miss: "after_delivery_deadline",
+      trade_offs: [{ kind: "late_delivery", delay_days: 3 }],
+    }).months,
+    1,
+  );
+});
+
+test("fields the listing does not state are named, in a fixed order", () => {
+  assert.deepEqual(unknownFields({ unknown: ["rooms", "delivery", "sub_district"] }), ["delivery", "rooms"]);
+  assert.deepEqual(unknownFields({}), []);
+});
+
+test("the suggestion keeps only a change the page can say", () => {
+  assert.deepEqual(requestSuggestion({ field: "max_price", value: 4800000, unlocks: 2 }), {
+    labelKey: "maxPrice",
+    value: 4800000,
+    isMoney: true,
+    count: 2,
+  });
+  assert.deepEqual(requestSuggestion({ field: "precise_location", value: false, unlocks: 3 }), {
+    labelKey: "preciseLocation",
+    value: null,
+    isMoney: false,
+    count: 3,
+  });
+  assert.equal(requestSuggestion({ field: "max_price", value: 1, unlocks: 0 }), null);
+  assert.equal(requestSuggestion({ field: "unknown_field", value: 1, unlocks: 1 }), null);
+  assert.equal(requestSuggestion(null), null);
 });

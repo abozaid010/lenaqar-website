@@ -128,6 +128,7 @@ function createEmptyForm(initialValues = {}) {
         ? "ready"
         : normalizeBuyRequestDelivery(initial.deliveryDate),
     notes: notesFromLoaded(initial),
+    precise_location: initial.precise_location === true,
   };
 }
 
@@ -149,6 +150,7 @@ function mapLoadedRequirement(loaded) {
         ? "ready"
         : normalizeBuyRequestDelivery(raw.deliveryDate),
     notes: notesFromLoaded(raw),
+    precise_location: loaded?.precise_location === true,
   };
 }
 
@@ -696,6 +698,21 @@ export default function BuyRequestDialog({
               enabled={open}
               error={placesError}
             />
+            <label className="mt-2 flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                name="precise_location"
+                checked={form.precise_location === true}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, precise_location: event.target.checked }))
+                }
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-black/30 text-primary focus:ring-primary/30"
+              />
+              <span className="min-w-0 text-sm text-black/80 leading-relaxed">
+                <span className="block font-medium">{tr("lenaqar.buyRequest.places.preciseOnly")}</span>
+                <span className="block text-xs text-black/60">{tr("lenaqar.buyRequest.places.preciseOnlyHint")}</span>
+              </span>
+            </label>
           </div>
 
           <div data-field="buildingType">
