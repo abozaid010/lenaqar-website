@@ -71,3 +71,14 @@ For the approved 2026-11-03 P0/P1 continuation, read `SEO-PLAN.md` and `seo-feat
 
 ## AI-search visibility
 Goal, rules, owner decisions and step status live in `ai-visibility-feature-progress.json` (authoritative for this feature; SEO-17+ in `seo-feature-progress.json` only point to it). Read it first, work its `next_step`, and update it in every step's PR. After each merge: verify the deployed SHA and run `node scripts/seo-health.mjs` on production, then continue.
+
+## Git worktrees (every feature — see workspace/CLAUDE.md §12)
+Never edit in `workspace/lenaqar`: it stays on a clean `main`.
+```bash
+git -C ../lenaqar fetch origin
+git -C ../lenaqar worktree add ../lenaqar-<task> -b <type>/<task> origin/main
+cd ../lenaqar-<task>
+ln -s ../lenaqar/.env .env && ln -s ../lenaqar/.env.local .env.local && ln -s ../lenaqar/node_modules node_modules
+```
+A worktree's own dev server uses a free port (`npm run dev -- -p 3002`; the CRM dev server holds :3000). Unfinished work → push + draft PR.
+After the PR merges: `git -C ../lenaqar worktree remove ../lenaqar-<task> && git -C ../lenaqar branch -d <type>/<task>`.
