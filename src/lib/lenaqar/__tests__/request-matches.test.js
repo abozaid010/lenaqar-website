@@ -21,22 +21,21 @@ test("a unit without a near-miss label is a match", () => {
 test("a near miss says which rule it breaks and by how much", () => {
   assert.deepEqual(
     matchInfo({ match_kind: "closest", miss: "over_price_cap", over_by: { total_price: 150000 } }),
-    { kind: "closest", labelKey: "overPrice", amount: 150000 },
+    { kind: "closest", badges: [{ labelKey: "overPrice", amount: 150000 }] },
   );
   assert.deepEqual(
     matchInfo({ match_kind: "closest", miss: "over_down_payment_cap", over_by: { down_payment: 50000 } }),
-    { kind: "closest", labelKey: "overDownPayment", amount: 50000 },
+    { kind: "closest", badges: [{ labelKey: "overDownPayment", amount: 50000 }] },
   );
   assert.deepEqual(matchInfo({ match_kind: "closest", miss: "location_mismatch", over_by: {} }), {
     kind: "closest",
-    labelKey: "location",
-    amount: null,
+    badges: [{ labelKey: "location", amount: null }],
   });
-  assert.equal(matchInfo({ match_kind: "closest", miss: "after_delivery_deadline" }).labelKey, "delivery");
+  assert.equal(matchInfo({ match_kind: "closest", miss: "after_delivery_deadline" }).badges[0].labelKey, "delivery");
 });
 
 test("a money label without an amount, or an unknown rule, falls back to the plain label", () => {
-  const plain = { kind: "closest", labelKey: "other", amount: null };
+  const plain = { kind: "closest", badges: [{ labelKey: "other", amount: null }] };
   assert.deepEqual(matchInfo({ match_kind: "closest", miss: "over_price_cap", over_by: {} }), plain);
   assert.deepEqual(matchInfo({ match_kind: "closest", miss: "over_price_cap" }), plain);
   assert.deepEqual(matchInfo({ match_kind: "closest", miss: "something_new" }), plain);
@@ -90,15 +89,35 @@ test("a later handover says by how many months", () => {
       miss: "after_delivery_deadline",
       trade_offs: [{ kind: "late_delivery", delay_days: 245 }],
     }),
-    { kind: "closest", labelKey: "delivery", amount: null, months: 8 },
+    { kind: "closest", badges: [{ labelKey: "delivery", amount: null, months: 8 }] },
   );
   assert.equal(
     matchInfo({
       match_kind: "closest",
       miss: "after_delivery_deadline",
       trade_offs: [{ kind: "late_delivery", delay_days: 3 }],
-    }).months,
+    }).badges[0].months,
     1,
+  );
+});
+
+test("a unit both elsewhere and later discloses both trade-offs", () => {
+  assert.deepEqual(
+    matchInfo({
+      match_kind: "closest",
+      miss: "location_mismatch",
+      trade_offs: [
+        { kind: "outside_location", city: "new cairo", district: "fifth settlement", project: null },
+        { kind: "late_delivery", delay_days: 365 },
+      ],
+    }),
+    {
+      kind: "closest",
+      badges: [
+        { labelKey: "location", amount: null },
+        { labelKey: "delivery", amount: null, months: 12 },
+      ],
+    },
   );
 });
 

@@ -22,25 +22,8 @@ function positive(value) {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-/**
- * How a unit relates to the request, for its badge.
- * @param {object} raw unit as the backend sent it
- * @returns {{kind: "match"} | {kind: "closest", labelKey: string, amount: number | null, months?: number}}
- */
-export function matchInfo(raw) {
-  if (raw?.match_kind !== "closest") return { kind: "match" };
-  // A later handover says by how much: the shortest delays are offered first.
-  const late = (Array.isArray(raw.trade_offs) ? raw.trade_offs : []).find(
-    (tradeOff) => tradeOff?.kind === "late_delivery" && positive(tradeOff.delay_days),
-  );
-  if (late && raw.miss === "after_delivery_deadline") {
-    return {
-      kind: "closest",
-      labelKey: "delivery",
-      amount: null,
-      months: Math.max(1, Math.round(late.delay_days / 30)),
-    };
-  }
+/** One badge for the miss an older response names (`miss` + `over_by`). */
+function missBadge(raw) {
   const labelKey = MISS_LABEL_KEYS[raw.miss] || "other";
   const amount =
     labelKey === "overPrice"
@@ -50,9 +33,38 @@ export function matchInfo(raw) {
         : null;
   // An amount-based label with no amount would print a broken sentence.
   if ((labelKey === "overPrice" || labelKey === "overDownPayment") && amount == null) {
-    return { kind: "closest", labelKey: "other", amount: null };
+    return { labelKey: "other", amount: null };
   }
-  return { kind: "closest", labelKey, amount };
+  return { labelKey, amount };
+}
+
+/** One badge per trade-off the backend lists; a unit may be both elsewhere and later. */
+function tradeOffBadges(raw) {
+  const badges = [];
+  for (const tradeOff of Array.isArray(raw.trade_offs) ? raw.trade_offs : []) {
+    if (tradeOff?.kind === "outside_location") {
+      badges.push({ labelKey: "location", amount: null });
+    } else if (tradeOff?.kind === "late_delivery" && positive(tradeOff.delay_days)) {
+      badges.push({
+        labelKey: "delivery",
+        amount: null,
+        months: Math.max(1, Math.round(tradeOff.delay_days / 30)),
+      });
+    }
+  }
+  return badges;
+}
+
+/**
+ * How a unit relates to the request, for its badges: every trade-off it asks the
+ * buyer to accept, so none is left undisclosed.
+ * @param {object} raw unit as the backend sent it
+ * @returns {{kind: "match"} | {kind: "closest", badges: {labelKey: string, amount: number | null, months?: number}[]}}
+ */
+export function matchInfo(raw) {
+  if (raw?.match_kind !== "closest") return { kind: "match" };
+  const badges = tradeOffBadges(raw);
+  return { kind: "closest", badges: badges.length ? badges : [missBadge(raw)] };
 }
 
 const UNKNOWN_FIELDS = ["delivery", "down_payment", "rooms", "project"];

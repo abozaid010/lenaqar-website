@@ -160,9 +160,14 @@ export default function RequestMatchContent({ result }) {
   const badge = (unit) => (
     <div className="flex flex-col items-start gap-1">
       {unit.match?.kind === "closest" ? (
-        <p className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-900">
-          {missLabel(unit.match)}
-        </p>
+        unit.match.badges.map((match) => (
+          <p
+            key={match.labelKey}
+            className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-900"
+          >
+            {missLabel(match)}
+          </p>
+        ))
       ) : (
         <p className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">
           {t("matchBadge")}
