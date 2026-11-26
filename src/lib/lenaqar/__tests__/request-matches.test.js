@@ -5,7 +5,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { isRequestNotFound, matchInfo, requestSummary } from "../request-matches.js";
+import {
+  isRequestNotFound,
+  matchInfo,
+  requestSuggestion,
+  requestSummary,
+  unknownFields,
+} from "../request-matches.js";
 
 test("a unit without a near-miss label is a match", () => {
   assert.deepEqual(matchInfo({ code: "A" }), { kind: "match" });
@@ -15,22 +21,21 @@ test("a unit without a near-miss label is a match", () => {
 test("a near miss says which rule it breaks and by how much", () => {
   assert.deepEqual(
     matchInfo({ match_kind: "closest", miss: "over_price_cap", over_by: { total_price: 150000 } }),
-    { kind: "closest", labelKey: "overPrice", amount: 150000 },
+    { kind: "closest", badges: [{ labelKey: "overPrice", amount: 150000 }] },
   );
   assert.deepEqual(
     matchInfo({ match_kind: "closest", miss: "over_down_payment_cap", over_by: { down_payment: 50000 } }),
-    { kind: "closest", labelKey: "overDownPayment", amount: 50000 },
+    { kind: "closest", badges: [{ labelKey: "overDownPayment", amount: 50000 }] },
   );
   assert.deepEqual(matchInfo({ match_kind: "closest", miss: "location_mismatch", over_by: {} }), {
     kind: "closest",
-    labelKey: "location",
-    amount: null,
+    badges: [{ labelKey: "location", amount: null }],
   });
-  assert.equal(matchInfo({ match_kind: "closest", miss: "after_delivery_deadline" }).labelKey, "delivery");
+  assert.equal(matchInfo({ match_kind: "closest", miss: "after_delivery_deadline" }).badges[0].labelKey, "delivery");
 });
 
 test("a money label without an amount, or an unknown rule, falls back to the plain label", () => {
-  const plain = { kind: "closest", labelKey: "other", amount: null };
+  const plain = { kind: "closest", badges: [{ labelKey: "other", amount: null }] };
   assert.deepEqual(matchInfo({ match_kind: "closest", miss: "over_price_cap", over_by: {} }), plain);
   assert.deepEqual(matchInfo({ match_kind: "closest", miss: "over_price_cap" }), plain);
   assert.deepEqual(matchInfo({ match_kind: "closest", miss: "something_new" }), plain);
@@ -75,4 +80,66 @@ test("a 404 is 'request not found' only when the backend says so", () => {
   assert.equal(isRequestNotFound({ detail: "Not Found" }), false);
   assert.equal(isRequestNotFound({ error_message: "Unit not found" }), false);
   assert.equal(isRequestNotFound(null), false);
+});
+
+test("a later handover says by how many months", () => {
+  assert.deepEqual(
+    matchInfo({
+      match_kind: "closest",
+      miss: "after_delivery_deadline",
+      trade_offs: [{ kind: "late_delivery", delay_days: 245 }],
+    }),
+    { kind: "closest", badges: [{ labelKey: "delivery", amount: null, months: 8 }] },
+  );
+  assert.equal(
+    matchInfo({
+      match_kind: "closest",
+      miss: "after_delivery_deadline",
+      trade_offs: [{ kind: "late_delivery", delay_days: 3 }],
+    }).badges[0].months,
+    1,
+  );
+});
+
+test("a unit both elsewhere and later discloses both trade-offs", () => {
+  assert.deepEqual(
+    matchInfo({
+      match_kind: "closest",
+      miss: "location_mismatch",
+      trade_offs: [
+        { kind: "outside_location", city: "new cairo", district: "fifth settlement", project: null },
+        { kind: "late_delivery", delay_days: 365 },
+      ],
+    }),
+    {
+      kind: "closest",
+      badges: [
+        { labelKey: "location", amount: null },
+        { labelKey: "delivery", amount: null, months: 12 },
+      ],
+    },
+  );
+});
+
+test("fields the listing does not state are named, in a fixed order", () => {
+  assert.deepEqual(unknownFields({ unknown: ["rooms", "delivery", "sub_district"] }), ["delivery", "rooms"]);
+  assert.deepEqual(unknownFields({}), []);
+});
+
+test("the suggestion keeps only a change the page can say", () => {
+  assert.deepEqual(requestSuggestion({ field: "max_price", value: 4800000, unlocks: 2 }), {
+    labelKey: "maxPrice",
+    value: 4800000,
+    isMoney: true,
+    count: 2,
+  });
+  assert.deepEqual(requestSuggestion({ field: "precise_location", value: false, unlocks: 3 }), {
+    labelKey: "preciseLocation",
+    value: null,
+    isMoney: false,
+    count: 3,
+  });
+  assert.equal(requestSuggestion({ field: "max_price", value: 1, unlocks: 0 }), null);
+  assert.equal(requestSuggestion({ field: "unknown_field", value: 1, unlocks: 1 }), null);
+  assert.equal(requestSuggestion(null), null);
 });

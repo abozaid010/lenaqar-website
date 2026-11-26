@@ -282,6 +282,8 @@ export function buildPublicBuyRequirement(form) {
       sub_district: place.sub_district || null,
       project: place.project || null,
     }));
+    // "These places only": the backend never offers a unit outside them.
+    requirement.precise_location = form?.precise_location === true;
   }
   if (roomsCount != null) requirement.roomsCount = roomsCount;
   if (max_price != null) requirement.max_price = max_price;

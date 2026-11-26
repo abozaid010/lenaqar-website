@@ -419,3 +419,9 @@ test("place picker: a typed place alone is a valid request", () => {
   assert.equal(result.requirement.city, undefined);
   assert.equal(result.requirement.preferred_locations.length, 1);
 });
+
+test("place picker: 'only these places' is sent as an explicit true or false", () => {
+  assert.equal(buildPublicBuyRequirement({ ...PICKED, precise_location: true }).requirement.precise_location, true);
+  // Unticking on a returning buyer's form must clear what they saved before.
+  assert.equal(buildPublicBuyRequirement(PICKED).requirement.precise_location, false);
+});

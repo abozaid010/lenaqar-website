@@ -1,7 +1,13 @@
 import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
 import { bffFetch } from "@/lib/bffFetch";
 import { catalogPlaceAr, enrichOpportunityLabels } from "./arabic-labels.server";
-import { isRequestNotFound, matchInfo, requestSummary } from "./request-matches";
+import {
+  isRequestNotFound,
+  matchInfo,
+  requestSuggestion,
+  requestSummary,
+  unknownFields,
+} from "./request-matches";
 import { toPublicOpportunity } from "./to-public-opportunity";
 import { isListableOpportunity } from "./validate-unit";
 import { normalizeMatchRef } from "./whatsapp-intent";
@@ -11,7 +17,7 @@ async function toMatchCard(raw) {
   const unit = toPublicOpportunity(raw);
   if (!unit || !isListableOpportunity(unit)) return null;
   const labeled = await enrichOpportunityLabels(unit);
-  return { ...labeled, match: matchInfo(raw) };
+  return { ...labeled, match: matchInfo(raw), unknown: unknownFields(raw) };
 }
 
 /** Arabic name of a catalog place, from the full catalog map (server-only). */
@@ -33,7 +39,7 @@ async function toMatchCards(rows) {
  *
  * @param {string} ref the request's match reference from the page URL
  * @returns {Promise<
- *   | {status: "ok", matchRef: string, matches: object[], closest: object[], summary: object}
+ *   | {status: "ok", matchRef: string, matches: object[], closest: object[], summary: object, suggestion: object | null}
  *   | {status: "not_found"}
  *   | {status: "unavailable", matchRef: string}
  * >} Never throws: the page always has something to show.
@@ -76,6 +82,7 @@ export async function fetchRequestMatches(ref) {
       matches,
       closest,
       summary: { ...summary, places: summary.places.map(withArabicLabel) },
+      suggestion: requestSuggestion(data.suggestion),
     };
   } catch (error) {
     console.error("[lenaqar] request matches failed", error?.name || error);

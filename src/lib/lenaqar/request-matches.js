@@ -22,13 +22,8 @@ function positive(value) {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-/**
- * How a unit relates to the request, for its badge.
- * @param {object} raw unit as the backend sent it
- * @returns {{kind: "match"} | {kind: "closest", labelKey: string, amount: number | null}}
- */
-export function matchInfo(raw) {
-  if (raw?.match_kind !== "closest") return { kind: "match" };
+/** One badge for the miss an older response names (`miss` + `over_by`). */
+function missBadge(raw) {
   const labelKey = MISS_LABEL_KEYS[raw.miss] || "other";
   const amount =
     labelKey === "overPrice"
@@ -38,9 +33,75 @@ export function matchInfo(raw) {
         : null;
   // An amount-based label with no amount would print a broken sentence.
   if ((labelKey === "overPrice" || labelKey === "overDownPayment") && amount == null) {
-    return { kind: "closest", labelKey: "other", amount: null };
+    return { labelKey: "other", amount: null };
   }
-  return { kind: "closest", labelKey, amount };
+  return { labelKey, amount };
+}
+
+/** One badge per trade-off the backend lists; a unit may be both elsewhere and later. */
+function tradeOffBadges(raw) {
+  const badges = [];
+  for (const tradeOff of Array.isArray(raw.trade_offs) ? raw.trade_offs : []) {
+    if (tradeOff?.kind === "outside_location") {
+      badges.push({ labelKey: "location", amount: null });
+    } else if (tradeOff?.kind === "late_delivery" && positive(tradeOff.delay_days)) {
+      badges.push({
+        labelKey: "delivery",
+        amount: null,
+        months: Math.max(1, Math.round(tradeOff.delay_days / 30)),
+      });
+    }
+  }
+  return badges;
+}
+
+/**
+ * How a unit relates to the request, for its badges: every trade-off it asks the
+ * buyer to accept, so none is left undisclosed.
+ * @param {object} raw unit as the backend sent it
+ * @returns {{kind: "match"} | {kind: "closest", badges: {labelKey: string, amount: number | null, months?: number}[]}}
+ */
+export function matchInfo(raw) {
+  if (raw?.match_kind !== "closest") return { kind: "match" };
+  const badges = tradeOffBadges(raw);
+  return { kind: "closest", badges: badges.length ? badges : [missBadge(raw)] };
+}
+
+const UNKNOWN_FIELDS = ["delivery", "down_payment", "rooms", "project"];
+
+/**
+ * What the buyer asked about that this unit does not record (label keys), so the
+ * card says so instead of implying it fits.
+ * @param {object} raw unit as the backend sent it
+ * @returns {string[]}
+ */
+export function unknownFields(raw) {
+  const unknown = Array.isArray(raw?.unknown) ? raw.unknown : [];
+  return UNKNOWN_FIELDS.filter((field) => unknown.includes(field));
+}
+
+const SUGGESTION_KEYS = {
+  max_price: "maxPrice",
+  downPayment: "downPayment",
+  roomsCount: "rooms",
+  land_area: "area",
+  precise_location: "preciseLocation",
+};
+const MONEY_SUGGESTIONS = new Set(["maxPrice", "downPayment"]);
+
+/**
+ * The one change to the request that would show the most units, when nothing fits.
+ * @param {unknown} suggestion backend `suggestion` ({field, value, unlocks})
+ * @returns {{labelKey: string, value: number | null, isMoney: boolean, count: number} | null}
+ */
+export function requestSuggestion(suggestion) {
+  if (!suggestion || typeof suggestion !== "object") return null;
+  const labelKey = SUGGESTION_KEYS[suggestion.field];
+  const count = positive(suggestion.unlocks);
+  if (!labelKey || !count) return null;
+  const value = labelKey === "preciseLocation" ? null : positive(suggestion.value);
+  if (labelKey !== "preciseLocation" && value == null) return null;
+  return { labelKey, value, isMoney: MONEY_SUGGESTIONS.has(labelKey), count: Math.floor(count) };
 }
 
 /**
