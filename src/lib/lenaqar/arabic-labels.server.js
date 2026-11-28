@@ -4,6 +4,7 @@ import { knownPlaceAr } from "./listing-seo.js";
 import { CATALOG_PLACES_AR } from "./places-catalog.js";
 import { applyArabicLabels, indexArabicNames } from "./arabic-labels.js";
 import { sharedSwrMemo } from "./swr-memo.js";
+import { lenaqarSnapshotStore } from "./snapshot-config.server.js";
 
 const TTL_MS = 60 * 60 * 1000;
 /** Names change rarely: a stale map beats no Arabic labels while the API is down. */
@@ -98,8 +99,22 @@ const mapsMemo = sharedSwrMemo("arabic-label-maps", {
   maxStaleMs: MAX_STALE_MS,
   maxEntries: 1,
   onBackgroundError: (error) => {
-    console.warn("[lenaqar] arabic name catalog refresh failed", error?.message);
+    console.warn("[lenaqar] arabic name catalog refresh or snapshot failed", error?.message);
   },
+  // Only the name maps are saved (well under 1 MB), never the 6 MB dump.
+  persist: lenaqarSnapshotStore({
+    name: "arabic-label-maps",
+    serialize: (maps) => ({
+      developers: [...maps.developers],
+      projects: [...maps.projects],
+    }),
+    deserialize: (data) => {
+      if (!Array.isArray(data?.developers) || !Array.isArray(data?.projects)) {
+        throw new Error("arabic name snapshot has no developer/project lists");
+      }
+      return { developers: new Map(data.developers), projects: new Map(data.projects) };
+    },
+  }),
 });
 
 /**

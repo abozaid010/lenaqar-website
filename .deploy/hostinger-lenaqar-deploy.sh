@@ -3,7 +3,8 @@
 # or by hand). Blue/green roll for lenaqar.com:
 #   1. build lenaqar-web:<TAG> from /opt/lenaai/src/lenaqar
 #   2. start the INACTIVE color (blue=127.0.0.1:3010, green=127.0.0.1:3011)
-#   3. health-check /api/version (must report GIT_SHA), switch the nginx upstream,
+#   3. health-check /api/version (must report GIT_SHA), wait for /api/ready
+#      (catalogue loaded), switch the nginx upstream,
 #      verify through nginx, stop the old color, keep the last 3 images
 # It never touches the lenaai containers, their active_color or switch-traffic.sh.
 # If any check fails before the switch, the live color is untouched.
@@ -74,6 +75,24 @@ if [ "$ok" != 1 ]; then
   exit 1
 fi
 echo "health OK on :$PORT"
+
+# ---- 3b. readiness: switch only once the new color holds the full catalogue,
+#      so no visitor waits on its first ~35 s walk. API down -> deploy stops
+#      here and the live color keeps serving. SKIP_CATALOG_READY=1 overrides.
+if [ "${SKIP_CATALOG_READY:-0}" != 1 ]; then
+  ready=0
+  for _ in $(seq 1 36); do
+    if curl -fsS -o /dev/null --max-time 5 "http://127.0.0.1:$PORT/api/ready"; then ready=1; break; fi
+    sleep 5
+  done
+  if [ "$ready" != 1 ]; then
+    echo "Catalog not ready after 180 s - traffic NOT switched. ${ACTIVE:-nothing} is still live."
+    curl -sS --max-time 5 "http://127.0.0.1:$PORT/api/ready" || true
+    docker logs --tail 40 "lenaqar-web-$INACTIVE" || true
+    exit 1
+  fi
+  echo "catalog ready on :$PORT: $(curl -sS --max-time 5 "http://127.0.0.1:$PORT/api/ready")"
+fi
 
 # ---- 4. switch nginx upstream ----
 write_upstream() {

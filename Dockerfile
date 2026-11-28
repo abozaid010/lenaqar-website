@@ -31,6 +31,7 @@ ENV NODE_ENV=production \
     HOSTNAME=0.0.0.0 \
     PORT=3000 \
     NODE_OPTIONS=--max-old-space-size=512 \
+    LENAQAR_CACHE_DIR=/app/.lenaqar-cache \
     GIT_SHA=$GIT_SHA \
     BUILT_AT=$BUILT_AT
 COPY --from=build --chown=node:node /app/.next/standalone ./
@@ -38,6 +39,10 @@ COPY --from=build --chown=node:node /app/.next/static ./.next/static
 COPY --from=build --chown=node:node /app/public ./public
 # Guides + project snapshot are read from process.cwd() at runtime.
 COPY --from=build --chown=node:node /app/content ./content
+# Catalogue snapshots (src/lib/lenaqar/snapshot-store.js). Compose mounts the
+# shared `lenaqar-cache` volume here; created owned by node so the empty
+# volume inherits a writable directory.
+RUN mkdir -p /app/.lenaqar-cache && chown node:node /app/.lenaqar-cache
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \

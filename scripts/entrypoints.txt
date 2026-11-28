@@ -13,3 +13,4 @@ src/app/api/lenaqar
 src/app/api/locations
 src/app/api/version
 src/instrumentation.js
+src/app/api/ready

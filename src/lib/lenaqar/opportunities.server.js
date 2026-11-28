@@ -12,6 +12,7 @@ import { applyArabicLabels } from "./arabic-labels";
 import { isListableOpportunity, validateUnit } from "./validate-unit";
 import { fetchCursorPages } from "./fetch-cursor-pages";
 import { sharedSwrMemo } from "./swr-memo.js";
+import { lenaqarSnapshotStore } from "./snapshot-config.server.js";
 import {
   applyCatalogApiFilters,
   hasCatalogApiFilters,
@@ -320,11 +321,21 @@ const catalogMemo = sharedSwrMemo("opportunity-catalog", {
   maxEntries: 1,
   onBackgroundError: (error, key) => {
     console.error(
-      "[lenaqar] catalog refresh failed; serving the last complete catalog",
+      "[lenaqar] catalog refresh or snapshot failed; serving the last complete catalog",
       key,
       error?.message || error,
     );
   },
+  // A restarted container serves the last complete catalogue from disk at once.
+  persist: lenaqarSnapshotStore({
+    name: "opportunity-catalog",
+    deserialize: (data) => {
+      if (!Array.isArray(data) || data.some((unit) => typeof unit?.code !== "string")) {
+        throw new Error("catalog snapshot is not a list of units");
+      }
+      return data;
+    },
+  }),
 });
 
 const FULL_CATALOG_KEY = "all";
@@ -376,6 +387,20 @@ export async function fetchOpportunityCatalog(apiFilters = {}) {
 export function warmOpportunityCatalog() {
   if (!SITE.feed.enabled) return;
   catalogMemo.warm(FULL_CATALOG_KEY);
+}
+
+/**
+ * Readiness for the blue/green deploy: true once a complete catalogue is in
+ * memory (loaded or restored from a snapshot of this build).
+ */
+export function opportunityCatalogStatus() {
+  const entry = catalogMemo.peek(FULL_CATALOG_KEY);
+  return {
+    ready: !SITE.feed.enabled || Boolean(entry?.hasValue),
+    units: entry?.size ?? null,
+    ageSeconds: entry?.hasValue ? Math.round((Date.now() - entry.fetchedAt) / 1000) : null,
+    refreshing: Boolean(entry?.loading),
+  };
 }
 
 /**

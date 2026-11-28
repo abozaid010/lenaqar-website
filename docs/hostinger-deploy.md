@@ -18,7 +18,10 @@ Moved from Vercel on 2026-11-28 (Vercel returned `402 DEPLOYMENT_DISABLED`).
 ## Deploy
 Merging `main` runs `.github/workflows/deploy-hostinger.yml`: upload `git archive` → build on the VPS
 under `/opt/lenaai/.deploy.lock` → start the inactive color → `/api/version` must report the SHA →
+`/api/ready` must answer 200 (the color holds the full opportunity catalogue, ~35 s walk) →
 switch the upstream → check through nginx → stop the old color → keep 3 images.
+If the catalogue does not load within 180 s (API down), the deploy stops and the live color keeps
+serving; `SKIP_CATALOG_READY=1` skips this gate in an emergency.
 
 Repo secrets: `HOSTINGER_HOST`, `HOSTINGER_SSH_USER`, `HOSTINGER_SSH_KEY`.
 
@@ -33,6 +36,14 @@ npm run deploy -- --status      # live sha, build time, color
 Vercel auto-deploys are off (`vercel.json` `git.deploymentEnabled: false`).
 
 Verify: `curl -s https://www.lenaqar.com/api/version` and `node scripts/seo-health.mjs`.
+
+## Catalogue snapshots (restarts are instant)
+The running container saves its last complete catalogue and the Arabic name maps to the Docker
+volume `lenaqar-cache` (`/app/.lenaqar-cache`, shared by blue and green). After a restart or an
+env-change recreate of the same image it serves them at once and refreshes from the API in the
+background. Files are keyed by the Next build id, so a new release never reads an old build's file.
+`curl -s http://127.0.0.1:3010/api/ready` (or 3011) shows `units` and `ageSeconds`.
+Container log: `[lenaqar] catalog loaded all <n> units in <ms>ms` on every walk.
 
 ## Rollback (seconds)
 ```bash

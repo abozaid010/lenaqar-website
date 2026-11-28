@@ -13,6 +13,11 @@
  * A failed load never replaces a good value and is never cached, so the next
  * call retries. Concurrent callers for one key share one in-flight load.
  * Entries are evicted least-recently-used beyond maxEntries.
+ *
+ * Optional `persist` ({ read(key), write(key, value, fetchedAt) }): the first
+ * call for a key reads a saved value (with its original fetchedAt, so age
+ * rules apply as if it never left memory), and every successful load is saved.
+ * Persist failures go to onBackgroundError and never fail a call.
  */
 export function createSwrMemo({
   load,
@@ -21,6 +26,7 @@ export function createSwrMemo({
   maxEntries = 32,
   now = Date.now,
   onBackgroundError = () => {},
+  persist = null,
 }) {
   if (typeof load !== "function") throw new TypeError("load is required");
   if (![freshMs, maxStaleMs, maxEntries].every((v) => Number.isFinite(v) && v > 0)) {
@@ -52,6 +58,12 @@ export function createSwrMemo({
           entry.hasValue = true;
           entry.fetchedAt = now();
           entry.promise = null;
+          if (persist) {
+            const { fetchedAt } = entry;
+            Promise.resolve()
+              .then(() => persist.write(key, value, fetchedAt))
+              .catch((error) => onBackgroundError(error, key));
+          }
           return value;
         },
         (error) => {
@@ -63,12 +75,31 @@ export function createSwrMemo({
     return entry.promise;
   }
 
+  function hydrate(key, entry) {
+    if (!entry.hydrating) {
+      entry.hydrating = Promise.resolve()
+        .then(() => persist.read(key))
+        .then(
+          (saved) => {
+            if (entry.hasValue || !saved || !Number.isFinite(saved.fetchedAt)) return;
+            if (now() - saved.fetchedAt >= maxStaleMs) return;
+            entry.value = saved.value;
+            entry.hasValue = true;
+            entry.fetchedAt = saved.fetchedAt;
+          },
+          (error) => onBackgroundError(error, key),
+        );
+    }
+    return entry.hydrating;
+  }
+
   async function get(key) {
     let entry = entries.get(key);
     if (!entry) {
-      entry = { value: undefined, hasValue: false, fetchedAt: 0, promise: null };
+      entry = { value: undefined, hasValue: false, fetchedAt: 0, promise: null, hydrating: null };
     }
     touch(key, entry);
+    if (persist && !entry.hasValue) await hydrate(key, entry);
 
     if (entry.hasValue) {
       const age = now() - entry.fetchedAt;
@@ -95,7 +126,12 @@ export function createSwrMemo({
     peek(key) {
       const entry = entries.get(key);
       return entry
-        ? { hasValue: entry.hasValue, fetchedAt: entry.fetchedAt, loading: Boolean(entry.promise) }
+        ? {
+            hasValue: entry.hasValue,
+            fetchedAt: entry.fetchedAt,
+            loading: Boolean(entry.promise),
+            size: Array.isArray(entry.value) ? entry.value.length : null,
+          }
         : null;
     },
     get size() {
