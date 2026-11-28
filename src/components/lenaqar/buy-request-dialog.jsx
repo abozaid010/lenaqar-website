@@ -209,6 +209,19 @@ const DETAIL_ERROR_KEYS = [
   "notes",
 ];
 
+/** Project names for the form's project picker. Shared so a page can prefetch it. */
+export const CATALOG_PROJECTS_QUERY = {
+  queryKey: ["lenaqar", "catalog-projects"],
+  queryFn: async () => {
+    const response = await fetch("/api/lenaqar/catalog-projects");
+    if (!response.ok) return [];
+    const json = await response.json();
+    const rows = json?.data ?? json;
+    return Array.isArray(rows) ? rows : [];
+  },
+  staleTime: 1000 * 60 * 5,
+};
+
 export default function BuyRequestDialog({
   open,
   onClose,
@@ -240,16 +253,8 @@ export default function BuyRequestDialog({
   const inline = presentation === "inline";
 
   const { data: catalogProjects = [], isLoading: catalogProjectsLoading } = useQuery({
-    queryKey: ["lenaqar", "catalog-projects"],
-    queryFn: async () => {
-      const response = await fetch("/api/lenaqar/catalog-projects");
-      if (!response.ok) return [];
-      const json = await response.json();
-      const rows = json?.data ?? json;
-      return Array.isArray(rows) ? rows : [];
-    },
+    ...CATALOG_PROJECTS_QUERY,
     enabled: open,
-    staleTime: 1000 * 60 * 5,
     retry: 1,
   });
 

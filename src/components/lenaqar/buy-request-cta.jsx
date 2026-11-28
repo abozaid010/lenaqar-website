@@ -138,6 +138,8 @@ export default function BuyRequestCta({
     if (isControlled || inline) return;
     if (buyRequestHashHandled) return;
     if (window.location.hash !== "#buy-request") return;
+    // The homepage onboarding owns #buy-request there (ad visitors see it first).
+    if (document.querySelector("[data-buy-request-hash-owner]")) return;
     buyRequestHashHandled = true;
     setOpen(true);
     trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_OPENED, { cta_location: trackingLocation });
@@ -288,7 +290,7 @@ export default function BuyRequestCta({
         initialValues={initialValues}
         prefill={prefill}
         showContactFields
-        overlayClassName="!z-[70]"
+        overlayClassName="!z-[70] lq-overlay-in"
         loadRequirement={loadRequirement}
         saveRequirement={saveRequirement}
         onSuccess={(requirement, saveResult) => {

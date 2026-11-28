@@ -3,10 +3,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Check, Pause, Play, RotateCcw } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/hooks/useI18n";
 import { ANALYTICS } from "@/constants/analytics";
 import { trackGa } from "@/lib/analytics";
+import { homeLandingMode } from "@/lib/lenaqar/home-landing";
 import BuyRequestCta from "./buy-request-cta";
+import { CATALOG_PROJECTS_QUERY } from "./buy-request-dialog";
 
 /**
  * Homepage onboarding: a ~30 second, auto-advancing presentation that ends on
@@ -290,6 +293,22 @@ export default function HomeOnboarding() {
   const skipped = useRef(false);
   // Once per page view.
   const tracked = useRef({ viewed: false, scenes: new Set(), completed: false });
+  // #buy-request: the dialog to open on reaching the composer. "journey" (an ad's
+  // first-time visitor): after the intro ends or is skipped; "home_hash": at once.
+  // Once per page view.
+  const pendingDialog = useRef(null);
+  // null until the page first opens the dialog (no hidden dialog instance before that).
+  const [buyDialog, setBuyDialog] = useState(null);
+  const queryClient = useQueryClient();
+
+  const openBuyDialog = useCallback((location) => {
+    trackGa(ANALYTICS.EVENTS.BUY_REQUEST_OPENED, { cta_location: location });
+    setBuyDialog({ open: true, location });
+  }, []);
+  const onBuyDialogOpenChange = useCallback(
+    (next) => setBuyDialog((current) => (current ? { ...current, open: next } : current)),
+    [],
+  );
 
   const t = (key) => translate(`lenaqar.onboarding.${key}`);
   const exampleText = t("exampleText");
@@ -314,6 +333,8 @@ export default function HomeOnboarding() {
   }, [goTo, scene]);
 
   // First visit plays the intro; returning visitors (or #request) start on the composer.
+  // #buy-request: an ad's first-time visitor gets the intro, then the dialog; anyone
+  // else gets the dialog at once (see home-landing.js).
   useEffect(() => {
     setMounted(true);
     let seen = false;
@@ -322,14 +343,36 @@ export default function HomeOnboarding() {
     } catch {
       /* storage blocked: play the intro */
     }
-    if (window.location.hash === "#request") {
+    const mode = homeLandingMode({
+      hash: window.location.hash,
+      search: window.location.search,
+      seen,
+    });
+    if (mode === "compose") {
       goTo(COMPOSE, { focus: true });
-    } else if (seen) {
+    } else if (mode === "seen") {
+      setScene(COMPOSE);
+    } else if (mode === "dialog") {
+      pendingDialog.current = "home_hash";
       setScene(COMPOSE);
     } else {
       playing.current = true;
+      if (mode === "journey") {
+        pendingDialog.current = "journey";
+        // Warm the form's project list while the intro plays, after first paint, so
+        // the dialog opens complete. Same query key: the dialog reuses the result.
+        const idle = window.requestIdleCallback;
+        const prefetch = () => queryClient.prefetchQuery(CATALOG_PROJECTS_QUERY);
+        if (idle) {
+          const handle = idle(prefetch, { timeout: 4000 });
+          return () => window.cancelIdleCallback?.(handle);
+        }
+        const timer = window.setTimeout(prefetch, 2000);
+        return () => window.clearTimeout(timer);
+      }
     }
-  }, [goTo]);
+    return undefined;
+  }, [goTo, openBuyDialog, queryClient]);
 
   // Analytics: intro shown, each scene reached, and the end reached without skipping.
   useEffect(() => {
@@ -367,11 +410,28 @@ export default function HomeOnboarding() {
     } catch {
       /* ignore */
     }
+    // #buy-request: the request dialog takes over (for an ad visitor, once the intro
+    // ended or was skipped). The composer stays underneath, unfocused, for a visitor
+    // who closes the dialog.
+    const pending = pendingDialog.current;
+    if (pending) {
+      pendingDialog.current = null;
+      focusOnCompose.current = false;
+      setFocusComposer(false);
+      openBuyDialog(
+        pending !== "journey"
+          ? pending
+          : skipped.current
+            ? "home_journey_skip"
+            : "home_journey_end",
+      );
+      return;
+    }
     // Focus on explicit skip, or on desktop; never pop the phone keyboard on its own.
     const finePointer = window.matchMedia?.("(pointer: fine)").matches;
     setFocusComposer(focusOnCompose.current || Boolean(finePointer));
     focusOnCompose.current = false;
-  }, [intro, mounted]);
+  }, [intro, mounted, openBuyDialog]);
 
   // Keyboard: arrows move (direction-aware), Space pauses, Escape skips.
   useEffect(() => {
@@ -471,6 +531,8 @@ export default function HomeOnboarding() {
       aria-labelledby="lq-home-title"
       // Server-rendered flag: CSS hides the mobile sticky bar during the intro (no flash).
       data-lq-stage={intro ? "intro" : "compose"}
+      // Tells the header's buy button that this page handles #buy-request itself.
+      data-buy-request-hash-owner=""
       className={`relative flex scroll-mt-20 flex-col bg-white ${
         intro ? "min-h-[calc(100svh-4rem)]" : ""
       }`}
@@ -575,6 +637,15 @@ export default function HomeOnboarding() {
         <p aria-hidden="true" className="pb-6 text-center text-xs text-black/35 sm:pb-8 sm:text-sm">
           {t("tapHint")}
         </p>
+      ) : null}
+
+      {buyDialog ? (
+        <BuyRequestCta
+          hideTrigger
+          open={buyDialog.open}
+          onOpenChange={onBuyDialogOpenChange}
+          trackingLocation={buyDialog.location}
+        />
       ) : null}
     </section>
   );
