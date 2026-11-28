@@ -12,6 +12,10 @@ import { applyArabicLabels } from "./arabic-labels";
 import { isListableOpportunity, validateUnit } from "./validate-unit";
 import { fetchCursorPages } from "./fetch-cursor-pages";
 import { sharedSwrMemo } from "./swr-memo.js";
+import {
+  applyCatalogApiFilters,
+  hasCatalogApiFilters,
+} from "./catalog-api-filters.js";
 import { isExplicitUnitNotFound, normalizeOpportunityCode } from "./unit-lookup.js";
 import {
   marketplaceCitiesMatch,
@@ -135,27 +139,12 @@ async function fetchPage(query) {
   };
 }
 
-async function fetchBoundedPages({
-  city,
-  district,
-  subDistrict,
-  project,
-  minPrice,
-  maxPrice,
-  bedrooms,
-} = {}) {
+async function fetchBoundedPages() {
   return fetchCursorPages({
     fetchPage: async (cursor) => {
       const query = {
         ...lenaqarInventoryQuery(),
         page_size: SITE.feed.pageSize,
-        city,
-        district,
-        sub_district: subDistrict,
-        project_name: project,
-        min_price: minPrice,
-        max_price: maxPrice,
-        bedrooms,
         cursor,
       };
       const { units, pagination } = await fetchPage(query);
@@ -285,11 +274,11 @@ function sortFeed(units) {
   return [...units].sort((a, b) => (b.cashMultiple ?? 0) - (a.cashMultiple ?? 0));
 }
 
-async function buildCatalog(apiKey) {
+/** The whole public catalogue: one walk, no API filters. */
+async function buildCatalog(memoKey) {
   const startedAt = Date.now();
-  const api = JSON.parse(apiKey);
   const [raw, nameMaps] = await Promise.all([
-    fetchBoundedPages(api),
+    fetchBoundedPages(),
     getArabicLabelMaps(),
   ]);
   const seen = new Set();
@@ -306,7 +295,7 @@ async function buildCatalog(apiKey) {
 
   console.info(
     "[lenaqar] catalog loaded",
-    apiKey,
+    memoKey,
     `${validated.length} units in ${Date.now() - startedAt}ms`,
   );
   return sortFeed(validated);
@@ -318,7 +307,9 @@ const CATALOG_FRESH_MS = 15 * 60 * 1000;
 const CATALOG_MAX_STALE_MS = 24 * 60 * 60 * 1000;
 
 /**
- * The assembled catalogue per API filter set, stale-while-revalidate.
+ * The assembled unfiltered catalogue, stale-while-revalidate. Filtered views
+ * are derived from it in process (catalog-api-filters.js), so a new filter
+ * set never waits on a walk of its own.
  * A walk that fails (IncompleteCatalogError, bad page) never replaces the last
  * complete catalogue and is never cached; with no catalogue yet it throws.
  */
@@ -326,7 +317,7 @@ const catalogMemo = sharedSwrMemo("opportunity-catalog", {
   load: buildCatalog,
   freshMs: CATALOG_FRESH_MS,
   maxStaleMs: CATALOG_MAX_STALE_MS,
-  maxEntries: 32,
+  maxEntries: 1,
   onBackgroundError: (error, key) => {
     console.error(
       "[lenaqar] catalog refresh failed; serving the last complete catalog",
@@ -336,9 +327,17 @@ const catalogMemo = sharedSwrMemo("opportunity-catalog", {
   },
 });
 
+const FULL_CATALOG_KEY = "all";
+
 // React `cache` pins one catalogue per render, so generateMetadata and the page
 // agree even if a background refresh lands between them.
-const loadCatalog = cache((apiKey) => catalogMemo.get(apiKey));
+const loadFullCatalog = cache(() => catalogMemo.get(FULL_CATALOG_KEY));
+
+const loadCatalog = cache(async (apiKey) => {
+  const full = await loadFullCatalog();
+  const filters = JSON.parse(apiKey);
+  return hasCatalogApiFilters(filters) ? applyCatalogApiFilters(full, filters) : full;
+});
 
 function catalogApiKey({
   city,
@@ -363,6 +362,8 @@ function catalogApiKey({
 /**
  * Cursor-paginated public listing, mapped through the slim list shape
  * then the privacy allowlist. Never forwards the raw unit document.
+ * API filters (city, district, project, price, bedrooms) are applied in
+ * process to the one memoised catalogue, with the backend's own rules.
  */
 export async function fetchOpportunityCatalog(apiFilters = {}) {
   return loadCatalog(catalogApiKey(apiFilters));
@@ -374,7 +375,7 @@ export async function fetchOpportunityCatalog(apiFilters = {}) {
  */
 export function warmOpportunityCatalog() {
   if (!SITE.feed.enabled) return;
-  catalogMemo.warm(catalogApiKey());
+  catalogMemo.warm(FULL_CATALOG_KEY);
 }
 
 /**
