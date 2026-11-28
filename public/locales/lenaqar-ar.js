@@ -530,6 +530,7 @@ export default {
     phone: "موبايل",
     nameRequired: "الاسم مطلوب",
     phoneRequired: "رقم الموبايل مطلوب",
+    phoneInvalid: "رقم الموبايل مش صحيح. اكتبه ١١ رقم ويبدأ بـ 01",
     locationSection: "الموقع",
     location: "الموقع",
     locationPlaceholder:
