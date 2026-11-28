@@ -284,6 +284,12 @@ export default function HomeOnboarding() {
   const stageRef = useRef(null);
   const focusOnCompose = useRef(false);
   const [focusComposer, setFocusComposer] = useState(false);
+  // Analytics: true while the intro is actually playing (first visit or replay), so
+  // returning visitors and #request (straight to the composer) send no onboarding events.
+  const playing = useRef(false);
+  const skipped = useRef(false);
+  // Once per page view: replaying the intro does not count it again.
+  const tracked = useRef({ viewed: false, scenes: new Set(), completed: false });
 
   const t = (key) => translate(`lenaqar.onboarding.${key}`);
   const exampleText = t("exampleText");
@@ -302,9 +308,16 @@ export default function HomeOnboarding() {
   }, []);
 
   const skip = useCallback(() => {
+    skipped.current = true;
     trackGa(ANALYTICS.EVENTS.ONBOARDING_SKIPPED, { scene });
     goTo(COMPOSE, { focus: true });
   }, [goTo, scene]);
+
+  const replay = useCallback(() => {
+    playing.current = true;
+    skipped.current = false;
+    goTo(0);
+  }, [goTo]);
 
   // First visit plays the intro; returning visitors (or #request) start on the composer.
   useEffect(() => {
@@ -319,8 +332,32 @@ export default function HomeOnboarding() {
       goTo(COMPOSE, { focus: true });
     } else if (seen) {
       setScene(COMPOSE);
+    } else {
+      playing.current = true;
     }
   }, [goTo]);
+
+  // Analytics: intro shown, each scene reached, and the end reached without skipping.
+  useEffect(() => {
+    if (!mounted || !playing.current) return;
+    const sent = tracked.current;
+    if (intro) {
+      if (!sent.viewed) {
+        sent.viewed = true;
+        trackGa(ANALYTICS.EVENTS.ONBOARDING_VIEWED);
+      }
+      if (!sent.scenes.has(scene)) {
+        sent.scenes.add(scene);
+        trackGa(ANALYTICS.EVENTS.ONBOARDING_STEP, { scene, scene_name: SCENES[scene] });
+      }
+      return;
+    }
+    playing.current = false;
+    if (!skipped.current && !sent.completed) {
+      sent.completed = true;
+      trackGa(ANALYTICS.EVENTS.ONBOARDING_COMPLETED);
+    }
+  }, [mounted, intro, scene]);
 
   // Auto-advance when the current scene's time is up.
   useEffect(() => {
@@ -416,7 +453,7 @@ export default function HomeOnboarding() {
               </h2>
               <button
                 type="button"
-                onClick={() => goTo(0)}
+                onClick={replay}
                 className="compact-btn inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium text-primary/60 transition-colors hover:bg-primary/5 hover:text-primary"
               >
                 <RotateCcw aria-hidden="true" className="size-3.5" />
