@@ -1,0 +1,5 @@
+# /etc/nginx/conf.d/lenaqar_upstream.conf — written by hostinger-lenaqar-deploy.sh
+upstream lenaqar_upstream {
+    server 127.0.0.1:3010;   # blue=3010, green=3011
+    keepalive 16;
+}

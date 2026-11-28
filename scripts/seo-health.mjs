@@ -3,7 +3,7 @@
  * Technical eligibility check for a fixed set of LenAqar URLs (the "T-set").
  *
  *   node scripts/seo-health.mjs                         # production
- *   node scripts/seo-health.mjs --base https://<preview>.vercel.app
+ *   node scripts/seo-health.mjs --base http://localhost:3002
  *   node scripts/seo-health.mjs --out REPORT/seo-health/2026-11-15.json
  *   node scripts/seo-health.mjs --listing kBqU7H1A --listing rXyPb6Lv
  *
@@ -190,7 +190,7 @@ async function main() {
       redirects: first.chain,
       ttfbMs: samples.map((s) => s.ttfbMs),
       ttfbMedianMs: median(samples.map((s) => s.ttfbMs)),
-      vercelCache: first.headers.get("x-vercel-cache"),
+      cacheStatus: first.headers.get("x-nextjs-cache") || first.headers.get("cf-cache-status") || first.headers.get("x-vercel-cache"),
       canonical,
       metaRobots,
       xRobots,
@@ -228,7 +228,7 @@ async function main() {
     const typesMissing = missingTypes(p.jsonLd.types, p.typesExpected);
     add(p.path, "schema types present", typesMissing.length ? "FAIL" : "PASS", typesMissing.length ? `missing ${typesMissing.join(", ")}` : p.jsonLd.types.join(", "));
     add(p.path, "inbound links from T-set", p.inboundFromTSet.length ? "PASS" : "WARN", String(p.inboundFromTSet.length));
-    add(p.path, `TTFB median < ${TTFB_WARN_MS}ms`, p.ttfbMedianMs < TTFB_WARN_MS ? "PASS" : "WARN", `${p.ttfbMs.join("/")}ms cache=${p.vercelCache || "-"}`);
+    add(p.path, `TTFB median < ${TTFB_WARN_MS}ms`, p.ttfbMedianMs < TTFB_WARN_MS ? "PASS" : "WARN", `${p.ttfbMs.join("/")}ms cache=${p.cacheStatus || "-"}`);
     for (const c of p.crawlers) {
       if (!c.robots.allowed && c.role !== "training") add(p.path, `robots.txt allows ${c.token}`, "FAIL", c.robots.rule);
       if (c.status != null && c.status !== p.status) add(p.path, `simulated ${c.token} status`, "FAIL", `${c.status} (browser ${p.status})`);

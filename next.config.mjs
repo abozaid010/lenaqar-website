@@ -7,12 +7,12 @@ loadEnvConfig(process.cwd());
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Self-contained server bundle for the Docker image on the Hostinger VPS.
+  output: "standalone",
   experimental: {
-    // Cap workers on small GCP VMs only. Local `next dev` and Vercel must
-    // use all CPUs — a single worker holds the whole Turbopack graph and OOMs.
-    ...(process.env.VERCEL || process.env.NODE_ENV === "development"
-      ? {}
-      : { cpus: 1 }),
+    // Production builds run on the shared 2-vCPU VPS: one worker keeps the
+    // build's memory low. Local `next dev` uses all CPUs.
+    ...(process.env.NODE_ENV === "development" ? {} : { cpus: 1 }),
     serverActions: {
       // Body size limit for server actions (matches max image upload size in src/config/imageUpload.js)
       bodySizeLimit: '10mb',
@@ -35,9 +35,8 @@ const nextConfig = {
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline';",
     // Improve image loading performance
-    // Fewer variants per photo = fewer billable optimizations (Hobby plan
-    // returns 402 once the allowance is used up). One modern format, no 2K/4K
-    // widths (listing photos never render that wide), cache 31 days.
+    // Fewer variants per photo = less CPU and disk on the VPS. One modern
+    // format, no 2K/4K widths (listing photos never render that wide), cache 31 days.
     minimumCacheTTL: 60*60*24*31,
     formats: ['image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],

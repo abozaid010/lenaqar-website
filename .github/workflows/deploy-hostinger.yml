@@ -1,0 +1,69 @@
+# Deploy lenaqar.com to the Hostinger VPS.
+# Builds ON the VPS (no registry), then runs a blue/green roll of lenaqar-web.
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: hostinger-lenaqar-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      VPS_HOST: ${{ secrets.HOSTINGER_HOST }}
+      VPS_USER: ${{ secrets.HOSTINGER_SSH_USER }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
+        run: |
+          set -Eeuo pipefail
+          if [ -z "$VPS_HOST" ] || [ -z "$VPS_USER" ] || [ -z "$SSH_KEY" ]; then
+            echo "::error::Set repo secrets HOSTINGER_HOST, HOSTINGER_SSH_USER, HOSTINGER_SSH_KEY"
+            exit 1
+          fi
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/hostinger && chmod 600 ~/.ssh/hostinger
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          echo "SSH=ssh -i $HOME/.ssh/hostinger -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=30 $VPS_USER@$VPS_HOST" >> "$GITHUB_ENV"
+
+      - name: Upload source to VPS
+        run: |
+          set -Eeuo pipefail
+          git archive --format=tar HEAD | gzip | $SSH '
+            set -Eeuo pipefail
+            S=/opt/lenaai/src
+            rm -rf "$S/lenaqar.new" && mkdir -p "$S/lenaqar.new"
+            tar -xz -C "$S/lenaqar.new"
+            rm -rf "$S/lenaqar.prev"
+            if [ -d "$S/lenaqar" ]; then mv "$S/lenaqar" "$S/lenaqar.prev"; fi
+            mv "$S/lenaqar.new" "$S/lenaqar"'
+
+      - name: Build + blue/green deploy
+        run: |
+          set -Eeuo pipefail
+          TAG="$(date -u +%Y%m%d%H%M)-${GITHUB_SHA::7}"
+          $SSH "TAG=$TAG GIT_SHA=${GITHUB_SHA::7} bash -s" < .deploy/hostinger-lenaqar-deploy.sh
+
+      - name: Verify live site
+        run: |
+          set -Eeuo pipefail
+          for i in $(seq 1 10); do
+            if curl -fsS --max-time 15 https://www.lenaqar.com/api/version | grep -q "\"sha\":\"${GITHUB_SHA::7}\""; then
+              echo "live: ${GITHUB_SHA::7}"; exit 0
+            fi
+            sleep 6
+          done
+          echo "::error::https://www.lenaqar.com/api/version does not report ${GITHUB_SHA::7}"
+          exit 1
