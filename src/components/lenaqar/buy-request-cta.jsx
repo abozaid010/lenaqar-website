@@ -37,6 +37,16 @@ import ActionButtonArrow from "@/components/ui/action-button-arrow";
 let buyRequestHashHandled = false;
 let inlineFormViewTracked = false;
 
+/**
+ * Window event sent when a CTA opens its own dialog. The homepage onboarding listens so
+ * a dialog it planned to open (ad journey) is dropped: one form at a time.
+ */
+export const BUY_REQUEST_CTA_OPENED_EVENT = "lenaqar:buy-request-cta-opened";
+
+function announceCtaOpened() {
+  window.dispatchEvent(new Event(BUY_REQUEST_CTA_OPENED_EVENT));
+}
+
 /** localStorage key of the lead id this browser's last buy request was saved under. */
 export const BUY_REQUEST_USER_ID_KEY = "lenaqar_buy_request_user_id";
 
@@ -138,6 +148,8 @@ export default function BuyRequestCta({
     if (isControlled || inline) return;
     if (buyRequestHashHandled) return;
     if (window.location.hash !== "#buy-request") return;
+    // The homepage onboarding owns #buy-request there (ad visitors see it first).
+    if (document.querySelector("[data-buy-request-hash-owner]")) return;
     buyRequestHashHandled = true;
     setOpen(true);
     trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_OPENED, { cta_location: trackingLocation });
@@ -261,6 +273,7 @@ export default function BuyRequestCta({
           className={actionButtonClass({ variant, tone, size, className })}
           onClick={() => {
             trackEvent(ANALYTICS.EVENTS.BUY_REQUEST_OPENED, { cta_location: trackingLocation });
+            announceCtaOpened();
             setOpen(true);
           }}
         >
@@ -288,7 +301,7 @@ export default function BuyRequestCta({
         initialValues={initialValues}
         prefill={prefill}
         showContactFields
-        overlayClassName="!z-[70]"
+        overlayClassName="!z-[70] lq-overlay-in"
         loadRequirement={loadRequirement}
         saveRequirement={saveRequirement}
         onSuccess={(requirement, saveResult) => {
