@@ -529,7 +529,7 @@ export default {
     phone: "Mobile",
     nameRequired: "Name is required",
     phoneRequired: "Mobile number is required",
-    phoneInvalid: "Mobile number is not valid. Use 11 digits starting with 01",
+    phoneInvalid: "Mobile number is not valid. Check the number and the country code.",
     locationSection: "Location",
     location: "Location",
     locationPlaceholder:
