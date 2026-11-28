@@ -10,8 +10,16 @@ services:
     ports:
       - "127.0.0.1:${LENAQAR_HOST_PORT:?LENAQAR_HOST_PORT is required}:3000"
     mem_limit: 1g
+    # Catalogue snapshots survive restarts and recreates (see Dockerfile).
+    volumes:
+      - lenaqar-cache:/app/.lenaqar-cache
     logging:
       driver: json-file
       options:
         max-size: "20m"
         max-file: "3"
+
+volumes:
+  # One fixed name for both colours (compose would otherwise prefix the project).
+  lenaqar-cache:
+    name: lenaqar-cache
