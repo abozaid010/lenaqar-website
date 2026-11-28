@@ -28,7 +28,7 @@ export async function GET() {
 
   if (!HAS_X_API_KEY) {
     apiError = "missing_api_key";
-  } else if (process.env.VERCEL && !HAS_BFF_SECRET) {
+  } else if (process.env.NODE_ENV === "production" && !HAS_BFF_SECRET) {
     apiError = "missing_bff_secret";
   } else {
     try {

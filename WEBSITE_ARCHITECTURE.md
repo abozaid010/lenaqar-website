@@ -10,7 +10,7 @@ Verified 2026-11-03 against production source `ab0deed6`. This replaces obsolete
 - Money rule: compare down + remaining to total + over (1% tolerance). Raw helper supports paid + remaining fallback, but public allowlist currently drops paidAmount before validation. Hidden splits null cash/down/remaining/over/yearly/**years**, retaining total asking price. `paymentSplitHidden` gates UI/schema.
 - Catalog is bounded at 30 pages/1,500 units; actual API returned 16/page on Nov 3, so the unfiltered website reaches only 480 of 613 records. Investigate pagination contract before changing caps.
 - Guide indexability combines publication status/date and `seo-trust.js`; 53 total, 41 eligible, 12 intentionally noindex. Sitemap uses the same guards. Canonical host is `https://www.lenaqar.com`; apex responds 308.
-- Deployment: linked Vercel project `lenaqar-website-279r`, scope `website-9c0c`; merging main triggers production automatically. Verify deployment API `meta.githubCommitSha`, READY, and canonical alias independently. CLI deployment is a fallback, not necessary for PR #23.
+- Deployment (since 2026-11-28): Docker on the Hostinger VPS (`76.13.144.250`), blue/green `lenaqar-web-{blue,green}` on 127.0.0.1:3010/3011 behind host nginx with a Let's Encrypt cert; DNS at Namecheap (no Cloudflare). Merging main runs `.github/workflows/deploy-hostinger.yml`. Verify the live SHA with `curl https://www.lenaqar.com/api/version`. Runbook: `docs/hostinger-deploy.md`. Vercel project `lenaqar-website-279r` is retired.
 - CI: `.github/workflows/seo-check.yml` runs npm ci, ESLint and SEO lint. It does **not** run Node tests or a build. GitHub main has no protection/rulesets as observed Nov 3. Do not change security policy without an owner decision.
 
 ## Durable context

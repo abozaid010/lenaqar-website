@@ -508,6 +508,16 @@
       "id": "PHASE2-PR-REVIEW",
       "status": "done_production_verified",
       "summary": "PR #22 and #23 merged; ab0deed6 production READY and focused QA passed; separate debt recorded."
+    },
+    {
+      "id": "HOSTING-HOSTINGER-2026-11-28",
+      "status": "done_production_verified",
+      "summary": "Vercel returned 402 DEPLOYMENT_DISABLED; lenaqar.com moved to the Hostinger VPS (Docker blue/green 3010/3011, host nginx, Let's Encrypt, Namecheap DNS A @/www -> 76.13.144.250). Live SHA via /api/version; seo-health 128 PASS / 0 FAIL. Runbook docs/hostinger-deploy.md."
+    },
+    {
+      "id": "HOSTING-CI-SECRETS",
+      "status": "done",
+      "summary": "Repo secrets HOSTINGER_HOST, HOSTINGER_SSH_USER, HOSTINGER_SSH_KEY set 2026-11-28 (key ~/.ssh/lenaai_gh_deploy, verified login). First workflow run happens on merge of PR #70."
     }
   ],
   "done_means": [

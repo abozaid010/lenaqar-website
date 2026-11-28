@@ -18,14 +18,10 @@ const FETCH_TIMEOUT_MS = 8_000;
 const SERVER_USER_AGENT =
   "LenaQar-Marketplace/1.0 (+https://www.lenaqar.com; server-side catalog)";
 
-if (
-  process.env.VERCEL &&
-  !HAS_BFF_SECRET &&
-  process.env.NODE_ENV !== "test"
-) {
+if (process.env.NODE_ENV === "production" && !HAS_BFF_SECRET) {
   console.error(
-    "[bffFetch] BFF_SECRET is not set on Vercel. " +
-      "The backend rejects serverless egress with 403 and /opportunities stays empty."
+    "[bffFetch] BFF_SECRET is not set in production. " +
+      "The backend rejects server egress with 403 and /opportunities stays empty."
   );
 }
 
