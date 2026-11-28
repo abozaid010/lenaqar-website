@@ -1,0 +1,17 @@
+# lenaqar.com web container on the Hostinger VPS (one project per color).
+# Driven by .deploy/hostinger-lenaqar-deploy.sh; installed to /opt/lenaai/compose/.
+# Needs: LENAQAR_COLOR (blue|green), LENAQAR_HOST_PORT (3010|3011), LENAQAR_IMAGE.
+services:
+  web:
+    image: ${LENAQAR_IMAGE:?LENAQAR_IMAGE is required}
+    container_name: lenaqar-web-${LENAQAR_COLOR:?LENAQAR_COLOR is required}
+    restart: unless-stopped
+    env_file: /opt/lenaai/secrets/lenaqar.env
+    ports:
+      - "127.0.0.1:${LENAQAR_HOST_PORT:?LENAQAR_HOST_PORT is required}:3000"
+    mem_limit: 1g
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"

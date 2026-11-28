@@ -1,46 +1,45 @@
-# Dockerfile for the GCP
-FROM node:20-bookworm-slim
+# LenaQar marketplace — production image for the Hostinger VPS.
+# Multi-stage standalone build: deps -> build -> slim runner.
+#
+# Env at BUILD time: pass the production env file as a BuildKit secret so
+# NEXT_PUBLIC_* are inlined and prerendered pages can call the backend,
+# without any value landing in an image layer:
+#   docker build --secret id=env,src=/opt/lenaai/secrets/lenaqar.env \
+#     --build-arg GIT_SHA=<sha> -t lenaqar-web:<tag> .
+# Env at RUN time: compose `env_file:` (server-only values such as X_API_KEY).
 
-# Create app directory
+FROM node:20-bookworm-slim AS deps
 WORKDIR /app
-
-# Install dependencies with native modules support
 COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts=false --include=optional
 
-# Copy project files
-COPY . .
-
-# ---------------------------------------------------------------------------
-# NEXT_PUBLIC_* env vars are INLINED into the client bundle at `next build`
-# time, NOT read at `next start`. They must be present here, before the build.
-# Pass them with: docker build --build-arg NEXT_PUBLIC_X_API_KEY=... .
-# (Runtime `docker run -e` / compose env does NOT affect NEXT_PUBLIC_* values.)
-# ---------------------------------------------------------------------------
-ARG NEXT_PUBLIC_X_API_KEY
-ARG NEXT_PUBLIC_API_BASE_URL=https://api.lenaai.net
-ARG NEXT_PUBLIC_SITE_URL=https://www.lenaai.net
-ARG NEXT_PUBLIC_IMAGE_BASE_URL
-ARG NEXT_PUBLIC_META_PIXEL_ID
-ENV NEXT_PUBLIC_X_API_KEY=$NEXT_PUBLIC_X_API_KEY
-ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
-ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
-ENV NEXT_PUBLIC_IMAGE_BASE_URL=$NEXT_PUBLIC_IMAGE_BASE_URL
-ENV NEXT_PUBLIC_META_PIXEL_ID=$NEXT_PUBLIC_META_PIXEL_ID
-
-# Fail the build early if the required public key is absent, instead of
-# shipping an image that silently 401/403s on every send.
-RUN test -n "$NEXT_PUBLIC_X_API_KEY" || (echo "ERROR: NEXT_PUBLIC_X_API_KEY build-arg is required (see README)" && exit 1)
-
-# Cap Node heap for e2-medium (4Gi) shared with backend; package.json build must match
-ENV NODE_OPTIONS="--max-old-space-size=1536"
+FROM node:20-bookworm-slim AS build
+WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+# `next build` loads .env.production; it exists only for this RUN step.
+RUN --mount=type=secret,id=env,target=/app/.env.production \
+    npm run build
 
-# Build with verbose output to help debug issues
-RUN npm run build || (echo "Build failed with exit code $?" && exit 1)
-
-# Expose port
+FROM node:20-bookworm-slim AS runner
+WORKDIR /app
+ARG GIT_SHA=unknown
+ARG BUILT_AT=unknown
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    HOSTNAME=0.0.0.0 \
+    PORT=3000 \
+    NODE_OPTIONS=--max-old-space-size=512 \
+    GIT_SHA=$GIT_SHA \
+    BUILT_AT=$BUILT_AT
+COPY --from=build --chown=node:node /app/.next/standalone ./
+COPY --from=build --chown=node:node /app/.next/static ./.next/static
+COPY --from=build --chown=node:node /app/public ./public
+# Guides + project snapshot are read from process.cwd() at runtime.
+COPY --from=build --chown=node:node /app/content ./content
+USER node
 EXPOSE 3000
-
-# Start the app
-CMD ["npm", "start"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:3000/api/version').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+CMD ["node", "server.js"]
