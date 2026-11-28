@@ -798,7 +798,10 @@ export default function BuyRequestDialog({
                   value={phoneNumber}
                   error={
                     missing.contact_phone
-                      ? tr("lenaqar.buyRequest.phoneRequired", "Phone is required")
+                      ? // Digits typed but not a valid number: say so, not "required".
+                        phoneNumber
+                        ? tr("lenaqar.buyRequest.phoneInvalid", "Enter a valid mobile number")
+                        : tr("lenaqar.buyRequest.phoneRequired", "Phone is required")
                       : undefined
                   }
                   onChange={(next) => setPhoneNumber(next ?? "")}
