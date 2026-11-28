@@ -284,11 +284,11 @@ export default function HomeOnboarding() {
   const stageRef = useRef(null);
   const focusOnCompose = useRef(false);
   const [focusComposer, setFocusComposer] = useState(false);
-  // Analytics: true while the intro is actually playing (first visit or replay), so
-  // returning visitors and #request (straight to the composer) send no onboarding events.
+  // Analytics: true only while a first visit's intro plays. Returning visitors, #request
+  // (straight to the composer) and replays from the composer send no viewed/step/completed.
   const playing = useRef(false);
   const skipped = useRef(false);
-  // Once per page view: replaying the intro does not count it again.
+  // Once per page view.
   const tracked = useRef({ viewed: false, scenes: new Set(), completed: false });
 
   const t = (key) => translate(`lenaqar.onboarding.${key}`);
@@ -312,12 +312,6 @@ export default function HomeOnboarding() {
     trackGa(ANALYTICS.EVENTS.ONBOARDING_SKIPPED, { scene });
     goTo(COMPOSE, { focus: true });
   }, [goTo, scene]);
-
-  const replay = useCallback(() => {
-    playing.current = true;
-    skipped.current = false;
-    goTo(0);
-  }, [goTo]);
 
   // First visit plays the intro; returning visitors (or #request) start on the composer.
   useEffect(() => {
@@ -453,7 +447,7 @@ export default function HomeOnboarding() {
               </h2>
               <button
                 type="button"
-                onClick={replay}
+                onClick={() => goTo(0)}
                 className="compact-btn inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium text-primary/60 transition-colors hover:bg-primary/5 hover:text-primary"
               >
                 <RotateCcw aria-hidden="true" className="size-3.5" />
