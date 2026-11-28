@@ -8,7 +8,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { ANALYTICS } from "@/constants/analytics";
 import { trackGa } from "@/lib/analytics";
 import { homeLandingMode } from "@/lib/lenaqar/home-landing";
-import BuyRequestCta from "./buy-request-cta";
+import BuyRequestCta, { BUY_REQUEST_CTA_OPENED_EVENT } from "./buy-request-cta";
 import { CATALOG_PROJECTS_QUERY } from "./buy-request-dialog";
 
 /**
@@ -373,6 +373,16 @@ export default function HomeOnboarding() {
     }
     return undefined;
   }, [goTo, openBuyDialog, queryClient]);
+
+  // The buyer opened the form from another CTA (the header) during the intro: that form
+  // is theirs now, so the end of the intro must not open a second one over it.
+  useEffect(() => {
+    const drop = () => {
+      pendingDialog.current = null;
+    };
+    window.addEventListener(BUY_REQUEST_CTA_OPENED_EVENT, drop);
+    return () => window.removeEventListener(BUY_REQUEST_CTA_OPENED_EVENT, drop);
+  }, []);
 
   // Analytics: intro shown, each scene reached, and the end reached without skipping.
   useEffect(() => {
