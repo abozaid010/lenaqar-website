@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { MessageCircle, Phone } from "lucide-react";
+import { Bot, MessageCircle, Phone } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { recordUnitInterest } from "@/app/(lenaqar)/_actions/buy-request";
 import { LENAQAR_CONTACT } from "@/config/lenaqar-contact";
@@ -20,6 +20,9 @@ const CALL_HREF = `tel:${LENAQAR_CONTACT.phoneE164}`;
 
 const callClass =
   "inline-flex items-center justify-center gap-2 rounded-md border-2 border-primary bg-white px-4 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40";
+
+/** Fewer exact matches than this and the page sends the buyer to the WhatsApp AI agent. */
+const FEW_MATCHES = 3;
 
 const summaryChipClass =
   "inline-flex min-h-8 items-center rounded-full bg-primary/5 px-3 text-sm text-primary";
@@ -64,6 +67,33 @@ function Notice({ title, body, children }) {
           {children}
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * The WhatsApp AI agent pitch, for a request with no or few exact matches. The
+ * link carries the request reference, so the agent already knows the request.
+ */
+function AgentPitch({ t, matchRef, title, location }) {
+  return (
+    <div className="flex flex-col items-center gap-3 text-center">
+      <span className="inline-flex size-10 items-center justify-center rounded-full bg-[#25D366]/15 text-[#128C7E]">
+        <Bot aria-hidden="true" className="size-5" />
+      </span>
+      <div>
+        <p className="text-base font-bold text-primary">{title}</p>
+        <p className="mx-auto mt-1 max-w-md text-sm leading-relaxed text-black/70">{t("agentBody")}</p>
+      </div>
+      <WhatsAppCta
+        href={matchRequestHref(matchRef)}
+        intent="buy"
+        location={location}
+        className="w-full sm:w-auto sm:px-6"
+      >
+        <MessageCircle aria-hidden="true" className="size-4 shrink-0" />
+        {t("agentCta")}
+      </WhatsAppCta>
     </div>
   );
 }
@@ -291,9 +321,28 @@ export default function RequestMatchContent({ result }) {
             {!closest.length && suggestionText ? (
               <p className="mt-2 text-sm font-semibold text-primary">{suggestionText}</p>
             ) : null}
+            <div className="mt-5 border-t border-black/10 pt-5">
+              <AgentPitch
+                t={t}
+                matchRef={matchRef}
+                title={t("agentTitle")}
+                location="match_page_agent_empty"
+              />
+            </div>
           </div>
         )}
       </section>
+
+      {matches.length > 0 && matches.length < FEW_MATCHES ? (
+        <section className="mt-6 rounded-2xl border border-[#25D366]/30 bg-[#25D366]/[0.04] p-6">
+          <AgentPitch
+            t={t}
+            matchRef={matchRef}
+            title={t("agentFewTitle")}
+            location="match_page_agent_few"
+          />
+        </section>
+      ) : null}
 
       {closest.length ? (
         <section aria-labelledby="match-closest-title" className="mt-10">
