@@ -3,20 +3,16 @@ import { bffFetch } from "@/lib/bffFetch";
 import { knownPlaceAr } from "./listing-seo.js";
 import { CATALOG_PLACES_AR } from "./places-catalog.js";
 import { applyArabicLabels, indexArabicNames } from "./arabic-labels.js";
+import { sharedSwrMemo } from "./swr-memo.js";
 
 const TTL_MS = 60 * 60 * 1000;
+/** Names change rarely: a stale map beats no Arabic labels while the API is down. */
+const MAX_STALE_MS = 30 * 24 * 60 * 60 * 1000;
 const CATALOG_TIMEOUT_MS = 30_000;
 
 const EMPTY_MAPS = {
   developers: new Map(),
   projects: new Map(),
-};
-
-/** @type {{ maps: { developers: Map<string, string>, projects: Map<string, string> } | null, fetchedAt: number, promise: Promise<{ developers: Map<string, string>, projects: Map<string, string> }> | null }} */
-const cache = {
-  maps: null,
-  fetchedAt: 0,
-  promise: null,
 };
 
 function unwrapRows(body) {
@@ -35,15 +31,16 @@ async function fetchRows(path) {
   if (!PUBLIC_X_API_KEY) return [];
   const headers = { accept: "application/json", "X-API-Key": PUBLIC_X_API_KEY };
   try {
-    // Not `no-store`: these run inside ISR routes (/opportunities/[slug],
-    // sitemap). A no-store fetch at runtime turns a static route dynamic and
-    // Next answers HTTP 500 ("Page changed from static to dynamic at runtime")
-    // for every slug not prerendered at build. /public/projects (~4.5 MB) is
-    // over the 2 MB data-cache limit, so Next only warns and skips storing it;
-    // the in-memory TTL cache below still deduplicates.
+    // `next.internal` bypasses Next's fetch cache and its static/dynamic
+    // bookkeeping. Not `no-store`: these run inside ISR routes
+    // (/opportunities/[slug], sitemap), where a no-store fetch at runtime makes
+    // Next answer HTTP 500 ("Page changed from static to dynamic at runtime").
+    // Not `revalidate` either: /public/projects (~6 MB) is over the 2 MB
+    // data-cache limit, so Next refetched it on every call. The memo below
+    // keeps only the name maps (a few hundred KB), stale-while-revalidate.
     const response = await bffFetch(`${API_BASE_URL}${path}`, {
       headers,
-      next: { revalidate: TTL_MS / 1000 },
+      next: { internal: true },
       signal: AbortSignal.timeout(CATALOG_TIMEOUT_MS),
     });
     if (!response.ok) {
@@ -84,35 +81,45 @@ async function loadMaps() {
   };
 }
 
+async function loadUsableMaps() {
+  const maps = await loadMaps();
+  if (maps.developers.size === 0 && maps.projects.size === 0) {
+    // Thrown so the memo neither caches nor replaces good maps with nothing.
+    throw new Error("arabic name catalogs returned no rows");
+  }
+  return maps;
+}
+
+const MAPS_KEY = "maps";
+
+const mapsMemo = sharedSwrMemo("arabic-label-maps", {
+  load: loadUsableMaps,
+  freshMs: TTL_MS,
+  maxStaleMs: MAX_STALE_MS,
+  maxEntries: 1,
+  onBackgroundError: (error) => {
+    console.warn("[lenaqar] arabic name catalog refresh failed", error?.message);
+  },
+});
+
 /**
- * Cached developer and project Arabic names. A failed fetch is not cached,
- * so the next request can try again. Places do not use this cache.
+ * Cached developer and project Arabic names, stale-while-revalidate: after the
+ * first load, callers never wait on the ~6 MB /public/projects download. A
+ * failed load is not cached, so the next call retries. Never throws; without
+ * any maps yet it returns empty ones. Places do not use this cache.
  */
 export async function getArabicLabelMaps() {
-  const now = Date.now();
-  if (cache.maps && now - cache.fetchedAt < TTL_MS) return cache.maps;
-  if (cache.promise) return cache.promise;
+  try {
+    return await mapsMemo.get(MAPS_KEY);
+  } catch (error) {
+    console.warn("[lenaqar] arabic name catalog error", error?.code || error?.message);
+    return EMPTY_MAPS;
+  }
+}
 
-  cache.promise = loadMaps()
-    .then((maps) => {
-      const usable = maps.developers.size > 0 || maps.projects.size > 0;
-      if (usable) {
-        cache.maps = maps;
-        cache.fetchedAt = Date.now();
-      }
-      cache.promise = null;
-      return usable ? maps : cache.maps || EMPTY_MAPS;
-    })
-    .catch((error) => {
-      cache.promise = null;
-      console.warn(
-        "[lenaqar] arabic name catalog error",
-        error?.code || error?.message,
-      );
-      return cache.maps || EMPTY_MAPS;
-    });
-
-  return cache.promise;
+/** Start loading the name maps without waiting (server boot). */
+export function warmArabicLabelMaps() {
+  mapsMemo.warm(MAPS_KEY);
 }
 
 /** Hand-tuned place names win; the locations catalog fills the rest. */
