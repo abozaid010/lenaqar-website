@@ -284,6 +284,12 @@ export default function HomeOnboarding() {
   const stageRef = useRef(null);
   const focusOnCompose = useRef(false);
   const [focusComposer, setFocusComposer] = useState(false);
+  // Analytics: true only while a first visit's intro plays. Returning visitors, #request
+  // (straight to the composer) and replays from the composer send no viewed/step/completed.
+  const playing = useRef(false);
+  const skipped = useRef(false);
+  // Once per page view.
+  const tracked = useRef({ viewed: false, scenes: new Set(), completed: false });
 
   const t = (key) => translate(`lenaqar.onboarding.${key}`);
   const exampleText = t("exampleText");
@@ -302,6 +308,7 @@ export default function HomeOnboarding() {
   }, []);
 
   const skip = useCallback(() => {
+    skipped.current = true;
     trackGa(ANALYTICS.EVENTS.ONBOARDING_SKIPPED, { scene });
     goTo(COMPOSE, { focus: true });
   }, [goTo, scene]);
@@ -319,8 +326,32 @@ export default function HomeOnboarding() {
       goTo(COMPOSE, { focus: true });
     } else if (seen) {
       setScene(COMPOSE);
+    } else {
+      playing.current = true;
     }
   }, [goTo]);
+
+  // Analytics: intro shown, each scene reached, and the end reached without skipping.
+  useEffect(() => {
+    if (!mounted || !playing.current) return;
+    const sent = tracked.current;
+    if (intro) {
+      if (!sent.viewed) {
+        sent.viewed = true;
+        trackGa(ANALYTICS.EVENTS.ONBOARDING_VIEWED);
+      }
+      if (!sent.scenes.has(scene)) {
+        sent.scenes.add(scene);
+        trackGa(ANALYTICS.EVENTS.ONBOARDING_STEP, { scene, scene_name: SCENES[scene] });
+      }
+      return;
+    }
+    playing.current = false;
+    if (!skipped.current && !sent.completed) {
+      sent.completed = true;
+      trackGa(ANALYTICS.EVENTS.ONBOARDING_COMPLETED);
+    }
+  }, [mounted, intro, scene]);
 
   // Auto-advance when the current scene's time is up.
   useEffect(() => {

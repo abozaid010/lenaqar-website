@@ -25,6 +25,10 @@ export const ANALYTICS = {
     EMAIL_CLICK: 'email_click',
     SHARE: 'share',
     LANGUAGE_SWITCHED: 'language_switched',
+    // Homepage onboarding: shown → each scene → played to the end, or skipped.
+    ONBOARDING_VIEWED: 'onboarding_viewed',
+    ONBOARDING_STEP: 'onboarding_step',
+    ONBOARDING_COMPLETED: 'onboarding_completed',
     ONBOARDING_SKIPPED: 'onboarding_skipped',
   },
 };
