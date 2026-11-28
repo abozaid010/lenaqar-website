@@ -232,3 +232,27 @@ test("rejects invalid options", () => {
     TypeError,
   );
 });
+
+test("warm after a failed load starts a new load (readiness retry)", async () => {
+  let loads = 0;
+  const errors = [];
+  const memo = createSwrMemo({
+    load: async () => {
+      loads += 1;
+      if (loads === 1) throw new Error("api blip");
+      return ["unit"];
+    },
+    freshMs: 1000,
+    maxStaleMs: 10_000,
+    onBackgroundError: (error) => errors.push(error.message),
+  });
+  memo.warm("all");
+  for (let i = 0; i < 20 && errors.length === 0; i += 1) await new Promise(setImmediate);
+  assert.deepEqual(errors, ["api blip"]);
+  assert.equal(memo.peek("all"), null, "failed load leaves nothing behind");
+
+  memo.warm("all");
+  for (let i = 0; i < 20 && !memo.peek("all")?.hasValue; i += 1) await new Promise(setImmediate);
+  assert.equal(loads, 2);
+  assert.equal(memo.peek("all").size, 1);
+});
