@@ -262,6 +262,10 @@ export default function BuyRequestDialog({
   // buyer changed something), and a switch that stops writing once the request is saved.
   const baselineRef = useRef("null");
   const draftOffRef = useRef(false);
+  // Inline: the lead id a submit just saved while the page moves to its match page. Its
+  // request is not read back: that read is a server action, and a server action started
+  // during the navigation cancels it, leaving the buyer on an empty form.
+  const skipReloadRef = useRef("");
   const notesRef = useRef(null);
   const focusedNotesRef = useRef(false);
   // The saved request was read back for this buyer: they are editing it, and the
@@ -331,6 +335,10 @@ export default function BuyRequestDialog({
 
   useEffect(() => {
     if (!open) return undefined;
+    if (userId && skipReloadRef.current === userId) {
+      skipReloadRef.current = "";
+      return undefined;
+    }
     const seed = (next) => {
       baselineRef.current = JSON.stringify(cleanDraft({ form: next }));
       let merged = next;
@@ -578,6 +586,10 @@ export default function BuyRequestDialog({
       };
       const saveResult = await saveRequirement(userId, built.requirement, extra);
       const savedUserId = String(saveResult?.userId || userId || "").trim();
+      // With a match reference the parent navigates to the match page (see skipReloadRef).
+      if (inline && saveResult?.matchRef && savedUserId && savedUserId !== userId) {
+        skipReloadRef.current = savedUserId;
+      }
       if (savedUserId) onUserId?.(savedUserId);
 
       if (inline) {
