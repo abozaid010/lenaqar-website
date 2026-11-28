@@ -89,5 +89,5 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ## Deploy
 
-Production runs in Docker on the Hostinger VPS; merging `main` deploys automatically.
+Production runs in Docker on the Hostinger VPS; merging `main` deploys automatically, or run `npm run deploy`.
 See [docs/hostinger-deploy.md](docs/hostinger-deploy.md).

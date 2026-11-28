@@ -22,12 +22,15 @@ switch the upstream → check through nginx → stop the old color → keep 3 im
 
 Repo secrets: `HOSTINGER_HOST`, `HOSTINGER_SSH_USER`, `HOSTINGER_SSH_KEY`.
 
-By hand (from a checkout of the commit to ship):
+One command (from any checkout):
 ```bash
-SSH="ssh -i ~/workspace/LENAAI-Agent/migration/id_hostinger_lenaai root@76.13.144.250"
-git archive --format=tar HEAD | gzip | $SSH 'S=/opt/lenaai/src; rm -rf $S/lenaqar.new && mkdir -p $S/lenaqar.new && tar -xz -C $S/lenaqar.new && rm -rf $S/lenaqar.prev && { [ -d $S/lenaqar ] && mv $S/lenaqar $S/lenaqar.prev || true; } && mv $S/lenaqar.new $S/lenaqar'
-$SSH "TAG=$(date -u +%Y%m%d%H%M)-$(git rev-parse --short=7 HEAD) GIT_SHA=$(git rev-parse --short=7 HEAD) bash -s" < .deploy/hostinger-lenaqar-deploy.sh
+npm run deploy                  # GitHub Actions deploy of origin/main, waits until live
+npm run deploy -- --local       # build this checkout's HEAD on the VPS from this Mac (no CI)
+npm run deploy -- --local REF   # a branch, tag or sha
+npm run deploy -- --status      # live sha, build time, color
 ```
+`scripts/deploy-hostinger.sh` ends by checking `https://www.lenaqar.com/api/version` reports the new sha.
+Vercel auto-deploys are off (`vercel.json` `git.deploymentEnabled: false`).
 
 Verify: `curl -s https://www.lenaqar.com/api/version` and `node scripts/seo-health.mjs`.
 

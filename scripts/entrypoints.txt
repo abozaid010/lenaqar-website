@@ -11,3 +11,4 @@ src/app/property
 src/app/unit
 src/app/api/lenaqar
 src/app/api/locations
+src/app/api/version
