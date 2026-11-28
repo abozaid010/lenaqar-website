@@ -516,8 +516,8 @@
     },
     {
       "id": "HOSTING-CI-SECRETS",
-      "status": "todo_owner",
-      "summary": "Add repo secrets HOSTINGER_HOST, HOSTINGER_SSH_USER, HOSTINGER_SSH_KEY so merges to main auto-deploy (docs/hostinger-deploy.md)."
+      "status": "done",
+      "summary": "Repo secrets HOSTINGER_HOST, HOSTINGER_SSH_USER, HOSTINGER_SSH_KEY set 2026-11-28 (key ~/.ssh/lenaai_gh_deploy, verified login). First workflow run happens on merge of PR #70."
     }
   ],
   "done_means": [
