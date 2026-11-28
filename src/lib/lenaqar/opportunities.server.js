@@ -11,6 +11,7 @@ import {
 import { applyArabicLabels } from "./arabic-labels";
 import { isListableOpportunity, validateUnit } from "./validate-unit";
 import { fetchCursorPages } from "./fetch-cursor-pages";
+import { sharedSwrMemo } from "./swr-memo.js";
 import { isExplicitUnitNotFound, normalizeOpportunityCode } from "./unit-lookup.js";
 import {
   marketplaceCitiesMatch,
@@ -64,8 +65,13 @@ export function parseOpportunitySearchParams(params = {}) {
  * Deliberately cookie-free: anything that reads cookies (the CRM's axiosInstance
  * did) opts the calling route into dynamic rendering, which costs TTFB on every
  * listing page and defeats `generateStaticParams`.
+ *
+ * `dataCache: false` skips Next's fetch cache entirely (`next.internal`: Next
+ * hands the call straight to the platform fetch, with no caching and no
+ * static/dynamic bookkeeping). Use it only where an in-process memo owns the
+ * caching, so the call is safe from ISR renders and from background refreshes.
  */
-export async function publicApiGet(path) {
+export async function publicApiGet(path, { dataCache = true } = {}) {
   if (!PUBLIC_X_API_KEY) {
     console.error(
       "[lenaqar] public API call skipped — no X_API_KEY / NEXT_PUBLIC_X_API_KEY configured"
@@ -76,7 +82,7 @@ export async function publicApiGet(path) {
   try {
     const response = await bffFetch(`${API_BASE_URL}${path}`, {
       headers: { accept: "application/json", "X-API-Key": PUBLIC_X_API_KEY },
-      next: { revalidate: 900 },
+      next: dataCache ? { revalidate: 900 } : { internal: true },
     });
 
     if (!response.ok) {
@@ -111,7 +117,9 @@ async function fetchPage(query) {
     qs.set(key, String(value));
   }
 
-  const json = await publicApiGet(`/public/v1/units?${qs}`);
+  // Cursor pages bypass Next's data cache: the assembled catalog is memoised
+  // below, and per-page entries keyed by cursor URL mostly missed anyway.
+  const json = await publicApiGet(`/public/v1/units?${qs}`, { dataCache: false });
   if (!json) {
     throw new Error("Catalog page request failed; refusing to use incomplete catalog data");
   }
@@ -277,7 +285,8 @@ function sortFeed(units) {
   return [...units].sort((a, b) => (b.cashMultiple ?? 0) - (a.cashMultiple ?? 0));
 }
 
-const loadCatalog = cache(async (apiKey) => {
+async function buildCatalog(apiKey) {
+  const startedAt = Date.now();
   const api = JSON.parse(apiKey);
   const [raw, nameMaps] = await Promise.all([
     fetchBoundedPages(api),
@@ -295,8 +304,41 @@ const loadCatalog = cache(async (apiKey) => {
     );
   }
 
+  console.info(
+    "[lenaqar] catalog loaded",
+    apiKey,
+    `${validated.length} units in ${Date.now() - startedAt}ms`,
+  );
   return sortFeed(validated);
+}
+
+/** Matches the page's `revalidate`: a catalogue older than this is refreshed. */
+const CATALOG_FRESH_MS = 15 * 60 * 1000;
+/** Past this a catalogue is too old to serve while refreshing; visitors wait. */
+const CATALOG_MAX_STALE_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * The assembled catalogue per API filter set, stale-while-revalidate.
+ * A walk that fails (IncompleteCatalogError, bad page) never replaces the last
+ * complete catalogue and is never cached; with no catalogue yet it throws.
+ */
+const catalogMemo = sharedSwrMemo("opportunity-catalog", {
+  load: buildCatalog,
+  freshMs: CATALOG_FRESH_MS,
+  maxStaleMs: CATALOG_MAX_STALE_MS,
+  maxEntries: 32,
+  onBackgroundError: (error, key) => {
+    console.error(
+      "[lenaqar] catalog refresh failed; serving the last complete catalog",
+      key,
+      error?.message || error,
+    );
+  },
 });
+
+// React `cache` pins one catalogue per render, so generateMetadata and the page
+// agree even if a background refresh lands between them.
+const loadCatalog = cache((apiKey) => catalogMemo.get(apiKey));
 
 function catalogApiKey({
   city,
@@ -324,6 +366,15 @@ function catalogApiKey({
  */
 export async function fetchOpportunityCatalog(apiFilters = {}) {
   return loadCatalog(catalogApiKey(apiFilters));
+}
+
+/**
+ * Start loading the unfiltered catalogue without waiting (server boot), so the
+ * first visitor after a deploy does not pay for the walk.
+ */
+export function warmOpportunityCatalog() {
+  if (!SITE.feed.enabled) return;
+  catalogMemo.warm(catalogApiKey());
 }
 
 /**
